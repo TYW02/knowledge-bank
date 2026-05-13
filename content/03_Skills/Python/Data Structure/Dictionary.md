@@ -123,6 +123,14 @@ for key, value in d.items():
 ```
 
 
+## Using get() to access values
+```python
+alien_0['multiple'] # this might not exists and will give an error
+
+multiple_value = alien.get('multiple', "No mutiple value assigned")
+print(multiple_value) # An error message will print if this key does not exists
+```
+
 ## Nested Dictionaries
 ![](https://media.geeksforgeeks.org/wp-content/uploads/Dictionary-Creation-1.jpg)
 ```python
@@ -131,6 +139,22 @@ d = {1: 'Geeks', 2: 'For',
 
 print(d)
 # {1: 'Geeks', 2: 'For', 3: {'A': 'Welcome', 'B': 'To', 'C': 'Geeks'}}
+```
+
+
+### Using for loop to create nested dictionaries
+```python
+aliens = []
+for alien_number in range(30):
+	new_alien = {'color': 'green', 'points': 5, 'speed': slow}
+	aliens.append(new_alien)
+	
+# Changing values of first 3 
+for alien in aliens[:3]:
+	if alien['color'] == 'green':
+		alien['color'] = 'yellow'
+		alien['points'] = 10
+		alien['speed'] = 'medium'
 ```
 
 
@@ -195,9 +219,42 @@ print("Deep Copy:", deep)
 
 
 
+## A List in a Dictionary
+```python
+pizza = {
+	'crust': 'thick',
+	'toppings': ['mushroom', 'extra cheese']
+}
+
+print(f"You ordered a {pizza['crust']}-crust pizza. With the following toppings:")
+
+for topping in pizza['toppings']:
+	print(f"\t{topping}")
+```
 
 
+## A Dictionary in a Dictionary
+```python
+users = {
+	'aeinstein': {
+		'first': 'albert',
+		'last': 'einstein',
+		'location': 'princeton'
+	},
+	'mcurie': {
+		'first': 'marie',
+		'last': 'curie',
+		'location': 'paris'
+	}
+}
 
+# username here is the key
+# user_info is the value / inner dict
+for username, user_info in users.items():
+	print(f"\nUsername: {username}")
+	full_name = f"{user_info["first"] {user_info["last"]}}"
+	location = user_info["location"]
+```
 
 
 

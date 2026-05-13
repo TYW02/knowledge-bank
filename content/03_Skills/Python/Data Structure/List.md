@@ -187,13 +187,49 @@ for i, val in enumerate(a):
 ```
 
 
+## List Comprehension
+
+Making a list of first 10 cubes:
+```python
+cubes = [value**3 for value in range(1, 11)]
+```
+
+List comprehension combines the for loop & creation of a new element into 1 line.
+
+## Slicing List
+#Slicing 
+
+```python
+foods = ["pizza", "falafel", "carrot cake", "cannotli", "ice cream"]
+
+# To get first 3 in list
+for food in foods[:3]:
+	print(food)
+	
+# Middle 3
+for food in foods[1:-1]:
+	print(food)
+	
+# Last 3
+for food in foods[-3:]:
+	print(food)
+```
 
 
+```python
+foods[0:3] # this will return index 0, 1, 2
+foods[:4] # while this will return from start to index 3
+```
 
 
+## Copying List
+#Copy
 
+```python
+friend_food = foods[:] # This will make a copy
 
-
+friend_food = foods # This will not work, any changes made will affect both list
+```
 
 
 
