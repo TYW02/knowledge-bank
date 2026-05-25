@@ -1,3 +1,8 @@
+---
+title: What are the Goals of AI
+tags:
+  - AI
+---
 
 # What is AI ? What do AI want to Achieve ?
 > The field of AI, is concerned with not just *understanding* but also building intelligent entities - machines that can compute how to act effectively and safely in a wide variety of novel situations

@@ -1,7 +1,12 @@
 ---
 tags:
+  - R
+  - dplyr
+  - SELECT
+  - Filter
 ---
 # Importing Data
+#R
 To import data into R use the `read_csv()` function from the `readr` package. To do so, we can load either `tidyverse` or `readr` into the current session.
 ```R
 library(tidyverse)
@@ -19,6 +24,8 @@ lifeboats <- read_csv("data_lecture/titanic/lifeboats.csv", show_col_types=FALSE
 
 
 # Glance at dplyr
+#dplyr
+
 | Row-Wise   |                                     |
 | ---------- | ----------------------------------- |
 | filter()   | Chooses rows based on column values |

@@ -1,3 +1,11 @@
+---
+title: AI in Organizations Today
+tags:
+  - AI
+  - AI_Guardrails
+  - AI_Risk
+  - Prompting
+---
 
 # Every AI tool does 1 of 3 Jobs
 
@@ -26,6 +34,7 @@ Connect Tools, automate tasks across System (Notion AI, M365 Copilot, Zapier AI)
 
 
 # Good Prompting
+#Prompting
 
 Don't expect AI to give you good output if you say "Give me an answer"
 
@@ -70,6 +79,7 @@ Logs, policies, escalation paths, and ownership. You can't govern what you don't
 Apply the embedded model to adjacent workflows, Budget, training, and clear ownership make it stick
 
 # Risk and Guardrails
+#AI_Guardrails
 
 > [!warning] Accuracy
 > Hallucinated facts, citations, and policies. Stated with full confidence
@@ -116,6 +126,7 @@ Apply the embedded model to adjacent workflows, Budget, training, and clear owne
 
 
 # Risk Ladder
+#AI_Risk
 
 ## Low Risk
 - Brainstorming

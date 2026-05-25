@@ -1,4 +1,10 @@
+---
+title: Workplace Ethics
+tags:
+  - Workplace_Ethics
+---
 
+#Workplace_Ethics
 Some Ethical Issue in the Workplace
 - Conflict of interest
 - Bribery
@@ -84,5 +90,32 @@ Employees more likely to be engaged and committed when they work for an organiza
 ## Protecting the Organization from Legal Actions
 Vicarious liability, or imputed liability, is legal rule that holds a person or company responsible for actions committed by their employees. Promoting ethical behavior reduces the likelihood of misconduct in the first place.
 
+# Ethics Program
+Structured approach implemented by organization to promote ethical behavior, values, and principles within the workplace.
+
+Establishes guidelines for employees to follow, provides training and creates mechanisms for reporting and addressing ethical concerns or violations.
+
+1. Code of Conduct
+2. Training Education
+3. Communication
+4. Reporting Mechanism
+5. Investigation
+6. Ethics Committee
+7. Monitoring
+8. Integration
+
+## Characteristics of a Successful Ethics Program
+- Employees willing to seek advice about ethical issues
+- Employees feel prepared to handle situations that could lead to misconduct
+- Employees are rewarded for ethical behavior
+- Employees are not rewarded for success obtained through questionable means
 
 
+# Ethical Decision-making process in the workplace
+1. Develop Problem Statement
+2. Identify Alternatives
+3. Evaluate and Choose Alternatives
+4. Implement Decision
+5. Evaluate Results
+6. Success ? 
+(If further refinement is needed, Return to step 1, refine problem and work through process again)

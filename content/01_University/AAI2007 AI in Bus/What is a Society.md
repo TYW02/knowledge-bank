@@ -1,3 +1,10 @@
+---
+title: What is a Society
+tags:
+  - Society
+  - Social_Issues
+---
+#Society
 The term society has roots from Latin words, *societas* (fellowship, association, alliance, union, community) and *socius* (companion, ally)
 
 Most definitions of society surround similar ideas
@@ -32,6 +39,7 @@ Technology has allowed humans to progress from a *hunter-gather society* to an *
 
 
 # Social Issues
+#Social_Issues
 A social issue or social problem is any condition or behavior that has negative consequences for large number of people and that is generally recognized as a condition or behavior that needs to be addressed.
 - Objective: must have negative consequence for large numbers of people
 - Subjective: must be perceived as a need to be addressed

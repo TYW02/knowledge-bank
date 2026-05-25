@@ -1,5 +1,11 @@
+---
+title: Behavioral Ethics
+tags:
+  - Bias
+---
 
 # What is Cognitive Bias ?
+#Bias
 Mental shortcut or error in judgment that can lead to make unethical decision without realizing it.
 
 
