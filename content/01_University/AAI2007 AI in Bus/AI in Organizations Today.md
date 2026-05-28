@@ -32,13 +32,22 @@ Connect Tools, automate tasks across System (Notion AI, M365 Copilot, Zapier AI)
 - Summarize - Condense long slack threads or meeting transcript
 - Embed - AI inside the tools your team already uses daily
 
+# Pick the right AI role
+- Analyst - Find themes and trade-offs
+- Critic - Find risks and weak assumptions
+- Simulator - Predict stakeholder reactions
+- Project Manager - Turn ideas into tasks and owners
+- Test Designer - Find edge cases and acceptance criteria
+- Security Reviewer - Spot privacy and access risks
+
+
 
 # Good Prompting
 #Prompting
 
 Don't expect AI to give you good output if you say "Give me an answer"
 
-Instead follow TCREI:
+## Instead follow TCREI:
 Task - What do you want done ?
 Context - Audience, data, goal, background
 Requirements - Constraints and output format

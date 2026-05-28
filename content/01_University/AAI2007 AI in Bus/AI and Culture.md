@@ -28,7 +28,8 @@ Ethnocentrism is a belief or attitude that one's own culture is better than all 
 
 People from one culture could see another as uneducated, backward, or even inferior
 
-**Cultural imperialism** is the deliberate imposition of one's own cultural values on another culture.
+## Cultural imperialism
+Is the deliberate imposition of one's own cultural values on another culture.
 
 ## Cultural Relativism
 - Practice of assessing a culture by its own standards rather than viewing it through the lens of one's own culture.
