@@ -1,0 +1,127 @@
+---
+title: Privacy & Data Protection
+tags:
+  - Privacy
+---
+
+# What is Privacy ?
+#Privay is the ability of individual or group to seclude themselves or information about themselves.
+Being able to choose what part of life you keep to yourself or share with others.
+
+# Benefits & Harms of Privacy
+
+## Benefits
+Promotes Creativity
+- Affords you to try out experiments and "stupid" ideas without constraint of worrying whether you would appear "stupid"
+
+Improves Psychological Health
+
+Prevents harm from "bad" people
+
+Fosters true friendship
+
+The right to live a normal life
+
+## Harms of privacy
+- Can be a cover of illegal or immoral activities
+- Can be an impediment to law enforcement
+- Can be a hindrance to public health / safety
+- Can lead to erosion of trust
+
+> Privacy is important to our personal development ...
+> **HOWEVER**
+> ... excessive privacy can be harmful to our society
+
+# Right Balance
+Protection of individual privacy while also addressing societal needs and concerns
+
+
+# IT and Privacy
+With growth of online services, vast amount of data are constantly being generated and collected
+
+Data privacy is a *subset* of privacy
+
+## Custodians of our Personal Data
+Government, educational institutions and organizations has a lot of information about us.
+**There is an implicit trust**
+
+## Information held by Private Organizations
+Consumer Data poses **greater risk**
+
+## Example of Misuse of Personal Data
+
+### Unsolicited Marketing
+Unsolicited Marketing purposes without obtaining proper consent
+
+### Sharing of Personal Data to Other Parties
+Sharing or selling personal data to third-party advertisers
+
+### Location Tracking without consent
+Tracking and storing an individual's movement without their knowledge or explicit consent
+
+## Morally Grey area
+### Detailed Profiling
+Combining information from multiple sources used to build very detailed profiles of people.
+Not breaking law because the information is public.
+This level of detailed profiling is worrying as it allows company to target people that feels intrusive.
+
+
+# Personal Data Protection Act (PDPA)
+Personal Data - Information that can be used to directly or indirectly identify a person
+
+### Personally Identifiable data (PII)
+Data that can be used to identify or directly link to an individual
+
+PDPA - Provides a baseline standard of protection for personal data in Singapore
+Governs the collection, use, disclosure and care of personal data in Singapore
+Establishes a National Do Not Call (DNC) Registry
+
+# Accountability
+Demonstrate commitment to protect personal data and to be accountable for their data protection practices
+1. Develop and Implement policies for data protection
+2. Appoint a Data Protection Officer (DPO)
+3. Provide training and Raise awareness
+4. Implement processes and practices
+
+# Notification
+Inform individuals of the purposes for collecting, using, or disclosing their personal data
+- Also the types of organizations to which their data may be disclosed
+
+# Consent
+Obtain consent from individuals before collecting, using or disclosing their personal data
+- Consent must be informed, specific, and given voluntarily
+
+# Purpose Limitation
+Collect, use, or disclose personal data only for purposes that have been notified to individuals and for which they have obtained consent
+- Consent for a new purpose will need to be sought again
+
+# Accuracy
+Take reasonable steps to ensure data is accurate and up-to-date
+
+# Protection
+Implement reasonable security measures to protect data in their possession or control
+
+# Transfer Limitation
+Ensure that data transferred outside of Singapore is protected by a comparable standard to the PDPA
+
+# Retention Limitation
+Retain data for as long as it is necessary for the purposes for which it was collected
+
+# Access and Correction
+Provide individuals with access to their personal data within a reasonable time frame and without charge
+- Also correct any inaccurate or incomplete personal data when informed 
+
+# Data Breach Notification
+Notify the Personal Data Protection Commission (PDPC) and affected individuals of any data breaches
+
+# Data Portability
+Transmit, at the request of individuals, their personal data to another organization
+
+# PDPC Responsibilities
+- Enforce and Ensure Compliance
+- Conduct Investigations
+- Take Enforcement Actions
+
+- Conduct educational and outreach programs
+- Organize workshops and seminars
+
