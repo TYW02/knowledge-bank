@@ -1,0 +1,62 @@
+---
+title: Ethics & Professional Conduct
+tags:
+  - Ethic
+  - SCS
+---
+Using Technology can change people
+- Experiences can cause **Physical** changes in brain and **Psychological** effects too.
+
+## Relationship with Technology
+Technology can solve problem but **MAY** create new problem
+- Automobile: Greater mobility, increase in traffic jam
+
+# Rules are more specific than principle
+E.g. "No eating or drinking in classroom"
+#Ethic 
+- Ethical theories/framework are more general than principle
+	- Important in situations:
+		- That have not been studied / encountered previously
+		- Where rules / principle are not applicable
+
+> Most professionals are subject to strict code of conduct, enshrining ethical and moral obligation 
+> - Typically agreed upon and maintained through widely recognised professional association (IEEE)
+
+# Singapore Computer Society (SCS) Code of Conduct
+- Act with **integrity**
+- Accept **full responsibility** for their work
+- Always aim to increase **competence**
+- Act with **professionalism** to enhance prestige of the profession and society
+
+## Integrity
+- Don't claim level of **competence** you don't possess
+- Act with complete **discretion** when entrusted with confidential information
+- Be impartial when giving advice, **disclose** relevant **personal interest**
+- Give **credit** for work done by others
+
+
+## Full Responsibility
+- Carry out assignment in professional manner
+- Adhere to employers' / clients' standard and guideline
+- Indicate to employer / client **consequences** to be expected if professional judgement is **overruled**
+
+## Competence
+- Continue to upgrade knowledge and skills
+- Provide **opportunity** and encouragement for professional development and advancement to **fellow professional**
+- Extend **public knowledge**, understanding and appreciation, oppose false / deceptive statement
+
+## Professionalism
+- Uphold / improve professional standard through formulation, establishment and enforcement
+- Don't seek personal advantage detriment of society
+- Don't speak on behalf of society without proper authority
+- Don't slander professional reputation of any other person
+- Use special knowledge and skill for human welfare
+
+# ACM Code of Ethics
+![[Pasted image 20260616170339.png]]
+
+![[Pasted image 20260616170350.png]]
+
+![[Pasted image 20260616170403.png]]
+
+![[Pasted image 20260616170414.png]]

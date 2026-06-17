@@ -1,0 +1,139 @@
+---
+title: Ethics Theories or Framework
+tags:
+  - Ethic
+  - Kantianism
+  - Utilitarianism
+  - Social_Contract_Theory
+  - Virtue_Ethics
+---
+# What is Ethics
+Ethics focuses on people's voluntary, moral choices
+
+
+## Relativism
+No universal standard of right & wrong
+> 1 Person can say "X is right", another can say "X is wrong" and both can be correct
+
+## Subjective Relativism
+Each person decides right or wrong for themselves
+> What's right for you may not be right for me
+
+### Case against Subject Relativism
+- Blur line between doing what is right and doing what you feel like
+- Decision may not be based on reason
+- **NOT workable theory**
+
+## Cultural Relativism
+Right and wrong depend on society's moral guideline
+Guideline vary from place to place and time to time
+Action may be right in one society but wrong in another
+
+### Case against Cultural Relativism
+- Because 2 society **DO** have different moral view doesn't mean they ought to have different view
+- **NOT workable theory**
+
+
+## Divine Command Theory
+Good Action: Aligned with God
+Bad Action: Contrary to God's will
+- Should use holy books as moral-decision making guide
+
+### Case against Divine Command Theory
+- Society is multicultural
+- Different holy books disagree on certain teaching
+- Modern moral problem not addressed in scripture
+- Based on obedience, **NOT** reason
+- **NOT workable theory**
+
+
+## Ethical Egoism
+Each person focus exclusively on their self-interest
+Action that provide maximum long-term benefit is morally right
+
+### Case against Ethical Egoism
+- May justify immoral behavior
+- **NOT workable theory**
+
+
+## Kantianism
+#Kantianism is where moral principle can be derived from pure reason.
+Action is performed in accordance with some principle
+
+## 1st Formulation: Universality
+"Act only on principle you would want everyone else to follow as a universal rule"
+
+## 2nd Formulation: Humanity
+"Never use people as mere tools or object to get what you want"
+
+### Case against Kantianism
+- Sometimes no rule adequately characterize action
+- Sometimes difficult to resolve conflicting underlying principle
+- Despite weakness, **workable theory**
+
+
+# Deontology
+Divine Command Theory & Kantianism belong to deontological ethics
+
+Deontology: Morality of action should be based on action is right or wrong under rules & principle rather than consequences of action
+
+# Consequentialism
+Consequences of conduct are ultimate basis for judgement about right or wrong
+
+
+## Utilitarianism
+#Utilitarianism  Action is good if benefits exceed harm
+
+## Act Utilitarianism
+Add up change in happiness of all beings by action
+Right to take action: One that makes the most people happy
+
+### Problems with Act Utilitarianism
+- Too much work
+- Cannot predict all consequences
+- Susceptible to moral luck
+
+## Rule Utilitarianism
+Adopt moral rules, if followed by everyone, will lead to greatest increase in total happiness
+
+> Act utilitarianism applies utility to individual action, Rule utilitarianism applies utility to moral rules
+
+### Case against Utilitarianism
+- Not all consequences can be measured or quantified
+- Ignores fairness in distribution of utility
+- Despite weakness both **Act & Rule are workable theory**
+
+## Social Contract Theory
+#Social_Contract_Theory give up absolute freedom to governing authority in exchange for security, order ...
+
+### Case against Social Contract Theory
+- No one signed social contract
+- Despite weakness **workable theory**
+
+## Virtue Ethics
+#Virtue_Ethics
+Kantianism, Utilitarianism, Social Contract Theory ignore important moral consideration
+- Moral Wisdom
+- Moral Education
+- Role of Emotion
+
+Virtue is a disposition that leads morally good action.
+Vice is a disposition that leads morally bad action.
+
+### Types of Virtue
+Intellectual Virtue: Virtue associated with reasoning and truth
+Moral Virtue: Virtue of character (E.g. Honesty)
+- Developed by habitually performing right action
+- Disposition to act in certain way and feel a certain way
+
+Morally right action: An action that a virtuous person would do in the same circumstance
+- Learn from role model. Practice Repeatedly
+
+Moral Guidance: Identify relevant virtue -> right action is consistent with these virtue -> consider circumstance
+
+### Case against Virtue Ethics
+- People may disagree on virtue relevant in given situation
+- Cannot guide government policies
+- Despite weakness, **workable theory**
+
+
