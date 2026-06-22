@@ -6,12 +6,14 @@ tags:
 
 #Workplace_Ethics
 Some Ethical Issue in the Workplace
-- Conflict of interest
-- Bribery
-- Whistle Blowing
+- [[#Conflict of interest | Conflict of interest]]
+- [[#Bribery | Bribery]]
+- [[#Whistle Blowing| Whistle Blowing]]
 
 # Conflict of interest
 Something you want for yourself clashes with your responsibility
+
+- Situation where individual's personal, financial, or professional interest clash with obligation or responsibility in role or process.
 
 ### Example
 You are a investor giving advice to client, you own stocks in XYZ and you recommend that stock to your client without revealing you are holding them. 
@@ -31,6 +33,8 @@ A manager promotes a close friend or family member without considering their qua
 # Bribery
 When someone offer, gives or receive something of value, to influence the action of the other party
 
+- Act of receiving, offering, giving something of value with intention of influencing others
+- Undermines fair competition, transparency and integrity
 ### Example
 Company executive offering sum of money to government in exchange for securing lucrative contract
 
@@ -44,6 +48,7 @@ University Policy
 Act of reporting wrongdoing, unethical behavior, or illegal activities within organization by an insider or employee who has access to sensitive information.
 Whistle blowers *may be punished* for the action, Lose their job or chances of advancement.
 
+- Reporting of exposing wrongdoing within organization typically by insider or employee who has access to sensitive information
 ### Example
 [The Challenger Explosion]
 Failure due to O-ring near Rocket Booster, Roger Boisjoly an employee at Morton Thiokol who makes the rocket boosters repeatedly raised concerns internally within Morton Thiokol to delay launch until weather conditions improved.
@@ -104,6 +109,10 @@ Establishes guidelines for employees to follow, provides training and creates me
 7. Monitoring
 8. Integration
 
+## Importance of leadership commitment
+- Sets powerful example for employees throughout organization
+- Leaders should communicate importance of ethics, allocate resource, and actively support and promote program
+
 ## Characteristics of a Successful Ethics Program
 - Employees willing to seek advice about ethical issues
 - Employees feel prepared to handle situations that could lead to misconduct
@@ -112,10 +121,10 @@ Establishes guidelines for employees to follow, provides training and creates me
 
 
 # Ethical Decision-making process in the workplace
-1. Develop Problem Statement
-2. Identify Alternatives
-3. Evaluate and Choose Alternatives
-4. Implement Decision
-5. Evaluate Results
+1. Develop Problem Statement (Clear, concise description of issue to be addressed)
+2. Identify Alternatives (Enlist help to brainstorm alternative solution)
+3. Evaluate and Choose Alternatives (Consider law, guideline, principle & consequence of each alternative)
+4. Implement Decision (Efficient, effective, timely implementation of decision, may face resistance during implementation)
+5. Evaluate Results (Observe impact on organization and various stakeholders. Monitor result to see if desired effects have been achieved)
 6. Success ? 
 (If further refinement is needed, Return to step 1, refine problem and work through process again)

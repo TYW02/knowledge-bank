@@ -46,6 +46,8 @@ Government, educational institutions and organizations has a lot of information 
 **There is an implicit trust**
 
 ## Information held by Private Organizations
+Credit card purchase, Purchase made with loyalty card, post to social network site, voluntary disclosures
+
 Consumer Data poses **greater risk**
 
 ## Example of Misuse of Personal Data
@@ -53,12 +55,23 @@ Consumer Data poses **greater risk**
 ### Unsolicited Marketing
 Unsolicited Marketing purposes without obtaining proper consent
 
-### Sharing of Personal Data to Other Parties
+### Sharing of Personal Data to Other Parties without Consent
 Sharing or selling personal data to third-party advertisers
 
 ### Location Tracking without consent
 Tracking and storing an individual's movement without their knowledge or explicit consent
 
+### Comprehensive Profiling
+Automated processing of personal data to evaluate, analyze, or predict individual's behaviour, preferences, health, or economic status. 
+Involves inferring highly sensitive, hidden details about a person 
+
+### Data Mining
+May reveal personal information you prefer not to disclose to others.
+Example: Target used predictive analytics to identify women who are likely to be pregnant.
+
+### Consumer Backlash
+[Cambridge Analytica](https://en.wikipedia.org/wiki/Facebook%E2%80%93Cambridge_Analytica_data_scandal) incident.
+Raised concerns about Facebook's handling of user privacy and led to a significant decline in Facebook's stock value.
 ## Morally Grey area
 ### Detailed Profiling
 Combining information from multiple sources used to build very detailed profiles of people.

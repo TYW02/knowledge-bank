@@ -20,10 +20,22 @@ Helps us see that or moral choices are not made in a vacuum.
 - Moral Licensing
 - Anonymity and Likelihood of Getting Caught
 
-## Moral Licensing
+## Obedience to Authority
+Most people have tendency to obey authority
+[Milgram Shock experiment](https://en.wikipedia.org/wiki/Milgram_experiment)
 
+## Roles
+Given role of guard and prisoner
+Behavioral differences driven by situational & social factor
+[Stanford Prison Experiment](https://en.wikipedia.org/wiki/Stanford_prison_experiment)
+
+## Moral Licensing
+Previous ethical behaviour may lead individual to feel morally licensed to engage in subsequent unethical behaviour 
+- Because I did something ethically correct earlier I can now do something that is unethical
 
 ## Anonymity and Likelihood of Getting Caught
+Decreased likelihood of being caught hence increases likelihood of unethical behaviour.
+
 When students are asked to do quiz from home vs f2f quiz. We are always tempted to get help from another device. If we think people cannot find out we tend to do things differently. If there was a CCTV or someway of getting caught we would also behave differently.
 
 # Cognitive Bias and how it affects ethical behavior
@@ -35,7 +47,7 @@ You have to catch yourself in a situation of bias so it becomes more obvious to 
 # Cognitive Dissonance
 Is the mental stress we feel when our belief and actions don't match.
 Motivates individuals to reduce the inconsistency and restore cognitive harmony by changing either their beliefs or actions.
-
+- Mental discomfort people feel when belief and action are inconsistent and contradictory
 
 ## Typical defence mechanisms against cognitive dissonance
 - Changing the behavior
@@ -50,6 +62,7 @@ This bias makes us select information that support our views, ignore contradicto
 
 Makes us search for evidence that confirms your belief
 
+- Tendency to search for and interpret information that confirms one's prior belief
 ### Other factors contributing to confirmation bias
 Social Influence:
 - Being surrounded by like-minded individuals may suppress or marginalize dissenting viewpoints, reinforcing confirmation bias
@@ -65,10 +78,15 @@ Takes cues for proper behavior from the actions of others rather than exercise o
 
 May motivate people to act altruistically (e.g. donating to charity, when they see others doing it too)
 Conformity bias may also lead us to commit acts against our own values in order to gain social acceptance.
+
+- Tendency to take cues for proper behaviour from actions of others rather than own judgement
+
 [Follow the crowd mentality]
 # Fundamental Attribution Error
 Tendency to attribute other people's actions to their character or personality rather than situational factors outside of their control.
 This error exists because of the limited information we have on the situational factors that others are facing.
+
+- Tendency to attribute other people's action to their character rather than situational factor outside of control
 
 [His personality / character is like that]
 ### Self-serving bias

@@ -1,0 +1,126 @@
+---
+title: Privacy and Government
+tags:
+  - Privacy
+  - Government
+---
+# Attitudes Toward Privacy
+Factors affecting Privacy
+
+## The right balance
+Most people are willing to give up some privacy for public safety
+Depends on people's attitudes towards privacy, which is affected by:
+1. Recent Events (9/11)
+2. Culture (COVID)
+
+### Different type of culture (Hofstede)
+Individualistic Culture
+- Personal-emphasized
+- Views people as unique
+- Encourages self-expression
+- Emphasizes competitiveness
+
+Collectivist Culture 
+- Social-emphasized
+- Views people as part of a group
+- Discourages self-expression
+- Emphasizes group harmony
+
+> [!NOTES]
+> Individuals within a society can have varying degrees of emphasis on privacy
+> 
+> Societies can exhibit a mix of individualistic and collectivist tendencies, and the importance placed on privacy can vary within different contexts.
+
+
+# Personal Data Collected by Governments
+
+Public Records:
+Birth certificates
+National ID cards
+Marriage certificates
+Motor vehicle records
+HR records of public employees
+Education and qualifications
+Immigration and travel data
+Tax returns
+Social Benefits and welfare data 
+Criminal records
+Deeds to property
+Health data
+
+## Debate on National ID cards
+Allow appropriate governmental authorities to monitor the movements and transactions of every registered citizen.
+
+Help deter terrorism and other related societal crimes through pre-screening and tracking of citizens.
+
+### Concerns
+Potential privacy rights violations
+Costs associated with establishing and maintaining national ID card systems
+
+Countries without national ID cards:
+- Australia
+- New Zealand
+- UK
+
+Alternative ID:
+- Birth certificate
+- Passport
+- Driver's licenses
+- Social security card
+
+### Mass surveillance
+Intricate surveillance of an entire or substantial fraction of a population in order to monitor that group of citizens.
+
+CCTV, capture video footage in specific locations
+
+Facial Recognition: Analyzes and identifies individuals based on facial features. Compared captured images or video frames with a database of known faces to identify or verify people. Enable real-time image and video processing can help in sieving through CCTV footage.
+
+GPS tracking: Enables real-time location monitoring by utilizing satellite based positioning systems. 
+
+Drones: Provide comprehensive view from above, used for border control or crowd monitoring 
+
+Automatic Number Plate Recognition (ANPR): Capture and analyze license plate numbers. Frequently used for law enforcement, parking enforcement, and toll collection.
+
+Internet and Social Media Monitoring: Surveillance includes monitoring Internet activities, social media platforms, and digital content to track individuals, identify trends, or detect potential threats.
+
+Communication Interception and Monitoring: Include wiretapping, packet sniffing, lawful interception systems. Enable the collection of voice, text, or data communications for surveillance purposes.
+
+Data Integration: Integrate data from multiple sources then combine disparate data points to generate comprehensive profiles of individuals.
+
+Data Mining: Processing vast amounts of data to identify patterns, anomalies, or specific events. ML and other analytical techniques are employed to extract meaningful information from surveillance data.
+
+# Technologies that impede mass surveillance
+
+## Cryptograph
+By encrypting communications and data, individuals can prevent surveillance entities from accessing the content of their messages of files.
+
+Even if intercepted, encrypted data appears as meaningless gibberish without the decryption key.
+
+### Regulation on Cryptograph
+Encryption Export Controls: Prevent the proliferation of strong encryption technology to unauthorized entities or countries of concern.
+
+Key Escrow and Access Requirements: Require individuals or organizations to retain cryptographic keys or provide access to encrypted information to authorized entities, such as law enforcement or national security agencies.
+
+
+# Support of Mass Surveillance
+> If you've got nothing to hide, you shouldn't worry about government surveillance
+
+## Privacy
+Some consider privacy as a fundamental human right. Even law-abiding citizens value privacy as it fosters freedom of though and expression and promotes innovation.
+
+## Potential Abuse:
+Granting surveillance powers without adequate checks and balances increases the risk of abuse. Even if one trusts the current authorities, there is no guarantee that future governments or officials will use surveillance capabilities responsibly.
+
+## Errors and False Positive:
+Surveillance systems are not infallible and can produce false positives or errors. Such errors can lead to unwarranted invasions of privacy, damage to reputations, and disruption of individuals' lives.
+
+
+# Emerging Markets: Many countries increasing adoption
+
+Some countries currently with low adoption of video surveillance are taking advantage of:
+- More affordable equipment
+- Improved device connectivity
+- Higher image resolution
+- Low lighting functionality
+- Video analytics
+
