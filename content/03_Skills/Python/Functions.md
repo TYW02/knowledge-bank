@@ -10,6 +10,9 @@ https://www.geeksforgeeks.org/python/python-functions/
 - Reduced code length
 - Increased readability of code
 
+### How to Design Functions well
+[[Function Design | Function Design]]
+[[Good Function Habits]]
 
 # Python Function Declaration
 The syntax to declare a functions is:
