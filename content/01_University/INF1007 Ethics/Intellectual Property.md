@@ -1,0 +1,191 @@
+---
+title: Intellectual Property
+---
+# Intellectual Property (IP)
+
+## What is IP ?
+Subset of intangible assets (IA), assets that are non-physical in nature as opposed to physical assets such as machinery.
+
+Non-disclosure agreement (NDA): Legal contract that outlines confidential material, that parties wish to share with one another for certain purposes, but wish to restrict access to.
+
+> Copyright is automatically granted upon creation.
+
+### Different types of IP
+
+#### Registrable IP
+- Trademarks
+- Patents
+- Designs
+- Geographic indications
+- Plant variety rights
+
+#### Non-Registrable IP
+- Trade Secrets
+- Trademarks
+- Patents
+- Copyright
+
+
+
+## Rationale behind IP protection
+
+### 2 main arguments FOR IP protection
+#### Fairness to the creators
+People should be rewarded for their hard work. Unfair to the creators if their IPs are not protected.
+
+#### Encouraging future innovation
+If IP are not protected, fewer people will create IPs, Less innovation in the future, Long run society is worse off.
+
+### 2 main arguments AGAINST IP protection
+#### Not maximizing social welfare
+IP protection represents a restriction that prevents knowledge from benefitting everyone in the society
+
+#### Discouraging future innovation
+IP protection can make it difficult for new knowledge to build on existing knowledge, hence can stifle innovation and hinder technological development.
+
+## Benefits and harms of IP protection
+
+### Benefits
+- Economic benefits
+- Knowledge sharing
+- Consumer protection
+
+
+### Harms
+- Anti-competition
+- Discourage Knowledge sharing
+- Unfair to developing countries and the less privileged
+- Abuse of IP rights
+
+
+
+# Different types of IP protection
+
+## Trade Secrets
+Confidential and propriety information that provides a business with a competitive advantage.
+
+> Characteristics:
+> - Not registrable
+> - There is no time limit
+
+Protecting involves maintaining NDAs and other security measures.
+
+### No protection against reverse engineering
+Attempts to understand through deductive reasoning
+
+## Trademarks
+Word, symbol, picture, sound or color used by business to help consumer recognize their goods and services.
+
+### Unregistered Trademarks
+May be recognized through use.
+Legal protection requires proof of reputation and goodwill.
+
+### Registered Trademarks
+Allows owner to:
+- Restrict other parties from using trademark in SG without owner's consent
+- Prevent later trademark, which is similar from being registered in SG
+
+Gives owner more options on how to extract financial gains from IP
+Registered trademark is valid for 10 years, and can last indefinitely if registration is renewed every 10 years.
+
+### Rules on trademark
+
+Marks contrary to public policy or morality
+- A mark could promote immoral behavior cannot be registered
+Deceptive marks
+- Marks that attempt to deceive the public
+Descriptive Marks
+- Marks that describe the goods and service, "super", "best" ...
+Marks "Common to the trade"
+- Marks that sign which customary in the trade. Too generic to be used to distinguish goods and services offered.
+Marks that are identical to earlier marks
+Marks that could cause confusion
+- Cannot be registered if likely to confuse public, "Cannot use pear on a smart phone"
+Marks that are identical to well-known marks
+
+
+## Patents (Patent Trolling)
+Protect new product, process by excluding others from making, using, selling the patented IP
+
+Term of protection for a patent is 20 years
+Patents can be sold or licensed.
+
+### 3 eligibility criteria
+Novelty
+- Invention should not be publicly known in any way, anywhere in the world
+Inventive step
+- Invention must be an improvement over an existing product or process. Improvement must not be obvious to someone with technical skills
+Industrial application
+- Invention must be useful and have some form of practical application
+
+### Exclusion to patent protection
+- Method of treatment of human or animal body by surgery
+- Invention that is generally expected to encourage offensive, immoral or anti-social behavior
+
+Validity of patent can be challenged at the patent office or in court
+
+### Patent Trolls
+Specialize in holding patents and licensing the rights to use these patents.
+
+Software can be patented in the US, but in some parts of the world, it is more difficult.
+
+## Copyright (Clean room design)
+
+### 5 principle rights
+- Reproduce copyrighted work
+- Distribute to public
+- Display to public
+- Perform in public
+- To produce new work derived from copyrighted work
+
+Also have right to prevent others from infringing on their rights
+Copyright can be sold or licensed
+
+### Length of protection depend on type of work 
+- Works with known authors typically expires 70 years from death of author
+- Films and sound, expiry is 70 years from making of work.
+Once in public domain, anyone an use the work free of restriction
+
+
+### Fair use of Fair Dealing
+Determining fair use:
+1. Purpose and character of the use
+	- Educational use is more likely than commercial use
+2. Nature of work used
+	- Use of nonfiction is more likely than use of fiction
+3. Amount and substantiality of portion of work used, in relation to the whole work
+	- Brief excerpts are more likely than entire chapters
+4. Effect that the use will have on potential market
+	- Use of out-of-print material is more likely than use of readily available work
+
+
+### Free software movement
+What motivates creativity ?
+- Financial gains
+- Joy from the process of creation itself
+- Recognition from others
+
+Hacker ethics: Software should be free
+
+> Free doesn't mean free of charge
+
+Free software is software that gives users the freedom to:
+- Run
+- Study
+- Modify
+- Share
+
+### Copyleft
+More restrictive as the demand reciprocity (any derived works must be distributed with source code under copyleft license) E.g. GNU General Public License(GPL)
+
+### Permissive
+Less restrictive as they do not demand reciprocity (derived code can be used within proprietary software) E.g. Apache License
+
+
+### Clean Room Design
+Method of reverse engineering without infringing the copyrights of the original design
+
+2 teams are involved:
+1st produce technical specification by inspecting software they wish to reverse engineer, without revealing how to implement it
+2nd develop the code based on the technical specification
+
