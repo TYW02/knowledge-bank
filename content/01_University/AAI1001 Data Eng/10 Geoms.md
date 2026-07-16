@@ -186,7 +186,245 @@ ggplot(volcano_dfr, aes(x, y, z = elevation)) +
 
 
 # Geom for Text
+Text in data visualization establishes immediate semantic relationships, which helps to enhance clarity, highlight key data points, and improve the overall visualization.
 
+`geom_text()` generates text only
+
+`geom_label()` adds rectangle and optional background colors
+> Both require `x`, `y`, and `label` in `aes()`
+
+### Example Data Used
+```R
+dfr <- tribble(
+  ~x, ~y, ~word,
+  0, -1, "1. This",
+  2, 2, "2. That",
+  1, -2, "3. Other",
+  3, 0, "4. Same",
+  1, 1, "5. Different"
+)
+gg <- ggplot(
+  dfr, 
+  aes(x, y, label = word)
+)
+gg + geom_text()
+```
+![[Pasted image 20260716185758.png]]
+Note that in this graph the word "4. Same" is outside the graph
+
+`ggplot2` does not automatically choose axis limits for text.
+Use `xlim()` and `ylim()` to adjust axis limits.
+
+
+## Using `geom_label()`
+```R
+gg + geom_label()
+```
+![[Pasted image 20260716190031.png]]
+
+### Adjusted Text Label
+```R
+gg + 
+  geom_label() + 
+  xlim(-0.2, 3.3) + 
+  ylim(-2.2, 2.2)
+```
+![[Pasted image 20260716185932.png]]
+
+### Additional aesthetic for text
+```R
+mutate(dfr,
+  class = c("i", "i", "ii", "ii", "iii"),
+  extent = c(1, 2, 2, 3, 3),
+  font_family = c("serif", "sans", "serif", "mono", "mono")
+) |>
+  ggplot(aes(x, y, label = word, color = class, size = extent, family = font_family)) +
+  xlim(-1, 4) +
+  ylim(-2.5, 2.5) + 
+  geom_label() +
+  scale_size_area()
+```
+![[Pasted image 20260716190058.png]]
+
+## Aligning, Nudging, and Resizing Text
+- Text by default is centered horizontally and vertically
+- `hjust` and `vjust` adjust the alignment, termed justification
+- Both arguments accept values between 0 and 1, bottom left to top right
+```R
+gg_partyid <-
+  ggplot(gss_by_partyid, aes(count, partyid, label = count)) +
+  geom_col(fill = NA, color = "darkblue") +
+  labs(
+    x = "Count",
+    y = "Response",
+    title = "Party Affiliation of GSS Participants",
+    caption = 'Source: R package "forcats"'
+  ) +
+  xlim(0, 4500)
+gg_partyid + geom_text()
+```
+![[Pasted image 20260716190222.png]]
+
+### Aligning text label
+```R
+gg_partyid + 
+  geom_text(hjust = 0)
+```
+![[Pasted image 20260716190339.png]]
+
+Use `nudge_x` and `nudge_y` to shift text by a specified distance
+```R
+gg_partyid + 
+  geom_text(hjust = 0, nudge_x = 75, size = 3)
+```
+![[Pasted image 20260716190420.png]]
+
+
+Use `guides(... = "none")` to remove an axis or legend
+Use `labs(... = NULL)` to remove an axis label or legend title
+```R
+gg_partyid +
+  geom_text(hjust = 0, nudge_x = 75, size = 3) +
+  labs(x = NULL, y = NULL) +
+  guides(x = "none")
+```
+![[Pasted image 20260716190531.png]]
+
+## Dodged Bar Charts
+```R
+count(gss_cat, partyid, marital, name = "count") |>
+  ggplot(aes(marital, count, fill = partyid, label = count)) +
+  geom_col(position = "dodge") +
+  gss_cat_labs() + labs(x = NULL, y = NULL) + guides(y = "none") + ylim(0, 2000) +
+  geom_text(aes(color = partyid), hjust = 0, vjust = 0.5, size = 4, angle = 90, position = ggpp::position_dodgenudge(width = 0.9, y = 20))
+```
+![[Pasted image 20260716190632.png]]
+
+
+# Reduce Overplotting of Text through Repulsion
+- When plotting a large number of text elements, they often overlap, making them unreadable
+- To mitigate this issue, use `ggrepel::geom_text_repel()` to reduce text overplotting
+- `max.overlaps` (default 10) is used to control the number of text elements that can overlap.
+
+```R
+michelle <-
+  storms |>
+  filter(name == "Michelle") |>
+  mutate(observation = row_number()) |>
+  select(wind, pressure, observation)
+gg_michelle <-
+  ggplot(michelle, aes(
+    pressure, 
+    wind, 
+    color = observation, 
+    label = observation
+  )) +
+  geom_point(alpha = 0.5) +
+  geom_line(color = "black") +
+  labs(
+    x = "Pressure (hPa)",
+    y = "Wind (knots)",
+    title = "Hurricane Michelle",
+    caption = "Source: National Hurricane Center"
+  ) +
+  guides(color = "none")
+  
+gg_michelle + 
+  geom_text()
+```
+![[Pasted image 20260716190920.png]]
+
+
+### Using repel
+```R
+gg_michelle + 
+  geom_text_repel(max.overlaps = 50)
+```
+![[Pasted image 20260716190937.png]]
+
+
+### Example 2
+```R
+count(gss_cat, partyid, marital, name = "count") |>
+  mutate(
+    partyid = fct_collapse( # Combine minor categories
+      partyid,
+      "Other/Missing" = c("No answer", "Don't know", "Other party")
+    )
+  ) |>
+  ggplot(aes(
+    count, 
+    partyid, 
+    fill = marital, 
+    colour = marital, 
+    label = count
+    )
+  ) +
+  geom_col(width = 0.1) +
+  ggrepel::geom_text_repel(
+    max.overlaps = 100,
+    position = position_stack(vjust = 0.5), size = 3, direction = "both") +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = "Marital Status",
+    color = "Marital Status",
+    title = "Party Affiliation of GSS Participants",
+    caption = 'Source: R package "forcats"'
+  )
+```
+![[Pasted image 20260716191014.png]]
+
+
+# Text for Groups of Data Points
+- Use `directlabels::geom_dl()` to print group labels in close proximity to the corresponding data points and remove the corresponding legend.
+- Use `ggforce::geom_mark_ellipse()` to draw enclosing ellipses around data point groups
+- Use `ggforce::geom_mark_hull()` to draw nearly convex hulls around data point groups
+
+```R
+gg_iris <-
+  ggplot(
+    iris,
+    aes(
+      Petal.Length, 
+      Petal.Width, 
+      colour = Species, 
+      label = Species
+    )
+  ) +
+  geom_jitter(alpha = 0.5) +
+  labs(
+    x = "Petal Length (cm)",
+    y = "Petal Width (cm)",
+    caption = "Source: Edgar Anderson (1935)"
+  )
+  
+gg_iris + 
+  labs(title = "Category Names in the Legend")
+```
+![[Pasted image 20260716192810.png]]
+
+```R
+gg_iris + directlabels::geom_dl(method = "smart.grid") +
+  labs(title = "Category Names in the Plot") + guides(color = "none")
+```
+![[Pasted image 20260716192822.png]]
+
+```R
+gg_iris + xlim(0.8, 7.3) + ylim(-0.1, 2.7) +
+  ggforce::geom_mark_ellipse() + guides(colour = "none") +
+  labs(title = "Group Label and Enclosing Ellipse")
+```
+![[Pasted image 20260716193028.png]]
+
+
+
+```R
+gg_iris + xlim(0.8, 7.3) + ylim(-0.1, 2.7) +
+  ggforce::geom_mark_hull() + guides(colour = "none") +
+  labs(title = "Group Label and Hull")
+```
+![[Pasted image 20260716193033.png]]
 
 
 
