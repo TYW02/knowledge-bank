@@ -44,98 +44,28 @@ We repeat steps 1 through 3 until the array is fully sorted.
 Code Example: #Code_Example 
 [[Insertion Sort in Action]]
 
-
 ```python
-def insertion_sort(array):
-	for index in range(1, len(array)):
-		position = index
-		temp_value = array[index]
-
-		while position > 0 and array[position - 1] > temp_value:
-			array[position] = array[position - 1]
-			position = position - 1
-		array[position] = temp_value
-```
-
-
-## Breaking it down line by line
-```python
-for index in range(1, len(array))
-```
-- We start loop at index 1 that runs through the entire array.
-- The current index is kept in the variable *index*
-
-Next, we mark a **position** at whatever **index** currently is. We also assign the value at that index to the variable *temp_value*
-
-
-```python
-while position > 0 and array[position - 1] > temp_value:
-	array[position] = array[position - 1]
-	position = position - 1
-```
-
-> [!INFO]
-> We use position > 0, because python allows negative value for position
-
-We then begin an inner **while** loop. We check whether the value to the left of *position* is greater than the *temp_value*.
-
-If it is, we then use **array[position] = array[position - 1]** to shift that left value one cell to the right, and then decrement *position* by one.
-
-We then check whether the value to the left of the new *position* is greater than *temp_value*, and keep repeating this process until we find a value that is less than the *temp_value*
-
-
-
-```python
-array[position] = temp_value
-```
-
-Finally, we drop the *temp_value* into the gap within the array.
-
----
-
-
-## My Version (Code Breakdown)
-```python
-array = [4, 2, 7, 1, 3]
-
-def insertion_sort(array):
-	for i in range(1, len(array)):
-		value_to_sort = array[i]
-		while array[i - 1] > value_to_sort and i > 0:
-			array[i - 1], array[i] = array[i], array[i - 1]
-			i = i - 1
-
-insertion_sort()
-print(array)
+def insertionSort(arr):
+	for i in range(1, len(arr)):
+		for j in range(i, 0, -1):
+			if arr[j - 1] > arr[j]:
+				arr[j - 1], arr[j] = arr[j], arr[j - 1]
+	return arr
 ```
 
 ## Breaking it down line by line
-
-
+We start by defining the first for loop
 ```python
-for i in range(1, len(array)):
-	value_to_sort = array[i]
+for i in range(1, len(arr))
 ```
 
-The for loop is used to get the second item in the list onwards till the last item.
-- We start from the second item because the left item from the 1st would be nothing
-
-Then we store the 2nd item in a variable to be compared, in this case it is ==2==
-
-
+This line helps us get all the elements from the 2nd element to the end.
+We want to start from the 2nd element because our `j` will be behind our `i` counter.
 
 ```python
-while array[i - 1] > value_to_sort and i > 0:
-	array[i - 1], array[i] = array[i], array[i - 1]
-	i = i - 1
+for j in range(i, 0, -1)
 ```
-
-> [!INFO]
-> We use i > 0 here because python allows negative **i** which is not what we want 
-
-The while loop here is to compare the 1st item and 2nd item.
-- If the 1st item [i -1] is ==bigger== than the 2nd item [value_to_sort] 
-	- Then we swap both their positions
+This is the j counter travelling backwards we start where `i` is because anything to the RIGHT of `i` has not been sorted.
 
 -----
 
@@ -178,17 +108,11 @@ $N^2 / 2$ Comparisons
 ### Adding up Shifts and Comparisons for Worst-Case
 $N^2 / 2$ Comparisons + $N^2 / 2$  Shifts = $N^2$ Steps
 
-
-
 ### Removing and Inserting 
 - They happen once per passthrough.
 - Since there are always $N - 1$ Passthroughs, we can conclude that there are N -1 removals and N - 1 insertions
 
 ----
-
-
-
-
 # In Big O Notation
 ![[insertion_sort(27).png]]
 
@@ -197,7 +121,7 @@ $N^2 / 2$ Comparisons + $N^2 / 2$  Shifts = $N^2$ Steps
 
 $O(N^2 + N)$
 
-## *Big o Notation only takes into account the highest order of N*
+## *Big O Notation only takes into account the highest order of N*
 
 Example:
 If an algorithm takes $N^4$ + $N^3$ + $N^2$ + $N$ steps, we only consider $N^4$ to be significant.

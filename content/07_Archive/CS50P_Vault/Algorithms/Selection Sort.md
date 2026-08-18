@@ -27,76 +27,24 @@ Algorithm: #SelectionSort
 # Selection Sort Implemented
 Code Example: #Code_Example 
 [[Selection Sort in Action]]
-
 ```python
-list = [4, 2, 7, 1, 3]
-
-def selectionsort(array):
-    for i in range(len(array)):
-        lowest_num_index = i
-
-        for j in range(i + 1, len(array)):
-            if (array[j] < array[lowest_num_index]):
-                lowest_num_index = j
-
-
-        if lowest_num_index != i :
-            temp = array[i]
-            array[i] = array[lowest_num_index]
-            array[lowest_num_index] = temp
-        
-
-    return array
-
-print(selectionsort(list))
-
-
-
-
+def selectionSort(arr):
+	for i in range(len(arr)):
+		for j in range(i, len(arr)):
+			if arr[j] < arr[i]:
+				arr[j], arr[i] = arr[i], arr[j]
+	return arr
 ```
-
-
 ## Breaking it down line by line
 
 ```python
-for i in range(len(array)):
-	lowest_num_index = i
+for i in range(len(arr)):
+	for j in range(i, len(arr))
 ```
 
-Outer loop to get the first element in the array
-Keep track of the *index* containing the lowest value we encounter so far
-
-- This will be 0 at the beginning of the first passthrough
+This helps you pass through the arr, `i` is the sorted index and `j` is you comparing if there is a smaller value compared to the current `i`
 
 
-```python
-for j in range(i + 1, len(array)):
-```
-
-Inner **for** loop that starts at $i + 1$ 
-To allow us to compare the 2 cells
-
-```python
-if (array[j] < array[lowest_num_index]):
-	lowest_num_index = j
-```
-
-Checks each element of the array that has not been sorted and looks for the lowest number.
-
-It does this by keeping track of the index of the lowest number it found so far in the *lowest_num_index* variable.
-
-By the end of the inner loop, we've determined the index of the lowest number not yet sorted.
-
-
-```python
-if lowest_num_index != i :
-            temp = array[i]
-            array[i] = array[lowest_num_index]
-            array[lowest_num_index] = temp
-```
-
-Check if the lowest number (j) is already in its correct place (i).
-	If not then we swap the lowest number with the number that's in the position that the lowest number should be at.
 
 
 # Efficiency of Selection Sort
@@ -126,13 +74,13 @@ We only need to make a maximum of one swap per passthrough.
 This is because in each passthrough, we make either one or zero swaps, depending on whether the lowest number of that passthrough is already in the correct position.
 
 #### Compared to Bubble Sort
-[[Bubble Sort]]
+[[07_Archive/CS50P_Vault/Algorithms/Bubble Sort]]
 
 Contrast this with Bubble Sort, where in a worst-case scenario --an array in descending order-- we have to make a swap for *each* and *every* comparison.
 
 ### Side-by-Side Comparison [Bubble Sort] vs [Selection Sort]
 
-| N Elements | Max # of steps in [[Bubble Sort]] | Max # of steps in [[Selection Sort]] |
+| N Elements | Max # of steps in [[07_Archive/CS50P_Vault/Algorithms/Bubble Sort]] | Max # of steps in [[Selection Sort]] |
 | ---- | ---- | ----|
 | 5 | 20 | 14 (10 Comparisons + 4 Swaps) |
 | 10 | 90 | 54 (45 Comparisons + 9 Swaps) |
@@ -145,7 +93,7 @@ Contrast this with Bubble Sort, where in a worst-case scenario --an array in des
 
 
 ## In Big O Notation
-Selection is described in Big O as $O(N^2)$, just like [[Bubble Sort]].
+Selection is described in Big O as $O(N^2)$, just like [[07_Archive/CS50P_Vault/Algorithms/Bubble Sort]].
 
 
 

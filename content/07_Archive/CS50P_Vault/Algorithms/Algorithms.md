@@ -7,23 +7,23 @@
 #BubbleSort 
 
 #### Steps to follow: 
-[[Bubble Sort#Steps to follow|Bubble Sort Steps]]
+[[07_Archive/CS50P_Vault/Algorithms/Bubble Sort#Steps to follow|Bubble Sort Steps]]
 
 
 #### How to Implement:
-[[Bubble Sort#Bubble Sort Implemented|Bubble Sort Implemented]]
+[[07_Archive/CS50P_Vault/Algorithms/Bubble Sort#Bubble Sort Implemented|Bubble Sort Implemented]]
 #### Code Break-Down:
-[[Bubble Sort#Breaking it down line by line|Code Breakdown]]
+[[07_Archive/CS50P_Vault/Algorithms/Bubble Sort#Breaking it down line by line|Code Breakdown]]
 
 
 #### Efficiency of Bubble Sort
-[[Bubble Sort#The Efficiency of Bubble Sort| Bubble Sort Efficiency]]
+[[07_Archive/CS50P_Vault/Algorithms/Bubble Sort#The Efficiency of Bubble Sort| Bubble Sort Efficiency]]
 #### Worst-Case Scenario
-[[Bubble Sort#Worst-Case scenario| Bubble Sort Worst-Case Scenario]]
+[[07_Archive/CS50P_Vault/Algorithms/Bubble Sort#Worst-Case scenario| Bubble Sort Worst-Case Scenario]]
 
 
 #### Big O Notation
-[[Bubble Sort#In Big O Notation| Bubble Sort Big O Notation]]
+[[07_Archive/CS50P_Vault/Algorithms/Bubble Sort#In Big O Notation| Bubble Sort Big O Notation]]
 
 
 

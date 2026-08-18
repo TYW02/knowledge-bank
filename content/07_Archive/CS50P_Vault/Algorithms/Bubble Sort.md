@@ -2,10 +2,6 @@ Algorithm: #BubbleSort
 
 ##  What is bubble sort ?
 - It is a basic sorting algorithm
-
-
-
-
 ### Why is it called bubble sort ?
 In each passthrough, the highest unsorted value "bubbles" up to its correct position
 
@@ -43,21 +39,19 @@ Code Example: #Code_Example
 [[Bubble Sort in Action]]
 
 ```python
-def bubble_sort(list):
-	unsorted_until_index = len(list) - 1
-	sorted = False
+def bubbleSort(arr):
+	swap = True
+	while swap:
+		swap = False
+		for i in range(1, arr):
+			if arr[i] < arr[i - 1]:
+				swap = True
+				arr[i], arr[i - 1] = arr[i - 1], arr[i]
+	return arr
 	
-while not sorted:
-	sorted = True
-	for i in range(unsorted_until_index):
-		if list[i] > list[i + 1]:
-			sorted = False
-			list[i], list[i + 1] = list[i + 1], list[i]
-		unsorted_until_index = unsorted_until_index - 1
-
-list = [65, 55, 45, 35, 25, 15, 10]
-bubble_sort(list)
-print list
+arr = [65, 55, 45, 35, 25, 15, 10]
+bubble_sort(arr)
+print(arr)
 
 > Output: [10, 15, 25, 35, 45, 55, 65]
 ```
