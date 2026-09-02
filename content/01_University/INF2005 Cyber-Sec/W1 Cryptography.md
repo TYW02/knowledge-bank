@@ -74,6 +74,13 @@ ALICEALI (Keyword)
 HELLOBOB (Plaintext)
 HPTNSBZJ (Ciphertext)
 
+### Decryption
+HPTNSBZJ (Ciphertext)
+ALICEALI (Keyword)
+At row 'H' look for letter 'A' then see what column corresponds that is the plaintext
+'L' find 'P' = E
+'I' find 'T' = 'L'
+> Find Key at row then find ciphertext in that row, the column will be your plaintext
 
 # Simple Transposition Cipher 
 
@@ -158,6 +165,30 @@ DES is a symmetric-key block cipher published by the National Institute of Stand
 - A 56-bit cipher key is used to generate a different 48-bit sub-key $K_i$ for Round $i$. Key length is actually 64-bit but every 8th bit is discarded to form 56-bit key
 - The 56-bit key then undergoes 2 permutations and left circular shift -> 48-bit sub-key is selected.
 
+### Encryption
+#### Example running for 2 rounds
+- Plaintext = 10110010
+- Split into half (L, R)
+- L0 = 1011, R0 = 0010
+- L1 = R0 = 0010
+- R1 = L1 XOR F(R0, K1)
+- F(R0, K1) = R0 XOR K1
+- L2 = R1 
+- R2 = L1 XOR F(R1, K2)
+> Basically swap L and R then take R and XOR with F(Rn-1, Kn)
+
+
+### Decryption
+#### Example running for 2 rounds
+Ciphertext = 01010001
+- Split L2 = 0101, R2 = 0001
+- R1 = L2 = 0101
+- L1 = 0001 XOR F(L2, K2)
+- R0 = L1
+- L0 = R1 XOR F(L1, K1)
+> Same thing here but you are finding L instead, and remember to use the key BACKWARDS. So K2 -> K1
+
+
 
 # 3DES (Triple Data Encryption Standard)
 
@@ -170,6 +201,15 @@ Reverse -> Decrypt
 - Encrypt the plaintext blocks using single DES with key $K_1$
 - Now decrypt the output of step 1 using single DES with key $K_2$
 - Finally, encrypt the output of step 2 using single DES with key $K_3$
+
+### Encryption
+> Same as DES but use only 1 key for all rounds. Then after you encrypted, decrypt with K2 and encrypt again with K3
+
+
+### Decryption
+> Now start with Decryption with K3, then encrypt with K2 and finally decrypt with K1.
+> Basically whatever you did for encryption, do it backwards.
+
 
 
 # AES (Advanced Encryption Standard)
