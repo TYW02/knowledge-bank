@@ -356,7 +356,7 @@ The Agile manifesto has come to value:
 ### Attributes of the Agile method
 
 #### The Good
-- Flexible to change and continuous feedback which increases the change of building the right product
+- Flexible to change and continuous feedback which increases the chance of building the right product
 - Customer Satisfaction
 - Early value delivery and early to market
 - Team Ownership (Self organizing team)
