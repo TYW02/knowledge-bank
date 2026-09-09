@@ -171,9 +171,9 @@ tags:
 
 ### Existing Documentation
 #### Purpose
-- Extract useful information about the system, processes, and constraints from already available documents
-- Helps analysts understand the current system and business domain before engaging stakeholders
-- Serves as a baseline for identifying gaps and improvements
+- Extract useful information about the system, processes, and constraints from **already available documents**
+- Helps analysts understand the current system and business domain **before** engaging stakeholders
+- Serves as a **baseline** for identifying gaps and improvements
 #### Types of Documentation to Review
 - Business Documents: Policies, Procedures, Contracts, Regulation
 - System Documents: User manuals, Technical Specifications, Source Code Documentation
@@ -187,8 +187,6 @@ tags:
 - Highlight assumptions, ambiguities, or inconsistencies
 - Validate findings with stakeholders (Documents may be outdated or inaccurate)
 
-This is a sentence containing a <abbr title="This is your short note that shows on hover!">specific word</abbr> inside it.
-
 #### Advantage
 - Provide **objective**, **written evidence** (Less biased than personal opinions)
 - Saves time, Reduces the need to "Start from scratch"
@@ -196,10 +194,9 @@ This is a sentence containing a <abbr title="This is your short note that shows 
 - Useful for understanding **regulatory and compliance requirements**
 #### Disadvantage
 - Documentation may be **outdated or incomplete**
-- Risk of misinterpretation if the analyst is not familiar with the domain
+- Risk of **misinterpretation** if the analyst is not familiar with the domain
 - May not reflect real-world practices (Users often deviate from official processes)
 - Still requires **validation** with stakeholders
-
 
 ### Observation
 #### Purpose
@@ -216,10 +213,10 @@ This is a sentence containing a <abbr title="This is your short note that shows 
 - Get permission and explain the purpose to participants
 - Prepare checklist or observation guides
 #### Conducting the Observation
-- Observe sequence of tasks, tools, interactions, and bottlenecks
+- Observe sequence of tasks, tools, interactions, and **bottlenecks**
 - Take detailed notes, photos, or video recording (IF permitted)
-- Minimize interference so users behave naturally
-- Ask clarifying questions AFTER the activity (To avoid disrupting workflow)
+- **Minimize interference** so users behave naturally
+- Ask clarifying questions **AFTER** the activity (To avoid disrupting workflow)
 
 #### Advantage
 - Reveal **REAL practices**, not just what stakeholders say they do
@@ -227,17 +224,17 @@ This is a sentence containing a <abbr title="This is your short note that shows 
 - Helps discover non-functional requirements
 - Provides context for system integration with real-world workflows
 #### Disadvantage
-- Can be time-consuming, especially for complex processes
+- Can be **time-consuming**, especially for complex processes
 - Stakeholders may **alter their behavior** if they know they're being watched
 - Some tasks may be sensitive 
-- Observed data may need careful interpretation to avoid bias
+- Observed data may need careful interpretation to **avoid bias**
 
 
 ### Prototyping
 #### Purpose  
 • To make requirements more tangible by creating a working model of the system.  
-• To help stakeholders articulate requirements they may struggle to express verbally.  
-• To validate assumptions early and reduce misunderstandings.  
+• To help stakeholders **articulate** requirements they may **struggle to express verbally**.  
+• To **validate** assumptions early and **reduce misunderstandings**.  
 
 #### Types of Prototypes  
 • Throwaway (rapid) prototypes → quickly built to explore ideas, then discarded.  
@@ -252,14 +249,14 @@ This is a sentence containing a <abbr title="This is your short note that shows 
 • Use it as a communication tool between developers and stakeholders.
 
 #### Advantages  
-• Makes abstract requirements concrete and visual.  
-• Helps uncover usability issues and hidden needs early.  
+• Makes abstract requirements **concrete and visual.**  
+• Helps **uncover** usability issues and hidden needs **early**.  
 • Encourages active participation from stakeholders.  
 • Reduces risk of delivering the wrong system.  
 
 #### Disadvantages / Challenges  
-• Can be time-consuming and costly if not managed properly.  
-• Stakeholders may confuse prototype with the final product.  
+• Can be **time-consuming** and **costly** if not managed properly.  
+• Stakeholders may **confuse** prototype with the final product.  
 • Risk of focusing too much on UI/visuals while ignoring deeper system  
 requirements.  
 • If used as throwaway, effort may feel “wasted” if not reused.
@@ -267,8 +264,8 @@ requirements.
 
 ### Questionnaire
 #### Purpose  
-• To gather requirements, opinions, or preferences from a wide audience.  
-• To collect both quantitative data (e.g., frequency of use, importance ratings) and qualitative data  
+• To gather requirements, opinions, or preferences from a **wide audience**.  
+• To collect both **quantitative** data (e.g., frequency of use, importance ratings) and **qualitative** data 
 (e.g., open-ended feedback).  
 • Useful for validating requirements across many users.  
 
@@ -284,15 +281,15 @@ requirements.
 • Choose an appropriate delivery method (online form, email, printed survey)
 
 #### Advantages  
-• Can reach large numbers of stakeholders quickly and cheaply.  
+• Can reach large numbers of stakeholders **quickly and cheaply**.  
 • Provides quantifiable results that can be statistically analyzed.  
-• Anonymity may encourage more honest responses.  
+• Anonymity may **encourage more honest** responses.  
 • Easy to compare responses across different user groups.  
 
 #### Disadvantages / Challenges  
-• Responses may lack depth compared to interviews or focus groups.  
-• Poorly designed questions can lead to ambiguous or biased results.  
-• Risk of low response rate, reducing representativeness.  
+• Responses **may lack depth** compared to interviews or focus groups.  
+• Poorly designed questions can lead to **ambiguous** or **biased** results.  
+• Risk of **low response rate**, reducing representativeness.  
 • No chance for immediate clarification (unlike interviews).
 
 
@@ -310,13 +307,13 @@ requirements.
 
 #### Advantages  
 • Easy for stakeholders to relate to and validate (natural language, story-like).  
-• Helps discover both functional and non-functional requirements.  
-• Reveals exceptions and alternative flows that might be missed in interviews or  
+• Helps discover both **functional** and **non-functional** requirements.  
+• Reveals **exceptions** and **alternative** flows that might be **missed** in interviews or  
 questionnaires.  
 • Provides a foundation for use cases, test cases, and prototyping.  
 #### Disadvantages / Challenges  
-• May oversimplify complex systems if not detailed enough.  
-• Can be time-consuming to create comprehensive scenarios for all possible cases.  
+• May **oversimplify** complex systems if not detailed enough.  
+• Can be **time-consuming** to create comprehensive scenarios for all possible cases.  
 • Risk of focusing too much on specific examples rather than general requirements.
 
 ## Blending Elicitation Techniques
@@ -354,7 +351,7 @@ Often, requirements are not standalone. Blending techniques could bring up these
 > - What happens when an error occurs ?
 
 ### Non-Functional Requirements
-- How well will the system perform ?
+- **How well** will the system perform ?
 - Quality Attributes
 	- Reliability
 	- Security
@@ -370,9 +367,11 @@ Often, requirements are not standalone. Blending techniques could bring up these
 
 ### Examples of Non-Functional Requirements
 - Product Requirement  
+```
 The Patient Management System (PMS) shall be available to all clinics  
 during normal working hours (Mon-Fri, 08:30-17:30). Downtime within  
 the normal working hours shall not exceed five seconds in any one day.  
+```
 
 - Organisational Requirement  
 Users of the PMS shall authenticate themselves using their health  
@@ -436,9 +435,9 @@ unnecessarily high sugar levels.)
 Expressive, intuitive and universal. Requirements can be understood by users and customers
 
 ### Problems
-- Lack clarity: Precision is difficult without making the document difficult to read
-- Requirements confusion: Functional and non-functional requirements tend to be mixed-up
-- Requirements mix: Several different requirements may be expressed together
+- **Lack clarity**: Precision is difficult without making the document difficult to read
+- **Requirements confusion**: Functional and non-functional requirements tend to be mixed-up
+- **Requirements mix**: Several different requirements may be expressed together
 
 ## Structured Natural Language
 - Requirements are written in a standard way.  
