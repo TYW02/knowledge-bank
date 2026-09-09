@@ -42,7 +42,7 @@ Example the letter 'G' (01000111), start from MSB '0' and replace the LSB of the
 
 ### LSB Matching Example
 ![[Pasted image 20260905202754.png]]
-- Add +1 or -1 if the LSB of the pixel value does not match the payload bits (From MSB)
+- Add +1 or -1 (**RANDOMLY**) if the LSB of the pixel value does not match the payload bits (From MSB)
 
 # Bit Planes
 Every RGB image is made up of 3 color channels or planes, and a greyscale image is made up of 1 color channel

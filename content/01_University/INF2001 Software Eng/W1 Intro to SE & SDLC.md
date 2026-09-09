@@ -93,10 +93,10 @@ BUT Software Engineering answer:
 
 Software is a model of reality, which is constantly changing
 Different types of maintenance
-- Corrective maintenance (about 20%)
+- **Corrective** maintenance (about 20%)
 - Enhancement
-	- Perfective maintenance (About 60%)
-	- Adaptive maintenance (About 20%)
+	- **Perfective** maintenance (About 60%)
+	- **Adaptive** maintenance (About 20%)
 
 
 # Consequence of Relative Costs of Phases
@@ -140,7 +140,7 @@ Maturity of the process is some gauge of success of organisation
 | 4.  | Implementation Phase           |
 | 5.  | Postdelivery Maintenance       |
 | 6.  | Retirement                     |
-- Sequential & Distinct Phases: 1 phase is completed and the next one begins
+- **Sequential** & Distinct Phases: 1 phase is completed and the next one begins
 - Document-driven (Plan and document approach)
 - Big Design Up Front (BDUF)
 
@@ -208,15 +208,16 @@ Waterfall model (Try to get it right first time)
 Rapid Prototype (Frequent changes, then discard)
 But both methods only have 1 shot for delivery at the end
 
-
+![[Pasted image 20260909200430.png]]
 ## Spiral Model
-4 Specific phases
-Uses in iterations
-Combines planning and documentation with prototyping in iterations
-There is an emphasis on risk analysis
-The radius of the iteration reflects the accumulated cost involved
-Customer is involved throughout
+- 4 Specific phases
+- Uses in iterations
+- Combines planning and documentation with prototyping in iterations
+- There is an emphasis on risk analysis
+- The radius of the iteration reflects the accumulated cost involved
+- Customer is involved throughout
 
+![[Pasted image 20260909200556.png]]
 ### Attributes of Spiral Model
 
 #### The Good
@@ -285,8 +286,8 @@ Customer is involved throughout
 
 
 ### Key points for Rational Unified Process
-- Use case and architecture centric
-- Deals with software in components with defined interfaces
+- **Use case** and architecture centric
+- Deals with software in **components** with defined interfaces
 - Unified Process framework is an adaptable methodology
 
 ### Attributes of Rational Unified Process

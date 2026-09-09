@@ -26,25 +26,32 @@ If the message is encrypted then the attack can only see the encrypted message, 
 
 # Types of Cryptography
 
-**Symmetric Key**: Encryption and Decryption use the **SAME** key (**Private** key known only to sender and receiver)  -> Private Key Cryptography 
+**Symmetric Key**: Encryption and Decryption use the **SAME** key (**Private** key known only to sender and receiver)  -> **Private Key Cryptography** 
 
-**Asymmetric Key**: Encryption and Decryption use **DIFFERENT** keys (**Public** key for encryption, **Private** key for Decryption, **Public** key known to authorised senders) -> Public Key Cryptography 
+**Asymmetric Key**: Encryption and Decryption use **DIFFERENT** keys (**Public** key for encryption, **Private** key for Decryption, **Public** key known to authorised senders) -> **Public Key Cryptography** 
 
-**Hashing**: Does NOT use keys (one-way functions can convert data to a fixed length "unique" hash value digest)
+**Hashing**: Does NOT use keys (**one-way** functions can convert data to a fixed length "unique" hash value **digest**)
 
+> [!Digest]-
+> A Digest is what the hash outputs.
 
 # Symmetric Cryptography
 
 PLAIN TEXT -> ENCRYPT(PLAIN TEXT, KEY) -> CIPHER TEXT -> DECRYPT(CIPHER TEXT, KEY) -> PLAIN TEXT
 
 ## Substitution Ciphers
-Replaces each plaintext character with another according to a fixed pattern.
-- Monoalphabetic: Caesar Cipher
-- Polyalphabetic: Vigenere Cipher
+**Replaces** each plaintext character with another according to a fixed pattern.
+- **Monoalphabetic**: Caesar Cipher
+- **Polyalphabetic**: Vigenere Cipher
 
+> [!Mono-alphabetic VS Poly-alphabetic]-
+> - Polyalphabetic
+> Vigenere Cipher is a polyalphabetic cipher, because it uses a repeating keyword where each letter of the key dictates a different shift.
+> - Monoalphabetic
+> Uses a single fixed shift for the entire message. If 'A' turns into 'D' once, it will turn into 'D' every time.
 
 ## Transposition Ciphers
-Simple encryption where plaintext characters are shifted in some regular pattern to different positions to form the ciphertext
+Simple encryption where plaintext characters are **shifted** in some regular pattern to different positions to form the ciphertext (Jumble up the plaintext)
 - Simple transposition cipher
 - Rail fence cipher
 - Columnar transposition cipher
@@ -55,7 +62,7 @@ Letters are shifted along in the alphabet to encrypt
 Shifted back the same amount to decrypt
 
 ### Example:
-Plain: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+Plain:    ABCDEFGHIJKLMNOPQRSTUVWXYZ
 Cipher: DEFGHIJKLMNOPQRSTUVWXYZABC
 
 Hello World -> KHOOR ZRUOG
@@ -104,6 +111,18 @@ HELLOBOB -> HLOOELBB
 |     |     | L   |     |     |     | O   |     |
 HELLOBOB -> HOELBBLO
 
+### Decrypt
+
+| H   |     |     |     | O   |     |     |     |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+|     | E   |     | L   |     | B   |     | B   |
+|     |     | L   |     |     |     | O   |     |
+> [!How to Decrypt]-
+> Take the number of characters in the ciphertext: `8`
+> Draw `8` columns with `key` number of rows
+> Fill in the table ROW BY ROW.
+> Read the plaintext zigzag.
+
 
 # Columnar Transposition Cipher
 
@@ -133,12 +152,18 @@ HELLOWORLD -> LWLX EORX HLOD
 | d   | u   | n   | t   | i   | l   | t   |
 | w   | o   | a   | m   | x   | y   | z   |
 ATTACK POSTPONED UNTIL TWO AM (Plaintext)
-TTNA APTM TSUO AODW COIX KNLY PETZ (Cipher text)
+
 
 - Key is 3 4 2 1 5 6 7
 - Padding characters are xyz
+TTNA APTM TSUO AODW COIX KNLY PETZ (Cipher text)
 
-
+| 3   | 4   | 2   | 1   | 5   | 6   | 7   |
+| --- | --- | --- | --- | --- | --- | --- |
+| t   | a   | t   | a   | c   | k   | p   |
+| t   | p   | s   | o   | o   | n   | e   |
+| n   | t   | u   | d   | i   | l   | t   |
+| a   | m   | o   | w   | x   | y   | z   |
 # Problems with vulnerabilities
 - If I know how Caesar cipher or Rail fence works I can decrypt it
 - Is knowledge of the algorithm a vulnerability ?
@@ -161,9 +186,9 @@ DES is a symmetric-key block cipher published by the National Institute of Stand
 ![[Pasted image 20260829161010.png]]
 
 - Each round does transposition, substitution and XOR of plaintext and sub-key
-- Each 64-bit plaintext block undergoes 16 rounds of encryption individually
-- A 56-bit cipher key is used to generate a different 48-bit sub-key $K_i$ for Round $i$. Key length is actually 64-bit but every 8th bit is discarded to form 56-bit key
-- The 56-bit key then undergoes 2 permutations and left circular shift -> 48-bit sub-key is selected.
+- Each 64-bit plaintext block undergoes `16` rounds of encryption individually
+- A **56-bit cipher key** is used to generate a different **48-bit sub-key** $K_i$ for Round $i$. Key length is actually 64-bit but **every 8th bit is discarded** to form 56-bit key
+- The 56-bit key then undergoes 2 permutations and **left circular shift** -> 48-bit sub-key is selected.
 
 ### Encryption
 #### Example running for 2 rounds
@@ -186,7 +211,7 @@ Ciphertext = 01010001
 - L1 = 0001 XOR F(L2, K2)
 - R0 = L1
 - L0 = R1 XOR F(L1, K1)
-> Same thing here but you are finding L instead, and remember to use the key BACKWARDS. So K2 -> K1
+> Same thing here but you are finding L instead, and remember to use the key **BACKWARDS**. So K2 -> K1
 
 
 
@@ -216,15 +241,15 @@ Reverse -> Decrypt
 - AES can theoretically be cracked with quantum computing
 ![[Pasted image 20260829164132.png]]
 - 3DES deprecated by NIST due to limited 64-bit plaintext block size support. Making it vulnerable to birthday attacks
-- AES includes 3 block ciphers: AES-128, AES-192, AES-256
+- AES includes **3 block** ciphers: AES-128, AES-192, AES-256
 - Each cipher encrypts and decrypts plaintext in blocks of 128 bits. Number of encryption rounds depend on key size
 - Each round does transposition, substitution and XOR of plaintext and sub-key
 
 
 
 # OTP (One Time Password)
-Plain: H A T
-OTP: 6 12 17
+Plain:   H A T
+OTP:     6 12 17
 Cipher: N M K
 
 Real world examples: 2FA, OTP Dongles
@@ -252,16 +277,16 @@ Random numbers used in computer programs are pseudo-random, which means they are
 
 
 # Symmetric Key Problem
-- Need to share key between sender and receiver
+- Need to **share key** between sender and receiver
 - Secure key distribution considerations (How secure ?)
 - Asymmetric cryptography offers a solution.
 
 # Asymmetric Cryptography
-- Uses key pair for encryption and decryption
+- Uses **key pair** for encryption and decryption
 - Key pair generated are mathematically related
 	- Then choose 1 as private, the other as public
 - Key generation algorithm is one-way function
-	- Given public key, computationally infeasible to get private key (public key still needs to be distributed to senders)
+	- Given public key, **computationally infeasible** to get private key (public key still needs to be distributed to senders)
 
 ![[Pasted image 20260829164931.png]]
 
@@ -273,6 +298,19 @@ Random numbers used in computer programs are pseudo-random, which means they are
 	- Public key encrypts -> Private key decrypts (Confidentiality)
 	- Private key encrypts -> Public key decrypts (Authentication)
 ![[Pasted image 20260829170702.png]]
+
+> [!Authentication]-
+> When you want to log in or prove a message came from you, the goal is **authenticity** not secrecy.
+> - You sign a piece of data with your private key.
+> - Since you are the only person with the private key, **anyone** can decrypt it or verify. If your public key unlocks the data it proves that it **MUST** have been locked by you
+> - If anyone can decrypt it, the data isn't secret but it is a proof of your identity.
+
+> [!Confidentiality]-
+> When you want to send a secret message your goal is **confidentiality**
+> You encrypt the data using the **receiver's public key**
+> Anyone can use the public key to encrypt the message, but only the person with private key can unlock it.
+> By using the public key, you guarantee that nobody can read the data.
+
 
 
 ## Combined Authentication
@@ -360,9 +398,9 @@ SHA-512 produces 512 bit hash code
 ![[Pasted image 20260829173102.png]]
 
 ## Hashing for Digital Signature
-- Hash of a document encrypted with the sender's private key (Signed or authenticated)
+- Hash of a document encrypted with the sender's **private key** (Signed or authenticated)
 - Sent to the recipient the encrypted hash with the original document (Original doc can also be encrypted)
-- Recipient can decrypt the encrypted hash, and check it against the hash of the (decrypted) original document sent.
+- Recipient can decrypt the encrypted hash, and **check it against the hash** of the (decrypted) original document sent.
 - A secure digital signature system can provide Confidentiality and Integrity for data
 - Data security requires data protection as well
 
@@ -403,7 +441,7 @@ When attacker has both the unencrypted text(plaintext) and its encrypted version
 ![[Pasted image 20260829175020.png]]
 
 # Characterising Cryptanalysis Attacks
-
+```
 - Brute Force -> Try all possible keys
 	- Feasible for alphabets only (or small key space)
 	- Significant computational resources needed otherwise
@@ -415,6 +453,7 @@ When attacker has both the unencrypted text(plaintext) and its encrypted version
 	- Need access to crypto engine
 	- Inject known plaintext and observe output ciphertext
 	- Infer protocol from correlation of I/O values
+```
 
 
 

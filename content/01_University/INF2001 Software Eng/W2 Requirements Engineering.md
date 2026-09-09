@@ -45,10 +45,10 @@ tags:
 
 
 # Activities of Requirements Engineering
-1. Elicitation: Process of requirements discovery
-2. Analysis: Refining and extending the initial requirements
-3. Validation: Are we building the right product ?
-4. Management: Needed because of the changing requirements
+1. **Elicitation**: Process of requirements discovery
+2. **Analysis**: Refining and extending the initial requirements
+3. **Validation**: Are we building the right product ?
+4. **Management**: Needed because of the changing requirements
 
 
 ## Requirements Elicitation
@@ -104,6 +104,7 @@ tags:
 6. Questionnaires
 7. Scenarios
 
+> IF O, DPQS
 ### Interviews
 #### Purpose
 - Capture stakeholders' needs, goals, pain points
@@ -131,22 +132,22 @@ tags:
 - Builds trust and engagement with stakeholders
 
 #### Disadvantage / Challenges
-- Time-consuming if many stakeholders are involved
-- Responses may be biased or incomplete
-- Requires good interviewing skills to avoid misinterpretation
-- Hard to cover large groups of users compared to surveys
+- **Time-consuming** if many stakeholders are involved
+- Responses may be **biased** or **incomplete**
+- Requires good interviewing skills to avoid **misinterpretation**
+- Hard to cover **large groups** of users compared to surveys
 
 ### Focus Group
 #### Purpose
 - Gather requirements, opinions, and expectations from a **group of stakeholder** simultaneously.
-- Stimulate discussion and generate ideas through group interaction
+- Stimulate discussion and generate ideas through **group interaction**
 - Uncover conflicts, consensus, and priorities among different users
 #### Structure
 - Typically involves **6-12 participants**
 - Led by facilitator / moderator who guides the discussion
 - May use prompts such as scenarios, prototypes, or storyboards to trigger feedback
 #### Preparation
-- Carefully select diverse but relevant group of participants
+- Carefully select **diverse but relevant** group of participants
 - Prepare guiding questions/topics (Current pain points, desired features, usability concerns)
 - Ensure a neutral and comfortable environment for open discussion.
 
@@ -163,10 +164,10 @@ tags:
 - Provides insights into conflicting priorities between stakeholders
 - Faster than one-on-one interview for collecting diverse views
 #### Disadvantage
-- Risk of groupthink (Participants conforming to dominant opinions)
-- Strong personalities may overshadow others
+- Risk of **groupthink** (Participants conforming to dominant opinions)
+- Strong personalities **may overshadow** others
 - Not ideal for sensitive or confidential requirements
-- Requires a skilled moderator to keep the discussion productive
+- Requires a **skilled moderator** to keep the discussion productive
 
 ### Existing Documentation
 #### Purpose
@@ -185,6 +186,8 @@ tags:
 - Analyze for requirements-related information (Functional, non-functional, constraints)
 - Highlight assumptions, ambiguities, or inconsistencies
 - Validate findings with stakeholders (Documents may be outdated or inaccurate)
+
+This is a sentence containing a <abbr title="This is your short note that shows on hover!">specific word</abbr> inside it.
 
 #### Advantage
 - Provide **objective**, **written evidence** (Less biased than personal opinions)
