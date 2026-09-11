@@ -43,6 +43,10 @@ def leaky_relu(x, alpha=0.01):
 ```
 
 ![[Pasted image 20260907221333.png]]
+
+## Saturation
+- When neuron's input becomes very large or very small, causing the function's output to flatten near its extreme minimum or maximum boundary.
+
 ## Binary Cross-Entropy Loss (BCE)
 $L = \sum_{n=1}^{N} -y^{n}ln(\hat{y}^{n} - (1 - y^{n})ln(1-\hat{y^{n}})$
 

@@ -23,7 +23,7 @@
 # Dual Emphasis
 > [!Question]
 > What are the 2 major components of the "dual emphasis" in Software Engineering ?
-> > [!Answer]-
+> > [!Answer]
 > > The **Product** (What is produced) and the Process (How it is produced)
 
 

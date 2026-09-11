@@ -1,5 +1,5 @@
 ---
-title: W1 Python-based Database
+title: Lab 01 Python-based Database
 tags:
   - SQLAlchemy
 ---
