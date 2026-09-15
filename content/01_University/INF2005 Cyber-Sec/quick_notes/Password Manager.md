@@ -1,0 +1,22 @@
+
+> The master password can be leaked or extracted by attackers using memory forensics tools like hex editors.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
