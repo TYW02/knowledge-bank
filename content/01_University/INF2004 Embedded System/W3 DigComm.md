@@ -1,6 +1,8 @@
 ---
 title: W3 DigComm
 ---
+##### Link to PDF
+[[W3.1 DigComm.pdf|Click here]]
 # Hardware Constraint
 
 ## Parallel Communication 
