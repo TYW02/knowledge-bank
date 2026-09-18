@@ -102,6 +102,8 @@ $L = \sum_{n=1}^{N} -y^{n}ln(\hat{y}^{n} - (1 - y^{n})ln(1-\hat{y^{n}})$
 - Minimizing gradient on training data ensures low loss on training data
 - Does not guarantee low losses on new unseen test data
 
+![[Negation of Derivative.svg]]
+
 # Forward Propagation & Backpropagation
 - Forward Propagation (Forward pass) refers to calculation and storage of intermediate variables (including outputs) for a neural network in order from the input layer to output layer
 - Backpropagation refers to the method of calculating the gradient of neural network parameters

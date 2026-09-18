@@ -3,6 +3,8 @@ title: W3 DigComm
 ---
 ##### Link to PDF
 [[W3.1 DigComm.pdf|Click here]]
+<object data="/assets/PDFs/INF 2004 Embedded System PDFs/W3.1 DigComm" type="application/pdf" width="100%" height="800px"></object>
+
 # Hardware Constraint
 
 ## Parallel Communication 
