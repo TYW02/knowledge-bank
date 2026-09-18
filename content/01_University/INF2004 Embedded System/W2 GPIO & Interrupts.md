@@ -161,7 +161,7 @@ led.value(1 if pressed else 0)
 
 # Polling discovers events when you ask
 ![[Pasted image 20260907193149.png]]
-- In this case, since the event does not happen during a polling check, we miss the event and nothing happens
+- In this case, since the event does not happen **during** a polling check, we **miss** the event and **nothing** happens
 
 ## Polling vs Interrupt
 ![[Pasted image 20260907193238.png]]
@@ -191,11 +191,11 @@ DMA = Direct Memory Access
 ## Interrupt Flow
 ![[Pasted image 20260907193710.png]]
 
-- CPU doing main work
-- Interrupt occurs, sends an Interrupt Request
-- Creates entry in Interrupt Vector Table (IVT) with relevant information like priority
-- If priority is high, Interrupt Service Routine will service that request
-- Once handled, clear status, and return back to main work
+- CPU doing **main** work
+- Interrupt occurs, sends an **Interrupt Request** (IRQ)
+- Creates entry in **Interrupt Vector Table** (IVT) with relevant information like **priority**
+- If priority is **high**, Interrupt Service Routine will service that request first
+- Once handled, **clear status**, and return **back to main work**
 
 ## Source, Request, Handler
 Source: Timer reaches a match
@@ -203,8 +203,8 @@ Interrupt Request: Request for attention
 Interrupt Service Routine: Code handles the cause
 
 ## Types of Interrupt
-- Something that interrupts the normal flow of program execution
-- A signal that immediate action is needed
+- Something that interrupts the **normal flow** of program execution
+- A signal that **immediate action** is needed
 - For example:
 	- Computer reset button
 	- Over-pressure sensor in nuclear reactor
@@ -218,7 +218,7 @@ Interrupt Service Routine: Code handles the cause
 ## 3 gates decide whether an ISR can start
 Source: Cause enabled (Signal that enables interrupt)
 Controller: IRQ enabled 
-CPU: Mask + Priority allow
+CPU: **Mask + Priority** allow
 
 If all 3 pass: ISR will start service
 
@@ -240,15 +240,15 @@ A CPU runs a program by:
 - ISRs itself can be located anywhere is memory
 
 # Interrupt Process
-- Before the CPU jumps to the IVT, it stores context (Current Program Counter, Status Register) and others
-- This is so after the interrupt is serviced, it can restore context and return to where it left off.
+- Before the CPU jumps to the IVT, it **stores context** (Current Program Counter, Status Register) and others
+- This is so **after** the interrupt is serviced, it can **restore** context and **return** to where it left off.
 - The place where PC, SR and others get stored to is a block of memory called the **stack**
 
 
 # The Stack
 - Area in RAM to store miscellaneous things for a while, then retrieve them
 - CPU and **PUSH** onto the stack and MUST **POP** them off later
-- The Stack Pointer (SP) is a register that indicated the address of the last item put into the stack
+- The Stack Pointer (SP) is a register that indicated the **address of the last item** put into the stack
 
 ![[Pasted image 20260907195616.png]]
 
@@ -264,11 +264,11 @@ A CPU runs a program by:
 5. Enable the intended source and route
 
 # Writing ISR
-- ISR code should be tiny, fast and efficient. It should affect the rest of the system as little as possible
-- They can happen at any time
+- ISR code should be **tiny**, fast and efficient. It should affect the rest of the system as little as possible
+- They can happen at **any time**
 - Turn off (mask) interrupts you don't need, but some are non-maskable interrupts
 - On exit from ISR, leave CPU in the same state as it was at entry (same context) 
-- Before exit, Clear the interrupt flag (Otherwise it will be triggered again immediately)
+- Before exit, **Clear the interrupt flag** (Otherwise it will be triggered again immediately)
 - ISR uses global variables, you can't pass parameters to them
 - Some process allow nested interrupts. Most use interrupt priorities for cases when they coincide
 
@@ -305,7 +305,7 @@ irq_set_enabled(UART0_IRQ, true)
 
 
 ![[Pasted image 20260907200529.png]]
-$ISR = f * c$
+$ISR load= f * c$
 
 ## ARM vs RISC-V
 | Target                         | IRQ Control     | Handler Entry                   |
@@ -316,7 +316,7 @@ $ISR = f * c$
 
 # How to debug ISR
 ![[Pasted image 20260907200829.png]]
-- You can use the GPIO LED to blink at different stages of the ISR
+- You can use the **GPIO LED** to blink at **different stages** of the ISR
 - Higher frequency of blinking at each later stage of ISR
 
 # Interrupt Latency: Tail-Chaining

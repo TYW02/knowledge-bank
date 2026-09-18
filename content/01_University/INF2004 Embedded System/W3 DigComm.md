@@ -3,7 +3,6 @@ title: W3 DigComm
 ---
 ##### Link to PDF
 [[W3.1 DigComm.pdf|Click here]]
-<object data="/assets/PDFs/INF 2004 Embedded System PDFs/W3.1 DigComm" type="application/pdf" width="100%" height="800px"></object>
 
 # Hardware Constraint
 
@@ -11,6 +10,7 @@ title: W3 DigComm
 - Multiple dedicated wires
 - Sends multiple bits simultaneously
 - Extremely fast
+
 ![[Pasted image 20260913154916.png]]
 
 
@@ -18,6 +18,7 @@ title: W3 DigComm
 - Vastly reduced physical footprint
 - Sends bits sequentially over a single data line
 - Universal standard for chip-to-chip comms
+
 ![[Pasted image 20260913154925.png]]
 
 
