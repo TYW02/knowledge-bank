@@ -70,12 +70,12 @@ Its pervasive nature means that its quality directly impacts safety, reliability
 
 
 # Key Challenges
-Resource Constraints
-Real-time Requirements
-Hardware-software Co-Design
-Concurrency and Interrupts
-Reliability and Safety
-Debugging Difficulties
+- Resource Constraints
+- Real-time Requirements
+- Hardware-software Co-Design
+- Concurrency and Interrupts
+- Reliability and Safety
+- Debugging Difficulties
 
 Many embedded systems are mission-critical, performing functions where failure is unacceptable and can lead to
 - Safety Risks

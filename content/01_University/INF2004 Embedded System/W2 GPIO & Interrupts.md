@@ -197,6 +197,13 @@ DMA = Direct Memory Access
 - If priority is **high**, Interrupt Service Routine will service that request first
 - Once handled, **clear status**, and return **back to main work**
 
+> [!How interrupt happens]
+> 1. Sensor **triggers interrupt**: Hardware line changes state, signaling the Interrupt Controller (NVIC or PIC)
+> 2. Interrupt is **registered** and **prioritized**: Interrupt Controller registers the request and evaluates its **priority** against any currently running tasks or other pending interrupts.
+> 3. Execution Decision: Depending on priority, the interrupt is either **queued** (If a higher-priority task is running) or **immediately accepted**.
+> 4. CPU checks the **Interrupt Vector Table**: Once accepted, the CPU uses the interrupt number to look up the specific **handler's memory address** in the Interrupt Vector Table
+> 5. Interrupt is serviced: The CPU jumps to that address and executes the **Interrupt Service Routine** (ISR)
+> 6. Interrupt is cleared: The Interrupt flag is **cleared** (Either automatically by hardware or manually in your code) so it **doesn't** trigger again continuously.
 ## Source, Request, Handler
 Source: Timer reaches a match
 Interrupt Request: Request for attention
