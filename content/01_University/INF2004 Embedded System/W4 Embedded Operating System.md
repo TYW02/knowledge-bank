@@ -119,6 +119,7 @@ tk_snd_mbf // Send copied data
 
 ![[Pasted image 20260921200459.png]]
 
+
 ![[Mutex#Key Concepts of Mutex]]
 
 
@@ -143,9 +144,8 @@ tk_snd_mbf // Send copied data
 
 ![[Pasted image 20260921203004.png]]
 
-![[Mailboxes#^5cbdff]]
+![[Mailboxes]]
 
-![[Mailboxes#How it Works]]
 
 
 ![[Pasted image 20260921203011.png]]
@@ -153,10 +153,9 @@ tk_snd_mbf // Send copied data
 
 ![[Pasted image 20260921204130.png]]
 
-![[Time Services#^a39347]]
+[[Time Services|Link to Time Services]]
 
 
-![[Time Services#Mechanism]]
 
 
 
@@ -165,9 +164,8 @@ tk_snd_mbf // Send copied data
 
 ![[Pasted image 20260921205013.png]]
 
-![[Fixed Pools in RTOS#^db6b2d]]
+[[Fixed Pools in RTOS|Link to Fixed Pools]]
 
-![[Fixed Pools in RTOS#How Fixed Pools Work]]
 
 ![[Pasted image 20260921205021.png]]
 

@@ -13,8 +13,7 @@ A service that pauses the currently executing task for a specific duration of ti
 The calling tasks transitions from the **RUNNING** state to the **WAITING** (or blocked) state. It remains blocked until the requested number of system ticks has elapsed
 
 ## Best used for
-Giving other tasks CPU time, debouncing switches, or creating simple pacing inside a specific task loop
-
+Giving other tasks CPU time, debouncing switches, or creating simple pacing inside a specific task loop 
 
 # Cyclic Handlers (Periodic Execution)
 
