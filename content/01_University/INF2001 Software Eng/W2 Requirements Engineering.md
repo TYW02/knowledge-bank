@@ -409,10 +409,10 @@ The PMS shall implement patient privacy provisions as set out in XXX
 # Prioritising Requirements
 MoSCoW Prioritisation
 - Categorise requirements into the following groups
-	- Must-have
-	- Should-have
-	- Could-have
-	- Will-not-have
+	- Must-have (For system to be **considered successful** and **functional**)
+	- Should-have (**Important** but **not strictly vital** for first release or basic functionality)
+	- Could-have (**Nice-to-have** only included if **time** and **budget** allow)
+	- Will-not-have (Requirements **explicitly** **excluded** from the current scope of the project)
 - Give unique identifier to each requirement
 - Identify tasks required to achieve each requirement
 - Give unique identifier for each task and file them as an issue in your team's Kanban Board

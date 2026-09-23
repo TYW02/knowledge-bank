@@ -57,7 +57,11 @@
 > P = (C - K) (mod 26)
 
 
-
+# DES
+> [!Question]
+> In DES what are the sizes of the plaintext input block and the key provided to the round-key generator ?
+> 
+> [[DES#Plaintext input block & Key|Sizes Required]]
 
 
 

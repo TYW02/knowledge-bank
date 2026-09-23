@@ -7,7 +7,10 @@
 | Approach | Transcribing           | Active interaction |
 
 
+## Specification Document & Software Project Management Plan
+- **Analysis** Phase
 
+> The analysis (Specification) phase turns **elicited requirements** into a **formal** specification document and a **management** plan.
 
 
 

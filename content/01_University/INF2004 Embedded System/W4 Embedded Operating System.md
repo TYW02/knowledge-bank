@@ -103,24 +103,22 @@ tk_snd_mbf // Send copied data
 
 # SEMAPHORE represents countable availability
 
-![[Semaphore#^ca9f3f]]
+![[Semaphore]]
 
 ![[Pasted image 20260921194449.png]]
 
-![[Semaphore#Core Operations]]
 
 ![[Pasted image 20260921195202.png]]
 
 
 # Mutex 
-![[Mutex#^184c1f]]
+![[Mutex]]
 
 ![[Pasted image 20260921195259.png]]
 
 ![[Pasted image 20260921200459.png]]
 
 
-![[Mutex#Key Concepts of Mutex]]
 
 
 ![[Pasted image 20260921202552.png]]

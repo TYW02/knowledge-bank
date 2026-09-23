@@ -5,6 +5,10 @@
 > How is Requirements Elicitation different from Requirements Gathering ?
 > [[Elicitation vs Requirement Gathering]]
 
+> [!Which Phase]
+> Which phase of the Software Development Life Cycle (SDLC) is primarily responsible for drawing up the "Specification Document" and the "Software Project Management Plan" ?
+> 
+> [[Elicitation vs Requirement Gathering#Specification Document & Software Project Management Plan|Which Phase]]
 
 # Classical vs Modern Maintenance
 > [!Maintenance]-
