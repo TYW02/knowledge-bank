@@ -1,6 +1,9 @@
 ---
 title: Intro to SE & SDLC
 ---
+![[SE W1.svg]]
+
+
 # Defining Software Engineering
 > "The application of a systematic, disciplined, quantifiable approach to the development, operation and maintenance of software"
 
