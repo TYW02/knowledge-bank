@@ -9,5 +9,10 @@ Database must be consistent **before** and **after** transactions
 Once a transaction is **committed**, considered **permanent**, even when there is **system failure**.
 
 
+## DBMS Rollback
+- Atomicity
+
+> Atomicity enforces an '**all-or-nothing**' execution rule, ensuring that if **any part** of a transaction **fails**, all previous steps are **completely aborted and undone**.
+
 
 

@@ -7,6 +7,10 @@ title: Database Common Mistakes
 > Explain ACID, and how it affects transactions.
 > [[ACID]]
 
+> [!Question]
+> During a bank transfer operation between two accounts, money is debited from Account A, but a network failure occurs before Account B is credited. The DBMS rolls back the entire operation so that no funds are lost. Which ACID property is directly demonstrated ?
+> 
+> [[ACID#DBMS Rollback]]
 
 # Physical Independence
 > [!Physical Independence]-

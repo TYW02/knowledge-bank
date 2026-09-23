@@ -10,6 +10,8 @@ $\frac{1}{1 + e^{-f(x)}}$
 - DOES NOT SUM TO 1
 - Can be interpreted as Probabilities
 
+[[Sigmoid|Link to Sigmoid Notes]]
+
 ![[Pasted image 20260907220632.png]]
 
 > [!Vanishing Gradient]
@@ -22,6 +24,7 @@ $\frac{1}{1 + e^{-f(x^{n})}}$
 - Returns **logits**, a set of probabilities that add up to **1**
 - Multi-Class Classification: Since each, class's probability has to add up to 1 
 
+[[Softmax|Link to Softmax Notes]]
 
 # Rectified Linear Unit (ReLU)
 - Fast to compute
