@@ -3,13 +3,14 @@ title: W2 Image Classification
 tags:
   - Classification
 ---
+![[CVDL W2.svg]]
+
 # Sigmoid
 $\frac{1}{1 + e^{-f(x)}}$
 - Maps any input value into a smooth S-shaped range between \[0, 1]
 - Binary Classification: Used in final output layer or in Logistic Regression when outcome must be classified into 1 of 2 groups \[yes / no]
 - DOES NOT SUM TO 1
 - Can be interpreted as Probabilities
-
 [[Sigmoid|Link to Sigmoid Notes]]
 
 ![[Pasted image 20260907220632.png]]

@@ -4,6 +4,8 @@ tags:
   - ERDiagram
   - SQL
 ---
+![[DB W2.svg]]
+
 # ER Diagram
 Consists of:
 - Collection of **Entity**

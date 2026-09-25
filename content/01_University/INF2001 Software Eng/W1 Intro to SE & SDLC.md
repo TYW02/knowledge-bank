@@ -9,7 +9,6 @@ title: Intro to SE & SDLC
 
 Software engineering is a discipline whose aim is the production of fault-free software, delivered on time and within budget, that satisfies the user's needs
 
-
 ## Fault-free Software
 What are faults ?
 - Software behaviours unaccounted for in its design

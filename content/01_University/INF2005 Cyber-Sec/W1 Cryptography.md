@@ -3,7 +3,7 @@ title: W1 Cryptography
 tags:
   - Cryptography
 ---
-
+![[CS W1.svg]]
 # Basic Concepts
 You have:
 - Cipher Text (Encrypted text / words that don't make sense)

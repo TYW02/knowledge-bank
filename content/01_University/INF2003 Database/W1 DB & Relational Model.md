@@ -3,6 +3,8 @@ title: W1 DB & Relational Model
 tags:
   - ACID
 ---
+![[DB W1.svg]]
+
 # Database
 An organized collection of information
 
