@@ -3,17 +3,18 @@ title: W2 Steganography
 tags:
   - Steganography
 ---
+![[CS W2.svg]]
 # Steganography
 > Practice of concealing messages or information within other non-secret text or multi-media data
 
 ## Acrostics
 An acrostic is a poem that has a 'hidden word'
 
-> A boat, beneath a sunny sky
-> Lingering onward dreamily
-> In an evening of July -
-> Children three that nestle near,
-> Eager eye and willing ear,
+> - A boat, beneath a sunny sky
+> - Lingering onward dreamily
+> - In an evening of July -
+> - Children three that nestle near,
+> - Eager eye and willing ear,
 > 
 > This is an Acrostics that has the hidden word "Alice"
 

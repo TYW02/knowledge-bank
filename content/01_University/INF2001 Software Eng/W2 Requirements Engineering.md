@@ -3,6 +3,8 @@ title: W2 Requirements Engineering
 tags:
   - Requirements
 ---
+![[SE W2.svg]]
+
 # Start of software development journey
 - Figure out your stakeholders needs
 
