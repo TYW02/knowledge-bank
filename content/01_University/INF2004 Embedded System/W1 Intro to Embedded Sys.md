@@ -2,6 +2,8 @@
 title: W1 Intro to Embedded Sys
 tags:
 ---
+![[ES W1.svg]]
+
 # What is Embedded System
 Computing System that does a specific task INSIDE a machine.
 
