@@ -3,6 +3,8 @@ title: W3 Use Case Diagram
 tags:
   - UseCaseDiagram
 ---
+![[SE W3.svg]]
+
 # Use Case Diagram
 - Describes how a **user** (actor) interacts with a system to achieve a **specific** goal
 - Focuses on **functional requirements** (What the system should do)

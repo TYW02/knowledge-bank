@@ -1,6 +1,8 @@
 ---
 title: W3 Access Control
 ---
+![[CS W3.svg]]
+
 # Access Control
 > **Authenticate** and **Authorize** individuals to access the information they are **allowed to see** and use
 

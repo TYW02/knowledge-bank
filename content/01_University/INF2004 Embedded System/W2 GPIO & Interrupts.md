@@ -4,6 +4,8 @@ tags:
   - GPIO
   - Interrupt
 ---
+![[ES W2.svg]]
+
 # What is a GPIO
 General Purpose Input Output (Configurable digital signal pin, whose behavior and direction are controlled by software)
 
