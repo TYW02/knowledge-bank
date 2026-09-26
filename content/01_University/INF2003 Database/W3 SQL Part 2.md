@@ -1,3 +1,5 @@
+![[DB W3.svg]]
+
 # Data Manipulation Language (DML): INSERT
 
 > Adding new rows to the existing table, order sensitive
