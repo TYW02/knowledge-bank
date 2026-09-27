@@ -5,6 +5,13 @@
 > 
 > [[General Data Protection Regulation#Definition|Answer]]
 
+> [!Question] 
+> Which of the following poses the greatest risk to your organization ?
+> - [] Black Hat
+> - []  White Hat
+> - [] Gray Hat
+> - [C] Unhappy Employees 
+
 # Intent
 > [!Question]
 > How is Malicious Intent hacking different from Professional Intent hacking ?

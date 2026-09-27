@@ -2,8 +2,8 @@
 title: W4 Ethical Hacking
 ---
 # Hacking
-- **Malicious** Intent: Causing severe damage to reputation and assets, steal information, exploit weakness
-- **Professional** Intent: Finding weaknesses (vulnerabilities) and improving security posture
+- **Malicious** Intent: Causing severe **damage to reputation** and assets, steal information, exploit weakness
+- **Professional** Intent: **Finding weaknesses** (vulnerabilities) and **improving** security posture
 - Personal, Military or Professional Goals
 
 ## Unethical Hacking is against the Law
@@ -12,57 +12,62 @@ title: W4 Ethical Hacking
 3. Unauthorised **modification** of computer material
 
 #### Offences (Chapter 50A Part II - Offences)
-- Unauthorized access to computer material
-- Access with intent to commit or facilitate commission of offence
-- Unauthorized modification of computer material
-- Unauthorized use or interception of computer service
-- Unauthorized obstruction of use of computer
-- Unauthorized disclosure of use access code
-- Enhanced punishment for offences involving protected computers
-- Abetments and attempts punishable as offences
+- Unauthorized **access** to **computer material**
+- Access with **intent** to commit or facilitate commission of offence
+- Unauthorized **modification** of computer material
+- Unauthorized **use or interception** of computer service
+- Unauthorized **obstruction** of use of computer
+- Unauthorized **disclosure** of use access code
+- Enhanced punishment for offences **involving protected computers**
+- **Abetments and attempts** punishable as offences
 
 # International Collaborations
 
-## International agreement to foster international cooperation
-- Offences against CIA of computer data and systems
-- Copyright-related offences
-- Computer-related offences
-- Content-related offences
+## Digital Actions Cross Borders
+- Law vary from country to country
+- Corporations that do business in **multiple countries** must comply with the **laws of all countries involved**
+- Someone whose actions are **legal in their own country** may face **prosecution** in another country where their **actions are illegal**
 
-> Sets common standards or ways to resolve international cases
+## International agreement to foster international cooperation
+- Offences against **CIA** of computer data and systems
+- **Copyright**-related offences
+- **Computer**-related offences
+- **Content**-related offences
+
+> Sets **common standards** or ways to resolve international cases
 
 
 # Ethics in Information Security
 
-- Protect society, commonwealth and the infrastructure
+- Protect **society**, **commonwealth** and the **infrastructure**
 - Act **honourably**, honestly, justly, responsibly, and legally
 - Provide diligent and **competent service** to principals
 - **Advance** and **protect** the profession
 
 # White Hat
-- Legally authorised to conduct hacking
+- **Legally authorised** to conduct hacking
 - The computer security professional who uses skills to **help**
 - Hacking as job to **help secure systems** and **provides insight** into policies and procedures
 
 # Black Hat
 - The guy who hacks **illegally** / without authorisation
-- The computer security expert who uses skills to steal, damage and destroy
+- The computer security expert who uses skills to **steal, damage and destroy**
 - Hacking for **personal gain** or motive
 
 # Gray Hat
 - Sometimes **good** guy, sometimes **bad**
 - The skilled hacker whose methods **may cross** legal and ethical boundaries
-- May **transfer vulnerability** knowledge to either systems owner or black hat
+- May **transfer vulnerability** knowledge to either **systems owner or black hat**
 
 
 # Hackers' Language
 
 ## Leet Speak
 
-> - Invented for coded communication.
+> - Invented for **coded communication**.
 > - Hiding websites, newsgroup
-> - To avoid detection by search filters
-> - Create stronger passwords
+> - To **avoid detection** by **search filters**
+> - Create **stronger passwords**
 
 ![[Pasted image 20260919225823.png]]
 
@@ -70,23 +75,26 @@ title: W4 Ethical Hacking
 
 
 # What is Ethical Hacking
-- Process of breaking into systems with professional intent
-- It is **Legal** - permission is obtained from the target's owner
-- Conforms to accepted professional standards of conduct 
+- Process of **breaking into systems** with **professional intent**
+- It is **Legal** - **permission** is obtained from the **target's owner**
+- Conforms to **accepted** professional standards of **conduct** 
 - Techniques used sometimes called **Penetration Testing**
 
 
 ## Type of Pen Testing
 
 ### Black Box
-- Hackers will attack in "**Stealth**" mode ("Covert")
+- Hackers will attack in "**Stealth**" mode ("**Covert**")
 - In this approach typically the attacker have **minimal** or **no pre-knowledge** of the target system
 - Employees may be tested
 
+![[01_University/INF2005 Cyber-Sec/quick_notes/Testing#Covert|Testing]]
 ### White Box
 - Tester is aiming to be **thorough** within the permitted scope
 - **Detailed info** regarding target is **known**
-- Tests all known aspects of a system / network and doesn't try to cover their tracks ("**Overt**")
+- Tests all known aspects of a system / network and doesn't try to cover their tracks ("**[[01_University/INF2005 Cyber-Sec/quick_notes/Testing#Overt|Overt]]**")
+
+
 
 ![[Pasted image 20260919230538.png]]
 
@@ -94,12 +102,12 @@ title: W4 Ethical Hacking
 
 
 # Hacking Stages
-1. **Reconnaissance** - Information gathering on target
-2. **Scanning** - Use information gathered in Stage 1 to examine target's security posture more closely
-3. **Enumeration** - Identify user / admin accounts for use, running services etc. when attempting to gain access (Sniffing)
-4. **Gaining Access** - Exploit (System, Network, Web) Vulnerabilities and information from Stage 2 & 3 (Lateral Movement / Privilege Escalation)
-5. **Keeping or Maintaining Access** - For future exploitation (Backdoor Trojan)
-6. **Covering Tracks** - Avoid detection (Cleanup footprints for Ethical Hacking)
+1. **Reconnaissance** - **Information gathering** on target
+2. **Scanning** - Use information gathered in Stage 1 to **examine target's security posture** more closely
+3. **Enumeration** - Identify **user / admin accounts** for use, **running services** etc. when attempting to gain access (Sniffing)
+4. **Gaining Access** - **Exploit** (System, Network, Web) **Vulnerabilities** and information from Stage 2 & 3 (Lateral Movement / Privilege Escalation)
+5. **Keeping or Maintaining Access** - For **future exploitation** (Backdoor Trojan)
+6. **Covering Tracks** - Avoid **detection** (Cleanup footprints for Ethical Hacking)
 
 
 # Stage 1 - Reconnaissance
@@ -110,7 +118,7 @@ Hacking into Company Z to (Steal info, Damage reputation)
 ## How do you event start ?
 - What is the **most publicized** reputable asset ?
 - Where is it located ? Is the location found, exact ?
-- What technologies are used to host it ?
+- What **technologies** are used to host it ?
 
 > [!Note]
 > - Gain as **much information** about target before attacking - Profiling
@@ -122,9 +130,9 @@ Hacking into Company Z to (Steal info, Damage reputation)
 - Technologies
 - People
 - Scope - overlaps with next phase
-- Collect as much info about targets (Techniques & tools)
-- Identification of Targets (Company websites, mail servers, OS, extranets, user info)
-- War Driving - look for SSIDs of wireless networks in the vicinity
+- Collect **as much info** about targets (Techniques & tools)
+- Identification of **Targets** (Company websites, mail servers, OS, extranets, user info)
+- War Driving - look for **SSIDs** of wireless networks in the vicinity
 
 ## Reconnaissance techniques and tools
 - Whois databases
@@ -134,13 +142,29 @@ Hacking into Company Z to (Steal info, Damage reputation)
 - Social Engineering
 - Google Hacking
 
+### Whois
+
+> [!Important] Information
+> - Web-based Info Harvesting Technique
+> - Evolved from Unix OS
+> 
+> Output Contains:
+> - Domain name **Registrant** (**Domain Owner**)
+> - Name servers for domain name
+> - Names and contact info of admin, technical staff
+
+> [!warning] Syntax
+> ```bash
+> whois microsoft.com
+> // whois target_domain
+> ```
 ### Shoulder Surfing
 
 > [!Definition]
-> Physical method of gaining private information based on stealth
+> **Physical method** of gaining private information **based on stealth**
 
 - Observational attack - **with** or **without** technology support
-- Used anywhere - office, airport lounges, hotel lobbies
+- **Used anywhere** - office, airport lounges, hotel lobbies
 - Many people are **completely unaware** of being spied upon 
 - Information you can gather:
 	- **Private email sessions**, classified documents, corporate secrets, user names or passwords
@@ -154,36 +178,36 @@ Hacking into Company Z to (Steal info, Damage reputation)
 	- Precursor to hackers
 
 ##### Target
-Discarded and damaged copies of important information
+**Discarded** and **damaged** copies of **important information**
 
 
 ### Social Engineering
 ![[Pasted image 20260919232245.png]]
 
-- Range of malicious activities designed to psychologically manipulate users into making mistakes concerning security
-- Can work with or without technology
-- It works because it exploits human vulnerabilities
-	- Desire to help or tendency to trust
-	- Hope for a reward
-	- Fear of making a mistake or getting into trouble
-	- Fear of getting someone else in trouble
+- Range of malicious activities designed to **psychologically manipulate** users into **making mistakes** concerning security
+- Can work **with or without** technology
+- It works because it **exploits human vulnerabilities**
+	- **Desire** to help or tendency to trust
+	- Hope for a **reward**
+	- **Fear** of making a mistake or **getting into trouble**
+	- **Fear** of getting **someone else in trouble**
 
 ### Google Hacking
 
 #### Main benefits
-- Low profile and passive - little or no exposure for attacker
+- **Low profile** and passive - little or no exposure for attacker
 - Ranked google results
 
-- Search to be reasonably precise - specific keywords <= 10
+- Search to be **reasonably precise** - specific keywords <= 10
 - Use search operators 
 
 #### Google group operators include
-- allintitle: Restricts results to those containing all the query terms you specify in the title
-- group: Allows you to find specific groups related to a given topic
-- related: Allows you to find web pages similar to the specified web pages
-- intext: Restricts results to documents containing specified term in the text
-- inurl: Restricts results to those containing term in URL
-- filetype: Restricts results to those containing file type specified
+- `allintitle`: **Restricts** results to those containing **all the query terms** you specify in the title
+- `group`: Allows you to find **specific groups** related to a given topic
+- `related`: Allows you to find web pages **similar** to the specified web pages
+- `intext`: **Restricts** results to **documents** containing specified term in the text
+- `inurl`: **Restricts** results to those **containing term in URL**
+- `filetype`: **Restricts** results to those **containing file type specified**
 
 
 # Stage 2 Scanning (and Enumeration)
@@ -198,62 +222,100 @@ Discarded and damaged copies of important information
 
 ![[Pasted image 20260919233909.png]]
 
-- After recon you should have a list of IP addresses which you are authorised to hack
-- Then scan ports on each of these IP addresses
-- This allows you to identify open ports and the services running on the targets, these could be used for exploits
+- **After recon** you should have a **list of IP addresses** which you are authorised to hack
+- Then **scan ports** on each of these IP addresses
+- This allows you to **identify open ports** and the services running on the targets, these could be **used for exploits**
 
 ## Passive vs Active Scanning
 
-- Passive - Gathering info **without** the **target's knowledge**, i.e. no packets are sent to the target systems
-- Active - Interacting **directly** with the **target** who may log our IP address and activity (May be illegal if unauthorised)
+- Passive - Gathering info **without** the **target's knowledge**, i.e. **no packets are sent** to the target systems
+- Active - Interacting **directly** with the **target** who may **log our IP address and activity** (May be **illegal** if unauthorised)
 
 
 ## Scanning Techniques
 
 - Determining if the **system is alive**
-	- Probing sweeps
+	- **Probing sweeps**
 		- **Ping** sweeps
 		- **TCP** and **UDP** sweeps
 
 - Determining which **ports** are open / closed / filtered
-	- Basic Port Scanning
+	- Basic **Port Scanning**
 	- Advanced Port Scanning
 
 - Detecting **reachable** systems
-	- Route Tracing
+	- **Route Tracing**
 	- APT - advance worms
 
 
 ## Ping
 ![[Pasted image 20260919234417.png]]
 
-- Used to determine if a system is "alive"
+> [!warning] Syntax
+> ```bash
+> Tracert <target domain name - URL or IP address>
+> ```
+> 
+> KALI LINUX - `ping`, `fping` (allows you to ping multiple hosts)
+> WINDOWS - `ping` 
+
+- Used to **determine** if a system is "**alive**"
 - A special type of Internet Control Message Protocol (ICMP) packet
 
-### Ping Sweeps
-- Pings are good for host discovery
-- Manually completing individual pings is time consuming
-- Ping sweeps can be completed using tools such as `Zenmap`, `Angry IP Scanner`
+> [!IMPORTANT] Remember
+> Facilitates **lateral movement** and **indirect target exploitation**
 
+
+### Ping Sweeps
+- Pings are good for **host discovery**
+- **Manually completing** individual pings is **time consuming**
+> [!Note] Ping Sweep Tools
+> - **Zenmap**
+> - **Angry IP Scanner**
 
 ## Nmap
 - Nmap (Network Mapper) is a free and open-source network scanner 
 - Included lots of useful tools, like nc, netcat
 
+> [!Important] Nmap Ping Sweep Syntax
+> ```bash
+> nmap -sn <IP address range>
+> 
+> nmap -sn 172.27.146.200-255
+> ```
 ## TCP Sweep
 
 > [!Note]
-> Sometimes, a more security-conscious site will block **ICMP** at the border router or firewall
+> Sometimes, a more security-conscious site will **block ICMP** at the border router or firewall
 
-- Both **TCP** and **UDP** provides alternative approaches to perform ping sweeps to find if a host is alive on the network
-- TCP is connection-oriented protocol that **guarantees packet delivery** in sequence but may be less efficient (slower) than ICMP, a control-oriented (network layer) protocol
+- Both **TCP** and **UDP** provides **alternative** approaches to perform **ping sweeps** to find if a host is **alive** on the network
+- TCP is connection-oriented protocol that **guarantees packet delivery** in sequence but may be **less efficient** (slower) than ICMP, a control-oriented (network layer) protocol
 - UDP, however, **may be less reliable** than TCP but may be used to **confirm closed port**
 
+> [!Important] Nmap TCP SYN Scan Syntax
+> ```bash
+> nmap -sT <IP address range>
+> 
+> nmap -sT 172.30.147.200-255
+> ```
 
+> [!Important] Nmap UDP Sweep Syntax
+> ```bash
+> nmap -sU <IP address range>
+> 
+> nmap -sU 172.30.147.200-255
+> ```
+
+> [!Important] Nmap TCP Sweep Syntax
+> ```bash
+> nmap -sS <IP address range>
+> 
+> nmap -sS 172.30.147.200-255
+> ```
 ## Port Scanning
 
 > [!Definition]
-> Identify specific ports and services running on a particular host
+> Identify **specific ports** and services running on a particular host
 > e.g. TCP connect scan, SYN scan
 
 ### Advance Scanning Techniques
@@ -282,14 +344,16 @@ Discarded and damaged copies of important information
 
 
 ## Trace Route
-- List routers and hops between the client and a remote host
-- The IP Address and domain name (if there is one) of each router is returned to the client
-- May also calculate and display the hop time
-- Info may be useful to locate new potential attack vectors
+- List routers and **hops between** the **client** and a **remote host**
+- The **IP Address and domain name** (if there is one) of each router is **returned to the client**
+- May also **calculate** and **display the hop time**
+- Info may be useful to **locate new potential attack** vectors
 - Popular trace routing tool
-	- traceroute
-	- tracert
+	- traceroute (Linux & Unix OS)
+	- tracert (Windows)
 
+> [!Note] Blocking
+> Possible that your network **blocks** ICMP traffic. Try using `traceroute -T` to use **TCP** rather than **ICMP**
 
 ## Enumeration
 
@@ -316,16 +380,31 @@ Discarded and damaged copies of important information
 - Acquire networked system info and port services info
 
 ## Scanning for Vulnerabilities
-- Locating and identifying known weaknesses in the services and software
-- Can be completed using a vulnerability scanner
+- Locating and identifying **known weaknesses** in the services and software
+- Can be completed using a **vulnerability scanner**
 
+> [!note] Nessus
+> **Industry-standard** vulnerability scanner used to identify **security flaws**, **misconfiguration**, and **missing patches** in networks, devices, and applications
 
+### Key Features
+> [!tips] Vulnerability Assessment
+> Scans for **open ports**, **outdated software**, and **known CVE-based** (Common Vulnerabilities & Exposures) weaknesses
+
+> [!tips] Scan Types
+> Support basic **network scans**, **credentialed internal audits**, **web application tests**, and **compliance checks**
+
+> [!tips] Severity Ratings
+> **Categorize** issues from **informational** and **Low** up to **Medium**, **High**, and **Critical**
+
+## NSE - Nmap Scripting Engine
+- **Verify findings** from initial port scan
+- Discover **new processes** and vulnerabilities
+- **Automate** pen testing techniques
 # Vulnerability Scanning vs Pen Testing
 
 ## Pen Testing
 > [!Pen Testing]
-> Pen testing performs exploitation and proof of concept attacks to show **actual vulnerabilities**
-
+> Pen testing performs **exploitation** and proof of concept attacks to show **actual vulnerabilities**
 
 ## Vulnerability Scanning
 > [!Vulnerability Scanning]
@@ -336,19 +415,33 @@ Discarded and damaged copies of important information
 - Know what **exploits** can be run against the **known vulnerabilities**
 - Exploit with **suitable technique** and tool
 - Ultimate goal is to get **admin access**
-- Edge Computing - Side Channel Attacks
+- **Edge** Computing - **Side Channel Attacks**
 
 ## Exploit Tools
 "A way to exploit a security flaw to circumvent security controls"
 
-- Different targets = different exploits
-- inurl: login.php (Look for unencrypted logins)
-- Use Wireshark to sniff
+- Different **targets** = different **exploits**
+- inurl: login.php (Look for **unencrypted logins**)
+- Use Wireshark to **sniff**
 - Password Cracking
 
 ![[Pasted image 20260920001613.png]]
 
+> [!Information] What is Metasploit
+> Open-source pen testing framework used to find, test, and validate vulnerabilities in computer system and networks
 
+### Core Components
+> [!tips] Exploits
+> Pieces of code that target specific security flaws in software or operating systems to gain access
+
+> [!tips] Payloads
+> Code that runs on the target system after a successful exploit
+
+> [!tips] Auxiliary Modules
+> Tools used for reconnaissance, port scanning, and sniffing without running an exploit
+
+> [!tips] Encoders and Evasion
+> Modules that alter code to help payloads bypass security filters and basic antivirus software.
 
 # Stage 4 - Post Exploitation (Maintaining Access)
 ![[Pasted image 20260920001648.png]]
@@ -357,38 +450,51 @@ Discarded and damaged copies of important information
 	- A simple method is to create a **new**, hidden, or less-obvious **user account** with **elevated** privileges
 - Modifying Startup Services
 	- **Malicious scripts or programs** can be **added** to the **system's startup** process to launch automatically
-- Installing Backdoors and RATs
+- Installing Backdoors and Remote Access Trojan (RATs)
 	- Tools like Netcat can be used to set up a **backdoor listener** on the target machine, which the attacker can **connect to later** to execute commands
 - Installing Rootkits
-	- A rootkit is a type of malware that installs at the **kernel level** of a system, giving the attacker **deep control** and making it difficult to detect.
+	- A rootkit is a type of malware that installs at the **kernel level** of a system, giving the attacker **deep control** and making it **difficult to detect**.
 
+> [!warning] Netcat Syntax
+> ```bash
+> C:\> nc -1 -p 12345 -e cmd.exe
+> ```
+> - `-1`: Make Netcat listen for network traffic
+> - `-p`: Listen on TCP port 12345
+> - `-e`: When data is received, execute a shell and send it the data
 
+![[Pasted image 20260927122944.png]]
+
+![[Pasted image 20260927122956.png]]
+
+![[Pasted image 20260927123005.png]]
 ## Make it Hidden - Explorer
 - Explorer -> Computer -> Organize -> Folder and search options
-- Folder Options -> View tab -> Don't show hidden...
-- Can be applied to files, folders as well as drives
+- Folder Options -> View tab -> **Don't show hidden**...
+- Can be applied to **files**, **folders** as well as **drives**
 
 ## Make it Hidden - CMD
 - attrib +s +a +h  \<folder/filename>
 - Change folder attributes to system, archive and hidden
 - Can be applied to files and folder
 
+![[Pasted image 20260927123039.png]]
 
 # Stage 5: Covering Tracks (Cleanup)
-- After an attacker compromises a machine and completes the attack or creates a back door, he has to **ensure that his presence is removed or remains hidden**
-- Similarly, when an ethical hacker completes work, the target machine has to be restored
+- **After** an attacker compromises a machine and completes the attack or **creates a back door**, he has to **ensure that his presence is removed or remains hidden**
+- Similarly, when an ethical hacker completes work, the target machine has to be **restored**
 	- Hiding files, folders and accounts
-	- Clean up log files, Trojans
-	- Restore target machine - uninstalling apps, deleting temporary accounts
+	- Clean up **log files**, **Trojans**
+	- **Restore target machine** - uninstalling apps, deleting temporary accounts
 
 > [!Checklist]
-> - Clear History
-> - Clear temporary internet files
-> - Clear cookies
-> - Clear Recent Documents list
-> - Password protected
-> - Run at Start-up
-> - Schedule to run when you want
+> - [ ] Clear History
+> - [ ] Clear temporary internet files
+> - [ ] Clear cookies
+> - [ ] Clear Recent Documents list
+> - [ ] Password protected
+> - [ ] Run at Start-up
+> - [ ] Schedule to run when you want
 
 ## Penetration Test Report
 - Pentest **Scope and Objectives**

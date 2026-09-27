@@ -4,9 +4,16 @@
 - Differences are split into distinct **Sub-Classes**
 
 ## Object-Oriented Paradigm
+
+> [!Definition]
+> A software system is structured as a collection of **encapsulated objects**. **Classification** of objects are known as **Classes**
+
 > **Maintainability** increases because the **modular structure** accommodates changes while **protecting** existing code
 
+- Each object as its _data_ and _actions_
+
 - Structures software systems as a collection of **Encapsulated** objects
+- The overall behavior of the system arises out of the **interactions** between the individual **objects**
 ## Class vs Object
 - Class is a **program template** defining attributes and behaviours
 - Object is a **specific instance** of that template
