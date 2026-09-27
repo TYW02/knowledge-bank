@@ -1,3 +1,9 @@
+# Joins
+> [!question] Joins
+> **(Lec3 — Joins, applied)**  
+> Write a SQL query using `INNER JOIN` syntax to retrieve all customer names and their order dates, given tables `customers(customer_id, customer_name)` and `orders(order_id, customer_id, order_date)`.
+> 
+> [[Joins#INNER JOIN|Answer]]
 # Union
 > [!Union]
 > What happens when the UNION operator is used without the ALL keyword ?

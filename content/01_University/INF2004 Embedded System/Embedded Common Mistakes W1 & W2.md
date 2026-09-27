@@ -24,6 +24,25 @@
 > 
 > [[GPIO Output#Masking|Masking]]
 
+## Startup Code
+> [!Question] Startup Code
+> In the C runtime startup sequence (crt0.s), what typically happens _before_ `main()` is called?  
+> A) Enable interrupts, then disable them again  
+> B) Copy data into RAM and zero the uninitialized data area  
+> C) Load the RTOS scheduler  
+> D) Configure the linker script
+> 
+> [[W1 Intro to Embedded Sys#C Runtime Startup Code|Answer]]
+
+## Volatile
+> [!Question] Volatile 
+> What is the primary danger of `volatile` in a shared ISR/main-loop variable?  
+> A) It prevents the compiler from ever reading the variable  
+> B) It slows down all arithmetic operations  
+> C) It does not make a multi-step (read-modify-write) operation atomic  
+> D) It causes the linker to discard the variable
+> 
+> [[Volatile#What does it do|Answer]]
 
 # Interrupt
 > [!Masked Interrupt]
