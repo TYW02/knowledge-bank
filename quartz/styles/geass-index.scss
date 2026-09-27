@@ -1,0 +1,347 @@
+/* ==========================================================================
+   CODE GEASS — INDEX PAGE THEME (Quartz v4)
+   --------------------------------------------------------------------------
+   Only applies to pages whose frontmatter contains:
+
+       cssclasses:
+         - geass-index
+
+   Save as: quartz/styles/geass-index.scss
+   Then add  @use "./geass-index.scss";  to quartz/styles/custom.scss
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1. TOKENS + PAGE AMBIENCE
+   -------------------------------------------------------------------------- */
+
+body:has(.geass-index) {
+  --geass-red: var(--secondary);
+  --geass-violet: var(--tertiary);
+  --geass-gold: #c8a44a;
+  --geass-cut: 14px;
+  --geass-glow: 0 0 14px color-mix(in srgb, var(--secondary) 55%, transparent);
+  --geass-notch: polygon(
+    0 0,
+    calc(100% - var(--geass-cut)) 0,
+    100% var(--geass-cut),
+    100% 100%,
+    var(--geass-cut) 100%,
+    0 calc(100% - var(--geass-cut))
+  );
+}
+
+/* fine HUD scanlines across the viewport */
+body:has(.geass-index)::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--secondary) 0 1px,
+    transparent 1px 4px
+  );
+  opacity: 0.04;
+}
+
+/* crimson crown glow (top) + knightmare core underglow (bottom-right) */
+body:has(.geass-index)::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 55% at 50% -10%,
+      color-mix(in srgb, var(--secondary) 22%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      90% 60% at 105% 105%,
+      color-mix(in srgb, var(--tertiary) 18%, transparent),
+      transparent 65%
+    );
+}
+
+
+/* --------------------------------------------------------------------------
+   2. TYPOGRAPHY — royal Britannian headers
+   -------------------------------------------------------------------------- */
+
+body:has(.geass-index) article h1,
+body:has(.geass-index) article h2,
+body:has(.geass-index) article h3,
+body:has(.geass-index) article h4,
+body:has(.geass-index) .page-title {
+  font-family: var(--headerFont);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+/* main title -> Black Knights banner */
+body:has(.geass-index) article h1:first-of-type {
+  position: relative;
+  display: block;
+  margin: 0 0 2rem;
+  padding: 0.55rem 2rem 0.55rem 1.1rem;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  line-height: 1.15;
+  color: var(--dark);
+  border-left: 4px solid var(--secondary);
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--secondary) 24%, transparent) 0%,
+    color-mix(in srgb, var(--secondary) 6%, transparent) 45%,
+    transparent 78%
+  );
+  clip-path: var(--geass-notch);
+  text-shadow: var(--geass-glow);
+  cursor: default;
+}
+
+/* Geass activation glitch */
+body:has(.geass-index) article h1:first-of-type:hover {
+  animation: geass-glitch 0.32s steps(2, end) 2;
+}
+
+@keyframes geass-glitch {
+  0%   { transform: translate(0, 0); }
+  20%  {
+    transform: translate(-2px, 1px);
+    text-shadow: 2px 0 var(--secondary), -2px 0 var(--tertiary);
+  }
+  40%  {
+    transform: translate(2px, -1px);
+    text-shadow: -2px 0 var(--secondary), 2px 0 var(--tertiary);
+  }
+  60%  { transform: translate(-1px, -1px); }
+  80%  {
+    transform: translate(1px, 1px);
+    text-shadow: var(--geass-glow);
+  }
+  100% { transform: translate(0, 0); }
+}
+
+/* section headers */
+body:has(.geass-index) article h2 {
+  position: relative;
+  margin-top: 2.5rem;
+  padding: 0 0 0.4rem 1.5rem;
+  font-size: 1.2rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--secondary) 30%, transparent);
+}
+
+body:has(.geass-index) article h2::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 0.6rem;
+  height: 0.6rem;
+  background: var(--secondary);
+  clip-path: polygon(0 0, 100% 0, 100% 55%, 55% 100%, 0 100%);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--secondary) 70%, transparent);
+}
+
+body:has(.geass-index) article h3 {
+  padding-left: 0.7rem;
+  border-left: 3px solid var(--tertiary);
+  font-size: 1rem;
+}
+
+
+/* --------------------------------------------------------------------------
+   3. LINKS — Geass contract glow
+   -------------------------------------------------------------------------- */
+
+body:has(.geass-index) article a.internal {
+  text-decoration-color: color-mix(in srgb, var(--secondary) 45%, transparent);
+  text-underline-offset: 3px;
+  transition: color 0.2s ease, text-shadow 0.25s ease;
+}
+
+body:has(.geass-index) article a.internal:hover {
+  color: var(--secondary);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--secondary) 75%, transparent);
+}
+
+
+/* --------------------------------------------------------------------------
+   4. LISTS — dossiers of the Order
+   -------------------------------------------------------------------------- */
+
+body:has(.geass-index) article ul {
+  list-style: none;
+  padding-left: 1.25rem;
+}
+
+body:has(.geass-index) article ul > li {
+  position: relative;
+  margin-left: -0.4rem;
+  padding: 0.08rem 0.45rem;
+  border-radius: 0;
+  transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+
+body:has(.geass-index) article ul > li::before {
+  content: "";
+  position: absolute;
+  left: -0.85rem;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  background: var(--secondary);
+  transform: rotate(45deg);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--secondary) 70%, transparent);
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+body:has(.geass-index) article ul > li:hover {
+  background: var(--highlight);
+  box-shadow: inset 3px 0 0 var(--secondary);
+}
+
+body:has(.geass-index) article ul > li:hover::before {
+  transform: rotate(45deg) scale(1.4);
+  background: var(--geass-gold);
+}
+
+/* don't fight with task-list checkboxes */
+body:has(.geass-index) article ul.contains-task-list > li::before {
+  display: none;
+}
+
+
+/* --------------------------------------------------------------------------
+   5. QUOTES
+   -------------------------------------------------------------------------- */
+
+body:has(.geass-index) article blockquote {
+  margin-left: 0;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid var(--secondary);
+  border-radius: 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--secondary) 12%, transparent),
+    transparent 70%
+  );
+  font-style: normal;
+}
+
+body:has(.geass-index) article blockquote p:first-child::before {
+  content: "「 ";
+  color: var(--secondary);
+}
+
+body:has(.geass-index) article blockquote p:last-child::after {
+  content: " 」";
+  color: var(--secondary);
+}
+
+
+/* --------------------------------------------------------------------------
+   6. RULES — a slash of Geass
+   -------------------------------------------------------------------------- */
+
+body:has(.geass-index) article hr {
+  position: relative;
+  height: 1px;
+  margin: 3rem 0;
+  border: none;
+  overflow: visible;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--secondary) 80%, transparent),
+    transparent
+  );
+}
+
+body:has(.geass-index) article hr::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: var(--secondary);
+  box-shadow: 0 0 14px var(--secondary);
+}
+
+
+/* --------------------------------------------------------------------------
+   7. TABLES & CODE — sharp, military-issue
+   -------------------------------------------------------------------------- */
+
+body:has(.geass-index) article table {
+  border-collapse: collapse;
+  border-radius: 0;
+}
+
+body:has(.geass-index) article th {
+  background: color-mix(in srgb, var(--secondary) 14%, transparent);
+  font-family: var(--headerFont);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+body:has(.geass-index) article th,
+body:has(.geass-index) article td {
+  border: 1px solid color-mix(in srgb, var(--secondary) 25%, transparent);
+}
+
+body:has(.geass-index) article pre,
+body:has(.geass-index) article code {
+  border-radius: 0;
+}
+
+body:has(.geass-index) article pre {
+  border-left: 3px solid var(--secondary);
+}
+
+
+/* --------------------------------------------------------------------------
+   8. OPTIONAL — header trim
+   (inspect your build if any of these don't take)
+   -------------------------------------------------------------------------- */
+
+body:has(.geass-index) .page-title a {
+  letter-spacing: 0.16em;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--secondary) 45%, transparent);
+}
+
+body:has(.geass-index) .search-button,
+body:has(.geass-index) #search-button {
+  border-radius: 0;
+  border: 1px solid color-mix(in srgb, var(--secondary) 40%, transparent);
+}
+
+
+/* --------------------------------------------------------------------------
+   9. RESPONSIVE / A11Y
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 600px) {
+  body:has(.geass-index) article h1,
+  body:has(.geass-index) .page-title {
+    letter-spacing: 0.06em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body:has(.geass-index) article h1:first-of-type:hover {
+    animation: none;
+  }
+  body:has(.geass-index) article a.internal,
+  body:has(.geass-index) article ul > li,
+  body:has(.geass-index) article ul > li::before {
+    transition: none;
+  }
+}
