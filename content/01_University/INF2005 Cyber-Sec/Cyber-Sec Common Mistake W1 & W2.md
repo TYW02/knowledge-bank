@@ -10,6 +10,14 @@
 > 
 > [[Payload Larger than Cover Image]]
 
+# Birthday Attack
+> [!question] Birthday Attack
+> A 128-but hash function (like MD5) becomes vulnerable to a birthday attack after roughly how many hash attempts ?
+> - [ ] $2^{128}$
+> - [ ] $2^{64}$
+> - [ ] $2^{32}$
+> - [ ] $2^{256}$
+> [[Birthday Attack#The Birthday Paradox|Answer]]
 
 # Hashing
 > [!Collision attack]
