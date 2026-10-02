@@ -167,6 +167,13 @@ Planning **continues** throughout the project lifecycle
 
 ![[Pasted image 20260928215833.png]]
 
+> [!warning] IMPORTANT
+> $$
+> 0.65 + (0.01 * DI)
+> $$
+> TCF **always** sits between **0.65 - 1.35**
+
+
 > [!tip] Note
 > Here `0.65` & `0.01` are **given**.
 > 

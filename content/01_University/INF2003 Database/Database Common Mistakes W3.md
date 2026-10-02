@@ -4,6 +4,19 @@
 > Write a SQL query using `INNER JOIN` syntax to retrieve all customer names and their order dates, given tables `customers(customer_id, customer_name)` and `orders(order_id, customer_id, order_date)`.
 > 
 > [[Joins#INNER JOIN|Answer]]
+
+> [!question] Given `Products(pid, name, price, category)`, write a query to find products priced above the average price within their own category
+> > [!Answer]-
+> > ```SQL
+> > SELECT p1.name
+> > FROM Products p1
+> > WHERE p1.price > (
+> > 	SELECT AVG(p2.price)
+> > 	FROM Products p2
+> > 	WHERE p2.category = p1.category
+> > );
+> > ```
+> > - For each product `p1`, the subquery recalculate the avg price ONLY among products in p1's own category
 # Union
 > [!Union]
 > What happens when the UNION operator is used without the ALL keyword ?
@@ -74,9 +87,25 @@
 > 
 > [[COUNT#Count including NULL|COUNT]]
 
+> [!question] Given `employee(ssn, name, salary, dept_name)`, write a query to find the names of employees earning more than the average salary of all employees.
+> > [!Answer]-
+> > ```SQL
+> > SELECT name FROM employee WHERE > (SELECT AVG(salary) FROM employee);
+> > ```
+> > - Aggregate functions **can't be mixed** with **row-level filtering** in the **SAME scope**.
+> > - You need a **nested SELECT** to **compute the aggregate first**, then compare against it.
 
-
-
+# Exists
+> [!question] Given `Boats(bid, bname, color)` and `Reserves(sid, bid, day)`, write a query using `EXISTS` to find boat names that have never been reserved.
+> > [!Answer]-
+> > ```SQL
+> > SELECT bname FROM Boats b
+> > WHERE NOT EXISTS (
+> > 	SELECT * FROM Reserves r WHERE r.bid = b.bid
+> > )
+> > ```
+> > - Return each boat where no reservation row matches its bid
+> > - `EXISTS / NOT EXISTS` always take a **complete subquery** in parentheses as their argument.
 
 
 
