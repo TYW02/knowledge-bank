@@ -61,13 +61,13 @@ Every RGB image is made up of 3 color channels or planes, and a greyscale image 
 ![[Pasted image 20260905204201.png]]
 
 ## BPCS Algorithm
-- While there is more to hide
-	- Get the next bit plane
-	- While there is more space in the current bit plane
-		- Get the next complex segment
-		- Get the next block of payload
-		- If the payload information is complex, then hide it in the current segment
-		- Else conjugate by performing an exclusive or (XOR) operation then hide it in the current segment
+- While there is **more to hide**
+	- Get the **next bit plane**
+	- While there is **more space** in the current bit plane
+		- Get the **next complex** segment
+		- Get the **next block** of payload
+		- If the payload information is **complex**, then **hide** it in the **current segment**
+		- Else **conjugate** by performing an **exclusive or** (XOR) operation then **hide it in the current segment**
 
 ### What is a Complex Segment
 ![[Pasted image 20260905204436.png]]
@@ -75,32 +75,42 @@ Every RGB image is made up of 3 color channels or planes, and a greyscale image 
 > If payload not noisy enough, perform 'conjugation' operation to make it complex
 > Works because human eye cannot notice difference in 'rapidly changing bit patterns'
 
-
+> [!warning] Important
+> What we do when our **PAYLOAD** is **not complex** enough, we take the **current payload** and we **conjugate it / XOR it** with the alternating 1,0 block to **make it complex**, then we **embed it** in the image.
 ### What is considered complex ?
-- Complexity measures how often neighbouring bits in a segment change value
+- **Complexity** measures how often **neighbouring bits** in a segment **change value**
 - Assume there are 8 bytes in a segment:
 	- Count number of times bits change value
-	- Maximum value is 7, (10101010) or (01010101)
+	- Maximum value is **7**, (10101010) or (01010101)
 - Do the same for each of the bytes
-	- Maximum number of change is 2 * 8 * 7= 112
-	- The complexity of a segment $c = actual changes / 112$
-	- Define a threshold value $T$ which is a parameter of the algorithm
+	- **Maximum number of change** is 2 * 8 * 7= 112
+	- The **complexity of a segment** $c = actual changes / 112$
+	- Define a **threshold value** $T$ which is a parameter of the algorithm
 	- If c > T then the segment is complex
-	- T is typically ~0.3
+	- T is typically **~0.3**
 
+> [!important] How to calculate Total Complexity
+> $$
+> Total Complexity = 2(States) * 8(Total Bits) * 7(Max Internal Change)
+> $$
+
+> [!important] How to calculate Complexity of a SEGMENT
+> $$
+> c = \frac{Actual Change}{Total Complexity}
+> $$
 # Steganalysis
 ![[Pasted image 20260905205452.png]]
-- Steganalysis is an attack on steganography
+- Steganalysis is an **attack on steganography**
 
 > [!Objective]
 > Primary Objective
-> - Hidden payload Detection
+> - Hidden payload **Detection**
 > 
 > Secondary Objective
-> - Extract the payload
+> - **Extract** the payload
 
 - Hiding info in digital media changes some media content
-- May introduce visual degradation or unusual characteristics
+- May **introduce visual degradation** or unusual characteristics
 
 ## Visual Steganalysis
 ![[Pasted image 20260905205722.png]]

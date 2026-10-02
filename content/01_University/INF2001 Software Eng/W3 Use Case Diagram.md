@@ -227,11 +227,69 @@ tags:
 
 
 
+<div class="quiz"
+     data-explanation="Inheritance represents an 'is-a' relationship. For example, a Duck is an Animal.">
+
+<div class="quiz-question">
+What does inheritance represent?
+</div>
+
+<div class="quiz-options">
+
+<button class="quiz-option" data-correct="true">
+A. An "is-a" relationship
+</button>
+
+<button class="quiz-option" data-correct="false">
+B. A "has-a" relationship
+</button>
+
+<button class="quiz-option" data-correct="false">
+C. A "uses-a" relationship
+</button>
+
+<button class="quiz-option" data-correct="false">
+D. A "contains-a" relationship
+</button>
+
+</div>
+
+<div class="quiz-feedback"></div>
+
+</div>
 
 
 
+<div class="quiz"
+     data-explanation="A class is a template that defines the data and behaviours of objects. An object is an instance of that class.">
 
+<div class="quiz-question">
+What is an object?
+</div>
 
+<div class="quiz-options">
+
+<button class="quiz-option" data-correct="true">
+A. An instance of a class
+</button>
+
+<button class="quiz-option" data-correct="false">
+B. A template for creating classes
+</button>
+
+<button class="quiz-option" data-correct="false">
+C. A relationship between classes
+</button>
+
+<button class="quiz-option" data-correct="false">
+D. A method inside a class
+</button>
+
+</div>
+
+<div class="quiz-feedback"></div>
+
+</div>
 
 
 
