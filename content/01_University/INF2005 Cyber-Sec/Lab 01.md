@@ -85,7 +85,7 @@ Second Input
 1110111011011110111001001100100001000000110100101110011001000000  
 11000100110100101101110
 > ```
-> 
+> - NOTE: The above binary value has its leading 0 **dropped** hence the **difference in length**
 > Use a Binary to Hexadecimal Converter
 > ```
 > 7468652070617373776F72642069732062696E
@@ -121,7 +121,7 @@ Second Input
 > ```
 
 
-## ASCII Shifting & LeetSpeek
+## ASCII Shifting & LeetSpeak
 ```
 8i4 q5tt/>/>1se g1s 8i4 di5mm4oa4 t284 2t; 4mju4
 ```

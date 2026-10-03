@@ -9,9 +9,9 @@ tags:
 - Figure out your stakeholders needs
 
 ### However
-- Stakeholder may know what they want, but not necessary what is required.
-- Stakeholders come from various domain expertise. Understanding the domain will significantly improve your understanding of their needs.
-- As stakeholders understand their needs and project better, their requirements will naturally evolve
+- Stakeholder may **know what they want,** but **not necessary what is required.**
+- Stakeholders come from **various domain expertise**. Understanding the domain will **significantly improve your understanding** of their needs.
+- As stakeholders **understand their needs** and project better, their **requirements will naturally evolve**
 
 # "Moving Target" problem
 - A change in requirements while software product is being developed
@@ -70,17 +70,17 @@ tags:
 
 #### Categories of Stakeholders
 - **Primary** stakeholders (direct users & owners):  
-	• End-users (who use the system daily)  
-	• Product owners or clients (who request and fund the software)  
-	• System administrators (who manage and maintain the system)  
+	• **End-users** (who use the system daily)  
+	• **Product owners** or **clients** (who request and fund the software)  
+	• **System administrators** (who manage and maintain the system)  
 ▪ **Secondary** stakeholders (indirectly involved or affected):  
 	• Managers (who rely on system reports or efficiency)  
 	• Customer support teams (who assist users with issues)  
 	• Marketing and sales (who sell or promote the product)  
 ▪ **External** stakeholders:  
-	• Regulators or government agencies (who set compliance requirements)  
-	• Investors (who fund the software development company)  
-	• Competitors (indirectly influencing design/market decisions)  
+	• **Regulators** or **government agencies** (who set compliance requirements)  
+	• **Investors** (who fund the software development company)  
+	• **Competitors** (indirectly influencing design/market decisions)  
 ▪ **Internal** stakeholders:  
 	• Software developers and testers  
 	• UX/UI designers  
@@ -90,12 +90,11 @@ tags:
 ## Elicitation
 > The process of requirements discovery
 
-- It is different from requirements gathering
+- It is **different from requirements gathering**
 	- In elicitation, the focus in on **what user needs**, not just **wants**
-	- Involves actively interacting with stakeholders to extract requirements
+	- Involves **actively interacting** with **stakeholders** to **extract requirements**
 - Focus on **what** the stakeholder need, not **how** it will be done.
-- The focus is on the problem, not the technical solution
-
+- The **focus** is on the **problem**, **not** the **technical solution**
 
 ## Requirements Discovery Methods
 1. Interviews
@@ -112,10 +111,11 @@ tags:
 - Capture stakeholders' needs, goals, pain points
 - Clarify unclear or ambiguous requirements
 - Explore both functional and non-functional requirements
-#### Types of interviews
-- **Structured**: Predefined questions, consistent format, easier to compare answers
-- **Unstructured**: Open-ended, free discussion, more flexibility
-- **Semi-Structured**: Mix of both, allows consistency with room for exploration
+
+> [!example] Types of interviews
+> - **Structured**: Predefined questions, consistent format, easier to compare answers
+> - **Unstructured**: Open-ended, free discussion, more flexibility
+> - **Semi-Structured**: Mix of both, allows consistency with room for exploration
 #### Preparation
 - Identify relevant stakeholder 
 - Prepare a question guide
@@ -129,8 +129,8 @@ tags:
 
 #### Advantage
 - Provides **deep insights** and context-specific information
-- Allows clarification of vague requirements immediately
-- Can uncover hidden needs and real pain points
+- Allows **clarification** of vague requirements **immediately**
+- Can **uncover hidden needs** and **real pain points**
 - Builds trust and engagement with stakeholders
 
 #### Disadvantage / Challenges
@@ -489,11 +489,11 @@ A formal document that captures the complete description of a software system's 
 # Validation
 > "Are we building the RIGHT product ?"
 
-- Validity: Does the system provide the functions that best support the needs ?
-- Consistency: Are there any requirements conflicts ?
-- Verifiability: Can the requirements be checked ?
-- Realism: Can the requirements be implemented given available budget and technology
-- Completeness: Are all functions required by the stakeholders included ?
+- **Validity**: Does the system provide the functions that **best support the needs** ?
+- **Consistency**: Are there any **requirements conflicts** ?
+- **Verifiability**: Can the requirements be **checked** ?
+- **Realism**: Can the requirements be **implemented given available budget and technology**
+- **Completeness**: Are **all functions required** by the **stakeholders included** ?
 
 ## Validation Techniques
 ### Requirements Review & Walkthrough

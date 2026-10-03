@@ -18,7 +18,7 @@ You have:
 
 ## Situations where Cryptography is useful
 
-When sending a message to another party, the communication channel is not secure. Another party can intercept it and read the content.
+When sending a message to another party, the **communication channel is not secure.** Another party can intercept it and read the content.
 
 This is also called a **"MITM Attack"** where an attack intercepts the connection between 2 parties and reads their information.
 
@@ -30,7 +30,7 @@ If the message is encrypted then the attack can only see the encrypted message, 
 
 **Asymmetric Key**: Encryption and Decryption use **DIFFERENT** keys (**Public** key for encryption, **Private** key for Decryption, **Public** key known to authorised senders) -> **Public Key Cryptography** 
 
-**Hashing**: Does NOT use keys (**one-way** functions can convert data to a fixed length "unique" hash value **digest**)
+**Hashing**: Does NOT use keys (**one-way** functions can convert data to a **fixed length** "unique" hash value **digest**)
 
 > [!Digest]-
 > A Digest is what the hash outputs.
@@ -46,26 +46,26 @@ PLAIN TEXT -> ENCRYPT(PLAIN TEXT, KEY) -> CIPHER TEXT -> DECRYPT(CIPHER TEXT, KE
 
 > [!Mono-alphabetic VS Poly-alphabetic]-
 > - Polyalphabetic
-> Vigenere Cipher is a polyalphabetic cipher, because it uses a repeating keyword where each letter of the key dictates a different shift.
+> Vigenere Cipher is a polyalphabetic cipher, because it uses a **repeating keyword** where each letter of the key dictates a **different shift**.
 > - Monoalphabetic
-> Uses a single fixed shift for the entire message. If 'A' turns into 'D' once, it will turn into 'D' every time.
+> Uses a **single fixed shift** for the entire message. If 'A' turns into 'D' **once**, it will turn into 'D' **every time**.
 
 ## Transposition Ciphers
-Simple encryption where plaintext characters are **shifted** in some regular pattern to different positions to form the ciphertext (Jumble up the plaintext)
+Simple encryption where plaintext characters are **shifted** in some **regular pattern** to different positions to form the ciphertext (**Jumble up the plaintext**)
 - Simple transposition cipher
 - Rail fence cipher
 - Columnar transposition cipher
 
 
 # Caesar Cipher (Substitution Cipher)
-Letters are shifted along in the alphabet to encrypt
-Shifted back the same amount to decrypt
+- Letters are shifted along in the alphabet to encrypt
+- Shifted back the same amount to decrypt
 
 ### Example:
-Plain:    ABCDEFGHIJKLMNOPQRSTUVWXYZ
-Cipher: DEFGHIJKLMNOPQRSTUVWXYZABC
+- Plain:    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+- Cipher: DEFGHIJKLMNOPQRSTUVWXYZABC
 
-Hello World -> KHOOR ZRUOG
+- Hello World -> KHOOR ZRUOG
 
 > [!NOTE]
 > Not Restricted to only letters
@@ -77,24 +77,24 @@ Hello World -> KHOOR ZRUOG
 Given the **KEYWORD** and the **PLAINTEXT** search in the table the corresponding keyword and plain text to get the cipher text.
 
 ### Example
-ALICEALI (Keyword)
-HELLOBOB (Plaintext)
-HPTNSBZJ (Ciphertext)
+- ALICEALI (Keyword)
+- HELLOBOB (Plaintext)
+- HPTNSBZJ (Ciphertext)
 
 ### Decryption
-HPTNSBZJ (Ciphertext)
-ALICEALI (Keyword)
-At row 'H' look for letter 'A' then see what column corresponds that is the plaintext
-'L' find 'P' = E
-'I' find 'T' = 'L'
-> Find Key at row then find ciphertext in that row, the column will be your plaintext
+- HPTNSBZJ (Ciphertext)
+- ALICEALI (Keyword)
+- At row 'H' look for letter 'A' then see what column corresponds that is the plaintext
+- 'L' find 'P' = E
+- 'I' find 'T' = 'L'
+> Find **Key at row** then find **ciphertext in that row**, the **column will be your plaintext**
 
 # Simple Transposition Cipher 
 
 Just reverse the order of characters in the plaintext
 
-YTISREVINU -> UNIVERSITY (Decrypt)
-SINGPORE -> EROPGNIS (Encrypt)
+- YTISREVINU -> UNIVERSITY (Decrypt)
+- SINGPORE -> EROPGNIS (Encrypt)
 
 # Rail Fence Cipher (Transposition Cipher)
 
@@ -117,11 +117,11 @@ HELLOBOB -> HOELBBLO
 | --- | --- | --- | --- | --- | --- | --- | --- |
 |     | E   |     | L   |     | B   |     | B   |
 |     |     | L   |     |     |     | O   |     |
-> [!How to Decrypt]-
-> Take the number of characters in the ciphertext: `8`
-> Draw `8` columns with `key` number of rows
-> Fill in the table ROW BY ROW.
-> Read the plaintext zigzag.
+> [!How to Decrypt]
+> - Take the number of characters in the ciphertext: `8`
+> - Draw `8` columns with `key` number of rows
+> - Fill in the table ROW BY ROW.
+> - Read the plaintext zigzag.
 
 
 # Columnar Transposition Cipher
@@ -169,7 +169,7 @@ TTNA APTM TSUO AODW COIX KNLY PETZ (Cipher text)
 - Is knowledge of the algorithm a vulnerability ?
 
 Algorithm - secret ?
-Can you assume secrecy of the algorithm. How can you ensure knowing the algorithm doesn't help ?
+- Can you assume secrecy of the algorithm. How can you ensure knowing the algorithm doesn't help ?
 
 **Ensure secrecy in the key only** (Doesn't matter if you know how it works, if you don't have the key you can't break it)
 
