@@ -238,11 +238,11 @@ tags:
 • To help stakeholders **articulate** requirements they may **struggle to express verbally**.  
 • To **validate** assumptions early and **reduce misunderstandings**.  
 
-#### Types of Prototypes  
-• Throwaway (rapid) prototypes → quickly built to explore ideas, then discarded.  
-• Evolutionary prototypes → incrementally refined until they evolve into the final system.  
-• Low-fidelity prototypes → sketches, wireframes, mock-ups.  
-• High-fidelity prototypes → interactive demos, partial system implementations.  
+> [!example] Types of Prototypes  
+> - **Throwaway** (rapid) prototypes → quickly built to explore ideas, then discarded. 
+> - **Evolutionary** prototypes → incrementally refined until they evolve into the final system.  
+> - **Low-fidelity** prototypes → sketches, wireframes, mock-ups.  
+> - **High-fidelity** prototypes → interactive demos, partial system implementations.  
 
 #### Process  
 • Build an initial mock-up or simplified version of the system.  
@@ -369,11 +369,11 @@ Often, requirements are not standalone. Blending techniques could bring up these
 
 ### Examples of Non-Functional Requirements
 - Product Requirement  
-```
-The Patient Management System (PMS) shall be available to all clinics  
-during normal working hours (Mon-Fri, 08:30-17:30). Downtime within  
-the normal working hours shall not exceed five seconds in any one day.  
-```
+
+> [!note] 
+> The Patient Management System (PMS) shall be available to all clinics 
+> during normal working hours (Mon-Fri, 08:30-17:30). Downtime within 
+> the normal working hours shall not exceed five seconds in any one day.  
 
 - Organisational Requirement  
 Users of the PMS shall authenticate themselves using their health  
