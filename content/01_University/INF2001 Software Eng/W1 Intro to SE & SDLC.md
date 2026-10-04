@@ -353,7 +353,7 @@ The Agile manifesto has come to value:
 - Gives the client **confidence** to know that a new version with additional functionality will arrive every 3 weeks
 - The developers know that they will have 3 weeks (but no more) to **deliver a new iteration**
 	- Without client interference of any kind
-- If it is possible to complete the entire task in the timebox, the work may be reduced ("Descoped")
+- If it is impossible to complete the entire task in the timebox, the work may be reduced ("Descoped")
 - Agile processes demand fixed time, not fixed features
 
 ### Attributes of the Agile method
