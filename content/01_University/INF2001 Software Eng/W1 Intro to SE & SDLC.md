@@ -120,7 +120,7 @@ To correct a fault **late** in the life cycle
 > To **reduce** the overall **number** of faults (and, hence, the overall cost)
 > To **reduce** the **cost** of maintenance
 
-
+	
 # Software Life Cycle
 A life cycle: The **actual steps** performed when building a product
 
@@ -202,7 +202,7 @@ However, it is **not realistic**
 
 ### Key points: Rapid Prototyping
 **DO NOT** turn the prototype into product
-Rapid prototyping may replace specification phase (Never the design phase)
+Rapid prototyping **may replace specification phase** (Never the design phase)
 
 ### Comparison
 Waterfall model (Try to get it right **first time**)

@@ -53,10 +53,11 @@ tags:
 # From Use Cases to Classes
 
 ## Entity Classes
-> [!Entity definition]
+
+> [!question] Entity Definition
 > A thing with **distinct** and **independent existence**
 
-> [!Entity Classes]
+> [!question] Entity Classes
 > Long-lived, **data-bearing** business **objects** of the system
 
 
