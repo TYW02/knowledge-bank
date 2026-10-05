@@ -34,8 +34,6 @@ Consists of:
 
 ## Entity Set
 
-^e62f72
-
 > A collection of entities, with the same properties
 - Same attributes, same data type, same order, same key attributes
 - Values are different, at least for the key attributes

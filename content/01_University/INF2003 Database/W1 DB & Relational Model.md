@@ -147,12 +147,13 @@ sid is a foreign key referring to STUDENT:
 > Enrolls(matricid, code, grade)
 
 ## Refine the Schemas
-> [!Analyze -> identify potential problem -> refine]
-> Module(code, title, lecturer, lectuererOffice)
-> It has a transitive dependency
-> Decompose:
-> Module(code, titile, lecturerId) -> lectuererId is now a foriegn key
-> Lecturer(lecturerId, name, office)
+> [!IMPORTANT]
+> Analyze -> identify potential problem -> refine
+> - Module(code, title, lecturer, lectuererOffice)
+> - It has a transitive dependency
+> - Decompose:
+> - Module(code, title, lecturerId) -> lectuererId is now a foriegn key
+> - Lecturer(lecturerId, name, office)
 
 ## Physical Database Design
 > [!Make the common queries fast]
