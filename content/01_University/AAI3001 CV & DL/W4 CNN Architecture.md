@@ -1,6 +1,20 @@
 ---
 title: W4 CNN Architecture
 ---
+---
+
+- [[#LeNet]]
+- [[#AlexNet Trial and Error]]
+- [[#Dropout|Dropout]]
+- [[#Convolution Layers|Convolution Layers]]
+- [[#Fully-Connected Layers|Fully-Connected Layers]]
+- [[#Batch Normalization|Batch Normalization]]
+- [[#Last layer as feature embeddings|Last layer as feature embeddings]]
+- [[#Maximally Activating Patches|Maximally Activating Patches]]
+- [[#Saliency via Occlusion|Saliency via Occlusion]]
+
+---
+
 # LeNet
 
 - Convolution - Activation - Pooling repeated

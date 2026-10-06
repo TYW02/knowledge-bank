@@ -1,8 +1,22 @@
 ---
 title: W3 CNN
 ---
+---
 
+- [[#Problem|Problem]]
+- [[#Solution|Solution]]
+- [[#Convolution|Convolution]]
+- [[#1D Convolution - 1 input channel|1D Convolution - 1 input channel]]
+	- [[#1D Convolution - 1 input channel#Convolution|Convolution]]
+- [[#2D Convolution - More input channels|2D Convolution - More input channels]]
+- [[#2D Convolution - More output channels|2D Convolution - More output channels]]
+- [[#Compared to CNN|Compared to CNN]]
+- [[#Max Pooling|Max Pooling]]
+- [[#Average Pooling|Average Pooling]]
+		- [[#Convolution#References|References]]
+		- [[#Convolution#Beautiful CNN visualizations:|Beautiful CNN visualizations:]]
 
+---
 # MLP Limitations
 > Image data is represented as a 2D grid of pixels regardless of color channels
 

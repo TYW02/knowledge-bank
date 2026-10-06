@@ -3,7 +3,24 @@ title: W2 Image Classification
 tags:
   - Classification
 ---
+---
+
+- [[#Sigmoid|Sigmoid]]
+- [[#Softmax]]
+- [[#Rectified Linear Unit (ReLU)]]
+- [[#Leaky ReLU]]
+- [[#Saturation|Saturation]]
+- [[#Binary Cross-Entropy Loss (BCE)|Binary Cross-Entropy Loss (BCE)]]
+- [[#2 important types|2 important types]]
+- [[#Gradient Descent]]
+- [[#Forward Propagation & Backpropagation]]
+- [[#Chain Rule]]
+- [[#Gradient in PyTorch - AutoGrad]]
+
+---
+
 ![[CVDL W2.svg]]
+
 
 # Sigmoid
 $\frac{1}{1 + e^{-f(x)}}$
