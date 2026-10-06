@@ -74,6 +74,7 @@ y = torch.tensor([4, 5])
 3. An input can be used in the computation if its size in a particular **dimension either matches the output size** in that dimension, or is a **singleton** dimension
 4. If an input has a dimension size of 1 in its shape, the first data entry in that dimension will be used for all calculations along that dimension.
 
+![[Broadcasting#What to watch out for]]
 ### Visualization Example
 - `m` has shape `[4, 3]`
 - `n` has shape `[3,]`
