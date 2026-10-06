@@ -5,7 +5,7 @@
 - [[Model .train vs .eval]]
 - [[zero_grad]]
 - [[Sigmoid]]
-
+- [[Softmax]]
 
 ##### Lecture Material
 - [[W1 Tensor Operations]]
