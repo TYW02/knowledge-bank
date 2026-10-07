@@ -6,6 +6,7 @@
 - [[zero_grad]]
 - [[Sigmoid]]
 - [[Softmax]]
+- [[01_University/AAI3001 CV & DL/quick_notes/Gradient Descent|Gradient Descent]]
 
 ##### Lecture Material
 - [[W1 Tensor Operations]]
