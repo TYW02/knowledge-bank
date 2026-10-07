@@ -56,6 +56,10 @@ For Conv2d(in_channels=**C_in**, out_channels=**C_out**, kernel_size=**k**)
 $$
 params = (C_{in} \cdot k \cdot k + 1) \cdot C_{out}
 $$
+OR
+$$
+params = (C_{in} \cdot C_{out} \cdot k \cdot k) + C_{out}
+$$
 Where:
 - $C_{in} \cdot k \cdot k$ = weights per output channel (one filter)
 - +1 = bias per output channel
