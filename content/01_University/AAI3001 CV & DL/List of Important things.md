@@ -7,6 +7,9 @@
 - [[Softmax]]
 - [[01_University/AAI3001 CV & DL/quick_notes/Gradient Descent|Gradient Descent]]
 - [[Receptive Field]]
+- [[Convolution]]
+- [[01_University/AAI3001 CV & DL/quick_notes/Chain Rule|Chain Rule]]
+- [[Pooling]]
 
 ##### Lecture Material
 - [[W1 Tensor Operations]]
