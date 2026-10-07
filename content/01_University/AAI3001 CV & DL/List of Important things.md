@@ -1,5 +1,4 @@
 
----
 ##### Important Notes
 - [[Broadcasting]]
 - [[Model .train vs .eval]]
@@ -7,6 +6,7 @@
 - [[Sigmoid]]
 - [[Softmax]]
 - [[01_University/AAI3001 CV & DL/quick_notes/Gradient Descent|Gradient Descent]]
+- [[Receptive Field]]
 
 ##### Lecture Material
 - [[W1 Tensor Operations]]
@@ -14,38 +14,4 @@
 - [[W3 CNN]]
 - [[W4 CNN Architecture]]
 - [[W5 Optimization & Regularization]]
-
----
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
