@@ -11,6 +11,8 @@
 - [[01_University/AAI3001 CV & DL/quick_notes/Chain Rule|Chain Rule]]
 - [[Pooling]]
 - [[Batch Normalization]]
+- [[Shape Manipulation]]
+- [[Training Loop]]
 
 ##### Lecture Material
 - [[W1 Tensor Operations]]
