@@ -13,6 +13,7 @@
 - [[Batch Normalization]]
 - [[Shape Manipulation]]
 - [[Training Loop]]
+- [[Calculating Accuracy]]
 
 ##### Lecture Material
 - [[W1 Tensor Operations]]

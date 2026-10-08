@@ -378,7 +378,7 @@ All the neurons will **do the same thing**, **output** the **same** thing, all g
 ![[Pasted image 20261006191927.png]]
 
 
-
+![[Pasted image 20261008232757.png]]
 
 
 
