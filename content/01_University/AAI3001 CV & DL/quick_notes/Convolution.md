@@ -15,6 +15,10 @@ For conv layer with input `W` or `H`, kernel size `k`, stride `s`, padding `p` a
 $$
 W_{out} = \lfloor \frac{W+2p - k_{eff}}{s} \rfloor + 1
 $$
+OR: (NOTE: This does not mean Use the top for W and bottom for H, you can use either)
+$$
+H_{out} = \lfloor\frac{H + 2P - D(K-1) - 1}{S}\rfloor + 1
+$$
 Where:
 $$
 k_{eff} = (k - 1) \cdot d + 1
