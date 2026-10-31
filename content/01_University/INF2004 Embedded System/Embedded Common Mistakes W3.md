@@ -1,4 +1,4 @@
-<iframe src="/assets/quiz/Embed_practice_01.html" width="100%" height="750px" style="border: 1px solid var(--lightgray); border-radius: 8px;"></iframe>
+<iframe src="/static/quiz/Embed_practice_01.html" width="100%" height="750px" style="border: 1px solid var(--lightgray); border-radius: 8px;"></iframe>
 
 # Terms
 
