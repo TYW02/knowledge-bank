@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 1 — Bits &amp; Shifts Drill</title>
+<style>
+  :root {
+    --bg: #f7f7fa;
+    --card: #fff;
+    --ink: #222;
+    --muted: #888;
+    --accent: #5b6cff;
+    --good: #4caf50;
+    --bad: #e57373;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+  header strong { font-size: 17px; }
+  #score { color: var(--muted); margin-right: 8px; font-variant-numeric: tabular-nums; }
+  button {
+    font-family: inherit;
+    font-size: 15px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  button:hover:not(:disabled) { background: #eef; }
+  button:disabled { opacity: 0.55; cursor: default; }
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .qnum {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .qtext {
+    font-size: 16px;
+    margin-bottom: 14px;
+    line-height: 1.55;
+  }
+  .qtext code, .expl code {
+    background: #f0f0f5;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.93em;
+    word-break: break-word;
+  }
+  .qtext pre {
+    background: #f0f0f5;
+    padding: 10px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 8px 0;
+    font-family: ui-monospace, monospace;
+    font-size: 14px;
+  }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 8px;
+    transition: background 0.15s;
+  }
+  .opt.correct { background: #d4f4dd; border-color: var(--good); }
+  .opt.wrong { background: #fde0e0; border-color: var(--bad); }
+  .expl {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: #f4f6ff;
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.55;
+    display: none;
+  }
+  .expl.show { display: block; }
+  .expl .tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .next {
+    margin-top: 14px;
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    width: 100%;
+    font-weight: 500;
+  }
+  .next:hover:not(:disabled) { background: #4a5aee; }
+  .done { text-align: center; padding: 20px 8px; }
+  .done .big { font-size: 30px; font-weight: 600; margin: 14px 0; }
+  .done .pct { color: var(--muted); margin-bottom: 18px; }
+  .hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+  @media (max-width: 480px) {
+    .qtext { font-size: 15px; }
+    .opt { font-size: 14px; padding: 11px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <strong>Lab 1 Bits Drill</strong>
+  <div>
+    <span id="score">0 / 0</span>
+    <button id="restart" title="New random set">Restart</button>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<script>
+/* ---------- small utils ---------- */
+const ri = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function popcount(n) {
+  n = n >>> 0;
+  let c = 0;
+  while (n) { c += n & 1; n >>>= 1; }
+  return c;
+}
+function topBit(n) {
+  n = n >>> 0;
+  let p = -1;
+  while (n) { p++; n >>>= 1; }
+  return p;
+}
+function hexB(n) {
+  return '0x' + (n & 0xFF).toString(16).toUpperCase().padStart(2, '0');
+}
+function hexAuto(n) {
+  if (n < 0x100) return '0x' + n.toString(16).toUpperCase().padStart(2, '0');
+  if (n < 0x10000) return '0x' + n.toString(16).toUpperCase();
+  return '0x' + (n >>> 0).toString(16).toUpperCase();
+}
+function hexW(n) {
+  return '0x' + (n >>> 0).toString(16).toUpperCase().padStart(8, '0');
+}
+function bin8(n) {
+  const s = (n & 0xFF).toString(2).padStart(8, '0');
+  return s.slice(0, 4) + ' ' + s.slice(4);
+}
+
+function makeQ(prompt, correct, distractors, explanation) {
+  const correctS = String(correct);
+  const seen = new Set([correctS]);
+  const opts = [correctS];
+  for (const d of distractors) {
+    const ds = String(d);
+    if (opts.length >= 4) break;
+    if (seen.has(ds)) continue;
+    seen.add(ds);
+    opts.push(ds);
+  }
+  let pad = 0;
+  while (opts.length < 4) {
+    const cand = String(pad++);
+    if (!seen.has(cand)) { seen.add(cand); opts.push(cand); }
+  }
+  const order = [0, 1, 2, 3];
+  shuffle(order);
+  const shuffled = order.map(i => opts[i]);
+  const correctIdx = order.indexOf(0);
+  return { prompt, options: shuffled, correct: correctIdx, explanation };
+}
+
+/* ---------- question generators (all generic — no lab-specific code) ---------- */
+
+function genUnsignedShiftRight() {
+  const v = ri(0x40, 0xFF);
+  const n = ri(1, 4);
+  const ans = (v >> n) & 0xFF;
+  const prompt = `
+    <code>uint8_t v = ${hexB(v)};</code><br>
+    <code>v >>= ${n};</code><br><br>
+    What is <code>v</code> afterwards?`;
+  const expl = `Right-shift by ${n} = divide by ${1 << n}. ` +
+    `<code>${hexB(v)} = ${bin8(v)}</code>. ` +
+    `After ${n} shift${n > 1 ? 's' : ''} right: <code>${bin8(ans)}</code> = <code>${hexB(ans)}</code>.`;
+  return makeQ(prompt, hexB(ans),
+    [hexB((v >> (n - 1)) & 0xFF), hexB((v << n) & 0xFF), hexB((v >> (n + 1)) & 0xFF)],
+    expl);
+}
+
+function genLeftShift1() {
+  const n = ri(2, 15);
+  const val = 1 << n;
+  const prompt = `What is <code>1u << ${n}</code>?`;
+  const expl = `1 << ${n} sets bit ${n}. Value = 2<sup>${n}</sup> = ${val} = <code>${hexAuto(val)}</code>.`;
+  return makeQ(prompt, hexAuto(val),
+    [hexAuto(1 << (n + 1)), hexAuto(1 << (n - 1)), hexAuto((1 << n) - 1)],
+    expl);
+}
+
+function genPopcount() {
+  const v = ri(0x10, 0xFF);
+  const c = popcount(v);
+  const prompt = `How many bits are set in <code>${hexB(v)}</code>?<br><br>` +
+    `<span style="color:#888">Binary: <code>${bin8(v)}</code></span>`;
+  const expl = `<code>${hexB(v)} = ${bin8(v)}</code>. ` +
+    `Count the 1s: <strong>${c}</strong>.`;
+  const dist = [String(c + 1)];
+  if (c - 1 >= 0) dist.push(String(c - 1));
+  if (8 - c !== c) dist.push(String(8 - c));
+  dist.push(String(c + 2));
+  return makeQ(prompt, String(c), dist, expl);
+}
+
+function genIterations() {
+  const topBitPos = ri(2, 31);
+  let v;
+  if (topBitPos === 31) {
+    v = (0x80000000 + ri(0, 0x7FFFFFFF)) >>> 0;
+  } else {
+    v = (((1 << topBitPos) | ri(0, (1 << topBitPos) - 1)) >>> 0);
+  }
+  const iters = topBitPos + 1;
+  const prompt = `
+    <pre>uint32_t v = ${hexW(v)};
+int n = 0;
+while (v) { v >>= 1; n++; }</pre>
+    How many times does the loop body run?`;
+  const expl = `Iterations = <strong>highest set bit position + 1</strong>. ` +
+    `<code>${hexW(v)}</code> has its top bit at position <code>${topBitPos}</code>, ` +
+    `so the loop runs <strong>${iters}</strong> times. ` +
+    `(Popcount here is ${popcount(v)} — that's a different number; it only matters if the body counts bits.)`;
+  const dist = [String(popcount(v)), '32', String(iters + 1)];
+  if (iters - 1 > 0) dist.push(String(iters - 1));
+  return makeQ(prompt, String(iters), dist, expl);
+}
+
+function genTruncate8() {
+  const v = ri(0x100, 0xFFF);
+  const ans = v & 0xFF;
+  const prompt = `
+    <code>uint8_t b = 0x${v.toString(16).toUpperCase()};</code><br><br>
+    What is <code>b</code>?`;
+  const expl = `Assigning to a narrower integer keeps only the low bits. ` +
+    `<code>uint8_t</code> keeps 8 bits: <code>0x${v.toString(16).toUpperCase()} &amp; 0xFF = ${hexB(ans)}</code>.`;
+  return makeQ(prompt, hexB(ans),
+    [hexB(v >> 8), hexB((v - 1) & 0xFF), hexB((v + 1) & 0xFF)],
+    expl);
+}
+
+function genTruncate16() {
+  const v = ri(0x10000, 0xFFFFFF);
+  const ans = v & 0xFFFF;
+  const prompt = `
+    <code>uint16_t w = 0x${v.toString(16).toUpperCase()};</code><br><br>
+    What is <code>w</code>?`;
+  const expl = `<code>uint16_t</code> keeps 16 bits (low 4 hex digits): ` +
+    `<code>0x${v.toString(16).toUpperCase()} &amp; 0xFFFF = 0x${ans.toString(16).toUpperCase().padStart(4, '0')}</code>.`;
+  return makeQ(prompt, '0x' + ans.toString(16).toUpperCase().padStart(4, '0'),
+    ['0x' + (v >> 16).toString(16).toUpperCase(),
+     '0x' + ((v & 0xFFFF) >> 4).toString(16).toUpperCase().padStart(4, '0'),
+     '0x' + (v & 0xFF).toString(16).toUpperCase().padStart(2, '0')],
+    expl);
+}
+
+function genPrecedence() {
+  const x = ri(0x10, 0xFF);
+  const mask = pick([0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80]);
+  const op = pick(['==', '!=']);
+  let correct, expl, dist;
+  if (op === '==') {
+    correct = '0';
+    expl = `<code>==</code> binds tighter than <code>&amp;</code>. So ` +
+      `<code>x &amp; ${hexB(mask)} == 0</code> parses as ` +
+      `<code>x &amp; (${hexB(mask)} == 0)</code> = <code>x &amp; 0</code> = <strong>0</strong>, ` +
+      `for any <code>x</code>. The programmer almost certainly meant <code>(x &amp; ${hexB(mask)}) == 0</code>.`;
+    dist = [String(x), hexB(x & mask), '1'];
+  } else {
+    const low = x & 1;
+    correct = String(low);
+    expl = `<code>!=</code> binds tighter than <code>&amp;</code>. So ` +
+      `<code>x &amp; ${hexB(mask)} != 0</code> parses as ` +
+      `<code>x &amp; (${hexB(mask)} != 0)</code> = <code>x &amp; 1</code> — ` +
+      `that is the lowest bit of <code>x</code>. ` +
+      `<code>${hexB(x)}</code> has lowest bit <strong>${low}</strong>.`;
+    dist = [String(x & mask), '0', '1'];
+  }
+  const prompt = `
+    <code>int x = ${hexB(x)};</code><br>
+    <code>int r = x &amp; ${hexB(mask)} ${op} 0;</code><br><br>
+    What is <code>r</code>?`;
+  return makeQ(prompt, correct, dist, expl);
+}
+
+function genSignedShift() {
+  const neg = -ri(3, 40) * 4;
+  const n = ri(1, 3);
+  const ans = neg >> n;
+  const prompt = `
+    <code>int8_t v = ${neg};</code><br>
+    <code>v >>= ${n};</code><br><br>
+    What is <code>v</code>? (Assume the compiler does an arithmetic shift — the usual case.)`;
+  const expl = `Right-shifting a negative signed value is <strong>implementation-defined</strong> ` +
+    `but in practice <strong>arithmetic</strong>: the sign bit replicates. ` +
+    `<code>${neg} >> ${n} = ${ans}</code>. ` +
+    `Because the result stays negative, <code>while (v) { v >>= 1; }</code> would loop forever for ` +
+    `<code>v = -1</code>.`;
+  const dist = [String(Math.abs(neg) >> n), String(neg), String(neg << n)];
+  if ((neg >> (n - 1)) !== ans) dist.push(String(neg >> (n - 1)));
+  return makeQ(prompt, String(ans), dist, expl);
+}
+
+function genBitIdiom() {
+  const n = ri(0, 7);
+  const action = pick(['set', 'clear', 'toggle']);
+  const lines = {
+    set: `x |= (1u << ${n});`,
+    clear: `x &amp;= ~(1u << ${n});`,
+    toggle: `x ^= (1u << ${n});`,
+    test: `(x &amp; (1u << ${n})) != 0`
+  };
+  const prompt = `Which line <strong>${action}s</strong> bit ${n} of <code>x</code> ` +
+    `and leaves every other bit alone?`;
+  const correct = lines[action];
+  const expl = {
+    set: `<code>|=</code> sets (adds a 1). <code>&amp;= ~</code> clears. <code>^=</code> toggles.`,
+    clear: `<code>&amp;= ~</code> clears bits. <code>|=</code> sets. <code>^=</code> toggles.`,
+    toggle: `<code>^=</code> = XOR = toggle. <code>|=</code> sets. <code>&amp;= ~</code> clears.`
+  }[action];
+  return makeQ(prompt, correct,
+    [lines.set, lines.clear, lines.toggle, lines.test],
+    expl);
+}
+
+function genSignExtension() {
+  const hi = ri(0x80, 0xFF);
+  const lo = ri(0x00, 0xFF);
+  const pattern = (hi << 8) | lo;
+  const ans = pattern - 0x10000;
+  const prompt = `
+    Big-endian bytes:<br>
+    <code>buf[0] = ${hexB(hi)}, buf[1] = ${hexB(lo)}</code><br><br>
+    <code>int16_t t = (int16_t)((buf[0] &lt;&lt; 8) | buf[1]);</code><br><br>
+    What is <code>t</code> in decimal?`;
+  const expl = `High bit (bit 15) is 1, so <code>t</code> is negative. ` +
+    `<code>0x${pattern.toString(16).toUpperCase().padStart(4, '0')}</code> as <code>int16_t</code> ` +
+    `= <code>-(0x10000 - 0x${pattern.toString(16).toUpperCase()})</code> = <strong>${ans}</strong>.`;
+  return makeQ(prompt, String(ans),
+    [String(pattern), String(hi), String(ans - 1), String(ans + 1)],
+    expl);
+}
+
+/* ---------- knowledge bank (fixed MCQs, shuffled per session) ---------- */
+
+const KNOWLEDGE = [
+  {
+    prompt: `In C, right-shifting a <em>negative</em> signed integer — e.g. <code>int v = -1; v >>= 1;</code> — is:`,
+    options: [
+      'Undefined behaviour',
+      'Well-defined: logical shift, fills with 0',
+      'Implementation-defined: usually arithmetic shift (sign replicates)',
+      'Always yields 0'
+    ],
+    correct: 2,
+    explanation: `The C standard leaves this <strong>implementation-defined</strong>. ` +
+      `Almost every compiler does an <strong>arithmetic</strong> shift: the sign bit replicates, ` +
+      `so <code>-1 >> 1</code> is still <code>-1</code>. That is exactly why ` +
+      `<code>while (v) { v >>= 1; }</code> loops forever for negative input. ` +
+      `Fix: cast to <code>uint32_t</code> first.`
+  },
+  {
+    prompt: `What does <code>x &lt;&lt; 32</code> do on a 32-bit <code>uint32_t</code>?`,
+    options: ['0', '1', 'x', 'Undefined behaviour'],
+    correct: 3,
+    explanation: `Shifting by an amount &ge; the type's width is <strong>undefined behaviour</strong> in C. ` +
+      `Not "wraps to 0", not "multiply by 2^32". ` +
+      `Common bug: <code>for (int i = 0; i &lt;= 32; i++) r |= ... &lt;&lt; (31 - i);</code> — the ` +
+      `<code>i == 32</code> iteration alone is UB.`
+  },
+  {
+    prompt: `Which operator binds <strong>tighter</strong>: <code>&amp;</code> or <code>==</code>?`,
+    options: ['&amp; (bitwise AND)', '== (equality)', 'They are equal', 'Depends on the compiler'],
+    correct: 1,
+    explanation: `<code>==</code> binds tighter than <code>&amp;</code>. ` +
+      `So <code>x &amp; MASK == 0</code> parses as <code>x &amp; (MASK == 0)</code> — which is ` +
+      `<code>x &amp; 0</code> = 0, for any nonzero MASK. ` +
+      `Intent is almost always <code>(x &amp; MASK) == 0</code>.`
+  },
+  {
+    prompt: `Which operator binds <strong>tighter</strong>: <code>&amp;</code> or <code>&lt;&lt;</code>?`,
+    options: ['&amp; (bitwise AND)', '&lt;&lt; (shift)', 'They are equal', 'Depends on operand types'],
+    correct: 1,
+    explanation: `<code>&lt;&lt;</code> binds tighter than <code>&amp;</code> — and also tighter than <code>==</code>. ` +
+      `So <code>mask &amp; 1u &lt;&lt; pin == 0</code> goes shift first, then <code>==</code>, then <code>&amp;</code>. ` +
+      `Write <code>(mask &amp; (1u &lt;&lt; pin)) == 0</code>.`
+  },
+  {
+    prompt: `<code>uint8_t b = 0x1FF;</code> — what is <code>b</code>?`,
+    options: ['0xFF', '0x1FF', '0x01', 'Compile error'],
+    correct: 0,
+    explanation: `Assigning to a narrower integer keeps only the low N bits. ` +
+      `<code>uint8_t</code> keeps 8: <code>0x1FF &amp; 0xFF = 0xFF</code>. ` +
+      `Silent unless you compile with <code>-Wconversion</code>.`
+  },
+  {
+    prompt: `Which line <strong>toggles</strong> bit 5 of <code>x</code> and leaves everything else alone?`,
+    options: [
+      'x |= (1u << 5);',
+      'x &amp;= ~(1u << 5);',
+      'x ^= (1u << 5);',
+      'x = (1u << 5);'
+    ],
+    correct: 2,
+    explanation: `<code>^=</code> is XOR = toggle. ` +
+      `<code>|=</code> sets a 1. <code>&amp;= ~</code> clears a 1. ` +
+      `<code>=</code> overwrites everything.`
+  },
+  {
+    prompt: `<code>while (v) { v >>= 1; n++; }</code> starting with <code>v = 0x0000002C</code> runs how many iterations?`,
+    options: [
+      '3 — the number of set bits',
+      '6 — the highest set bit position + 1',
+      '8 — the byte width',
+      '32 — the word width'
+    ],
+    correct: 1,
+    explanation: `Iterations = <strong>highest set bit position + 1</strong>. ` +
+      `<code>0x2C = 0010 1100</code>. Highest set bit is bit 5 &rarr; 6 iterations. ` +
+      `Popcount (3 here) matters only when the loop body counts bits.`
+  }
+];
+
+function shuffleKnowledge(q) {
+  const idx = q.options.map((_, i) => i);
+  shuffle(idx);
+  const opts = idx.map(i => q.options[i]);
+  const correct = idx.indexOf(q.correct);
+  return { ...q, options: opts, correct };
+}
+
+const GENERATORS = [
+  genUnsignedShiftRight,
+  genLeftShift1,
+  genPopcount,
+  genIterations,
+  genTruncate8,
+  genTruncate16,
+  genPrecedence,
+  genSignedShift,
+  genBitIdiom,
+  genSignExtension
+];
+
+function buildQuiz(n = 10) {
+  const gens = shuffle(GENERATORS.slice());
+  const qs = [];
+  const genCount = Math.ceil(n / 2);
+  for (let i = 0; i < genCount; i++) {
+    qs.push(gens[i % gens.length]());
+  }
+  const ks = shuffle(KNOWLEDGE.slice()).slice(0, n - qs.length);
+  for (const k of ks) qs.push(shuffleKnowledge(k));
+  return shuffle(qs);
+}
+
+/* ---------- quiz runner ---------- */
+
+const main = document.getElementById('main');
+const scoreEl = document.getElementById('score');
+const restartBtn = document.getElementById('restart');
+
+let quiz = [];
+let idx = 0;
+let score = 0;
+let answered = false;
+
+function start() {
+  quiz = buildQuiz(10);
+  idx = 0;
+  score = 0;
+  answered = false;
+  scoreEl.textContent = '0 / 0';
+  render();
+}
+
+function render() {
+  if (idx >= quiz.length) return renderDone();
+  answered = false;
+  const q = quiz[idx];
+  scoreEl.textContent = `${score} / ${idx}`;
+
+  main.innerHTML = `
+    <div class="card">
+      <div class="qnum">Question ${idx + 1} of ${quiz.length}</div>
+      <div class="qtext">${q.prompt}</div>
+      <div id="opts"></div>
+      <div class="expl" id="expl">
+        <div class="tag">Explanation</div>
+        ${q.explanation}
+      </div>
+      <button class="next" id="next" disabled>Next &rarr;</button>
+    </div>
+  `;
+
+  const optsBox = document.getElementById('opts');
+  q.options.forEach((opt, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = opt;
+    b.addEventListener('click', () => pickAnswer(i));
+    optsBox.appendChild(b);
+  });
+
+  document.getElementById('next').addEventListener('click', next);
+}
+
+function pickAnswer(i) {
+  if (answered) return;
+  answered = true;
+  const q = quiz[idx];
+  if (i === q.correct) score++;
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach((el, j) => {
+    el.disabled = true;
+    if (j === q.correct) el.classList.add('correct');
+    else if (j === i) el.classList.add('wrong');
+  });
+  document.getElementById('expl').classList.add('show');
+  document.getElementById('next').disabled = false;
+  scoreEl.textContent = `${score} / ${idx + 1}`;
+}
+
+function next() {
+  idx++;
+  render();
+}
+
+function renderDone() {
+  const pct = Math.round((score / quiz.length) * 100);
+  let msg = '';
+  if (pct >= 90) msg = 'Excellent — mechanics are solid.';
+  else if (pct >= 70) msg = 'Good. Re-read the ones you missed, then restart.';
+  else msg = 'Keep at it. Restart for a fresh set — repetition builds reflexes.';
+  main.innerHTML = `
+    <div class="card done">
+      <div style="color:#888; font-size:13px; letter-spacing:0.05em; text-transform:uppercase;">Session complete</div>
+      <div class="big">${score} / ${quiz.length}</div>
+      <div class="pct">${pct}%</div>
+      <div style="margin-bottom:18px;">${msg}</div>
+      <button class="next" id="again">Start a new random set</button>
+    </div>
+  `;
+  document.getElementById('again').addEventListener('click', start);
+  scoreEl.textContent = `${score} / ${quiz.length}`;
+}
+
+restartBtn.addEventListener('click', start);
+start();
+</script>
+
+</body>
+</html>

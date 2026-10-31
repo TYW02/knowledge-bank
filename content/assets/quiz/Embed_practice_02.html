@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 2 — Wire Format &amp; Bytes Drill</title>
+<style>
+  :root {
+    --bg: #f7f7fa;
+    --card: #fff;
+    --ink: #222;
+    --muted: #888;
+    --accent: #5b6cff;
+    --good: #4caf50;
+    --bad: #e57373;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    max-width: 660px;
+    margin: 0 auto;
+    padding: 16px;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+  header strong { font-size: 17px; }
+  #score { color: var(--muted); margin-right: 8px; font-variant-numeric: tabular-nums; }
+  button {
+    font-family: inherit;
+    font-size: 15px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  button:hover:not(:disabled) { background: #eef; }
+  button:disabled { opacity: 0.55; cursor: default; }
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .qnum {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .qtext {
+    font-size: 16px;
+    margin-bottom: 14px;
+    line-height: 1.55;
+  }
+  .qtext code, .expl code {
+    background: #f0f0f5;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.93em;
+    word-break: break-word;
+  }
+  .qtext pre, .expl pre {
+    background: #f0f0f5;
+    padding: 10px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 8px 0;
+    font-family: ui-monospace, monospace;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 8px;
+    transition: background 0.15s;
+  }
+  .opt.correct { background: #d4f4dd; border-color: var(--good); }
+  .opt.wrong { background: #fde0e0; border-color: var(--bad); }
+  .expl {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: #f4f6ff;
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.55;
+    display: none;
+  }
+  .expl.show { display: block; }
+  .expl .tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .next {
+    margin-top: 14px;
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    width: 100%;
+    font-weight: 500;
+  }
+  .next:hover:not(:disabled) { background: #4a5aee; }
+  .done { text-align: center; padding: 20px 8px; }
+  .done .big { font-size: 30px; font-weight: 600; margin: 14px 0; }
+  .done .pct { color: var(--muted); margin-bottom: 18px; }
+  @media (max-width: 480px) {
+    .qtext { font-size: 15px; }
+    .opt { font-size: 14px; padding: 11px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <strong>Lab 2 Bytes Drill</strong>
+  <div>
+    <span id="score">0 / 0</span>
+    <button id="restart" title="New random set">Restart</button>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<script>
+/* ---------- utils ---------- */
+const ri = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function hexB(n) { return '0x' + (n & 0xFF).toString(16).toUpperCase().padStart(2, '0'); }
+function hexW(n) { return '0x' + (n >>> 0).toString(16).toUpperCase().padStart(8, '0'); }
+function hex16(n) { return '0x' + (n & 0xFFFF).toString(16).toUpperCase().padStart(4, '0'); }
+
+function makeQ(prompt, correct, distractors, explanation) {
+  const correctS = String(correct);
+  const seen = new Set([correctS]);
+  const opts = [correctS];
+  for (const d of distractors) {
+    if (opts.length >= 4) break;
+    const ds = String(d);
+    if (seen.has(ds)) continue;
+    seen.add(ds);
+    opts.push(ds);
+  }
+  let pad = 0;
+  while (opts.length < 4 && pad < 50) {
+    const cand = String(pad++);
+    if (!seen.has(cand)) { seen.add(cand); opts.push(cand); }
+  }
+  const order = [0, 1, 2, 3];
+  shuffle(order);
+  const shuffled = order.map(i => opts[i]);
+  const correctIdx = order.indexOf(0);
+  return { prompt, options: shuffled, correct: correctIdx, explanation };
+}
+
+/* ---------- generators ---------- */
+
+function genBigEndian16() {
+  const v = ri(0x100, 0xFFFE);
+  const hi = (v >> 8) & 0xFF;
+  const lo = v & 0xFF;
+  const vh = '0x' + v.toString(16).toUpperCase().padStart(4, '0');
+  const prompt = `
+    Encode <code>uint16_t v = ${vh}</code> as <strong>big-endian</strong> into a two-byte buffer:<br><br>
+    <pre>buf[0] = (uint8_t)(v &gt;&gt; 8);
+buf[1] = (uint8_t)(v &amp; 0xFF);</pre>
+    What is <code>buf[0]</code>?`;
+  const expl = `Big-endian = <strong>high byte first</strong>. ` +
+    `<code>${vh}</code> has high byte <code>${hexB(hi)}</code> ` +
+    `and low byte <code>${hexB(lo)}</code>. ` +
+    `So <code>buf[0] = ${hexB(hi)}</code>, <code>buf[1] = ${hexB(lo)}</code>.`;
+  return makeQ(prompt, hexB(hi),
+    [hexB(lo), hexB(0x00), hexB((v >> 4) & 0xFF)],
+    expl);
+}
+
+function genLittleEndian16() {
+  const v = ri(0x100, 0xFFFE);
+  const hi = (v >> 8) & 0xFF;
+  const lo = v & 0xFF;
+  const vh = '0x' + v.toString(16).toUpperCase().padStart(4, '0');
+  const prompt = `
+    On a <strong>little-endian</strong> CPU:<br><br>
+    <pre>uint16_t v = ${vh};
+uint8_t *p = (uint8_t *)&amp;v;</pre>
+    What is <code>p[0]</code>, the byte at the <em>lowest</em> address?`;
+  const expl = `Little-endian = <strong>low byte first</strong>. ` +
+    `The low byte of <code>${vh}</code> is <code>${hexB(lo)}</code> — it sits at the lowest address, ` +
+    `so <code>p[0] = ${hexB(lo)}</code>. ` +
+    `(Big-endian would put <code>${hexB(hi)}</code> here.)`;
+  return makeQ(prompt, hexB(lo),
+    [hexB(hi), hexB(0x00), hexB((v >> 4) & 0xFF)],
+    expl);
+}
+
+const STRUCT_CONFIGS = [
+  { fields: [['uint8_t','a',1],['uint16_t','b',2],['uint32_t','c',4]] },
+  { fields: [['uint8_t','a',1],['uint32_t','b',4],['uint8_t','c',1]] },
+  { fields: [['uint16_t','a',2],['uint8_t','b',1],['uint16_t','c',2]] },
+  { fields: [['uint8_t','a',1],['uint8_t','b',1],['uint32_t','c',4]] },
+  { fields: [['uint32_t','a',4],['uint16_t','b',2],['uint8_t','c',1]] },
+  { fields: [['uint8_t','a',1],['uint16_t','b',2],['uint8_t','c',1]] },
+  { fields: [['uint32_t','a',4],['uint8_t','b',1],['uint16_t','c',2]] },
+  { fields: [['uint16_t','a',2],['uint32_t','b',4],['uint8_t','c',1]] }
+];
+
+function computeStruct(fields) {
+  let off = 0, maxAlign = 1;
+  const layout = [];
+  for (const f of fields) {
+    const [type, name, size] = f;
+    const rem = off % size;
+    if (rem !== 0) off += size - rem;
+    layout.push({ type, name, size, offset: off });
+    off += size;
+    if (size > maxAlign) maxAlign = size;
+  }
+  const rem = off % maxAlign;
+  if (rem !== 0) off += maxAlign - rem;
+  return { size: off, layout, maxAlign };
+}
+
+function genStructSize() {
+  const cfg = pick(STRUCT_CONFIGS);
+  const { size, layout, maxAlign } = computeStruct(cfg.fields);
+  const sumSizes = cfg.fields.reduce((s, f) => s + f[2], 0);
+  const structCode = cfg.fields.map(f => `    ${f[0]} ${f[1]};`).join('\n');
+  const prompt = `
+    On a 32-bit platform with natural alignment:<br><br>
+    <pre>struct s {
+${structCode}
+};</pre>
+    What is <code>sizeof(struct s)</code> in bytes?`;
+  const layoutStr = layout.map(f =>
+    `${f.type.padEnd(9)} ${f.name}  @ offset ${String(f.offset).padStart(2, ' ')}`
+  ).join('\n');
+  const expl = `Field sizes: ${cfg.fields.map(f => f[0] + '=' + f[2]).join(', ')}. ` +
+    `Sum = ${sumSizes}, but alignment pads gaps.<br><br>` +
+    `<pre>${layoutStr}\n─────────────\n  total: ${size}</pre>` +
+    `Largest alignment = ${maxAlign}, so the total is rounded up to a multiple of ${maxAlign}. ` +
+    `<strong>sizeof = ${size}</strong>.` +
+    (size !== sumSizes ? ` (padding = ${size - sumSizes} bytes)` : '');
+  const dist = [String(sumSizes), String(size + 4), String(size + 1)];
+  return makeQ(prompt, String(size), dist, expl);
+}
+
+function genBigEndian32Decode() {
+  const b0 = ri(0, 0xFF), b1 = ri(0, 0xFF), b2 = ri(0, 0xFF), b3 = ri(0, 0xFF);
+  const v = (((b0 << 24) >>> 0) | (b1 << 16) | (b2 << 8) | b3) >>> 0;
+  const prompt = `
+    Decode a <strong>big-endian</strong> 32-bit value from these bytes:<br><br>
+    <code>buf = { ${hexB(b0)}, ${hexB(b1)}, ${hexB(b2)}, ${hexB(b3)} }</code><br><br>
+    <pre>uint32_t v = ((uint32_t)buf[0] &lt;&lt; 24) | ((uint32_t)buf[1] &lt;&lt; 16)
+           | ((uint32_t)buf[2] &lt;&lt;  8) |  (uint32_t)buf[3];</pre>
+    What is <code>v</code> in hex?`;
+  const expl = `Big-endian = <strong>most significant byte first</strong>. ` +
+    `Concatenate in order: <code>${hexB(b0).slice(2)}${hexB(b1).slice(2)}${hexB(b2).slice(2)}${hexB(b3).slice(2)}</code> ` +
+    `= <code>${hexW(v)}</code>.`;
+  const wrong1 = (((b3 << 24) >>> 0) | (b2 << 16) | (b1 << 8) | b0) >>> 0;
+  const wrong2 = (v ^ 0x00000001) >>> 0;
+  const wrong3 = (v ^ 0xFFFFFFFF) >>> 0;
+  return makeQ(prompt, hexW(v),
+    [hexW(wrong1), hexW(wrong2), hexW(wrong3)],
+    expl);
+}
+
+function genSignedInt16Decode() {
+  const hi = ri(0x80, 0xFF);
+  const lo = ri(0x00, 0xFF);
+  const pat = (hi << 8) | lo;
+  const ans = pat - 0x10000;
+  const prompt = `
+    Big-endian bytes <code>{ ${hexB(hi)}, ${hexB(lo)} }</code> are decoded as a signed 16-bit value:<br><br>
+    <pre>int16_t t = (int16_t)((buf[0] &lt;&lt; 8) | buf[1]);</pre>
+    What is <code>t</code> in decimal?`;
+  const expl = `Bit 15 (top bit) is 1, so <code>t</code> is <strong>negative</strong>. ` +
+    `<code>0x${pat.toString(16).toUpperCase().padStart(4, '0')}</code> as <code>int16_t</code> = ` +
+    `<code>-(0x10000 - 0x${pat.toString(16).toUpperCase().padStart(4, '0')})</code> = <strong>${ans}</strong>. ` +
+    `Sign extension happens when the 16-bit pattern is assigned to a <em>signed</em> type.`;
+  return makeQ(prompt, String(ans),
+    [String(pat), String(ans + 1), String(ans - 1)],
+    expl);
+}
+
+function genChecksum8() {
+  const n = ri(3, 6);
+  const bytes = Array.from({ length: n }, () => ri(0, 0xFF));
+  const sum = bytes.reduce((a, b) => a + b, 0);
+  const cks = sum & 0xFF;
+  const prompt = `
+    Compute the <strong>8-bit sum checksum</strong> of this payload 
+    (sum of all bytes, truncated to 8 bits):<br><br>
+    <code>{ ${bytes.map(hexB).join(', ')} }</code>`;
+  const expl = `Sum = ${sum} = <code>0x${sum.toString(16).toUpperCase()}</code>. ` +
+    `Truncate to 8 bits: <code>0x${sum.toString(16).toUpperCase()} &amp; 0xFF = ${hexB(cks)}</code>. ` +
+    `The answer must fit in <strong>one byte</strong> — anything larger would be rejected by a parser expecting a single-byte field.`;
+  const dist = [
+    '0x' + sum.toString(16).toUpperCase(),
+    hexB((sum + 1) & 0xFF),
+    hexB((sum - 1) & 0xFF)
+  ];
+  return makeQ(prompt, hexB(cks), dist, expl);
+}
+
+function genChecksum16() {
+  const n = ri(3, 6);
+  const bytes = Array.from({ length: n }, () => ri(0, 0xFF));
+  const sum = bytes.reduce((a, b) => a + b, 0);
+  const cks = sum & 0xFFFF;
+  const prompt = `
+    Compute the <strong>16-bit sum checksum</strong> of this payload 
+    (sum of all bytes, truncated to 16 bits, in hex):<br><br>
+    <code>{ ${bytes.map(hexB).join(', ')} }</code>`;
+  const expl = `Sum = ${sum} = <code>0x${sum.toString(16).toUpperCase()}</code>. ` +
+    `Truncate to 16 bits: <strong>${hex16(cks)}</strong>.`;
+  return makeQ(prompt, hex16(cks),
+    ['0x' + sum.toString(16).toUpperCase(), hex16((cks + 1) & 0xFFFF), hex16((cks - 1) & 0xFFFF)],
+    expl);
+}
+
+function genIntPromoUB() {
+  const b = ri(0x00, 0xFF);
+  const isUB = b >= 0x80;
+  const prompt = `
+    Assume <code>int</code> is 32-bit signed. Consider:<br><br>
+    <pre>uint8_t buf[4] = { ${hexB(b)}, 0x00, 0x00, 0x01 };
+uint32_t v = (buf[0] &lt;&lt; 24) | (buf[1] &lt;&lt; 16)
+           | (buf[2] &lt;&lt;  8) |  buf[3];</pre>
+    Does the subexpression <code>buf[0] &lt;&lt; 24</code> have undefined behaviour?`;
+  let correct, dist, expl;
+  if (isUB) {
+    correct = 'Yes — undefined behaviour';
+    expl = `<code>uint8_t</code> is promoted to <code>int</code> before the shift. ` +
+      `<code>${hexB(b)}</code> = ${b} promoted to <code>int</code>. ` +
+      `${b} &lt;&lt; 24 = <code>0x${((b << 24) >>> 0).toString(16).toUpperCase()}</code>, ` +
+      `which is <strong>larger than <code>0x7FFFFFFF</code></strong> — it doesn't fit in signed 32-bit int. ` +
+      `Shifting into the sign bit is <strong>undefined behaviour</strong>. ` +
+      `<br><br><strong>Fix:</strong> cast first — <code>((uint32_t)buf[0] &lt;&lt; 24)</code>.`;
+    dist = ['No — well-defined for this value', 'Only on 64-bit platforms', 'Only if buf is uninitialised'];
+  } else {
+    correct = 'No — well-defined for this value';
+    expl = `<code>uint8_t</code> is promoted to <code>int</code> before the shift. ` +
+      `<code>${hexB(b)}</code> = ${b}, and ${b} &lt;&lt; 24 = <code>0x${((b << 24) >>> 0).toString(16).toUpperCase()}</code>. ` +
+      `That fits within signed 32-bit int (max <code>0x7FFFFFFF</code>), so this particular subexpression is well-defined. ` +
+      `<br><br><strong>But the pattern is fragile</strong> — any byte &ge; 0x80 becomes UB. ` +
+      `Always cast to <code>uint32_t</code> before shifting a multi-byte value's high byte.`;
+    dist = ['Yes — any shift of uint8_t is UB', 'Yes — because 24 ≥ 16', 'Only undefined at runtime'];
+  }
+  return makeQ(prompt, correct, dist, expl);
+}
+
+function genPayloadSize() {
+  const configs = [
+    { desc: 'uint16_t sensor_id;\nuint8_t status;\nint16_t temp_c_x10;\nuint32_t timestamp;', sizes: [2,1,2,4], sum: 9 },
+    { desc: 'uint8_t  a;\nuint8_t  b;\nuint16_t c;\nuint32_t d;', sizes: [1,1,2,4], sum: 8 },
+    { desc: 'uint32_t timestamp;\nuint16_t value;\nuint8_t  flags;\nuint8_t  crc;', sizes: [4,2,1,1], sum: 8 },
+    { desc: 'int16_t a;\nint16_t b;\nint16_t c;', sizes: [2,2,2], sum: 6 },
+    { desc: 'uint32_t a;\nuint32_t b;\nuint16_t c;', sizes: [4,4,2], sum: 10 },
+    { desc: 'uint8_t  magic;\nuint16_t len;\nuint32_t payload;', sizes: [1,2,4], sum: 7 }
+  ];
+  const c = pick(configs);
+  const prompt = `
+    A wire format specifies this payload, <strong>tightly packed, no padding</strong>:<br><br>
+    <pre>${c.desc}</pre>
+    How many bytes does the payload occupy on the wire?`;
+  const expl = `"Tightly packed" means <strong>no padding — sum the field sizes directly</strong>: ` +
+    `${c.sizes.join(' + ')} = <strong>${c.sum}</strong> bytes. ` +
+    `Note: <code>sizeof</code> of an equivalent C struct would be <em>larger</em> because of alignment padding — ` +
+    `which is why wire formats are specified byte-by-byte, not as C structs.`;
+  return makeQ(prompt, String(c.sum),
+    [String(c.sum + 1), String(c.sum - 1), String(c.sum + 4)],
+    expl);
+}
+
+function genBoundsCheck() {
+  const len = ri(1, 16);
+  const minInLen = len + 3;
+  const prompt = `
+    Frame layout: <code>[SOF][LEN][payload of LEN bytes][checksum]</code>.<br><br>
+    A parser receives a buffer of <code>in_len</code> bytes, and the LEN byte says 
+    <code>${len}</code>. What is the <strong>minimum</strong> <code>in_len</code> that 
+    guarantees the whole frame is present?`;
+  const expl = `Frame bytes = 1 (SOF) + 1 (LEN) + ${len} (payload) + 1 (checksum) = <strong>${minInLen}</strong>. ` +
+    `The parser must check <code>in_len &ge; ${minInLen}</code> <em>before</em> reading any payload byte ` +
+    `or the checksum byte. ` +
+    `Without this check, an attacker can send <code>in_len = 4</code> with <code>LEN = 200</code> and crash the parser.`;
+  return makeQ(prompt, String(minInLen),
+    [String(len), String(len + 1), String(len + 2)],
+    expl);
+}
+
+const GENERATORS = [
+  genBigEndian16,
+  genLittleEndian16,
+  genStructSize,
+  genBigEndian32Decode,
+  genSignedInt16Decode,
+  genChecksum8,
+  genChecksum16,
+  genIntPromoUB,
+  genPayloadSize,
+  genBoundsCheck
+];
+
+/* ---------- knowledge bank (all strings in backticks — apostrophe-safe) ---------- */
+
+const KNOWLEDGE = [
+  {
+    prompt: `In a <strong>little-endian</strong> CPU, the value <code>0x1234</code> is stored in memory as:`,
+    options: [
+      `0x12 at the lowest address, 0x34 next`,
+      `0x34 at the lowest address, 0x12 next`,
+      `0x00 0x12 0x34 (3 bytes)`,
+      `Depends on the compiler`
+    ],
+    correct: 1,
+    explanation: `Little-endian = <strong>low byte first</strong>. ` +
+      `The low byte of <code>0x1234</code> is <code>0x34</code>, so it sits at the lowest address. ` +
+      `This is why memcpy-ing a little-endian struct to a wire format specified as big-endian produces byte-swapped output.`
+  },
+  {
+    prompt: `Trailing padding is added to a struct when:`,
+    options: [
+      `Always — after every field`,
+      `Never — structs are always tightly packed`,
+      `The total size is not a multiple of the largest field's alignment`,
+      `Only when the struct has an odd number of fields`
+    ],
+    correct: 2,
+    explanation: `Trailing padding ensures that an <strong>array</strong> of the struct has every element aligned. ` +
+      `If the total were, say, 9 bytes in a struct whose largest alignment is 4, then <code>arr[1]</code> would start ` +
+      `at offset 9 — misaligned. Rounding the size up to 12 (a multiple of 4) fixes that. ` +
+      `Rule: after all fields, pad to a multiple of the largest alignment.`
+  },
+  {
+    prompt: `Writing a struct directly to the wire with <code>memcpy(buf, &amp;s, sizeof s)</code> is wrong because:`,
+    options: [
+      `memcpy is slower than a loop`,
+      `It copies the struct's padding bytes and the CPU's native byte order — neither matches the wire spec`,
+      `It only works on 64-bit CPUs`,
+      `It silently truncates to the first field`
+    ],
+    correct: 1,
+    explanation: `Two separate defects: (1) <strong>padding</strong> — the struct may have gaps the wire format doesn't want; ` +
+      `(2) <strong>byte order</strong> — the CPU's endianness (usually little-endian) doesn't match the wire format (usually big-endian). ` +
+      `The correct way is to encode field by field, byte by byte.`
+  },
+  {
+    prompt: `A UART is configured with <code>uart_set_translate_crlf(uart, true)</code>. ` +
+      `Why is this a bug for a <strong>binary</strong> protocol?`,
+    options: [
+      `It runs the UART at the wrong baud rate`,
+      `It may translate incoming 0x0A / 0x0D bytes, silently corrupting any payload byte with those values`,
+      `It only affects transmit, so incoming frames are safe`,
+      `It disables the UART FIFO`
+    ],
+    correct: 1,
+    explanation: `CRLF translation is for <strong>text</strong> lines — it converts between \r (0x0D) ` +
+      `and \r\n (0x0D 0x0A). On a binary link, any payload byte that happens to be 0x0A or 0x0D ` +
+      `gets mangled — e.g. a timestamp like 0x0A0B0C0D. ` +
+      `Rule: <strong>never</strong> enable text-mode translations on a binary link.`
+  },
+  {
+    prompt: `Why does a frame format typically start with a fixed SOF byte (e.g. 0xAA)?`,
+    options: [
+      `It makes the frame pretty`,
+      `It gives the receiver a byte to resync on after a dropped byte or a noise glitch`,
+      `It is required by the UART hardware`,
+      `It stores the frame length`
+    ],
+    correct: 1,
+    explanation: `Without an SOF marker, once a single byte is lost the receiver is <strong>permanently misaligned</strong> — ` +
+      `it will treat every subsequent byte as part of the wrong frame. ` +
+      `The SOF byte lets the receiver search through the stream and lock back onto a frame boundary. ` +
+      `Every robust protocol has one.`
+  },
+  {
+    prompt: `Before a shift, a <code>uint8_t</code> is promoted to <code>int</code>. ` +
+      `What problem does this cause for <code>uint8_t b = 0x80; b &lt;&lt; 24;</code>?`,
+    options: [
+      `The result is 0 because the promotion truncates`,
+      `0x80 promoted to int is 128; 128 &lt;&lt; 24 = 0x80000000, which overflows signed int → undefined behaviour`,
+      `uint8_t cannot be shifted by 24`,
+      `No problem — the assignment truncates safely`
+    ],
+    correct: 1,
+    explanation: `The C standard promotes the <code>uint8_t</code> to <code>int</code> (signed, 32-bit) before the shift. ` +
+      `<code>0x80 &lt;&lt; 24</code> = <code>0x80000000</code>, which is larger than <code>INT_MAX</code> (<code>0x7FFFFFFF</code>). ` +
+      `Shifting into the sign bit is <strong>undefined behaviour</strong>. ` +
+      `<br><br><strong>Fix:</strong> cast first — <code>((uint32_t)b &lt;&lt; 24)</code>.`
+  },
+  {
+    prompt: `A wire format specifies the checksum as an <strong>8-bit sum</strong>. ` +
+      `If the sum of the payload bytes is 0x1FE, what byte goes in the checksum field?`,
+    options: [`0x1FE`, `0xFE`, `0x01`, `0x00`],
+    correct: 1,
+    explanation: `An <strong>8-bit</strong> field holds <strong>one byte</strong>. ` +
+      `<code>0x1FE &amp; 0xFF = 0xFE</code>. ` +
+      `The upper bits are discarded. ` +
+      `Rule: whenever a spec says "N-bit checksum," the answer must fit in N bits — apply the mask.`
+  },
+  {
+    prompt: `A parser reads a frame <code>[SOF][len][payload…][checksum]</code>. ` +
+      `Where must the length check <code>in_len &ge; 2 + len + 1</code> be placed?`,
+    options: [
+      `After the payload copy, but before the checksum check`,
+      `Before the payload copy — otherwise the copy already reads past the buffer`,
+      `At the very end of the function`,
+      `It is not needed if the length byte is always trusted`
+    ],
+    correct: 1,
+    explanation: `The whole point of bounds checking is to run <strong>before</strong> any memory access. ` +
+      `Copying payload first — then checking — means the overflow has already happened. ` +
+      `The order is: check header → check length against buffer size → copy → verify checksum → parse fields. ` +
+      `Check first, parse later.`
+  },
+  {
+    prompt: `Two frames are received. The first has <code>LEN = 9</code> and the second has <code>LEN = 12</code> ` +
+      `with the same wire format. What is wrong with a parser that accepts both?`,
+    options: [
+      `Nothing — LEN may vary`,
+      `It should reject LEN ≠ the spec's fixed payload size — accepting variable lengths lets a malformed frame through`,
+      `It should accept only odd LEN values`,
+      `It should reject LEN values below 16`
+    ],
+    correct: 1,
+    explanation: `If the spec says the payload is always exactly N bytes, then <strong>LEN must equal N</strong>. ` +
+      `A variable-length parser accepting both 9 and 12 is missing the <code>len == FRAME_PAYLOAD</code> check — ` +
+      `this is exactly what allows out-of-bounds reads (a parser computing offsets for field 8 assumes the buffer is at least 9 bytes).`
+  },
+  {
+    prompt: `Decoding a big-endian <code>int16_t</code>: if the top bit (bit 15) of the 16-bit value is set, ` +
+      `what does the resulting signed value represent?`,
+    options: [
+      `A positive number in the range 0…32767`,
+      `A negative number; the pattern is interpreted as two's complement`,
+      `Zero`,
+      `Undefined — reading a negative int16_t is UB`
+    ],
+    correct: 1,
+    explanation: `Signed integers use <strong>two's complement</strong>. ` +
+      `If bit 15 is 1, the value is negative. To get the magnitude: ` +
+      `<code>-(0x10000 - pattern)</code>. Example: <code>0xFF38</code> → <code>-(0x10000 - 0xFF38) = -200</code>. ` +
+      `The assignment to <code>int16_t</code> performs this sign extension automatically.`
+  }
+];
+
+function shuffleKnowledge(q) {
+  const idx = q.options.map((_, i) => i);
+  shuffle(idx);
+  const opts = idx.map(i => q.options[i]);
+  const correct = idx.indexOf(q.correct);
+  return { ...q, options: opts, correct };
+}
+
+function buildQuiz(n = 14) {
+  const gens = shuffle(GENERATORS.slice());
+  const qs = [];
+  const genCount = Math.ceil(n / 2);
+  for (let i = 0; i < genCount; i++) {
+    qs.push(gens[i % gens.length]());
+  }
+  const ks = shuffle(KNOWLEDGE.slice()).slice(0, n - qs.length);
+  for (const k of ks) qs.push(shuffleKnowledge(k));
+  return shuffle(qs);
+}
+
+/* ---------- runner ---------- */
+
+const main = document.getElementById('main');
+const scoreEl = document.getElementById('score');
+const restartBtn = document.getElementById('restart');
+
+let quiz = [];
+let idx = 0;
+let score = 0;
+let answered = false;
+
+function start() {
+  quiz = buildQuiz(14);
+  idx = 0;
+  score = 0;
+  answered = false;
+  scoreEl.textContent = '0 / 0';
+  render();
+}
+
+function render() {
+  if (idx >= quiz.length) return renderDone();
+  answered = false;
+  const q = quiz[idx];
+  scoreEl.textContent = `${score} / ${idx}`;
+
+  main.innerHTML = `
+    <div class="card">
+      <div class="qnum">Question ${idx + 1} of ${quiz.length}</div>
+      <div class="qtext">${q.prompt}</div>
+      <div id="opts"></div>
+      <div class="expl" id="expl">
+        <div class="tag">Explanation</div>
+        ${q.explanation}
+      </div>
+      <button class="next" id="next" disabled>Next &rarr;</button>
+    </div>
+  `;
+
+  const optsBox = document.getElementById('opts');
+  q.options.forEach((opt, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = opt;
+    b.addEventListener('click', () => pickAnswer(i));
+    optsBox.appendChild(b);
+  });
+
+  document.getElementById('next').addEventListener('click', next);
+}
+
+function pickAnswer(i) {
+  if (answered) return;
+  answered = true;
+  const q = quiz[idx];
+  if (i === q.correct) score++;
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach((el, j) => {
+    el.disabled = true;
+    if (j === q.correct) el.classList.add('correct');
+    else if (j === i) el.classList.add('wrong');
+  });
+  document.getElementById('expl').classList.add('show');
+  document.getElementById('next').disabled = false;
+  scoreEl.textContent = `${score} / ${idx + 1}`;
+}
+
+function next() {
+  idx++;
+  render();
+}
+
+function renderDone() {
+  const pct = Math.round((score / quiz.length) * 100);
+  let msg = '';
+  if (pct >= 90) msg = 'Excellent — byte-order, padding and parsing all solid.';
+  else if (pct >= 70) msg = 'Good. Re-read the ones you missed, then restart.';
+  else msg = 'Keep at it. Restart for a fresh set — repetition builds reflexes.';
+  main.innerHTML = `
+    <div class="card done">
+      <div style="color:#888; font-size:13px; letter-spacing:0.05em; text-transform:uppercase;">Session complete</div>
+      <div class="big">${score} / ${quiz.length}</div>
+      <div class="pct">${pct}%</div>
+      <div style="margin-bottom:18px;">${msg}</div>
+      <button class="next" id="again">Start a new random set</button>
+    </div>
+  `;
+  document.getElementById('again').addEventListener('click', start);
+  scoreEl.textContent = `${score} / ${quiz.length}`;
+}
+
+restartBtn.addEventListener('click', start);
+start();
+</script>
+
+</body>
+</html>
