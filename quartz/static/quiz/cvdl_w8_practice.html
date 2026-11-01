@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 8: Vision & Interpretability Quiz</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --bg: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text: #1F2937;
+            --correct: #10B981;
+            --incorrect: #EF4444;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        .topic {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .progress {
+            font-size: 0.9rem;
+            color: #6B7280;
+        }
+        h2 {
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        button.option-btn {
+            background-color: #F9FAFB;
+            border: 2px solid #E5E7EB;
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text);
+        }
+        button.option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background-color: #EEF2FF;
+        }
+        button.option-btn:disabled {
+            cursor: not-allowed;
+        }
+        button.correct {
+            background-color: #D1FAE5;
+            border-color: var(--correct);
+            color: #065F46;
+        }
+        button.incorrect {
+            background-color: #FEE2E2;
+            border-color: var(--incorrect);
+            color: #991B1B;
+        }
+        .explanation {
+            display: none;
+            padding: 16px;
+            background-color: #F3F4F6;
+            border-left: 4px solid var(--primary);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+        .explanation.show {
+            display: block;
+        }
+        .next-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: none;
+            margin-top: auto;
+            transition: background-color 0.2s;
+        }
+        .next-btn:hover {
+            background-color: var(--primary-hover);
+        }
+        .next-btn.show {
+            display: block;
+        }
+        .score-screen {
+            text-align: center;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 40px 0;
+        }
+        .score-screen h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .score-screen p {
+            font-size: 1.2rem;
+            color: #6B7280;
+            margin-bottom: 30px;
+        }
+        .restart-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="quiz-container">
+    <div class="header">
+        <span class="topic" id="question-topic">Topic</span>
+        <span class="progress" id="question-progress">1 / 22</span>
+    </div>
+    <h2 id="question-text">Question goes here</h2>
+    <div class="options" id="options-container"></div>
+    <div class="explanation" id="explanation-text"></div>
+    <button class="next-btn" id="next-btn">Next Question</button>
+</div>
+
+<div class="container score-screen" id="score-container">
+    <h1>Quiz Complete!</h1>
+    <p id="final-score">You scored 0 / 22</p>
+    <button class="restart-btn" onclick="location.reload()">Try Again (Randomizes Calculations)</button>
+</div>
+
+<script>
+    // --- UTILITY FUNCTIONS FOR RANDOMIZATION ---
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const randFloat = (min, max, decimals = 2) => parseFloat((Math.random() * (max - min) + min).toFixed(decimals));
+
+    // --- QUESTION BANK ---
+    // Each generate() function ensures numbers change on restart
+    const quizData = [
+        // TOPIC 1: Image Fundamentals
+        {
+            topic: "Image Fundamentals",
+            generate: () => ({
+                q: "In PyTorch, what is the standard dimension ordering for a batch of RGB images?",
+                options: ["(B, H, W, C)", "(B, C, H, W)", "(H, W, C, B)", "(C, B, H, W)"],
+                ans: 1,
+                exp: "PyTorch uses a channels-first ordering: (Batch Size, Channels, Height, Width)."
+            })
+        },
+        {
+            topic: "Image Fundamentals",
+            generate: () => {
+                const H = rand(100, 400), W = rand(100, 400), C = 3;
+                const correct = H * W * C;
+                return {
+                    q: `An RGB image has a resolution of ${H} x ${W}. What is the total pixel count (number of values)?`,
+                    options: [`${H * W}`, `${correct}`, `${H * W * 2}`, `${H * W * C * 255}`],
+                    ans: 1,
+                    exp: `Total values = H × W × C. For RGB (C=3), it is ${H} × ${W} × 3 = ${correct}.`
+                };
+            }
+        },
+        {
+            topic: "Image Fundamentals",
+            generate: () => {
+                const x = rand(100, 200);
+                const mu = randFloat(0.4, 0.6);
+                const sigma = randFloat(0.2, 0.3);
+                const ansVal = ((x / 255) - mu) / sigma;
+                const ansStr = ansVal.toFixed(3);
+                return {
+                    q: `Given a pixel value x=${x}, dataset mean μ=${mu}, and std σ=${sigma}, what is the normalized value x'? (Formula: x' = (x/255 - μ) / σ)`,
+                    options: [`${((x - mu) / sigma).toFixed(3)}`, `${ansStr}`, `${((x / 255) - mu).toFixed(3)}`, `${((x / sigma) - mu).toFixed(3)}`],
+                    ans: 1,
+                    exp: `Plug in the values: (${x}/255 - ${mu}) / ${sigma} = (${(x/255).toFixed(3)} - ${mu}) / ${sigma} ≈ ${ansStr}.`
+                };
+            }
+        },
+
+        // TOPIC 2: Dataset Bias & Shortcut Learning
+        {
+            topic: "Dataset Bias & Shortcut Learning",
+            generate: () => ({
+                q: "In the famous Wolf vs. Husky case study, the model learned to classify based on the background (snow vs. grass). What is this an example of?",
+                options: ["Data Leakage", "Shortcut Learning (Spurious Correlation)", "Gradient Vanishing", "Feature Hierarchy Failure"],
+                ans: 1,
+                exp: "Shortcut learning occurs when a model learns a spurious correlation (snow = wolf) rather than the actual features of the target object."
+            })
+        },
+        {
+            topic: "Dataset Bias & Shortcut Learning",
+            generate: () => {
+                const majority = rand(90, 98);
+                const minority = 100 - majority;
+                return {
+                    q: `A dataset contains ${majority}% Class A and ${minority}% Class B. A "dummy" model that always predicts Class A gets ${majority}% accuracy. What is the recall for Class B?`,
+                    options: [`${minority}%`, "0%", "50%", "100%"],
+                    ans: 1,
+                    exp: "If the model always predicts Class A, it never correctly predicts Class B. Therefore, the recall for Class B is exactly 0% (the accuracy trap)."
+                };
+            }
+        },
+        {
+            topic: "Dataset Bias & Shortcut Learning",
+            generate: () => ({
+                q: "To properly diagnose if a model is relying on dataset shortcuts (like background), what metric should you look at instead of overall accuracy?",
+                options: ["Training Loss", "Per-class Recall and F1-score", "Number of Parameters", "Inference Latency"],
+                ans: 1,
+                exp: "Overall accuracy hides class imbalance. Per-class recall and F1-scores will expose if the model is failing completely on minority classes."
+            })
+        },
+
+        // TOPIC 3: Feature Hierarchy & Representation
+        {
+            topic: "Feature Hierarchy & Representation",
+            generate: () => ({
+                q: "What is the primary difference between a Feature Map and an Embedding Vector in CNNs?",
+                options: [
+                    "Feature maps are used for training, embeddings for inference.",
+                    "Feature maps preserve spatial dimensions (where), while embeddings collapse them to represent semantic concepts (what).",
+                    "Feature maps use ReLU, embeddings use Softmax.",
+                    "Feature maps are 1D, embeddings are 3D."
+                ],
+                ans: 1,
+                exp: "Feature maps have shape (C, H, W) and retain spatial location. Embeddings use Global Average Pooling (GAP) to create a (C,) vector representing 'what' is in the image."
+            })
+        },
+        {
+            topic: "Feature Hierarchy & Representation",
+            generate: () => ({
+                q: "How do the features learned by shallow/intermediate layers (e.g., ResNet-50 layer2) differ from deep layers (layer4)?",
+                options: [
+                    "Shallow layers detect high-level objects; deep layers detect edges.",
+                    "Shallow layers group ground/background context; deep layers group high-level semantic objects.",
+                    "Shallow layers use Grad-CAM; deep layers use CAM.",
+                    "Shallow layers have more parameters than deep layers."
+                ],
+                ans: 1,
+                exp: "Shallow layers capture low-level textures and backgrounds (like snow vs. grass). Deep layers capture high-level semantic objects (like the dog itself)."
+            })
+        },
+        {
+            topic: "Feature Hierarchy & Representation",
+            generate: () => ({
+                q: "In a Vision Transformer (ViT-B/16) processing a 224x224 image, the 196 patch tokens are pooled to a 768-dimensional vector. Which token usually aggregates this global information?",
+                options: ["The [SEP] token", "The [MASK] token", "The [CLS] token", "The [PAD] token"],
+                ans: 2,
+                exp: "The [CLS] (Classification) token is added to the sequence. Through self-attention, it gathers global context and is used for the final linear classification head."
+            })
+        },
+
+        // TOPIC 4: Classifier Head Mechanics & Depth Effects
+        {
+            topic: "Classifier Head Mechanics",
+            generate: () => ({
+                q: "If you attach a linear classifier head to the features of a shallow CNN layer, what is the most likely outcome?",
+                options: [
+                    "It will perfectly generalize to the test set.",
+                    "It will overfit by relying on background shortcuts, failing on the test set.",
+                    "It will produce a lower training accuracy than a deep layer head.",
+                    "It will not converge at all."
+                ],
+                ans: 1,
+                exp: "Shallow layers only have background/context features. A head trained here achieves high training accuracy by memorizing the background (shortcut learning) but fails to generalize."
+            })
+        },
+        {
+            topic: "Classifier Head Mechanics",
+            generate: () => ({
+                q: "Why does training a classifier head on deeper layers (e.g., layer4) avoid the shortcut failure seen in shallow layers?",
+                options: [
+                    "Deep layers have a higher resolution.",
+                    "Deep layers force the model to focus on high-level facial/object features rather than backgrounds.",
+                    "Deep layers use global average pooling, while shallow layers do not.",
+                    "Deep layers have access to the original pixel values."
+                ],
+                ans: 1,
+                exp: "Deep layers represent abstract, semantic concepts (the animal itself), forcing the classifier to ignore the spurious background correlations."
+            })
+        },
+
+        // TOPIC 5: Model Interpretation (Visualisation)
+        {
+            topic: "Model Interpretation",
+            generate: () => ({
+                q: "Which method involves directly inspecting the first-layer convolutional weights (e.g., 64 filters of 7x7x3) to see what the network *can* detect?",
+                options: ["Learned Filters / Kernels", "Maximally Activating Patches", "Occlusion Sensitivity", "Grad-CAM"],
+                ans: 0,
+                exp: "Inspecting the Learned Filters is a free, class-agnostic method that visualizes the raw weights (like edge detectors) in the first layer."
+            })
+        },
+        {
+            topic: "Model Interpretation",
+            generate: () => ({
+                q: "What is a major drawback of using Occlusion (sliding a mask over the image) for saliency?",
+                options: [
+                    "It requires a strict architecture with GAP.",
+                    "It requires calculating gradients.",
+                    "It is computationally expensive (requires 1 forward pass per patch).",
+                    "It is class-agnostic."
+                ],
+                ans: 2,
+                exp: "Occlusion is a black-box, model-agnostic method, but it requires running a separate forward pass for every single patch you mask, making it very slow."
+            })
+        },
+        {
+            topic: "Model Interpretation",
+            generate: () => ({
+                q: "What is the strict architectural requirement for Class Activation Mapping (CAM)?",
+                options: [
+                    "The network must be a Vision Transformer.",
+                    "The network must use ReLU in the first layer.",
+                    "The network must have Global Average Pooling (GAP) directly followed by a linear classification head.",
+                    "The network must have residual connections."
+                ],
+                ans: 2,
+                exp: "CAM mathematically requires the specific structure of GAP -> Linear head so it can use the linear head's weights to weight the feature maps."
+            })
+        },
+
+        // TOPIC 6: Deep Dive into CAM and Grad-CAM
+        {
+            topic: "CAM & Grad-CAM Calculations",
+            generate: () => {
+                const w1 = randFloat(-1, 1), w2 = randFloat(-1, 1);
+                const a1 = rand(1, 5), a2 = rand(1, 5);
+                const ans = (w1 * a1) + (w2 * a2);
+                return {
+                    q: `In CAM, the heatmap for a specific pixel is calculated as M = Σ (w_k * A_k). If the linear head weights for the target class are w1=${w1}, w2=${w2}, and the feature map activations at that pixel are A1=${a1}, A2=${a2}, what is the CAM score?`,
+                    options: [`${(w1 * a1 + w2 * a2).toFixed(2)}`, `${(w1 + w2).toFixed(2)}`, `${(a1 + a2).toFixed(2)}`, `${((w1 * a2) + (w2 * a1)).toFixed(2)}`],
+                    ans: 0,
+                    exp: `M = (${w1} * ${a1}) + (${w2} * ${a2}) = ${(w1 * a1).toFixed(2)} + ${(w2 * a2).toFixed(2)} = ${ans.toFixed(2)}.`
+                };
+            }
+        },
+        {
+            topic: "CAM & Grad-CAM Calculations",
+            generate: () => {
+                // Grad-CAM Alpha calculation
+                const g1 = randFloat(0.1, 0.9);
+                const g2 = randFloat(0.1, 0.9);
+                const Z = 2; // Spatial size
+                const alpha = (g1 + g2) / Z;
+                return {
+                    q: `In Grad-CAM, the neuron importance weight α_k is the average gradient (1/Z * Σ ∂y/∂A). If the gradients for channel k at two spatial positions are ${g1} and ${g2} (Z=2), what is α_k?`,
+                    options: [`${(g1 + g2).toFixed(3)}`, `${((g1 + g2)/2).toFixed(3)}`, `${(g1 * g2).toFixed(3)}`, `${(g1 / g2).toFixed(3)}`],
+                    ans: 1,
+                    exp: `α_k = (1/2) * (${g1} + ${g2}) = ${((g1 + g2)/2).toFixed(3)}. This averages the gradients to get the importance weight.`
+                };
+            }
+        },
+        {
+            topic: "CAM & Grad-CAM Calculations",
+            generate: () => ({
+                q: "Why is a ReLU applied in the final step of the Grad-CAM formula? L = ReLU(Σ α_k * A_k)",
+                options: [
+                    "To normalize the image to 0-255.",
+                    "Because we only care about features that have a positive influence on the target class.",
+                    "To prevent vanishing gradients during backpropagation.",
+                    "Because the original image pixels are always positive."
+                ],
+                ans: 1,
+                exp: "The ReLU ensures we only visualize features that positively contribute to the class of interest. Negative contributions are zeroed out."
+            })
+        },
+
+        // TOPIC 7: ViT Interpretability & Attention
+        {
+            topic: "ViT Interpretability & Attention",
+            generate: () => {
+                // Simple attention score calc
+                const q1 = rand(1, 4), k1 = rand(1, 4);
+                const q2 = rand(1, 4), k2 = rand(1, 4);
+                const dk = 2; // sqrt(dk) = 1.41
+                const dot = (q1 * k1) + (q2 * k2);
+                const score = (dot / Math.sqrt(dk)).toFixed(2);
+                return {
+                    q: `Calculate the pre-softmax attention score between Query Q=[${q1}, ${q2}] and Key K=[${k1}, ${k2}] with d_k=${dk}. Formula: score = (Q · K) / √d_k`,
+                    options: [`${dot.toFixed(2)}`, `${(dot / dk).toFixed(2)}`, `${score}`, `${(dot * Math.sqrt(dk)).toFixed(2)}`],
+                    ans: 2,
+                    exp: `Q · K = (${q1}*${k1}) + (${q2}*${k2}) = ${dot}. Score = ${dot} / √${dk} ≈ ${score}.`
+                };
+            }
+        },
+        {
+            topic: "ViT Interpretability & Attention",
+            generate: () => ({
+                q: "What does the phrase 'Attention is not explanation' mean in the context of Vision Transformers?",
+                options: [
+                    "Attention weights cannot be calculated mathematically.",
+                    "Final layer [CLS] attention often focuses on background 'register tokens' rather than the actual class evidence.",
+                    "Attention maps require backpropagation to work.",
+                    "ViTs do not use attention mechanisms."
+                ],
+                ans: 1,
+                exp: "Studies show that raw attention weights in final layers often attend to irrelevant background areas (register tokens). Thus, attention weights do not directly equal a faithful explanation."
+            })
+        },
+        {
+            topic: "ViT Interpretability & Attention",
+            generate: () => ({
+                q: "What is the purpose of 'Attention Rollout' in ViTs?",
+                options: [
+                    "To calculate the loss function.",
+                    "To multiply head-averaged attention maps across all layers to track information flow.",
+                    "To prune unnecessary attention heads for speed.",
+                    "To convert the [CLS] token back into an image."
+                ],
+                ans: 1,
+                exp: "Attention Rollout multiplies attention maps across all layers (adding residual connections) to trace how information from input patches propagates to the final token."
+            })
+        }
+    ];
+
+    // --- QUIZ LOGIC ---
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let activeQuestions = [];
+
+    const ui = {
+        container: document.getElementById('quiz-container'),
+        topic: document.getElementById('question-topic'),
+        progress: document.getElementById('question-progress'),
+        question: document.getElementById('question-text'),
+        options: document.getElementById('options-container'),
+        explanation: document.getElementById('explanation-text'),
+        nextBtn: document.getElementById('next-btn'),
+        scoreContainer: document.getElementById('score-container'),
+        finalScore: document.getElementById('final-score')
+    };
+
+    function initQuiz() {
+        // Generate random numbers for all questions at the start
+        activeQuestions = quizData.map(qData => {
+            const generated = qData.generate();
+            return {
+                topic: qData.topic,
+                question: generated.q,
+                options: generated.options,
+                answer: generated.ans,
+                explanation: generated.exp
+            };
+        });
+
+        // Shuffle questions so they are not in fixed order
+        activeQuestions = activeQuestions.sort(() => Math.random() - 0.5);
+        
+        currentQuestionIndex = 0;
+        score = 0;
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const q = activeQuestions[currentQuestionIndex];
+        
+        ui.topic.textContent = q.topic;
+        ui.progress.textContent = `${currentQuestionIndex + 1} / ${activeQuestions.length}`;
+        ui.question.textContent = q.question;
+        
+        ui.options.innerHTML = '';
+        ui.explanation.classList.remove('show');
+        ui.nextBtn.classList.remove('show');
+
+        q.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.textContent = opt;
+            btn.onclick = () => selectAnswer(index, btn);
+            ui.options.appendChild(btn);
+        });
+    }
+
+    function selectAnswer(selectedIndex, btnElement) {
+        const q = activeQuestions[currentQuestionIndex];
+        const allBtns = ui.options.querySelectorAll('.option-btn');
+        
+        // Disable all buttons
+        allBtns.forEach(b => b.disabled = true);
+
+        if (selectedIndex === q.answer) {
+            btnElement.classList.add('correct');
+            score++;
+        } else {
+            btnElement.classList.add('incorrect');
+            // Highlight the correct answer
+            allBtns[q.answer].classList.add('correct');
+        }
+
+        // Show explanation
+        ui.explanation.textContent = q.explanation;
+        ui.explanation.classList.add('show');
+
+        // Show next button
+        if (currentQuestionIndex < activeQuestions.length - 1) {
+            ui.nextBtn.textContent = "Next Question";
+        } else {
+            ui.nextBtn.textContent = "See Results";
+        }
+        ui.nextBtn.classList.add('show');
+    }
+
+    ui.nextBtn.addEventListener('click', () => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < activeQuestions.length) {
+            showQuestion();
+        } else {
+            showResults();
+        }
+    });
+
+    function showResults() {
+        ui.container.style.display = 'none';
+        ui.scoreContainer.style.display = 'flex';
+        ui.finalScore.textContent = `You scored ${score} out of ${activeQuestions.length}`;
+    }
+
+    // Start the quiz
+    initQuiz();
+</script>
+</body>
+</html>
