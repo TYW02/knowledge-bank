@@ -2,6 +2,9 @@
 title: W1 Intro to Embedded Sys
 tags:
 ---
+<iframe src="/static/quiz/embed_W1_practice.html" width="100%" height="750px" style="border: 1px solid var(--lightgray); border-radius: 8px;"></iframe>
+
+
 ![[ES W1.svg]]
 
 # What is Embedded System

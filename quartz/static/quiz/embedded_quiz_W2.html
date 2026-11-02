@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Embedded Systems Quiz: W2.1 GPIO and W2.2 Interrupts</title>
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1b2333; --muted:#5d6881; --line:#dde3ef;
+  --brand:#2f5bea; --brand-ink:#ffffff; --ok:#12805c; --ok-bg:#e3f6ee; --bad:#b3261e; --bad-bg:#fdeceb;
+  --warn:#9a6700; --warn-bg:#fff6dd; --chip:#e9edf6;
+  --l1:#2e7d6b; --l2:#2f5bea; --l3:#8a4fd3; --l4:#d9741a; --l5:#c0262d;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#0f1420; --card:#171e2e; --ink:#e8ecf6; --muted:#9aa6c1; --line:#2a3550;
+    --brand:#6b8cff; --brand-ink:#0b1020; --ok:#4cd6a2; --ok-bg:#12332a; --bad:#ff8a80; --bad-bg:#3a1c1a;
+    --warn:#f2c14e; --warn-bg:#3a3012; --chip:#222c43; }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+#app{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.5rem;margin:0 0 4px}
+h2{font-size:1.2rem;margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 18px;border-radius:10px;font-weight:600}
+.btn:hover:not(:disabled){border-color:var(--brand)}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spread{justify-content:space-between}
+.pill{background:var(--chip);border-radius:999px;padding:4px 12px;font-size:.88rem;font-weight:600}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.bad{background:var(--bad-bg);color:var(--bad)}
+.badge{display:inline-block;color:#fff;border-radius:6px;padding:3px 10px;font-size:.8rem;font-weight:700;letter-spacing:.02em}
+.badge.l1{background:var(--l1)} .badge.l2{background:var(--l2)} .badge.l3{background:var(--l3)} .badge.l4{background:var(--l4)} .badge.l5{background:var(--l5)}
+.progress{height:8px;background:var(--chip);border-radius:99px;overflow:hidden;margin:12px 0}
+.progress>div{height:100%;width:0;background:var(--brand);transition:width .25s}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.chip{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--chip);color:var(--ink);font-weight:700;font-size:.85rem;padding:0}
+.chip.cur{outline:2px solid var(--brand);outline-offset:1px}
+.chip.right{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
+.chip.wrong{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.qmeta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;color:var(--muted);font-size:.9rem}
+.qtext{font-size:1.1rem;font-weight:600;margin:6px 0 16px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.92em}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:10px;padding:12px 14px}
+.opt:hover:not(:disabled){border-color:var(--brand)}
+.opt .L{flex:0 0 28px;height:28px;border-radius:50%;background:var(--chip);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.opt.sel{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 9%,var(--card))}
+.opt.sel .L{background:var(--brand);color:var(--brand-ink)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)} .opt.right .L{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)} .opt.wrong .L{background:var(--bad);color:#fff}
+.opt:disabled{cursor:default;color:var(--ink)}
+.fb{margin-top:18px;border-radius:10px;padding:16px;border:1px solid var(--line)}
+.fb.right{background:var(--ok-bg);border-color:var(--ok)} .fb.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.fb h3{margin:0 0 6px;font-size:1.05rem}
+.fb .expl{margin:8px 0}
+.fb ul{margin:6px 0 0;padding-left:20px}
+.ref{color:var(--muted);font-size:.88rem;margin-top:8px}
+.nav{margin-top:18px}
+.big{font-size:2.6rem;font-weight:800;line-height:1.1}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);font-size:.95rem}
+.meter{height:8px;background:var(--chip);border-radius:99px;overflow:hidden;min-width:90px}
+.meter>div{height:100%;background:var(--ok)} .meter>div.low{background:var(--bad)} .meter>div.mid{background:var(--warn)}
+.note{background:var(--warn-bg);border:1px solid var(--warn);border-radius:10px;padding:12px 14px;color:var(--ink)}
+.rev{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.rev .ans{margin:4px 0}
+.tag-ok{color:var(--ok);font-weight:700}.tag-bad{color:var(--bad);font-weight:700}
+[hidden]{display:none!important}
+@media (max-width:520px){.card{padding:16px}.big{font-size:2.1rem}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- START -->
+<section id="start" class="card">
+  <h1>Embedded Systems: W2.1 GPIO &amp; W2.2 Interrupts</h1>
+  <p class="sub">University-level practice quiz built from your lecture slides.</p>
+  <p>The quiz has <strong id="nq">36</strong> questions in five levels, from foundational to advanced:</p>
+  <ol>
+    <li>Foundational understanding</li>
+    <li>Conceptual understanding</li>
+    <li>Application</li>
+    <li>Analysis &amp; problem solving</li>
+    <li>Advanced critical thinking</li>
+  </ol>
+  <p>Calculation questions use fresh random numbers every time you start or restart. Answers are locked once submitted. You can jump to any question using the numbered boxes at the top, and the results page shows which slide topics to revisit.</p>
+  <button class="btn primary" id="startBtn">Start quiz</button>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" hidden>
+  <div class="card">
+    <div class="row spread">
+      <strong id="qnum">Question 1</strong>
+      <div class="row">
+        <span class="pill ok">Correct <span id="sc-c">0</span></span>
+        <span class="pill bad">Incorrect <span id="sc-w">0</span></span>
+        <span class="pill">Accuracy <span id="sc-p">–</span></span>
+      </div>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="chips" id="chips" aria-label="Question navigator"></div>
+  </div>
+
+  <div class="card">
+    <div class="qmeta"><span id="lvl" class="badge l1">Level 1</span><span id="topic"></span></div>
+    <div class="qtext" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+    <div id="fb" hidden></div>
+    <div class="row spread nav">
+      <button class="btn" id="prevBtn">← Previous</button>
+      <div class="row">
+        <button class="btn primary" id="submitBtn">Submit answer</button>
+        <button class="btn" id="nextBtn">Next →</button>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px" id="finishRow" hidden>
+      <button class="btn primary" id="finishBtn">All answered: see results</button>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results" hidden></section>
+
+</div>
+
+<script id="engine">
+/* ================= ENGINE: questions, generators, builder (no DOM access) ================= */
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=arr=>arr[rnd(0,arr.length-1)];
+function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=rnd(0,i);const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+const fmt=(x,dp)=>String(+x.toFixed(dp===undefined?2:dp));
+const hex=n=>'0x'+(n&255).toString(16).toUpperCase().padStart(2,'0');
+const bin=n=>(n&255).toString(2).padStart(8,'0');
+
+const LEVELS=['','Foundational understanding','Conceptual understanding','Application','Analysis & problem solving','Advanced critical thinking'];
+
+/* ---------- Static question bank ---------- */
+const STATIC=[
+/* ===== LEVEL 1 ===== */
+{level:1,topic:'GPIO basics',ref:'W2.1 GPIO: "What is GPIO?"',
+ q:`In the lecture's model of GPIO, what does one GPIO pin carry at any moment?`,
+ a:`One digital state (0 or 1); the circuit sets the voltage and the program gives that state its meaning`,
+ w:[[`A continuous analogue value that the CPU converts into a number`,`That describes an ADC input. A GPIO pin only distinguishes logic levels.`],
+    [`A whole byte of serial data, so one pin is enough for UART or SPI`,`Serial protocols send bits one after another over time; a pin holds a single binary state at an instant.`],
+    [`A fixed function chosen at manufacture that software cannot change`,`Pins are multiplexed ("pins with many hats"); software selects which function owns the pin.`]],
+ e:`The slide shows the chain: external signal → GPIO pin (0 or 1) → application meaning (pressed? ready?). The circuit sets the voltage; the program decides what the logic level <em>means</em>.`},
+
+{level:1,topic:'GPIO basics',ref:'W2.1 GPIO: "Direction"',
+ q:`Which decision must be made about a pin <em>before</em> your program can correctly read it or drive it?`,
+ a:`Its direction: input (senses an external circuit) or output (drives an external load)`,
+ w:[[`Its debounce time`,`Debouncing is a software policy applied to inputs after the direction has been chosen.`],
+    [`Its interrupt priority`,`Priority only matters if interrupts are used; it does not decide whether the pin senses or drives.`],
+    [`Its PWM duty cycle`,`Duty cycle belongs to a PWM output function, which already assumes the pin is configured as an output.`]],
+ e:`"Input senses; output drives. Choose the direction before reading or driving the signal." An MCU input connects to external circuits such as sensors; an MCU output connects to loads such as actuators.`},
+
+{level:1,topic:'Pull-up / pull-down & floating inputs',ref:'W2.1 GPIO: "Inputs: Open Switch"',
+ q:`A switch connects a GPIO input to GND when pressed. When it is open, nothing else is attached to the pin (no pull resistor). What logic level does the pin read?`,
+ a:`Undefined: a floating (undriven) input has no defined default level`,
+ w:[[`Logic 0, because nothing is connected`,`The slide states "Nothing connected is not the same as logic 0." A floating pin picks up noise and can read either level.`],
+    [`Logic 1, because the supply is the default`,`There is no default; the input just senses whatever voltage happens to be on the pin.`],
+    [`Whatever it read last, held indefinitely`,`Nothing drives the pin, so its level can drift or flip; no memory is guaranteed.`]],
+ e:`An undriven input or floating pin has no defined default. That is why switch inputs need a pull-up or pull-down so the pin has a known level when the switch is open.`},
+
+{level:1,topic:'Interrupt basics',ref:'W2.2 Interrupts: "Source, Request, Handler"',
+ q:`Which option correctly names the three different things involved in an interrupt?`,
+ a:`Source = the peripheral event that causes it; IRQ = the request for attention; ISR = the code that services the cause`,
+ w:[[`Source = the handler code; IRQ = the peripheral; ISR = the request line`,`This swaps all three roles. The ISR is code, not a request line.`],
+    [`Source = the CPU; IRQ = the stack; ISR = the vector table`,`The CPU responds to the request, the stack stores context and the vector table holds entry points; none of these is the source/IRQ/ISR trio.`],
+    [`They are three names for the same thing`,`The slide title is "Source, Request, Handler: Three Different Things" (e.g. timer match → IRQ → handler code).`]],
+ e:`A peripheral (source) raises an IRQ (the request); an ISR (handler code) services the cause. The CPU decides when it can respond.`},
+
+{level:1,topic:'Interrupt process (IVT, stack, context)',ref:'W2.2 Interrupts: "Interrupt Response", "The Stack"',
+ q:`For most interrupts you program, what does the CPU do automatically before it jumps to the vector table entry?`,
+ a:`It stores its context, including the program counter and status register, typically on the stack`,
+ w:[[`It copies all of RAM to flash so nothing is lost`,`Far too slow and unnecessary; only the minimum context needed to resume is saved.`],
+    [`Nothing: the ISR must push the return address itself`,`Hardware saves the PC and SR (and possibly more). Other registers may need runtime/compiler help, but the return address is not left to you.`],
+    [`It clears the peripheral's interrupt flag`,`The peripheral's flag is cleared by the ISR according to the peripheral's acknowledgement rules.`]],
+ e:`So that after servicing the interrupt the CPU can restore context and return to where it left off. The block of memory used is usually the stack, with the stack pointer (SP) tracking the last item pushed.`},
+
+{level:1,topic:'PIO',ref:'W2.1 GPIO: "What is Programmable I/O (PIO)?"',
+ q:`How does the lecture describe a PIO state machine on the RP2040/RP2350?`,
+ a:`A tiny independent "processor" that runs a custom I/O program separately from the main Cortex core`,
+ w:[[`A routine in the SDK that bit-bangs pins from the CPU's main loop`,`PIO exists precisely to eliminate CPU-intensive bit-banging.`],
+    [`A DMA channel that copies buffers between memory regions`,`DMA moves data blocks; PIO executes its own small instruction set that controls pins.`],
+    [`A fixed-function UART block with a programmable baud rate`,`PIO is general: it can build custom interfaces, including completely novel protocols.`]],
+ e:`PIO programs use only nine instructions (in, out, push, pull, mov, irq, wait, jmp, set). The CPU configures PIO, then PIO runs independently while <code>main()</code> continues.`},
+
+/* ===== LEVEL 2 ===== */
+{level:2,topic:'Pull-up / pull-down & floating inputs',ref:'W2.1 GPIO: "Pull-up", "Pull-down"',
+ q:`Which statement correctly compares a pull-up and a pull-down on a switch input?`,
+ a:`Pull-up: released = 1, pressed = 0 (active-low). Pull-down: released = 0, pressed = 1 (active-high)`,
+ w:[[`Pull-up: released = 0, pressed = 1. Pull-down: released = 1, pressed = 0`,`Reversed. A pull-up holds the pin HIGH until the switch connects it to GND.`],
+    [`Both give the same polarity; the resistor value only changes the speed`,`The resistor pulls toward different rails, so the polarity of "pressed" is opposite.`],
+    [`A pull-up turns the pin into an output that drives HIGH`,`The pull resistor is weak and passive; the pin remains an input.`]],
+ e:`With a pull-up (weak) and a switch to GND (strong), the open switch gives HIGH and pressing gives LOW. With a pull-down the reverse holds. "The circuit defines the convention," so software must interpret the level accordingly.`},
+
+{level:2,topic:'Outputs & LED current',ref:'W2.1 GPIO: "Outputs: push-pull"',
+ q:`Why is a GPIO output pin not treated as a power supply for a heavy load?`,
+ a:`A driven output is only a limited current source or sink; heavy loads need a driver or their own supply`,
+ w:[[`Outputs can only produce 0 V, never a HIGH level`,`A push-pull output drives toward the supply for 1 and toward GND for 0.`],
+    [`Outputs need an external pull-up before they can drive HIGH`,`A push-pull output actively drives both levels; pull-ups are an input-side technique here.`],
+    [`Outputs lose their level whenever the CPU executes an interrupt`,`Output latches hold their value independent of interrupts.`]],
+ e:`The slide says it plainly: a driven output is a limited current source or sink and NOT a power supply. Exceeding the pin's ratings risks wrong levels or damage.`},
+
+{level:2,topic:'Outputs & LED current',ref:'W2.1 GPIO: "An LED needs a current-limiting resistor"',
+ q:`What is the purpose of the series resistor between a GPIO output and an LED?`,
+ a:`It limits the current: the resistor drops the difference between the pin voltage and the LED's forward voltage`,
+ w:[[`It keeps the pin HIGH while the LED is off`,`That is a pull-up's job and applies to inputs; the resistor here is in the LED current path.`],
+    [`It converts the digital level into an analogue brightness`,`Brightness depends on current; a fixed resistor does not make the output analogue (PWM would vary the average).`],
+    [`It debounces the output when switching`,`Debouncing is for mechanical switch inputs, not LED outputs.`]],
+ e:`An LED has a roughly fixed forward drop and very low dynamic resistance, so without a resistor the current is not limited. The lecture estimate is I ≈ (V<sub>GPIO</sub> − V<sub>f</sub>)/R.`},
+
+{level:2,topic:'Edge vs level',ref:'W2.2 Interrupts: "Edges report change; levels report a condition"',
+ q:`A GPIO interrupt is configured as level-triggered on "input LOW". The ISR returns without removing the condition, and the input stays LOW. What happens?`,
+ a:`The ISR runs again immediately, because the level (condition) persists and the request is still asserted`,
+ w:[[`The request is cleared automatically on ISR return`,`Only an edge is a one-time transition; a level request remains while the condition is true.`],
+    [`The CPU permanently masks that interrupt after the first service`,`No automatic permanent masking; you must remove the condition or mask the source yourself.`],
+    [`The event is queued once and serviced later`,`A persistent level re-asserts the request; it is not a single queued event.`]],
+ e:`"An edge is a transition. A level is a condition that persists." Service the cause before returning: remove the condition or mask the source. This is also why ISRs usually clear the interrupt flag, otherwise they trigger again immediately.`},
+
+{level:2,topic:'Pending & event loss',ref:'W2.2 Interrupts: "Three gates decide whether an ISR can start"',
+ q:`What does it mean when an interrupt is "pending"?`,
+ a:`A request has been recorded, but the ISR only starts when the source, controller and CPU (mask + priority) all allow it`,
+ w:[[`The ISR is currently executing`,`The slide says it directly: "Pending does not mean running."`],
+    [`The ISR has finished and is waiting to return`,`Returning is part of the ISR's lifetime; pending is before service.`],
+    [`The CPU has saved context and is reading the vector table`,`That is the response stage after the CPU decides to take the interrupt.`]],
+ e:`Three gates: source enabled → interrupt controller line enabled → CPU mask and priority allow. "Masking does not necessarily erase an event," so an event can stay pending until the gates open.`},
+
+{level:2,topic:'Shared data & atomicity',ref:'W2.2 Interrupts: "Shared state can change between instructions"',
+ q:`Why does the lecture warn that <code>volatile</code> is not atomicity for a counter shared between an ISR and main code?`,
+ a:`volatile only forces the compiler to access memory; a read–modify–write is still several instructions that an interrupt can split`,
+ w:[[`volatile makes the variable read-only inside the ISR`,`volatile has no such access restriction.`],
+    [`volatile only works on local variables`,`It applies to any object; the problem is interleaving, not scope.`],
+    [`volatile disables interrupts around every access`,`volatile never touches interrupt masking.`]],
+ e:`Example from the slides: main reads 7, the ISR increments to 8, main writes back 7 + 1 = 8; the expected value was 9. Shared read–modify–write operations must be protected.`},
+
+{level:2,topic:'PIO',ref:'W2.1 GPIO: PIO slides',
+ q:`What is the main benefit of using PIO for a custom protocol instead of bit-banging in software?`,
+ a:`The state machine handles the precise pin timing independently, saving CPU time for other work`,
+ w:[[`PIO instructions execute on the CPU's floating-point unit and so run faster`,`PIO is a separate tiny processor with its own nine-instruction set.`],
+    [`PIO removes the need to know the board pinout`,`You still map GPIO pins and must read the pinout of the actual board.`],
+    [`PIO makes every other peripheral interrupt unnecessary`,`PIO complements the system; other peripherals still use interrupts as needed.`]],
+ e:`The slides: PIO "eliminates CPU-intensive bit-banging by managing custom protocols independently." The CPU configures the state machine, then <code>main()</code> can continue or sleep.`},
+
+{level:2,topic:'GPIO configuration',ref:'W2.1 GPIO: "The Pins with many Hats"',
+ q:`A pin supports GPIO, UART and PWM functions. What does pin multiplexing imply when you want to use it for PWM?`,
+ a:`You select one function to own the pin, after confirming the chosen pin actually supports it`,
+ w:[[`All functions drive the pin at once and their outputs are combined`,`Only one function owns the pin's output at a time.`],
+    [`Any pin on the chip can take any function`,`Each pin supports only certain functions; check the datasheet/pinout.`],
+    [`The attached pull resistor selects the function`,`Function selection is a pin-mux setting, not determined by the pull.`]],
+ e:`The slide says to select one output owner and confirm that the chosen pin supports that function.`},
+
+/* ===== LEVEL 3 (static) ===== */
+{level:3,topic:'GPIO configuration',ref:'W2.1 GPIO: "Configuring GPIO", "The same model appears in the Pico SDK"',
+ q:`You must configure GP15 as an LED output that starts OFF (LOW) without a glitch. Which sequence matches the lecture's pattern "identify → preload → enable → verify"?`,
+ a:`<code>gpio_init(15); gpio_put(15, 0); gpio_set_dir(15, GPIO_OUT);</code>`,
+ w:[[`<code>gpio_init(15); gpio_set_dir(15, GPIO_OUT); gpio_put(15, 0);</code>`,`The output driver is enabled before the safe level is preloaded, so the pin can briefly drive an unintended level.`],
+    [`<code>gpio_set_dir(15, GPIO_OUT); gpio_init(15); gpio_put(15, 0);</code>`,`Direction is set before the pin is initialised, relying on a guessed reset state.`],
+    [`<code>gpio_put(15, 1); gpio_init(15); gpio_set_dir(15, GPIO_OUT);</code>`,`Preloads HIGH (LED on) and before initialisation; wrong safe level and wrong order.`]],
+ e:`The SDK example is exactly: init → put 0 → set direction OUT. The driver is enabled only after the safe level is preloaded. "Follow the device sequence; do not rely on a guessed reset state."`},
+
+{level:3,topic:'Polling vs interrupt',ref:'W2.2 Interrupts: "A button arrives during useful work", "Polling discovers events when you ask"',
+ q:`A button produces a 20 ms pulse on an unlatched input while the CPU is busy for 200 ms in a loop that only polls the pin once per iteration. What is the likely outcome?`,
+ a:`The pulse can be missed, because an unlatched short pulse may disappear between polls; a latched or interrupt-recorded event would be remembered`,
+ w:[[`It is always detected, because the GPIO hardware buffers all pulses`,`A plain input does not buffer events; it only shows the level at the moment you read it.`],
+    [`It is detected twice, once on each edge`,`Edges are only seen if the loop samples while they exist; here the loop is busy.`],
+    [`It is always detected, since a 20 ms pulse is longer than any CPU instruction`,`The CPU is busy for 200 ms, ten times longer than the pulse, so the pulse can start and end between two polls.`]],
+ e:`"A latched event waits. A short, unlatched pulse may disappear." The question posed on the slide is: how can the MCU remember an event while the CPU is busy? An interrupt (pending bit) does exactly that.`},
+
+{level:3,topic:'ISR design',ref:'W2.2 Interrupts: "Capture now. Process later."',
+ q:`A UART ISR currently captures a byte, parses the whole command, and prints a log line with <code>printf</code>. Which piece of work should be moved out of the ISR into the main loop or a task?`,
+ a:`Parsing the command and printing/logging it`,
+ w:[[`Reading the received byte from the peripheral`,`Capturing and draining the source is the ISR's job; it also makes the interrupt go quiet.`],
+    [`Pushing the byte into a ring buffer`,`This is bounded, short capture work that belongs in the ISR.`],
+    [`Setting a flag to notify the main loop`,`Notifying is explicitly part of the ISR's role (capture, acknowledge, notify).`]],
+ e:`ISR: capture, acknowledge, notify. Main loop/task: parse, compute, update/log. The lecture also says never put an infinite loop or <code>printf</code> in an ISR; "short, bounded work keeps the rest of the system responsive."`},
+
+{level:3,topic:'ISR design',ref:'W2.2 Interrupts: "Configure First, Enable Last"',
+ q:`Which sequence follows the rule "Configure first, enable last" for a new GPIO interrupt?`,
+ a:`Keep the source disabled → set the trigger mode → install the handler and initialise shared state → clear stale status and set priority → enable the source and route`,
+ w:[[`Enable the interrupt controller line → set trigger mode → install handler → clear stale status`,`The IRQ could fire before the handler and shared state are ready, or because of stale status.`],
+    [`Install handler → enable source → set trigger mode → clear stale status`,`The source is enabled before the trigger mode is set and stale status is cleared; a spurious ISR is possible.`],
+    [`Enable source → install handler → initialise shared state → set priority`,`Enabling must come last; the ISR could run on uninitialised data.`]],
+ e:`Five steps from the slide: (1) keep the source disabled; (2) set pin/timer/trigger mode; (3) install handler and initialise shared state; (4) clear stale status, set priority; (5) enable the intended source and route.`},
+
+/* ===== LEVEL 4 (static) ===== */
+{level:4,topic:'Shared data & atomicity',ref:'W2.2 Interrupts: "Shared state can change between instructions"',
+ q:`Both main code and an ISR execute <code>count++</code> on a shared variable. With <code>count = 7</code>: main reads 7, is interrupted, the ISR makes it 8, main resumes and writes 8. The expected value was 9. Which fix is correct?`,
+ a:`Make the read–modify–write atomic with respect to the ISR (briefly mask the interrupt or use an atomic operation), or let only one side modify the variable`,
+ w:[[`Declare <code>count</code> as <code>volatile</code>`,`volatile forces memory access but does not make a multi-instruction read–modify–write indivisible.`],
+    [`Shorten the ISR so it finishes faster`,`The window between main's read and write still exists; a shorter ISR only makes the bug rarer.`],
+    [`Raise the ISR's priority`,`The ISR already pre-empts main; priority does not make main's update uninterruptible.`]],
+ e:`The race exists because the ISR can run between main's read and write. "volatile is not atomicity. Protect shared read–modify–write operations." Alternatively use a flag-style handoff (<code>take_and_clear</code> must be atomic relative to the ISR).`},
+
+{level:4,topic:'Pending & event loss',ref:'W2.2 Interrupts: "One pending bit is not an event queue"',
+ q:`Three rising edges arrive on an edge-triggered source while its ISR cannot yet start. Only the pending bit records the event. What happens once the ISR may run, and how could you count all three?`,
+ a:`The ISR typically runs once for "at least one event"; to count every edge use a hardware counter, FIFO or bounded queue`,
+ w:[[`The ISR runs exactly three times because each edge queues a request`,`One pending bit is not an event queue; extra edges while pending coalesce.`],
+    [`The ISR never runs because edges during the blocked period are erased`,`"Masking does not necessarily erase an event"; the pending bit can remain set.`],
+    [`The ISR runs twice: once for the first edge and once for the remaining two`,`No such rule exists; with a single pending bit the requests coalesce into one.`]],
+ e:`The slide shows 3 events → PENDING = 1 → one service. If every event matters, put the counting in hardware (counter/FIFO) or a bounded queue; software telemetry can still miss events.`},
+
+{level:4,topic:'ISR design',ref:'W2.2 Interrupts: "Debug the event path one link at a time"',
+ q:`A falling-edge GPIO interrupt never runs. A scope shows clean falling edges on the pin, and a spare GPIO toggled at ISR entry never changes. Following the lecture's debug chain (event → enabled → handler → cleared), what should you check next?`,
+ a:`Whether the full enable path is on: the pin's interrupt source, the interrupt controller line and the core's mask`,
+ w:[[`Whether the interrupt cause is cleared inside the ISR`,`That is the last link and only matters after the ISR actually runs.`],
+    [`Whether an event exists on the pin`,`Already confirmed by the scope, so the first link is satisfied.`],
+    [`Add a <code>printf</code> at ISR entry to see if it runs`,`<code>printf</code> in an ISR is discouraged, and the spare-GPIO probe already tells you the ISR is not entered.`]],
+ e:`Chain: EVENT? (pin/timer/status) → ENABLED? (source + controller + core) → HANDLER? (correct entry/callback) → CLEARED? (cause serviced). The event exists, so the next link to verify is whether everything is enabled.`},
+
+{level:4,topic:'Priority & timing',ref:'W2.2 Interrupts: "A higher-priority IRQ may interrupt an ISR"',
+ q:`A low-priority ISR needs 100 µs and starts at t = 0. A high-priority IRQ arrives at t = 40 µs and its ISR needs 30 µs. Ignoring entry/exit overhead, when do the ISRs complete?`,
+ a:`High-priority ISR completes at 70 µs; low-priority ISR completes at 130 µs`,
+ w:[[`High-priority ISR completes at 70 µs; low-priority ISR completes at 100 µs`,`Pre-emption is not free: the low ISR has to wait 30 µs while the high ISR runs, so it finishes later.`],
+    [`High-priority ISR completes at 140 µs; low-priority ISR completes at 100 µs`,`That assumes no pre-emption; a higher-priority IRQ pre-empts the lower one.`],
+    [`High-priority ISR completes at 70 µs; low-priority ISR completes at 170 µs`,`Adds the 40 µs already executed again; the low ISR resumes with 60 µs left from t = 70 µs.`]],
+ e:`High ISR: 40 → 70 µs. The low ISR ran 40 µs, pauses, resumes at 70 µs with 60 µs remaining, so it finishes at 130 µs (= 100 + 30). "Priority chooses who waits. It does not create more CPU time."`},
+
+{level:4,topic:'Polling vs interrupt',ref:'W2.2 Interrupts: "Choose the mechanism to fit the workload"',
+ q:`Match the mechanism to the workload: (i) a rare button press that must wake a sleeping system; (ii) a sustained high-rate sample stream from a peripheral; (iii) a short, predictable wait where simple control flow is preferred.`,
+ a:`(i) interrupt; (ii) DMA + interrupt on completed block; (iii) polling`,
+ w:[[`(i) polling; (ii) interrupt per sample; (iii) DMA`,`Polling a sleeping system defeats sleep; an interrupt per sample at high rates wastes CPU; DMA is excessive for a short wait.`],
+    [`(i) DMA + interrupt; (ii) polling; (iii) interrupt`,`DMA suits sustained streams, not a rare button; polling a sustained stream burns CPU.`],
+    [`(i) interrupt; (ii) polling; (iii) DMA + interrupt`,`(i) is right, but a sustained stream wants DMA with a completion interrupt, and a short predictable wait is simplest by polling.`]],
+ e:`Poll: short, predictable wait, simple control flow. Interrupt: sporadic or time-sensitive events, sleeping between events. DMA + interrupt: sustained data stream, lower per-item CPU overhead. Choose using event rate, deadline, CPU cost and complexity.`},
+
+{level:4,topic:'Handshaking',ref:'W2.1 GPIO: "Handshaking lets the receiver respond"',
+ q:`A sender puts data on pins and pulses REQ for 10 µs, then removes the data whether or not the receiver has captured it. What is the main design flaw?`,
+ a:`The data is not held until the receiver accepts it (ACK); the handshake needs defined timing, signal polarity and a timeout`,
+ w:[[`REQ must always be active-low, so the polarity is wrong`,`Either polarity works as long as it is defined and used consistently.`],
+    [`The data lines need pull-up resistors`,`Pulls give inputs a known level but do not provide acceptance feedback.`],
+    [`Handshaking requires the sender to use an interrupt`,`Handshaking is a signalling protocol; it can be implemented by polling or interrupts.`]],
+ e:`Slide: SENDER → DATA, REQ: data ready, ACK: captured. "Hold data until accepted. Define timing, signal polarity, and a timeout."`},
+
+/* ===== LEVEL 5 (static) ===== */
+{level:5,topic:'Edge vs level',ref:'W2.2 Interrupts: "Edges report change; levels report a condition", "One button press may create many edges"',
+ q:`An active-low button (with pull-up) is wired to a <em>level-triggered</em> "input LOW" interrupt. The ISR only sets a flag and returns. The user holds the button for 300 ms. What is the likely behaviour and the best fix?`,
+ a:`The ISR re-fires repeatedly while the pin stays LOW; use a falling-edge trigger, or mask the source in the ISR and re-enable it after release and debounce`,
+ w:[[`The ISR runs once, because the pull-up clears the interrupt automatically`,`A level request stays asserted while the condition holds; nothing clears it automatically.`],
+    [`The ISR runs once per millisecond; fix it by calling <code>sleep_ms(300)</code> inside the ISR`,`Blocking inside an ISR starves the system; debounce with time and state outside the ISR.`],
+    [`The ISR runs once per press; just raise its priority`,`Priority does not remove a persisting level condition and can make starvation worse.`]],
+ e:`"Service the cause before returning": for a GPIO level, the input is held active, so remove the condition or mask the source. A falling-edge trigger reports only the change. Combine with time-and-state debouncing, since one press can create many edges.`},
+
+{level:5,topic:'Pending & event loss',ref:'W2.2 Interrupts: "Three gates", "One pending bit is not an event queue"',
+ q:`Interrupts are masked at the CPU for 5 ms inside a critical section. During that time four rising edges occur on an edge-triggered GPIO source whose source and controller enables are on. What is the most defensible expectation when the CPU unmasks?`,
+ a:`The event can remain pending so the ISR typically runs, but only once: the four edges are not individually counted (details are device-specific)`,
+ w:[[`All four edges are lost, because masking erases events`,`"Masking does not necessarily erase an event"; the pending bit can remain set.`],
+    [`The ISR already ran four times during the masked period`,`While masked the CPU cannot start the ISR; masking is the CPU gate.`],
+    [`The ISR runs exactly four times right after unmasking`,`A single pending bit is not an event queue; the edges coalesce.`]],
+ e:`The three gates (source enabled, controller enabled, CPU mask/priority allowing) must all be open for the ISR to start. A masked event can still be recorded as pending, but one pending bit collapses multiple events. Use a hardware counter, FIFO or queue if every event matters.`},
+
+{level:5,topic:'Priority & timing',ref:'W2.2 Interrupts: "Too many interrupts can consume the CPU", "Polling vs Interrupt"',
+ q:`A system's average ISR load is only 2%, yet a sporadic sensor ISR sometimes misses its 100 µs deadline. Which explanation is consistent with the lecture?`,
+ a:`Low average load does not prove deadlines are met: a higher-priority ISR, a masked section or coincident IRQs can delay the response beyond h + c ≤ D`,
+ w:[[`A 2% load is already too high for any deadline to be met`,`2% is small; deadline analysis concerns worst-case latency, not a load threshold.`],
+    [`Deadlines depend only on average load, so the measurement must be wrong`,`The slide says the opposite: "Low average load does not prove that deadlines are met."`],
+    [`Once an IRQ is pending, hardware guarantees it is serviced within h`,`h is only the hardware response time; masking, priority and other ISRs add delay before service starts.`]],
+ e:`For interrupts the constraint is h + c ≤ D ≤ T, where h is hardware response time and c is CPU handling time. Worst-case waiting (pre-emption by higher-priority ISRs, masked regions) can break the deadline even when average load is small.`},
+
+{level:5,topic:'ISR design',ref:'W2.2 Interrupts: "Capture now. Process later.", "Writing an ISR"',
+ q:`A UART receives bursts of data while the main loop spends 50 ms updating a display. Which design best fits the lecture's guidance?`,
+ a:`A UART ISR drains the FIFO into a bounded ring buffer and notifies; the main loop parses the data later`,
+ w:[[`The ISR parses the complete packet and prints a log line with <code>printf</code>`,`Too much work in the ISR and <code>printf</code> is forbidden there; other interrupts and the system suffer.`],
+    [`Poll the UART once per 50 ms main-loop pass`,`The FIFO can overflow during the 50 ms; polling is only suited to short, predictable waits.`],
+    [`The ISR reads one byte, then loops forever waiting for the next byte`,`Never put an infinite loop in an ISR; it blocks everything of lower priority and the main code.`]],
+ e:`ISR: capture, acknowledge, notify (drain enough of the FIFO so the interrupt goes quiet). Main loop/task: parse, compute, update/log. Short, bounded work in the ISR keeps the rest of the system responsive, and the buffer must be bounded.`},
+
+{level:5,topic:'Platforms (RP2040 / RP2350)',ref:'W2.2 Interrupts: "Same fundamentals, different entry machinery"',
+ q:`Which statement is correct when comparing RP2040 (Cortex-M0+), RP2350 (Cortex-M33) and RP2350 (Hazard3 RISC-V)?`,
+ a:`The event → request → save → service → resume model applies to all; the entry machinery differs (NVIC + vector table vs Xh3irq with trap entry and software dispatch)`,
+ w:[[`Hazard3 also uses the NVIC with a vector table exactly as the Arm cores do`,`The slide lists Xh3irq with trap entry → software dispatch for Hazard3.`],
+    [`Interrupt service routines do not exist on RISC-V cores`,`The same model applies; only the interrupt controller and entry path differ.`],
+    [`Only the RP2040 has an interrupt controller; RP2350 polls everything`,`Both RP2350 CPU choices handle interrupts (NVIC on M33, Xh3irq on Hazard3).`]],
+ e:`"The event → request → service → resume model still applies." A portable SDK (e.g. <code>gpio_set_irq_enabled_with_callback</code>) keeps application intent clear, but you still need a build for the selected target.`}
+];
+
+/* ---------- Randomised calculation generators ---------- */
+function genLED(){
+  const Vf=pick([1.8,2.0,2.1,2.2]), R=pick([330,470,680,1000,1500,2200]);
+  const mA=x=>x.toFixed(2)+' mA';
+  const I=(3.3-Vf)/R*1000;
+  return {level:3,topic:'Outputs & LED current',ref:'W2.1 GPIO: "An LED needs a current-limiting resistor"',
+    q:`A GPIO output drives HIGH at 3.3 V. It feeds an LED (forward voltage V<sub>f</sub> = ${Vf.toFixed(1)} V) in series with a ${R} Ω resistor to GND. Using the lecture's estimate I ≈ (V<sub>GPIO</sub> − V<sub>f</sub>) / R, what is the LED current? (Answer in mA, 2 decimal places.)`,
+    a:mA(I),
+    w:[[mA(3.3/R*1000),`Ignores the LED's forward voltage: the resistor only sees 3.3 V − V<sub>f</sub>, not the full 3.3 V.`],
+       [mA(Vf/R*1000),`Uses the LED voltage across the resistor. The resistor drops the <em>difference</em> (3.3 − ${Vf.toFixed(1)}) V.`],
+       [mA((3.3+Vf)/R*1000),`Adds the voltages; the LED's forward drop reduces the voltage across the resistor, it does not increase it.`]],
+    e:`Voltage across the resistor = 3.3 − ${Vf.toFixed(1)} = ${(3.3-Vf).toFixed(2)} V.<br>I = ${(3.3-Vf).toFixed(2)} V / ${R} Ω = ${(I/1000).toFixed(5)} A = <strong>${mA(I)}</strong>.`,
+    meta:{kind:'led',Vf,R}};
+}
+
+function genMask(){
+  const kind=pick(['set','clear','toggle']);
+  const s=rnd(0x11,0xEE);
+  const idx=[0,1,2,3,4,5,6,7];
+  let expr,res,mask,pool,how;
+  if(kind==='set'){
+    const zeros=idx.filter(i=>!((s>>i)&1)); if(!zeros.length) return null;
+    const n=pick(zeros); mask=1<<n; res=(s|mask)&255;
+    const adj=n<7?n+1:n-1;
+    expr=`OUT |= (1u &lt;&lt; ${n});`;
+    how=`OUT | mask = ${bin(s)} | ${bin(mask)} = ${bin(res)}`;
+    pool=[[mask,`That is <code>OUT = mask</code>: it replaces the whole port instead of preserving the other bits.`],
+          [(s&~mask)&255,`That clears bit ${n} (AND with ~mask) instead of setting it.`],
+          [(s|(1<<adj))&255,`Sets bit ${adj} instead of bit ${n}: an off-by-one in the bit index.`],
+          [(~s)&255,`Inverts every bit; <code>|=</code> only forces the chosen bit to 1.`]];
+  } else if(kind==='clear'){
+    const ones=idx.filter(i=>(s>>i)&1); if(!ones.length) return null;
+    const n=pick(ones); mask=1<<n; res=(s&~mask)&255;
+    const adj=n<7?n+1:n-1;
+    expr=`OUT &amp;= ~(1u &lt;&lt; ${n});`;
+    how=`~mask = ${bin(~mask)}; OUT &amp; ~mask = ${bin(s)} &amp; ${bin(~mask)} = ${bin(res)}`;
+    pool=[[(s&mask)&255,`That is <code>OUT &amp; mask</code> (forgot the <code>~</code>): it keeps only bit ${n} and wipes the others.`],
+          [(s|mask)&255,`That is setting the bit (OR) rather than clearing it.`],
+          [(s&~(1<<adj))&255,`Clears bit ${adj} instead of bit ${n}: an off-by-one in the bit index.`],
+          [(~s)&255,`Inverts every bit; clearing needs AND with the inverted mask.`],
+          [(~mask)&255,`That is <code>OUT = ~mask</code>: it overwrites the port rather than preserving the other bits.`]];
+  } else {
+    const a=rnd(0,7); let b=rnd(0,7); while(b===a) b=rnd(0,7);
+    const m1=1<<a,m2=1<<b; mask=m1|m2; res=(s^mask)&255;
+    expr=`OUT ^= (1u &lt;&lt; ${a}) | (1u &lt;&lt; ${b});`;
+    how=`mask = ${bin(mask)}; OUT ^ mask = ${bin(s)} ^ ${bin(mask)} = ${bin(res)}`;
+    pool=[[(s^m1)&255,`Toggles only bit ${a}; the mask includes bit ${b} as well.`],
+          [(s^m2)&255,`Toggles only bit ${b}; the mask includes bit ${a} as well.`],
+          [mask,`That is <code>OUT = mask</code>: it replaces the whole port.`],
+          [(s|mask)&255,`That sets both bits (OR) rather than toggling them.`],
+          [(s&~mask)&255,`That clears both bits (AND with ~mask) rather than toggling them.`],
+          [(~s)&255,`Toggles all eight bits; only the two masked bits should change.`]];
+  }
+  const seen=new Set([res]); const w=[];
+  shuffle(pool).forEach(p=>{ if(w.length<3 && !seen.has(p[0])){seen.add(p[0]); w.push([hex(p[0]),p[1]]);} });
+  if(w.length<3) return null;
+  return {level:3,topic:'Registers & bit masks',ref:'W2.1 GPIO: "A mask selects the bits you mean", "Change your bit without replacing the port"',
+    q:`An 8-bit output register holds <code>OUT = ${hex(s)}</code> (binary ${bin(s)}). After <code>${expr}</code> executes, what does OUT contain?`,
+    a:hex(res), w,
+    e:`Start: ${hex(s)} = ${bin(s)}<br>${how}<br>Result: <strong>${hex(res)}</strong>. The set/clear/toggle idioms (<code>|=</code>, <code>&amp;= ~</code>, <code>^=</code>) preserve the other bits; <code>OUT = mask</code> would overwrite them.`,
+    meta:{kind:'mask',op:kind,s,mask,res}};
+}
+
+function genDebounce(){
+  const B=rnd(3,12), S=pick([20,30,40,50]);
+  return {level:3,topic:'Polling & debouncing',ref:'W2.1 GPIO: "Switch bounce", "Debouncing"',
+    q:`A switch is pressed at t = 0. The raw pin bounces and its <em>last</em> raw change happens at t = ${B} ms, after which it stays LOW. The debounce logic restarts a stability timer on every raw change and accepts a state once it has stayed stable for ${S} ms. At what time (after first contact) is the press accepted?`,
+    a:`${B+S} ms`,
+    w:[[`${S} ms`,`Assumes the timer starts at first contact. It restarts on every raw change, so it effectively starts at t = ${B} ms.`],
+       [`${B} ms`,`That is only when the bouncing ends; the state must then stay stable for ${S} ms.`],
+       [`${B+2*S} ms`,`Counts the stability period twice; it is applied once after the last raw change.`],
+       [`${B+S/2} ms`,`Uses half the stability time; the logic requires the full ${S} ms.`]],
+    e:`The timer restarts at each raw change, so the last restart is at t = ${B} ms. The state is accepted after ${S} ms more: ${B} + ${S} = <strong>${B+S} ms</strong>. One accepted press, one event.`,
+    meta:{kind:'deb',B,S}};
+}
+
+function genISRLoad(){
+  const f=pick([1,2,5,10,20,25]), c=pick([8,15,20,30,40]); const prod=f*c;
+  if(prod>600) return null;
+  const ms=x=>fmt(x,1)+' ms';
+  return {level:4,topic:'Priority & timing',ref:'W2.2 Interrupts: "Too many interrupts can consume the CPU"',
+    q:`A periodic timer interrupt fires at ${f} kHz and each ISR execution takes ${c} µs (ignore entry/exit overhead). Using ISR load ≈ event rate × time per ISR, how many milliseconds of CPU time <em>per second</em> remain for the main loop?`,
+    a:ms(1000-prod),
+    w:[[ms(prod),`That is the CPU time the ISR consumes each second, not what remains.`],
+       [ms(1000-prod/10),`Uses the load percentage (${fmt(prod/10,1)}%) as if it were milliseconds.`],
+       [ms(100-prod/10),`That is the remaining <em>percentage</em> (100 − ${fmt(prod/10,1)}), mislabelled as milliseconds.`],
+       [ms(prod/10),`That is the ISR load in percent, not a time per second.`]],
+    e:`Rate = ${f} kHz = ${f*1000} events/s; c = ${c} µs = ${c}×10<sup>-6</sup> s.<br>ISR load = ${f*1000} × ${c}×10<sup>-6</sup> = ${fmt(prod/1000,4)} = ${fmt(prod/10,1)}% of the CPU, i.e. ${prod} ms of each second.<br>Remaining for main: 1000 − ${prod} = <strong>${1000-prod} ms/s</strong>. (As the slide warns, a low average load still does not prove deadlines are met.)`,
+    meta:{kind:'load',f,c}};
+}
+
+function genPoll(){
+  const D=pick([40,50,60,80,100]), c=pick([5,8,10,12,15]), T=D+pick([20,40,60]);
+  return {level:4,topic:'Polling vs interrupt',ref:'W2.2 Interrupts: "Polling vs Interrupt" constraints',
+    q:`Events can occur as close together as T = ${T} ms. Each must be handled within a deadline D = ${D} ms, and handling takes c = ${c} ms of CPU. Using the lecture's worst case (an event waits p + c to be processed) with 2c ≤ c + p ≤ D ≤ T, what is the largest polling period p?`,
+    a:`${D-c} ms`,
+    w:[[`${D} ms`,`Forgets that handling takes c ms after detection; p + c must fit inside D.`],
+       [`${T-c} ms`,`Uses T instead of the deadline D; the deadline is the binding constraint here.`],
+       [`${D-2*c} ms`,`Subtracts c twice; the worst case is one polling period plus one handling time.`],
+       [`${T} ms`,`The period must be well below T and, more strictly, leave room for c before D.`]],
+    e:`Worst-case latency = p + c ≤ D, so p ≤ D − c = ${D} − ${c} = <strong>${D-c} ms</strong>. Check: p must also exceed c (${D-c} > ${c} ✓) and D ≤ T (${D} ≤ ${T} ✓).`,
+    meta:{kind:'poll',D,c,T}};
+}
+
+function genPIO(){
+  const d=pick([9,19,29]), k=pick([1,2,3,4,9]), fclk=pick([1000,2000,5000,10000]);
+  const cycHalf=(k+1)*(d+1), cyc=2*cycHalf;
+  const fo=fclk/cyc; const Hz=x=>x.toFixed(2)+' Hz';
+  return {level:4,topic:'PIO',ref:'W2.1 GPIO: "A Simple PIO Example"',
+    q:`A PIO program runs on a state machine clocked at ${fclk} Hz. Every instruction takes 1 cycle plus its delay. The loop is: <code>set pins, 1 [${d}]</code>, then ${k} × <code>nop [${d}]</code>, then <code>set pins, 0 [${d}]</code>, then ${k} × <code>nop [${d}]</code>, then wrap. What is the output waveform frequency? (2 decimal places)`,
+    a:Hz(fo),
+    w:[[Hz(fclk/(2*(k+1))),`Ignores the delay cycles: each instruction with [${d}] takes ${d+1} cycles, not 1.`],
+       [Hz(fclk/cycHalf),`Uses only the HIGH half as the whole period; a period is HIGH plus LOW.`],
+       [Hz(fclk/(2*k*(d+1))),`Forgets that the <code>set</code> instruction itself also takes ${d+1} cycles.`],
+       [Hz(fclk/(2*(k+1)*d)),`Uses ${d} cycles per instruction instead of 1 + ${d} = ${d+1}.`]],
+    e:`Cycles per instruction = 1 + ${d} = ${d+1}.<br>HIGH half = (1 set + ${k} nop) × ${d+1} = ${cycHalf} cycles; LOW half is the same, so period = ${cyc} cycles.<br>f = ${fclk} / ${cyc} = <strong>${Hz(fo)}</strong>. (The slide example, 2 kHz with 100 + 100 cycles, gives 10 Hz.)`,
+    meta:{kind:'pio',d,k,fclk}};
+}
+
+function genTwoISR(){
+  const f1=pick([1,2,5,10]), c1=pick([10,20,30]), f2=pick([0.5,1,2,4]), c2=pick([40,60,100,150]);
+  const p1=f1*c1, p2=f2*c2, total=p1+p2; if(total>700) return null;
+  const rem=1000-total; const r=rem+pick([-120,-60,60,120]); if(r<=0) return null;
+  const st=v=> v>=r ? `Yes: ${fmt(v,1)} ms/s remain, ${fmt(v-r,1)} ms/s spare` : `No: only ${fmt(v,1)} ms/s remain, short by ${fmt(r-v,1)} ms/s`;
+  return {level:5,topic:'Priority & timing',ref:'W2.2 Interrupts: "Too many interrupts can consume the CPU"',
+    q:`Two ISRs share one CPU core: a timer ISR (${f1} kHz, ${c1} µs per execution) and a UART ISR (${f2} kHz on average, ${c2} µs per execution). The main task needs ${r} ms of CPU time every second. Ignoring entry/exit overhead and nesting effects, which statement is correct?`,
+    a:st(rem),
+    w:[[st(1000-p1),`Counts only the timer ISR; the UART ISR also consumes f × c = ${fmt(p2,1)} ms every second.`],
+       [st(1000-p2),`Counts only the UART ISR; the timer ISR consumes ${fmt(p1,1)} ms every second as well.`],
+       [st(1000-p1-p2/10),`Divides the UART ISR's cost by 10 (a unit slip). f(kHz) × c(µs) already gives ms per second.`],
+       [st(1000-total/10),`Divides the total by 10, which converts to a percentage, not to the ms-per-second figure.`]],
+    e:`Timer ISR: ${f1} kHz × ${c1} µs = ${fmt(p1,1)} ms/s. UART ISR: ${f2} kHz × ${c2} µs = ${fmt(p2,1)} ms/s.<br>Total ISR time = ${fmt(total,1)} ms/s (${fmt(total/10,1)}% load), leaving 1000 − ${fmt(total,1)} = <strong>${fmt(rem,1)} ms/s</strong> versus the ${r} ms/s required, so: ${st(rem)}.<br>Even when capacity suffices, average load alone does not prove individual deadlines are met.`,
+    meta:{kind:'two',f1,c1,f2,c2,r}};
+}
+
+const GENS=[genLED,genMask,genDebounce,genISRLoad,genPoll,genPIO,genTwoISR];
+
+function validQ(d){
+  if(!d||!d.w||d.w.length<3) return false;
+  const t=[d.a].concat(d.w.map(x=>x[0]));
+  return new Set(t).size===t.length;
+}
+function tryGen(fn){
+  for(let i=0;i<1000;i++){ const d=fn(); if(validQ(d)) return d; }
+  throw new Error('generator failed: '+fn.name);
+}
+function materialize(d){
+  const opts=shuffle([{t:d.a,ok:true,r:''}].concat(d.w.map(x=>({t:x[0],ok:false,r:x[1]}))));
+  return {level:d.level,topic:d.topic,ref:d.ref,q:d.q,e:d.e,opts,correct:opts.findIndex(o=>o.ok),
+          sel:null,submitted:false,meta:d.meta||null,a:d.a};
+}
+function buildQuiz(){
+  const all=[];
+  STATIC.forEach(d=>all.push(materialize(d)));
+  GENS.forEach(g=>all.push(materialize(tryGen(g))));
+  const by={1:[],2:[],3:[],4:[],5:[]};
+  all.forEach(q=>by[q.level].push(q));
+  const out=[];
+  [1,2,3,4,5].forEach(l=>shuffle(by[l]).forEach(q=>out.push(q)));
+  return out;
+}
+</script>
+
+<script id="ui">
+/* ================= UI ================= */
+const $=id=>document.getElementById(id);
+let quiz=[], cur=0;
+
+function show(id){ ['start','quiz','results'].forEach(s=>{$(s).hidden=(s!==id);}); window.scrollTo(0,0); }
+function stats(){
+  const ans=quiz.filter(q=>q.submitted);
+  const c=ans.filter(q=>q.sel===q.correct).length;
+  return {answered:ans.length,correct:c,wrong:ans.length-c,total:quiz.length};
+}
+function startQuiz(){ quiz=buildQuiz(); cur=0; show('quiz'); render(); }
+
+function render(){
+  const q=quiz[cur], st=stats(), L='ABCDE';
+  $('qnum').textContent='Question '+(cur+1)+' of '+quiz.length;
+  const lv=$('lvl'); lv.textContent='Level '+q.level+' · '+LEVELS[q.level]; lv.className='badge l'+q.level;
+  $('topic').textContent=q.topic;
+  $('bar').style.width=(st.answered/quiz.length*100)+'%';
+  $('sc-c').textContent=st.correct; $('sc-w').textContent=st.wrong;
+  $('sc-p').textContent=st.answered?Math.round(st.correct/st.answered*100)+'%':'–';
+  $('qtext').innerHTML=q.q;
+
+  $('chips').innerHTML=quiz.map((x,i)=>{
+    let cls='chip'+(i===cur?' cur':'')+(x.submitted?(x.sel===x.correct?' right':' wrong'):'');
+    return '<button class="'+cls+'" data-j="'+i+'" title="Question '+(i+1)+' (level '+x.level+')">'+(i+1)+'</button>';
+  }).join('');
+
+  $('opts').innerHTML=q.opts.map((o,i)=>{
+    let cls='opt';
+    if(q.submitted){ if(i===q.correct) cls+=' right'; else if(i===q.sel) cls+=' wrong'; }
+    else if(i===q.sel) cls+=' sel';
+    return '<button class="'+cls+'" data-i="'+i+'"'+(q.submitted?' disabled':'')+'><span class="L">'+L[i]+'</span><span>'+o.t+'</span></button>';
+  }).join('');
+
+  const fb=$('fb');
+  if(q.submitted){
+    const ok=q.sel===q.correct;
+    let why=q.opts.map((o,i)=>o.ok?'':'<li><strong>'+L[i]+'.</strong> '+o.r+'</li>').join('');
+    fb.className='fb '+(ok?'right':'wrong'); fb.hidden=false;
+    fb.innerHTML='<h3>'+(ok?'✓ Correct':'✗ Incorrect')+'</h3>'+
+      (ok?'':'<div>Correct answer: <strong>'+L[q.correct]+'.</strong> '+q.opts[q.correct].t+'</div>')+
+      '<div class="expl">'+q.e+'</div>'+
+      '<div><strong>Why the other options are wrong</strong><ul>'+why+'</ul></div>'+
+      '<div class="ref">Revisit: '+q.ref+'</div>';
+  } else { fb.hidden=true; fb.innerHTML=''; }
+
+  $('submitBtn').disabled=q.submitted||q.sel===null;
+  $('prevBtn').disabled=cur===0;
+  const all=st.answered===quiz.length;
+  const nb=$('nextBtn');
+  if(cur<quiz.length-1){ nb.textContent='Next →'; nb.disabled=false; }
+  else { nb.textContent=all?'See results':'Next unanswered →'; nb.disabled=false; }
+  $('finishRow').hidden=!all;
+}
+
+function selectOpt(i){ const q=quiz[cur]; if(q.submitted) return; q.sel=i; render(); }
+function submitAns(){ const q=quiz[cur]; if(q.submitted||q.sel===null) return; q.submitted=true; render(); }
+function nextQ(){
+  if(cur<quiz.length-1){ cur++; render(); window.scrollTo(0,0); return; }
+  const un=quiz.findIndex(q=>!q.submitted);
+  if(un===-1) showResults(); else { cur=un; render(); window.scrollTo(0,0); }
+}
+function prevQ(){ if(cur>0){ cur--; render(); window.scrollTo(0,0);} }
+
+function showResults(){
+  const st=stats(), L='ABCDE';
+  const pct=Math.round(st.correct/st.total*100);
+  const byLevel=[1,2,3,4,5].map(l=>{
+    const qs=quiz.filter(q=>q.level===l), c=qs.filter(q=>q.sel===q.correct).length;
+    return {l,n:qs.length,c,p:qs.length?c/qs.length:0};
+  });
+  const topics={};
+  quiz.forEach(q=>{
+    const t=topics[q.topic]||(topics[q.topic]={n:0,c:0,refs:new Set()});
+    t.n++; if(q.sel===q.correct) t.c++; else t.refs.add(q.ref);
+  });
+  const tlist=Object.keys(topics).map(k=>({name:k,n:topics[k].n,c:topics[k].c,refs:Array.from(topics[k].refs)}));
+  const weak=tlist.filter(t=>t.c<t.n).sort((a,b)=>a.c/a.n-b.c/b.n);
+  const meterCls=p=>p>=0.75?'':(p>=0.5?'mid':'low');
+
+  let h='<div class="card"><h1>Results</h1>'+
+    '<div class="row" style="gap:28px;margin:10px 0">'+
+    '<div><div class="big">'+st.correct+' / '+st.total+'</div><div class="sub" style="margin:0">Total score</div></div>'+
+    '<div><div class="big">'+pct+'%</div><div class="sub" style="margin:0">Overall percentage</div></div>'+
+    '<div><div class="big" style="color:var(--ok)">'+st.correct+'</div><div class="sub" style="margin:0">Correct</div></div>'+
+    '<div><div class="big" style="color:var(--bad)">'+st.wrong+'</div><div class="sub" style="margin:0">Incorrect</div></div></div>'+
+    '<button class="btn primary" id="restartBtn">Restart quiz (fresh numbers and order)</button></div>';
+
+  h+='<div class="card"><h2>Performance by difficulty level</h2><table><tr><th>Level</th><th>Score</th><th style="width:40%">Accuracy</th></tr>'+
+    byLevel.map(x=>'<tr><td><span class="badge l'+x.l+'">L'+x.l+'</span> '+LEVELS[x.l]+'</td><td>'+x.c+' / '+x.n+'</td><td><div class="meter"><div class="'+meterCls(x.p)+'" style="width:'+Math.round(x.p*100)+'%"></div></div></td></tr>').join('')+
+    '</table></div>';
+
+  h+='<div class="card"><h2>Concepts to revisit</h2>';
+  if(!weak.length) h+='<p>No missed topics. Re-run the quiz to practise with new numerical values.</p>';
+  else {
+    h+='<div class="note">Topics where you lost marks, weakest first. Re-read the slide sections listed under each.</div><table><tr><th>Topic</th><th>Score</th><th>Slides to review</th></tr>'+
+      weak.map(t=>'<tr><td>'+t.name+'</td><td>'+t.c+' / '+t.n+'</td><td>'+t.refs.join('<br>')+'</td></tr>').join('')+'</table>';
+  }
+  const strong=tlist.filter(t=>t.c===t.n).map(t=>t.name);
+  if(strong.length) h+='<p class="sub" style="margin-top:12px">Solid topics: '+strong.join(', ')+'.</p>';
+  h+='</div>';
+
+  h+='<div class="card"><h2>Full review</h2>'+quiz.map((q,i)=>{
+    const ok=q.sel===q.correct;
+    const why=q.opts.map((o,j)=>o.ok?'':'<li><strong>'+L[j]+'.</strong> '+o.r+'</li>').join('');
+    return '<div class="rev"><div class="qmeta"><span class="badge l'+q.level+'">Level '+q.level+'</span><span>Q'+(i+1)+' · '+q.topic+'</span> <span class="'+(ok?'tag-ok':'tag-bad')+'">'+(ok?'✓ Correct':'✗ Incorrect')+'</span></div>'+
+      '<div class="qtext" style="font-size:1rem">'+q.q+'</div>'+
+      '<div class="ans">Your answer: <strong>'+L[q.sel]+'.</strong> '+q.opts[q.sel].t+'</div>'+
+      (ok?'':'<div class="ans">Correct answer: <strong>'+L[q.correct]+'.</strong> '+q.opts[q.correct].t+'</div>')+
+      '<div class="expl" style="margin:8px 0">'+q.e+'</div>'+
+      '<details><summary>Why the other options are wrong</summary><ul>'+why+'</ul></details>'+
+      '<div class="ref">Revisit: '+q.ref+'</div></div>';
+  }).join('')+'</div>';
+
+  const r=$('results'); r.innerHTML=h; show('results');
+  $('restartBtn').addEventListener('click',startQuiz);
+}
+
+$('startBtn').addEventListener('click',startQuiz);
+$('opts').addEventListener('click',e=>{const b=e.target.closest('.opt'); if(b) selectOpt(+b.dataset.i);});
+$('chips').addEventListener('click',e=>{const b=e.target.closest('.chip'); if(b){cur=+b.dataset.j; render();}});
+$('submitBtn').addEventListener('click',submitAns);
+$('nextBtn').addEventListener('click',nextQ);
+$('prevBtn').addEventListener('click',prevQ);
+$('finishBtn').addEventListener('click',showResults);
+$('nq').textContent=STATIC.length+GENS.length;
+</script>
+</body>
+</html>

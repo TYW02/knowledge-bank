@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>W1 Embedded Systems — Exam Drill</title>
+<style>
+  :root{
+    --bg:#f5f6fa; --card:#fff; --ink:#1f2330; --muted:#7a8194;
+    --accent:#4f5dff; --good:#2e9e5b; --bad:#d9534f; --warn:#b7791f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    max-width:720px; margin:0 auto; padding:16px;
+    background:var(--bg); color:var(--ink); line-height:1.5;
+  }
+  header{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px;}
+  header strong{font-size:17px;}
+  #score{color:var(--muted); font-variant-numeric:tabular-nums; margin-right:8px;}
+  button{
+    font-family:inherit; font-size:15px; padding:10px 14px; border-radius:8px;
+    border:1px solid #ccc; background:#fff; cursor:pointer; color:var(--ink);
+  }
+  button:hover:not(:disabled){background:#eef;}
+  button:disabled{opacity:.55; cursor:default;}
+
+  .progress{height:6px; background:#e4e6ef; border-radius:3px; overflow:hidden; margin-bottom:14px;}
+  #bar{height:100%; width:0; background:var(--accent); transition:width .25s;}
+
+  .card{background:var(--card); border-radius:14px; padding:18px; box-shadow:0 3px 12px rgba(0,0,0,.07);}
+  .qhead{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;}
+  .qnum{font-size:13px; color:var(--muted);}
+  .badges{display:flex; gap:6px; flex-wrap:wrap;}
+  .badge{font-size:11px; font-weight:600; padding:3px 8px; border-radius:999px;}
+  .badge.topic{background:#eef0ff; color:#4f5dff;}
+  .badge.easy{background:#e6f6ec; color:#2e9e5b;}
+  .badge.medium{background:#fff4e0; color:#b7791f;}
+  .badge.hard{background:#fde8e8; color:#c0392b;}
+
+  .qtext{font-size:16px; margin-bottom:16px; line-height:1.6;}
+  .qtext code,.expl code{
+    background:#f0f1f7; padding:1px 5px; border-radius:4px;
+    font-family:ui-monospace,"SF Mono",Menlo,monospace; font-size:.93em; word-break:break-word;
+  }
+  .qtext pre{
+    background:#f0f1f7; padding:10px; border-radius:6px; overflow-x:auto; margin:8px 0;
+    font-family:ui-monospace,monospace; font-size:14px;
+  }
+  .opt{display:block; width:100%; text-align:left; margin-bottom:8px; transition:background .15s; line-height:1.45;}
+  .opt.correct{background:#d4f4dd; border-color:var(--good);}
+  .opt.wrong{background:#fde0e0; border-color:var(--bad);}
+
+  .expl{
+    margin-top:14px; padding:12px 14px; background:#f4f6ff;
+    border-left:3px solid var(--accent); border-radius:6px;
+    font-size:14px; line-height:1.55; display:none;
+  }
+  .expl.show{display:block;}
+  .expl .tag{
+    font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--accent); font-weight:600; margin-bottom:4px;
+  }
+  .next{margin-top:14px; background:var(--accent); color:#fff; border-color:var(--accent); width:100%; font-weight:500;}
+  .next:hover:not(:disabled){background:#3f4ee6;}
+
+  .done{text-align:center; padding:22px 10px;}
+  .done .big{font-size:34px; font-weight:600; margin:14px 0;}
+  .done .pct{color:var(--muted); margin-bottom:18px;}
+
+  @media (max-width:480px){
+    .qtext{font-size:15px;}
+    .opt{font-size:14px; padding:11px 12px;}
+    header strong{font-size:15px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <strong>W1 Embedded Systems Drill</strong>
+  <div>
+    <span id="score">0 / 0</span>
+    <button id="restart" title="New random set">Restart</button>
+  </div>
+</header>
+
+<div class="progress"><div id="bar"></div></div>
+<main id="main"></main>
+
+<script>
+/* ============================================================
+   Utilities
+   ============================================================ */
+const ri = (a,b) => Math.floor(Math.random()*(b-a+1)) + a;
+const pick = a => a[Math.floor(Math.random()*a.length)];
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function popcount(n){
+  n = n >>> 0; let c = 0;
+  while(n){ c += n & 1; n >>>= 1; }
+  return c;
+}
+function hexB(n){ return '0x' + (n & 0xFF).toString(16).toUpperCase().padStart(2,'0'); }
+function hexW(n){ return '0x' + (n >>> 0).toString(16).toUpperCase().padStart(8,'0'); }
+function bin8(n){
+  const s = (n & 0xFF).toString(2).padStart(8,'0');
+  return s.slice(0,4) + ' ' + s.slice(4);
+}
+
+/* Build a multiple-choice question from a correct answer + distractors */
+function makeQ(prompt, correct, distractors, explanation, topic, difficulty){
+  const correctS = String(correct);
+  const opts = [correctS];
+  const seen = new Set([correctS]);
+
+  for(const d of distractors){
+    const ds = String(d);
+    if(opts.length >= 4) break;
+    if(seen.has(ds)) continue;
+    seen.add(ds);
+    opts.push(ds);
+  }
+  let pad = 0;
+  while(opts.length < 4){
+    const cand = String(pad++);
+    if(!seen.has(cand)){ seen.add(cand); opts.push(cand); }
+  }
+  const order = [0,1,2,3];
+  shuffle(order);
+  return {
+    prompt,
+    options: order.map(i => opts[i]),
+    correct: order.indexOf(0),
+    explanation, topic, difficulty
+  };
+}
+
+/* Shuffle a fixed (hand-written) question's options */
+function fixedQ(q){
+  const idx = q.options.map((_,i)=>i);
+  shuffle(idx);
+  return {
+    prompt: q.prompt,
+    options: idx.map(i => q.options[i]),
+    correct: idx.indexOf(q.correct),
+    explanation: q.explanation,
+    topic: q.topic,
+    difficulty: q.difficulty
+  };
+}
+
+/* ============================================================
+   Fixed knowledge questions
+   ============================================================ */
+const FIXED = [
+  {
+    prompt:"Which statement best defines an <strong>embedded system</strong>?",
+    options:[
+      "A general-purpose computer optimised for running many unrelated applications",
+      "A computing system integrated into a larger machine to perform a dedicated function, often under real-time constraints",
+      "A standalone CPU that always requires external RAM and peripherals",
+      "A software-only system with no physical interaction"
+    ],
+    correct:1,
+    explanation:"An embedded system is integrated into a larger electrical/mechanical system to perform a dedicated task. It combines hardware and software and often operates under real-time and resource constraints.",
+    topic:"Fundamentals", difficulty:"Easy"
+  },
+  {
+    prompt:"A <strong>cyber-physical system (CPS)</strong> is best described as:",
+    options:[
+      "Embedded computing that closely integrates physical processes with digital logic via sensors and actuators",
+      "A network of general-purpose PCs used only for simulation",
+      "A system that processes digital data with no physical interface",
+      "A purely mechanical system with no electronics"
+    ],
+    correct:0,
+    explanation:"A CPS tightly couples physical processes with digital computation: sensors bring physical state into the digital world, actuators act back on the physical world.",
+    topic:"Fundamentals", difficulty:"Medium"
+  },
+  {
+    prompt:"To bridge the analogue and digital worlds, an MCU-based embedded system typically pairs:",
+    options:[
+      "an ADC for analogue inputs and a DAC/PWM for analogue or power outputs",
+      "a DAC for inputs and an ADC for outputs",
+      "only GPIO, because all sensors are digital",
+      "only a bootloader and linker script"
+    ],
+    correct:0,
+    explanation:"Sensing often needs an ADC; acting often needs a DAC or PWM. GPIO alone cannot handle analogue signals.",
+    topic:"Fundamentals", difficulty:"Hard"
+  },
+  {
+    prompt:"Which property most clearly distinguishes an embedded system from a general-purpose PC?",
+    options:[
+      "A dedicated function fixed at design time",
+      "The ability to run an operating system",
+      "The use of a CPU",
+      "Support for USB peripherals"
+    ],
+    correct:0,
+    explanation:"Embedded systems are task-specific; their functions are known and assigned at design time. General-purpose PCs are designed for many unrelated workloads.",
+    topic:"Properties", difficulty:"Easy"
+  },
+  {
+    prompt:"Which set lists typical constraints of embedded systems?",
+    options:[
+      "Limited memory, processing power, physical size and energy/power",
+      "Unlimited memory and mains power",
+      "Only timing constraints, with no resource limits",
+      "No need for reliability or safety"
+    ],
+    correct:0,
+    explanation:"Embedded systems commonly operate under tight limits on memory, processing power, physical size and energy/power, as well as timing constraints.",
+    topic:"Properties", difficulty:"Medium"
+  },
+  {
+    prompt:"Why is 'functions are known and assigned at design-time' important for embedded systems?",
+    options:[
+      "It allows the system to be optimised for a dedicated task and meet tight resource and timing constraints",
+      "It means the device can never be reprogrammed",
+      "It guarantees the software has no bugs",
+      "It removes the need for a compiler"
+    ],
+    correct:0,
+    explanation:"Because the workload is known in advance, hardware and software can be tailored to the task, helping meet resource and real-time constraints. It does not guarantee correctness or prevent reprogramming.",
+    topic:"Properties", difficulty:"Hard"
+  },
+  {
+    prompt:"A <strong>real-time system</strong> is correct only if:",
+    options:[
+      "both the functional result and the time at which it is produced are correct",
+      "the result is logically correct regardless of when it is produced",
+      "it runs as fast as possible",
+      "it uses an RTOS"
+    ],
+    correct:0,
+    explanation:"Correctness depends on both functional/logical results and temporal results. A late answer is a wrong answer.",
+    topic:"Real-Time", difficulty:"Medium"
+  },
+  {
+    prompt:"Which statement about <strong>hard real-time</strong> systems is correct?",
+    options:[
+      "Missing a deadline is a total system failure even if the result is functionally correct",
+      "Occasional deadline misses only degrade user experience",
+      "Hard real-time means using the highest CPU clock speed",
+      "Hard real-time systems have no timing constraints"
+    ],
+    correct:0,
+    explanation:"Hard real-time systems must meet deadlines at all times. A late response is a total failure and can cause catastrophic consequences (loss of life, critical damage).",
+    topic:"Real-Time", difficulty:"Hard"
+  },
+  {
+    prompt:"Which classification is correct?",
+    options:[
+      "Airbag controller = hard real-time; video streaming = soft real-time",
+      "Airbag controller = soft real-time; video streaming = hard real-time",
+      "Both are non-real-time",
+      "Both are hard real-time"
+    ],
+    correct:0,
+    explanation:"An airbag controller must meet a life-critical deadline (hard). Video streaming can occasionally miss deadlines with only degraded user experience (soft).",
+    topic:"Real-Time", difficulty:"Medium"
+  },
+  {
+    prompt:"What is the role of the <strong>NVIC</strong> in an ARM Cortex-M MCU?",
+    options:[
+      "Nested Vectored Interrupt Controller — manages interrupt priorities and dispatching",
+      "Non-Volatile Instruction Cache",
+      "Network Virtual Interface Controller",
+      "Memory Protection Unit"
+    ],
+    correct:0,
+    explanation:"The NVIC handles interrupts: it prioritises them and dispatches the corresponding ISRs. The MPU is separate and handles memory protection.",
+    topic:"Hardware", difficulty:"Medium"
+  },
+  {
+    prompt:"Which memory type loses its contents when power is removed?",
+    options:["SRAM","Flash","EEPROM","ROM"],
+    correct:0,
+    explanation:"SRAM is volatile and used for data memory. Flash, EEPROM and ROM are non-volatile and retain contents without power.",
+    topic:"Hardware", difficulty:"Easy"
+  },
+  {
+    prompt:"What does the <strong>Memory Protection Unit (MPU)</strong> in an MCU do?",
+    options:[
+      "Defines memory regions and access permissions to protect memory",
+      "Stores the program permanently",
+      "Converts analogue signals to digital values",
+      "Manages USB packet transfers"
+    ],
+    correct:0,
+    explanation:"The MPU lets software define regions with access permissions (read-only, no-execute, etc.), helping isolate tasks and catch memory errors.",
+    topic:"Hardware", difficulty:"Hard"
+  },
+  {
+    prompt:"What is <strong>DO-178C</strong>?",
+    options:[
+      "A safety standard for software considerations in airborne systems and equipment certification",
+      "A medical device sterilisation standard",
+      "An automotive tyre-pressure standard",
+      "A web application security standard"
+    ],
+    correct:0,
+    explanation:"DO-178C is a rigorous safety standard for airborne software — an example of the formal guidelines safety-critical embedded development may need to follow.",
+    topic:"Quality", difficulty:"Medium"
+  },
+  {
+    prompt:"Which is a key challenge in embedded development?",
+    options:[
+      "Hardware-software co-design, concurrency/interrupt management and limited debugging visibility",
+      "Unlimited memory and power",
+      "No real-time requirements",
+      "Always running a general-purpose OS"
+    ],
+    correct:0,
+    explanation:"Embedded developers face tight resource limits, real-time requirements, hardware-software co-design, concurrency and interrupts, reliability/safety demands, and difficult debugging with limited visibility into the hardware.",
+    topic:"Quality", difficulty:"Medium"
+  },
+  {
+    prompt:"Why did the <strong>Ariane 5 Flight 501</strong> crash in 1996?",
+    options:[
+      "Unhandled integer overflow when a 64-bit floating-point horizontal velocity was converted to a 16-bit signed integer",
+      "The rocket ran out of fuel",
+      "A unit mismatch between English Imperial and Metric units",
+      "A single-point-of-failure sensor caused automated trim commands"
+    ],
+    correct:0,
+    explanation:"Ariane 5 reused Ariane 4 inertial reference software. A horizontal velocity value exceeded the range of a 16-bit signed integer without a range check, causing an overflow that corrupted flight control.",
+    topic:"Case Studies", difficulty:"Medium"
+  },
+  {
+    prompt:"The <strong>NASA Mars Climate Orbiter (1999)</strong> was lost because of:",
+    options:[
+      "A unit mismatch between English Imperial and Metric units",
+      "An integer overflow in a 16-bit signed integer",
+      "Monolithic spaghetti code",
+      "A watchdog timer reset"
+    ],
+    correct:0,
+    explanation:"One team used English Imperial units while another used Metric, leading to an incorrect trajectory and loss of the spacecraft.",
+    topic:"Case Studies", difficulty:"Medium"
+  },
+  {
+    prompt:"The <strong>Boeing 737 MAX MCAS</strong> issue involved:",
+    options:[
+      "Single-point-of-failure sensor input logic causing automated trim commands",
+      "A linker script memory-map error",
+      "An ADC resolution mismatch",
+      "A bootloader failing to load the application"
+    ],
+    correct:0,
+    explanation:"MCAS relied on a single sensor input. Erroneous data could trigger automated trim commands — a cautionary example of single-point-of-failure logic in safety-critical systems.",
+    topic:"Case Studies", difficulty:"Medium"
+  },
+  {
+    prompt:"Why is monolithic/spaghetti code especially hazardous in embedded systems?",
+    options:[
+      "It reduces modularity, making logic unmaintainable and bugs hard to trace under tight timing and resource constraints",
+      "It always uses too much flash memory",
+      "It prevents the use of C",
+      "It makes the CPU clock run faster"
+    ],
+    correct:0,
+    explanation:"Lack of modularity leads to unmaintainable logic, obscure bugs and prolonged debugging cycles — especially risky when timing and resources are tight.",
+    topic:"Case Studies", difficulty:"Hard"
+  },
+  {
+    prompt:"Which sequence correctly orders the embedded build pipeline?",
+    options:[
+      "Source (.c/.s) → compiler/assembler → object (.o) → linker → executable (.bin/.uf2)",
+      "Source → linker → compiler → object → executable",
+      "Object → source → compiler → linker → executable",
+      "Executable → linker → object → compiler → source"
+    ],
+    correct:0,
+    explanation:"The compiler and assembler translate source files into relocatable object files. The linker combines objects, libraries and startup code into an executable/binary.",
+    topic:"Toolchain", difficulty:"Medium"
+  },
+  {
+    prompt:"What is the purpose of a <strong>linker script (.ld)</strong>?",
+    options:[
+      "Defines the physical memory map (RAM vs Flash) and placement of code/data sections",
+      "Compiles C into assembly",
+      "Initialises the stack pointer",
+      "Provides USB drivers"
+    ],
+    correct:0,
+    explanation:"The linker script controls the linking phase by defining the exact physical memory map and where code and data sections are placed.",
+    topic:"Toolchain", difficulty:"Medium"
+  },
+  {
+    prompt:"Which tasks are performed by <strong>C runtime startup code (crt0)</strong> before <code>main()</code>?",
+    options:[
+      "Initialise the stack pointer, zero the BSS section, and copy initialised data from Flash to RAM",
+      "Compile source files and link libraries",
+      "Configure the linker script",
+      "Provide a bootloader over USB"
+    ],
+    correct:0,
+    explanation:"Startup code runs immediately after reset. It sets up the runtime environment — stack pointer, BSS zeroing, and copying initialised data from Flash to RAM — before calling main().",
+    topic:"Toolchain", difficulty:"Hard"
+  },
+  {
+    prompt:"What is the role of a <strong>bootloader</strong>?",
+    options:[
+      "On-chip firmware that runs at power-up and can load or launch the application image",
+      "Converts C to machine code",
+      "Manages interrupt priorities",
+      "Stores the linker script"
+    ],
+    correct:0,
+    explanation:"A bootloader executes on power-up and checks for new binary images in flash/USB before launching the application program.",
+    topic:"Toolchain", difficulty:"Medium"
+  },
+  {
+    prompt:"Why is the <code>volatile</code> qualifier used in embedded C?",
+    options:[
+      "It tells the compiler that memory contents can change outside normal program flow, preventing unsafe optimisation",
+      "It makes every variable thread-safe",
+      "It stores variables in Flash instead of RAM",
+      "It increases the CPU clock speed"
+    ],
+    correct:0,
+    explanation:"volatile informs the compiler that a variable may change at any time (hardware register or ISR-shared flag), so reads/writes must not be optimised away.",
+    topic:"Embedded C", difficulty:"Hard"
+  },
+  {
+    prompt:"Why prefer <code>uint32_t</code> over plain <code>int</code> for hardware registers?",
+    options:[
+      "It guarantees a fixed width and signedness across platforms and compilers",
+      "It is always faster",
+      "It allows negative addresses",
+      "It automatically makes the variable volatile"
+    ],
+    correct:0,
+    explanation:"Explicit-width types from &lt;stdint.h&gt; remove ambiguity about size and signedness, which matters when matching hardware register layouts and avoiding overflow/truncation surprises.",
+    topic:"Embedded C", difficulty:"Medium"
+  },
+  {
+    prompt:"What does a <strong>read-modify-write</strong> operation on a hardware register mean?",
+    options:[
+      "Read the current register value, change only the target bits, and write the result back",
+      "Write a new value without reading first",
+      "Reset the entire register to zero",
+      "Use DMA instead of the CPU"
+    ],
+    correct:0,
+    explanation:"Bit operations like <code>x |= (1u << n)</code> are read-modify-write: the CPU reads the register, modifies the selected bits, and writes the whole value back. This is why concurrency with interrupts matters.",
+    topic:"Embedded C", difficulty:"Hard"
+  }
+];
+
+/* ============================================================
+   Randomised generators
+   ============================================================ */
+
+/* --- Real-time classification --- */
+const RT_SCENARIOS = [
+  { name:"airbag controller", type:"Hard real-time", reason:"a late deployment can cause loss of life", diff:"Easy" },
+  { name:"flight control system", type:"Hard real-time", reason:"a missed deadline can be catastrophic", diff:"Easy" },
+  { name:"nuclear reactor temperature control", type:"Hard real-time", reason:"a late response can cause critical damage", diff:"Medium" },
+  { name:"anti-lock braking system", type:"Hard real-time", reason:"braking must occur within a life-critical deadline", diff:"Medium" },
+  { name:"pacemaker", type:"Hard real-time", reason:"a late pulse can endanger the patient", diff:"Medium" },
+  { name:"video streaming", type:"Soft real-time", reason:"an occasional late frame only degrades user experience", diff:"Easy" },
+  { name:"mobile phone user interface", type:"Soft real-time", reason:"occasional delay degrades experience but is not dangerous", diff:"Easy" },
+  { name:"air conditioning system", type:"Soft real-time", reason:"occasional late control updates are not dangerous", diff:"Easy" },
+  { name:"refrigerator", type:"Soft real-time", reason:"occasional deadline misses do not cause significant danger", diff:"Easy" },
+  { name:"TV remote control", type:"Non-real-time", reason:"there is no strict timing deadline", diff:"Easy" },
+  { name:"lawn sprinkler", type:"Non-real-time", reason:"late responses do not significantly impact functionality", diff:"Easy" },
+  { name:"power window lifter", type:"Non-real-time", reason:"there is no strict timing deadline", diff:"Medium" }
+];
+
+function genRTScenario(){
+  const s = pick(RT_SCENARIOS);
+  const all = ["Hard real-time","Soft real-time","Non-real-time","Not an embedded system"];
+  return makeQ(
+    `How should a <strong>${s.name}</strong> be classified?`,
+    s.type,
+    all.filter(x => x !== s.type),
+    `${s.name} is <strong>${s.type.toLowerCase()}</strong>: ${s.reason}.`,
+    "Real-Time", s.diff
+  );
+}
+
+/* --- Hardware component identification --- */
+const COMPONENTS = [
+  { desc:"a CPU core with on-chip RAM, Flash memory and peripheral interfaces on a single chip", answer:"Microcontroller (MCU)" },
+  { desc:"a standalone CPU that requires external memory and system peripherals", answer:"Microprocessor (μP)" },
+  { desc:"an integrated die containing CPU, GPU, memory controllers and a bus matrix", answer:"System on Chip (SoC)" },
+  { desc:"custom silicon designed for a single specialised application", answer:"Application Specific Integrated Circuit (ASIC)" },
+  { desc:"a processor optimised for fast, deterministic matrix/signal computations", answer:"Digital Signal Processor (DSP)" },
+  { desc:"reconfigurable hardware logic gates", answer:"Field-Programmable Gate Array (FPGA)" },
+  { desc:"an accelerator for parallel graphics or AI/ML inferencing workloads", answer:"GPU / NPU" },
+  { desc:"a compact, versatile board such as a Raspberry Pi", answer:"Single-Board Computer (SBC)" }
+];
+
+function genComponent(){
+  const c = pick(COMPONENTS);
+  const all = COMPONENTS.map(x => x.answer);
+  const distractors = shuffle(all.filter(a => a !== c.answer)).slice(0,3);
+  return makeQ(
+    `Which term best describes <strong>${c.desc}</strong>?`,
+    c.answer, distractors,
+    `This is the definition of a <strong>${c.answer}</strong>.`,
+    "Hardware", "Medium"
+  );
+}
+
+/* --- ADC quantisation step --- */
+function genADCStep(){
+  const vref = pick([1.8, 2.5, 3.3, 5.0]);
+  const bits = pick([8, 10, 12]);
+  const levels = 1 << bits;
+  const stepMv = (vref * 1000) / levels;
+
+  const correct = stepMv.toFixed(3) + ' mV';
+  const d1 = ((vref * 1000) / (levels / 2)).toFixed(3) + ' mV';
+  const d2 = ((vref * 1000) / (levels * 2)).toFixed(3) + ' mV';
+  const d3 = ((vref * 1000) / (levels - 1)).toFixed(3) + ' mV';
+
+  return makeQ(
+    `A <strong>${bits}-bit ADC</strong> has <code>Vref = ${vref} V</code>. What is its ideal quantisation step (LSB size)?`,
+    correct, [d1, d2, d3],
+    `The ADC divides the reference voltage into <code>2^${bits} = ${levels}</code> levels. ` +
+    `Step = Vref / 2^bits = ${vref} V / ${levels} = ${stepMv.toFixed(3)} mV.`,
+    "Hardware", bits === 12 ? "Hard" : "Medium"
+  );
+}
+
+/* --- ADC code -> voltage --- */
+function genADCCode(){
+  const vref = pick([1.8, 2.5, 3.3, 5.0]);
+  const bits = pick([10, 12]);
+  const levels = 1 << bits;
+  const code = ri(Math.floor(levels / 8), levels - 2);
+  const voltage = (code / levels) * vref;
+
+  const correct = voltage.toFixed(3) + ' V';
+  const d1 = ((code / (levels - 1)) * vref).toFixed(3) + ' V';
+  const d2 = ((code / levels) * vref * 2).toFixed(3) + ' V';
+  const d3 = (((code + 1) / levels) * vref).toFixed(3) + ' V';
+
+  return makeQ(
+    `A <strong>${bits}-bit ADC</strong> with <code>Vref = ${vref} V</code> returns code <code>${code}</code>. What analogue voltage does this represent (ideal)?`,
+    correct, [d1, d2, d3],
+    `Ideal ADC: <code>V = code / 2^bits × Vref</code> = ${code} / ${levels} × ${vref} V = ${voltage.toFixed(3)} V.`,
+    "Hardware", "Hard"
+  );
+}
+
+/* --- SysTick reload value --- */
+function genSysTick(){
+  const mhz = pick([1, 8, 12, 16, 24, 48, 64, 96, 120]);
+  const periodMs = pick([1, 10]);
+  const ticks = mhz * 1000 * periodMs;
+  const reload = ticks - 1;
+
+  return makeQ(
+    `A SysTick timer runs at <strong>${mhz} MHz</strong> and must interrupt every <strong>${periodMs} ms</strong>. What reload value gives the correct period?<br><span style="color:#888">(reload = ticks − 1)</span>`,
+    String(reload),
+    [String(ticks), String(reload - 1), String(Math.floor(ticks / 2))],
+    `Ticks per period = f × T = ${mhz}×10^6 × ${periodMs}/1000 = ${ticks}. ` +
+    `Reload = ticks − 1 = ${reload}.`,
+    "Hardware", "Hard"
+  );
+}
+
+/* --- Flash last valid address --- */
+function genFlashLast(){
+  const base = pick([0x08000000, 0x00000000, 0x10000000]);
+  const sizeKB = pick([64, 128, 256, 512]);
+  const size = sizeKB * 1024;
+  const last = base + size - 1;
+
+  const hexBase = '0x' + base.toString(16).toUpperCase().padStart(8,'0');
+  const correct = '0x' + last.toString(16).toUpperCase().padStart(8,'0');
+  const d1 = '0x' + (base + size).toString(16).toUpperCase().padStart(8,'0');
+  const d2 = '0x' + (last - 1).toString(16).toUpperCase().padStart(8,'0');
+  const d3 = '0x' + (base + size - 2).toString(16).toUpperCase().padStart(8,'0');
+
+  return makeQ(
+    `A linker script maps Flash at <code>${hexBase}</code> with size <strong>${sizeKB} KB</strong>. What is the <strong>last valid byte address</strong>?`,
+    correct, [d1, d2, d3],
+    `End = base + size − 1 = ${hexBase} + 0x${size.toString(16).toUpperCase()} − 1 = ${correct}. ` +
+    `The last valid byte is base + size − 1 because addresses start at 0.`,
+    "Toolchain", "Medium"
+  );
+}
+
+/* --- Ariane 5 int16 overflow --- */
+function genArianeOverflow(){
+  const k = ri(0, 5);
+  const H_O = (32768 + k) * 65536;
+  const quotient = 32768 + k;
+  const stored = quotient - 65536; // wrap into int16 range
+
+  const prompt = `
+    In the Ariane 5 code a 64-bit horizontal velocity
+    <code>H_O = ${H_O}</code> is converted by<br><br>
+    <code>B_H = (float) H_O / 65536.0;</code><br><br>
+    where <code>B_H</code> is a 16-bit signed integer.
+    Assuming two's-complement wraparound, what value does <code>B_H</code> hold?`;
+
+  const expl = `H_O / 65536 = ${quotient}, which exceeds the int16_t maximum of 32767. ` +
+    `Wrapping modulo 65536 into the signed range gives ${stored}. ` +
+    `The missing range check let this out-of-range value corrupt flight control.`;
+
+  return makeQ(
+    prompt, String(stored),
+    [String(quotient), String(-quotient), String(32767), String(stored - 1)],
+    expl, "Case Studies", "Hard"
+  );
+}
+
+/* --- Bit idiom set/clear/toggle --- */
+function genBitIdiom(){
+  const n = ri(0, 7);
+  const action = pick(['set','clear','toggle']);
+
+  const lines = {
+    set:    `x |= (1u &lt;&lt; ${n});`,
+    clear:  `x &amp;= ~(1u &lt;&lt; ${n});`,
+    toggle: `x ^= (1u &lt;&lt; ${n});`,
+    test:   `(x &amp; (1u &lt;&lt; ${n})) != 0`
+  };
+  const prompt = `Which line <strong>${action}s</strong> bit ${n} of <code>x</code> and leaves every other bit alone?`;
+  const correct = lines[action];
+  const dist = [lines.set, lines.clear, lines.toggle, lines.test].filter(l => l !== correct);
+
+  const expl = {
+    set:    `<code>|=</code> sets (adds a 1). <code>&amp;= ~</code> clears. <code>^=</code> toggles.`,
+    clear:  `<code>&amp;= ~</code> clears bits. <code>|=</code> sets. <code>^=</code> toggles.`,
+    toggle: `<code>^=</code> is XOR = toggle. <code>|=</code> sets. <code>&amp;= ~</code> clears.`
+  }[action];
+
+  return makeQ(prompt, correct, dist, expl, "Embedded C", "Easy");
+}
+
+/* --- Popcount --- */
+function genPopcount(){
+  const v = ri(0x10, 0xFF);
+  const c = popcount(v);
+  const prompt = `How many bits are set in <code>${hexB(v)}</code>?<br><br><span style="color:#888">Binary: <code>${bin8(v)}</code></span>`;
+  const expl = `<code>${hexB(v)} = ${bin8(v)}</code>. Count the 1s: <strong>${c}</strong>.`;
+
+  const dist = [String(c + 1)];
+  if (c - 1 >= 0) dist.push(String(c - 1));
+  if (8 - c !== c) dist.push(String(8 - c));
+  dist.push(String(c + 2));
+
+  return makeQ(prompt, String(c), dist, expl, "Embedded C", "Medium");
+}
+
+/* --- Loop iterations = highest set bit + 1 --- */
+function genIterations(){
+  const topBitPos = ri(2, 31);
+  let v;
+  if(topBitPos === 31){
+    v = (0x80000000 + ri(0, 0x7FFFFFFF)) >>> 0;
+  } else {
+    v = (((1 << topBitPos) | ri(0, (1 << topBitPos) - 1)) >>> 0);
+  }
+  const iters = topBitPos + 1;
+
+  const prompt = `
+    <pre>uint32_t v = ${hexW(v)};
+int n = 0;
+while (v) { v >>= 1; n++; }</pre>
+    How many times does the loop body run?`;
+
+  const expl = `Iterations = highest set bit position + 1. ` +
+    `<code>${hexW(v)}</code> has its top bit at position <code>${topBitPos}</code>, ` +
+    `so the loop runs <strong>${iters}</strong> times. ` +
+    `(Popcount here is ${popcount(v)} — a different number; it only matters if the body counts bits.)`;
+
+  const dist = [String(popcount(v)), '32', String(iters + 1)];
+  if (iters - 1 > 0) dist.push(String(iters - 1));
+
+  return makeQ(prompt, String(iters), dist, expl, "Embedded C", "Hard");
+}
+
+/* --- uint8_t truncation --- */
+function genTruncate8(){
+  const v = ri(0x100, 0xFFF);
+  const ans = v & 0xFF;
+
+  const prompt = `
+    <code>uint8_t b = 0x${v.toString(16).toUpperCase()};</code><br><br>
+    What is <code>b</code>?`;
+
+  const expl = `Assigning to a narrower integer keeps only the low bits. ` +
+    `<code>uint8_t</code> keeps 8 bits: <code>0x${v.toString(16).toUpperCase()} &amp; 0xFF = ${hexB(ans)}</code>.`;
+
+  return makeQ(
+    prompt, hexB(ans),
+    [hexB(v >> 8), hexB((v - 1) & 0xFF), hexB((v + 1) & 0xFF)],
+    expl, "Embedded C", "Medium"
+  );
+}
+
+/* --- Operator precedence trap --- */
+function genPrecedence(){
+  const x = ri(0x10, 0xFF);
+  const mask = pick([0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80]);
+  const op = pick(['==','!=']);
+
+  let correct, expl, dist;
+  if(op === '=='){
+    correct = '0';
+    expl = `<code>==</code> binds tighter than <code>&amp;</code>. So ` +
+      `<code>x &amp; ${hexB(mask)} == 0</code> parses as ` +
+      `<code>x &amp; (${hexB(mask)} == 0)</code> = <code>x &amp; 0</code> = <strong>0</strong>, ` +
+      `for any <code>x</code>. The programmer almost certainly meant <code>(x &amp; ${hexB(mask)}) == 0</code>.`;
+    dist = [String(x), hexB(x & mask), '1'];
+  } else {
+    const low = x & 1;
+    correct = String(low);
+    expl = `<code>!=</code> binds tighter than <code>&amp;</code>. So ` +
+      `<code>x &amp; ${hexB(mask)} != 0</code> parses as ` +
+      `<code>x &amp; (${hexB(mask)} != 0)</code> = <code>x &amp; 1</code> — ` +
+      `the lowest bit of <code>x</code>. ` +
+      `<code>${hexB(x)}</code> has lowest bit <strong>${low}</strong>.`;
+    dist = [String(x & mask), '0', '1'];
+  }
+
+  const prompt = `
+    <code>int x = ${hexB(x)};</code><br>
+    <code>int r = x &amp; ${hexB(mask)} ${op} 0;</code><br><br>
+    What is <code>r</code>?`;
+
+  return makeQ(prompt, correct, dist, expl, "Embedded C", "Hard");
+}
+
+/* --- Arithmetic right shift of negative --- */
+function genSignedShift(){
+  const neg = -ri(3, 40) * 4;
+  const n = ri(1, 3);
+  const ans = neg >> n;
+
+  const prompt = `
+    <code>int8_t v = ${neg};</code><br>
+    <code>v >>= ${n};</code><br><br>
+    What is <code>v</code>? (Assume an arithmetic shift — the usual compiler behaviour.)`;
+
+  const expl = `Right-shifting a negative signed value is implementation-defined but in practice ` +
+    `<strong>arithmetic</strong>: the sign bit replicates. ` +
+    `<code>${neg} >> ${n} = ${ans}</code>. ` +
+    `Because the result stays negative, <code>while (v) { v >>= 1; }</code> would loop forever for <code>v = -1</code>.`;
+
+  const dist = [String(Math.abs(neg) >> n), String(neg), String(neg << n)];
+  if((neg >> (n - 1)) !== ans) dist.push(String(neg >> (n - 1)));
+
+  return makeQ(prompt, String(ans), dist, expl, "Embedded C", "Hard");
+}
+
+/* --- Unsigned right shift (easy warm-up) --- */
+function genUnsignedShiftRight(){
+  const v = ri(0x40, 0xFF);
+  const n = ri(1, 4);
+  const ans = (v >> n) & 0xFF;
+
+  const prompt = `
+    <code>uint8_t v = ${hexB(v)};</code><br>
+    <code>v >>= ${n};</code><br><br>
+    What is <code>v</code> afterwards?`;
+
+  const expl = `Right-shift by ${n} = divide by ${1 << n}. ` +
+    `<code>${hexB(v)} = ${bin8(v)}</code>. ` +
+    `After ${n} shift${n > 1 ? 's' : ''} right: <code>${bin8(ans)}</code> = <code>${hexB(ans)}</code>.`;
+
+  return makeQ(prompt, hexB(ans),
+    [hexB((v >> (n - 1)) & 0xFF), hexB((v << n) & 0xFF), hexB((v >> (n + 1)) & 0xFF)],
+    expl, "Embedded C", "Easy");
+}
+
+/* ============================================================
+   Quiz assembly
+   ============================================================ */
+const GENERATORS = [
+  genRTScenario,
+  genComponent,
+  genADCStep,
+  genADCCode,
+  genSysTick,
+  genFlashLast,
+  genArianeOverflow,
+  genBitIdiom,
+  genPopcount,
+  genIterations,
+  genTruncate8,
+  genPrecedence,
+  genSignedShift,
+  genUnsignedShiftRight
+];
+
+function buildQuiz(n = 12){
+  const gens = shuffle(GENERATORS.slice());
+  const qs = [];
+  const genCount = Math.ceil(n / 2);
+
+  for(let i = 0; i < genCount; i++){
+    qs.push(gens[i % gens.length]());
+  }
+
+  const fixed = shuffle(FIXED.slice()).slice(0, n - qs.length).map(fixedQ);
+  qs.push(...fixed);
+
+  return shuffle(qs);
+}
+
+/* ============================================================
+   Runner
+   ============================================================ */
+const main = document.getElementById('main');
+const scoreEl = document.getElementById('score');
+const barEl = document.getElementById('bar');
+const restartBtn = document.getElementById('restart');
+
+let quiz = [];
+let idx = 0;
+let score = 0;
+let answered = false;
+
+function start(){
+  quiz = buildQuiz(12);
+  idx = 0;
+  score = 0;
+  answered = false;
+  scoreEl.textContent = '0 / 0';
+  barEl.style.width = '0%';
+  render();
+}
+
+function updateBar(){
+  const pct = (idx / quiz.length) * 100;
+  barEl.style.width = pct + '%';
+}
+
+function diffClass(d){
+  const k = String(d || '').toLowerCase();
+  if(k === 'hard') return 'hard';
+  if(k === 'medium') return 'medium';
+  return 'easy';
+}
+
+function render(){
+  if(idx >= quiz.length) return renderDone();
+
+  answered = false;
+  const q = quiz[idx];
+  scoreEl.textContent = `${score} / ${idx}`;
+  updateBar();
+
+  main.innerHTML = `
+    <div class="card">
+      <div class="qhead">
+        <div class="qnum">Question ${idx + 1} of ${quiz.length}</div>
+        <div class="badges">
+          <span class="badge topic">${q.topic || 'General'}</span>
+          <span class="badge ${diffClass(q.difficulty)}">${q.difficulty || 'Medium'}</span>
+        </div>
+      </div>
+      <div class="qtext">${q.prompt}</div>
+      <div id="opts"></div>
+      <div class="expl" id="expl">
+        <div class="tag">Explanation</div>
+        ${q.explanation}
+      </div>
+      <button class="next" id="next" disabled>Next &rarr;</button>
+    </div>
+  `;
+
+  const optsBox = document.getElementById('opts');
+  q.options.forEach((opt, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = opt;
+    b.addEventListener('click', () => pickAnswer(i));
+    optsBox.appendChild(b);
+  });
+
+  document.getElementById('next').addEventListener('click', next);
+}
+
+function pickAnswer(i){
+  if(answered) return;
+  answered = true;
+
+  const q = quiz[idx];
+  if(i === q.correct) score++;
+
+  document.querySelectorAll('.opt').forEach((el, j) => {
+    el.disabled = true;
+    if(j === q.correct) el.classList.add('correct');
+    else if(j === i) el.classList.add('wrong');
+  });
+
+  document.getElementById('expl').classList.add('show');
+  document.getElementById('next').disabled = false;
+  scoreEl.textContent = `${score} / ${idx + 1}`;
+}
+
+function next(){
+  idx++;
+  render();
+}
+
+function renderDone(){
+  updateBar();
+  const pct = Math.round((score / quiz.length) * 100);
+  let msg;
+  if(pct >= 90)      msg = 'Excellent — mechanics are solid.';
+  else if(pct >= 70) msg = 'Good. Re-read the ones you missed, then restart.';
+  else               msg = 'Keep at it. Restart for a fresh set — repetition builds reflexes.';
+
+  main.innerHTML = `
+    <div class="card done">
+      <div style="color:#888;font-size:13px;letter-spacing:.05em;text-transform:uppercase;">Session complete</div>
+      <div class="big">${score} / ${quiz.length}</div>
+      <div class="pct">${pct}%</div>
+      <div style="margin-bottom:18px;">${msg}</div>
+      <button class="next" id="again">Start a new random set</button>
+    </div>
+  `;
+  document.getElementById('again').addEventListener('click', start);
+  scoreEl.textContent = `${score} / ${quiz.length}`;
+}
+
+restartBtn.addEventListener('click', start);
+start();
+</script>
+
+</body>
+</html>
