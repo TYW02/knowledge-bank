@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 8 Quiz: Malware Intro &amp; System Security (INF2005)</title>
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1b2333; --muted:#5d6881; --line:#dde3ef;
+  --brand:#2f5bea; --brand-ink:#ffffff; --ok:#12805c; --ok-bg:#e3f6ee; --bad:#b3261e; --bad-bg:#fdeceb;
+  --warn:#9a6700; --warn-bg:#fff6dd; --chip:#e9edf6;
+  --l1:#2e7d6b; --l2:#2f5bea; --l3:#8a4fd3; --l4:#d9741a; --l5:#c0262d;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#0f1420; --card:#171e2e; --ink:#e8ecf6; --muted:#9aa6c1; --line:#2a3550;
+    --brand:#6b8cff; --brand-ink:#0b1020; --ok:#4cd6a2; --ok-bg:#12332a; --bad:#ff8a80; --bad-bg:#3a1c1a;
+    --warn:#f2c14e; --warn-bg:#3a3012; --chip:#222c43; }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+#app{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.5rem;margin:0 0 4px}
+h2{font-size:1.2rem;margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 18px;border-radius:10px;font-weight:600}
+.btn:hover:not(:disabled){border-color:var(--brand)}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spread{justify-content:space-between}
+.pill{background:var(--chip);border-radius:999px;padding:4px 12px;font-size:.88rem;font-weight:600}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.bad{background:var(--bad-bg);color:var(--bad)}
+.badge{display:inline-block;color:#fff;border-radius:6px;padding:3px 10px;font-size:.8rem;font-weight:700;letter-spacing:.02em}
+.badge.l1{background:var(--l1)} .badge.l2{background:var(--l2)} .badge.l3{background:var(--l3)} .badge.l4{background:var(--l4)} .badge.l5{background:var(--l5)}
+.progress{height:8px;background:var(--chip);border-radius:99px;overflow:hidden;margin:12px 0}
+.progress>div{height:100%;width:0;background:var(--brand);transition:width .25s}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.chip{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--chip);color:var(--ink);font-weight:700;font-size:.85rem;padding:0}
+.chip.cur{outline:2px solid var(--brand);outline-offset:1px}
+.chip.right{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
+.chip.wrong{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.qmeta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;color:var(--muted);font-size:.9rem}
+.qtext{font-size:1.1rem;font-weight:600;margin:6px 0 16px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.92em}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:10px;padding:12px 14px}
+.opt:hover:not(:disabled){border-color:var(--brand)}
+.opt .L{flex:0 0 28px;height:28px;border-radius:50%;background:var(--chip);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.opt.sel{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 9%,var(--card))}
+.opt.sel .L{background:var(--brand);color:var(--brand-ink)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)} .opt.right .L{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)} .opt.wrong .L{background:var(--bad);color:#fff}
+.opt:disabled{cursor:default;color:var(--ink)}
+.fb{margin-top:18px;border-radius:10px;padding:16px;border:1px solid var(--line)}
+.fb.right{background:var(--ok-bg);border-color:var(--ok)} .fb.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.fb h3{margin:0 0 6px;font-size:1.05rem}
+.fb .expl{margin:8px 0}
+.fb ul{margin:6px 0 0;padding-left:20px}
+.ref{color:var(--muted);font-size:.88rem;margin-top:8px}
+.nav{margin-top:18px}
+.big{font-size:2.6rem;font-weight:800;line-height:1.1}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);font-size:.95rem}
+.meter{height:8px;background:var(--chip);border-radius:99px;overflow:hidden;min-width:90px}
+.meter>div{height:100%;background:var(--ok)} .meter>div.low{background:var(--bad)} .meter>div.mid{background:var(--warn)}
+.note{background:var(--warn-bg);border:1px solid var(--warn);border-radius:10px;padding:12px 14px;color:var(--ink)}
+.rev{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.rev .ans{margin:4px 0}
+.tag-ok{color:var(--ok);font-weight:700}.tag-bad{color:var(--bad);font-weight:700}
+[hidden]{display:none!important}
+@media (max-width:520px){.card{padding:16px}.big{font-size:2.1rem}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- START -->
+<section id="start" class="card">
+  <h1>Week 8: Malware Intro &amp; System Security</h1>
+  <p class="sub">University-level practice quiz built from the INF2005 lecture slides.</p>
+  <p>The quiz has <strong id="nq">40</strong> questions in five levels, from foundational to advanced:</p>
+  <ol>
+    <li>Foundational understanding</li>
+    <li>Conceptual understanding</li>
+    <li>Application</li>
+    <li>Analysis &amp; problem solving</li>
+    <li>Advanced critical thinking</li>
+  </ol>
+  <p>Calculation questions use fresh random numbers every time you start or restart. Answers are locked once submitted. You can jump to any question using the numbered boxes at the top, and the results page shows which slide topics to revisit.</p>
+  <button class="btn primary" id="startBtn">Start quiz</button>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" hidden>
+  <div class="card">
+    <div class="row spread">
+      <strong id="qnum">Question 1</strong>
+      <div class="row">
+        <span class="pill ok">Correct <span id="sc-c">0</span></span>
+        <span class="pill bad">Incorrect <span id="sc-w">0</span></span>
+        <span class="pill">Accuracy <span id="sc-p">–</span></span>
+      </div>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="chips" id="chips" aria-label="Question navigator"></div>
+  </div>
+
+  <div class="card">
+    <div class="qmeta"><span id="lvl" class="badge l1">Level 1</span><span id="topic"></span></div>
+    <div class="qtext" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+    <div id="fb" hidden></div>
+    <div class="row spread nav">
+      <button class="btn" id="prevBtn">← Previous</button>
+      <div class="row">
+        <button class="btn primary" id="submitBtn">Submit answer</button>
+        <button class="btn" id="nextBtn">Next →</button>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px" id="finishRow" hidden>
+      <button class="btn primary" id="finishBtn">All answered: see results</button>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results" hidden></section>
+
+</div>
+
+<script id="engine">
+/* ================= ENGINE: questions, generators, builder (no DOM access) ================= */
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=arr=>arr[rnd(0,arr.length-1)];
+function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=rnd(0,i);const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+const fmt=(x,dp)=>String(+x.toFixed(dp===undefined?2:dp));
+const hex=n=>'0x'+(n&255).toString(16).toUpperCase().padStart(2,'0');
+const bin=n=>(n&255).toString(2).padStart(8,'0');
+
+const LEVELS=['','Foundational understanding','Conceptual understanding','Application','Analysis & problem solving','Advanced critical thinking'];
+
+/* ---------- Static question bank ---------- */
+const STATIC=[
+/* ===== LEVEL 1 ===== */
+{level:1,topic:'Malware fundamentals',ref:'Malware Intro: "Malicious Software (Malware)"',
+ q:`Which option best matches the lecture's definition of malware?`,
+ a:`Software designed to intrude into, disrupt, or damage a computer system or its contents`,
+ w:[[`A physical defect in a CPU that corrupts calculations`,`That is a hardware fault. Malware is software with malicious intent.`],
+    [`Any program that uses more CPU than the user expects`,`Performance problems are not the same as malicious design.`],
+    [`A weakness in a network protocol that attackers can exploit`,`That is a vulnerability; malware is the software that exploits or abuses systems.`],
+    [`A policy violation committed by an employee`,`That is insider misuse. Malware is malicious software, not a behaviour policy breach.`]],
+ e:`The slide defines malware as "any software program designed to intrude into or cause disruption or damage to a computer/contents." The key element is malicious intent encoded in software.`},
+
+{level:1,topic:'Impact categories',ref:'Malware Intro: "Potential impact"',
+ q:`The lecture lists DATA, TIME, HARDWARE and REPUTATION as potential malware impacts. Why is HARDWARE described as "not directly"?`,
+ a:`Malware damages hardware indirectly by corrupting critical software such as firmware or drivers`,
+ w:[[`Because malware cannot affect hardware at all`,`It can, but indirectly, by corrupting the software that controls the hardware.`],
+    [`Because hardware damage is always caused by fault injection`,`Fault injection is a separate hardware attack, not the malware impact path described.`],
+    [`Because the OS kernel protects hardware from all malware`,`Kernel protection is not the reason given; the impact is indirect because malware attacks software, not the physical chip.`]],
+ e:`The slide says: "HARDWARE — not directly, but can mess up the critical software for the hardware e.g. drivers." The other impacts (data, time, reputation) are more direct.`},
+
+{level:1,topic:'Virus vs worm',ref:'Malware Intro: "Viruses", "Worms"',
+ q:`Which property separates a virus from a worm?`,
+ a:`A virus attaches to a host file/program and needs human interaction to propagate; a worm self-replicates across networks without a host or user interaction`,
+ w:[[`A virus is always encrypted; a worm is always plaintext`,`Encryption is a virus variant (polymorphic), not the virus/worm distinction.`],
+    [`A worm requires a host document; a virus does not`,`Reversed. The worm explicitly does not need a host document.`],
+    [`A virus only targets Windows; a worm only targets Unix`,`Platform is not the distinction; both can target multiple systems.`]],
+ e:`Virus: executable that needs a host and human interaction, and inserts a marker to prevent reinfection. Worm: self-replicating, propagates automatically over networks, no host document, no user interaction.`},
+
+{level:1,topic:'Trojans & backdoors',ref:'Malware Intro: "Trojans"',
+ q:`A program appears to be a free video player but installs a remote-access backdoor and does not copy itself into other files. Which category fits best?`,
+ a:`Trojan`,
+ w:[[`Virus`,`A virus attaches to host files and replicates when the host runs; this program does neither.`],
+    [`Worm`,`A worm self-propagates across the network without user interaction; no propagation is described.`],
+    [`Logic bomb`,`A logic bomb triggers a payload on an event; no trigger is described here.`]],
+ e:`Trojans are "hidden inside innocuous programs," do not self-replicate, and often include a back door for command and control. That matches the scenario exactly.`},
+
+{level:1,topic:'Netcat & backdoors',ref:'Malware Intro: "Netcat Backdoor"',
+ q:`On the victim, the attacker runs <code>nc -nlvp 40911 -e cmd.exe</code>, then connects to port 40911 from their own machine. What has been set up?`,
+ a:`A bind shell: the victim listens on the port and binds a shell to it; the attacker connects inbound`,
+ w:[[`A reverse shell: the victim would initiate the connection outward to the attacker`,`A reverse shell has the victim connect out; here the victim is listening.`],
+    [`A file transfer: stdin/stdout would be redirected to a file`,`There is no file redirection in this command.`],
+    [`A port scan: the attacker scans the victim's ports`,`A port scan does not bind a shell.`]],
+ e:`Bind shell: victim listens (<code>-l</code>) on port 40911 and attaches <code>cmd.exe</code> to it. The attacker connects inbound. A reverse shell would have the victim initiate the outbound connection.`},
+
+{level:1,topic:'Hypervisors',ref:'System Security: "Hypervisor / Virtualization Manager"',
+ q:`Which description matches a Type-1 (bare-metal) hypervisor?`,
+ a:`It runs directly on hardware, beneath the guest operating systems (e.g., VMware vSphere, Xen, KVM)`,
+ w:[[`It runs as an application on top of a host OS (e.g., VirtualBox)`,`That is a Type-2 (hosted) hypervisor.`],
+    [`It is a container runtime sharing the host kernel (e.g., LXC, Docker)`,`That is OS-level virtualization, not a Type-1 hypervisor.`],
+    [`It is a hardware component that virtualises memory`,`A hypervisor is software; hardware virtualisation assists it but is not the hypervisor itself.`]],
+ e:`Type-1: bare-metal, sits directly on hardware. Type-2: hosted, runs on top of a host OS. Containers are OS-level isolation, not full hypervisors.`},
+
+{level:1,topic:'Privilege escalation',ref:'System Security: "Kernel Privilege Escalation"',
+ q:`An attacker with a normal user account uses a kernel exploit to become root. What type of escalation is this?`,
+ a:`Vertical privilege escalation`,
+ w:[[`Horizontal privilege escalation`,`Horizontal means moving to another account at the same privilege level.`],
+    [`Jailbreaking`,`Jailbreaking escapes a restricted execution environment (a jail); it is related but not the general term for user → root.`],
+    [`Hyperjacking`,`Hyperjacking replaces a hypervisor; it is not privilege escalation within an OS.`]],
+ e:`Horizontal: same-level account access. Vertical: raising privileges to administrative/root. The slide calls vertical escalation "particularly dangerous" because it may grant complete control.`},
+
+{level:1,topic:'Indicators of compromise',ref:'Malware Intro: "Signs of Infection"',
+ q:`Which of the following is listed as a sign of infection (IoC)?`,
+ a:`Program executable file sizes change and old files show unexpectedly recent modification timestamps`,
+ w:[[`CPU temperature rises during heavy legitimate workloads`,`That is normal behaviour, not an IoC.`],
+    [`An administrator adds a new user account`,`Legitimate admin action; not listed as an infection sign.`],
+    [`Scheduled disk defragmentation runs on time`,`Normal maintenance, not an IoC.`]],
+ e:`The IoC list includes: program slowdowns, RAM drops, changed executable sizes, old files with recent modification times, unprovoked reboots, unusually heavy network traffic, and keystrokes not matching display output.`},
+
+/* ===== LEVEL 2 ===== */
+{level:2,topic:'Virus anatomy',ref:'Malware Intro: "Virus Anatomy"',
+ q:`A virus contains code that hides it from antivirus, code that finds and infects new files, and code that deletes data on a trigger date. Match these to the three parts of virus anatomy.`,
+ a:`Concealment, propagation, payload respectively`,
+ w:[[`Payload, concealment, propagation`,`The order is reversed: hiding is concealment, infecting is propagation, damage is payload.`],
+    [`Propagation, payload, concealment`,`Infecting is propagation, damage is payload, hiding is concealment.`],
+    [`Concealment, payload, propagation`,`The middle part infects files (propagation), not the damage routine.`]],
+ e:`Concealment hides from AV; propagation finds and infects files and adds markers; payload is any code not related to concealment or propagation (the damaging routine).`},
+
+{level:2,topic:'Triggers',ref:'Malware Intro: "Viruses - Triggers"',
+ q:`A virus payload executes only when a specific file is opened. What trigger type is this?`,
+ a:`Logic bomb (event-triggered)`,
+ w:[[`Time bomb (date/time-triggered)`,`A time bomb fires on a date/time, not on a file event.`],
+    [`Polymorphic trigger`,`Polymorphism is an encryption variant, not a trigger.`],
+    [`Metamorphic trigger`,`Metamorphism is a mutation variant, not a trigger.`]],
+ e:`Logic bomb: payload triggered by an event. Time bomb: triggered by date/time. The slide's batch example tests a date string; file-open is an event trigger.`},
+
+{level:2,topic:'Virus variants',ref:'Malware Intro: "Viruses"',
+ q:`Which pair correctly describes mutating (metamorphic) versus encrypted (polymorphic) viruses?`,
+ a:`Metamorphic viruses change their own code; polymorphic viruses encrypt their code and vary the decryption routine`,
+ w:[[`Metamorphic encrypts; polymorphic mutates code structure`,`Reversed. Metamorphic = mutation; polymorphic = encryption.`],
+    [`Both only rename files to evade AV`,`Renaming is superficial and not what the slides describe.`],
+    [`Metamorphic targets Unix; polymorphic targets Windows`,`Platform is not the distinction.`]],
+ e:`The slide lists "Mutating (metamorphic) viruses vs Encrypted (polymorphic) viruses." Metamorphic changes its own code; polymorphic encrypts and varies the decryptor.`},
+
+{level:2,topic:'Netcat & backdoors',ref:'Malware Intro: "Netcat Backdoor"',
+ q:`Why is a reverse shell often more effective than a bind shell against a firewalled victim?`,
+ a:`The victim initiates an outbound connection to the attacker, which is typically allowed, whereas inbound connections to the victim are blocked`,
+ w:[[`Reverse shells use stronger encryption`,`No encryption is implied by the Netcat examples.`],
+    [`Bind shells require the attacker to already have root on the victim`,`A bind shell just needs the ability to listen and execute a shell.`],
+    [`Reverse shells avoid antivirus by using UDP instead of TCP`,`Protocol choice is not the reason given.`]],
+ e:`The notes say a reverse shell "initiates an outbound connection back to the attacker's listening machine, bypassing inbound firewall restrictions." A bind shell requires the victim to accept inbound connections, which firewalls often block.`},
+
+{level:2,topic:'Spectre',ref:'System Security: "Hardware Attack Example: Spectre"',
+ q:`What does Spectre exploit to leak memory?`,
+ a:`CPU branch prediction and speculative execution, using cache timing as a side channel`,
+ w:[[`A buffer overflow in the kernel's network stack`,`That is a software/kernel bug, not Spectre.`],
+    [`A misconfigured hypervisor`,`That would be a VM escape or hyperjacking issue.`],
+    [`Weak SSH passwords on the victim`,`That is a credential attack, not a micro-architectural attack.`]],
+ e:`Spectre exploits branch prediction and speculative execution. The CPU guesses a value, executes speculatively, and the cache state becomes a timing side channel that leaks data from lower layers to user space.`},
+
+{level:2,topic:'VM escape',ref:'System Security: "Hypervisor / Virtualization Attacks"',
+ q:`What is a VM escape attack?`,
+ a:`Breaking out of guest VM isolation to execute code on the host or hypervisor`,
+ w:[[`Replacing the hypervisor with a malicious one`,`That is hyperjacking, a different attack.`],
+    [`Running a rootkit in an invisible VM beneath the OS`,`That is a VM rootkit, a special case of hyperjacking.`],
+    [`Encrypting files inside the guest VM`,`That is ransomware running in the guest, not an escape.`]],
+ e:`VM escape "breaks the isolation provided by the hypervisor" and allows interaction with the underlying hypervisor or host OS. Examples: VENOM, VMware 3D acceleration flaw, uninitialized stack memory.`},
+
+{level:2,topic:'Dynamic linking',ref:'System Security: "System Software Attacks"',
+ q:`How does an LD_PRELOAD attack work on Linux?`,
+ a:`The dynamic linker loads an attacker-specified shared library before other system libraries, so its functions override legitimate ones`,
+ w:[[`It patches the kernel image on disk`,`That would be a kernel module or rootkit attack, not dynamic linking.`],
+    [`It modifies the package manager's signing keys`,`That is a package management attack.`],
+    [`It exploits a virtual floppy controller`,`That is VENOM, a hypervisor attack.`]],
+ e:`The slide: "on Linux systems, the LD_PRELOAD environment variable can specify libraries that are loaded before any of the other system libraries are loaded." This lets attacker functions intercept calls.`},
+
+{level:2,topic:'Injection attacks',ref:'System Security: "Software Attack"',
+ q:`What distinguishes command injection from code injection in the lecture's taxonomy?`,
+ a:`Command injection is a code injection where attacker input modifies commands passed to a command interpreter (shell)`,
+ w:[[`Command injection targets hardware; code injection targets software`,`Both are software attacks.`],
+    [`Command injection requires a compiled binary; code injection only affects scripts`,`Not the distinction given.`],
+    [`Code injection is always remote; command injection is always local`,`Not the distinction given.`]],
+ e:`Code injection: input to a program (generator) produces executable code for an executor. Command injection: a code injection where the attacker modifies commands sent to a command interpreter/shell.`},
+
+/* ===== LEVEL 3 ===== */
+{level:3,topic:'Worm propagation',ref:'Malware Intro: "Worms", "How Can It Move?"',
+ q:`A program sends copies of itself to random IP addresses on port 445, infects hosts without any user opening a file, and then installs a backdoor. What is the best classification?`,
+ a:`Worm (self-propagating) carrying a backdoor payload`,
+ w:[[`Virus`,`A virus needs a host file and human interaction to propagate; no host is described.`],
+    [`Trojan`,`A Trojan is disguised and does not self-replicate; this program clearly propagates itself.`],
+    [`Logic bomb`,`A logic bomb triggers a payload on an event; the propagation behaviour is not explained by that label.`]],
+ e:`Self-propagation without user interaction or a host document is the worm signature. The backdoor is a payload the worm carries, just as EternalRocks left a backdoor.`},
+
+{level:3,topic:'Command injection',ref:'System Security: "Software Attack Example: Command Injection"',
+ q:`The C program builds <code>"/usr/bin/cat " + argv[i]</code> and calls <code>system()</code>. If <code>argv[i]</code> is <code>/dev/null;reboot</code>, what happens?`,
+ a:`The shell runs <code>cat /dev/null</code>, then runs <code>reboot</code>, rebooting the system`,
+ w:[[`<code>cat</code> treats <code>;reboot</code> as a filename and fails`,`The shell interprets <code>;</code> as a command separator, so <code>reboot</code> becomes a second command.`],
+    [`The program refuses the input because <code>;</code> is escaped`,`No escaping or validation is performed.`],
+    [`Only <code>reboot</code> runs; <code>cat</code> is skipped`,`Both run sequentially.`]],
+ e:`The slide shows exactly this: <code>/usr/bin/cat /dev/null;reboot</code> — the shell executes both commands, rebooting the system. The fix is to avoid passing unvalidated input to a shell.`},
+
+{level:3,topic:'Netcat & backdoors',ref:'Malware Intro: "Netcat Backdoor"',
+ q:`An attacker runs <code>nc -nlvp 4444 &gt; received.bin</code> on their machine. What is happening?`,
+ a:`The attacker listens on port 4444 and redirects received data into a file — a file transfer`,
+ w:[[`The attacker connects outbound and sends a file`,`That would use <code>nc -nv &lt;IP&gt; &lt;port&gt; &lt; file</code>, not <code>-l</code> with output redirection.`],
+    [`The attacker executes a remote shell on the victim`,`There is no <code>-e</code> and no shell command.`],
+    [`The attacker scans the port range`,`No scanning behaviour is present.`]],
+ e:`The notes describe file transfer with Netcat: <code>nc -nlvp &lt;port&gt; &gt; file</code> receives into a file, while <code>nc -nv &lt;IP&gt; &lt;port&gt; &lt; file</code> sends a file.`},
+
+{level:3,topic:'File attributes',ref:'Malware Intro: "Stealth &amp; Covering Tracks"',
+ q:`What does <code>attrib +s +a +h file.exe</code> do?`,
+ a:`Sets the system, archive, and hidden attributes, helping the file blend in and resist casual discovery`,
+ w:[[`Sets read-only and encrypts the file`,`The flags shown are system, archive and hidden, not read-only or encryption.`],
+    [`Deletes the file after archiving it`,`No deletion is performed.`],
+    [`Grants execute permission to all users`,`attrib manages file attributes, not permissions.`]],
+ e:`The slide lists <code>attrib +s +a +h &lt;filename&gt;</code> to set system, archive and hidden flags. Combined with Windows Explorer's "Hide protected operating system files," this helps malware stay out of sight.`},
+
+{level:3,topic:'Spectre',ref:'System Security: "Hardware Attack Example: Spectre"',
+ q:`In the Spectre snippet, why can <code>array2[array1[x] * PAGESIZE]</code> leak data when <code>x &gt;= array1_size</code>?`,
+ a:`Speculative execution may read out-of-bounds array1[x] and use it to index array2, leaving a cache trace that a timing side channel can observe`,
+ w:[[`The bounds check is missing entirely, so the CPU always reads out of bounds architecturally`,`The check is present; speculation bypasses its result, not the check itself.`],
+    [`array2 is mapped into the kernel and readable from user space`,`The issue is the cache side channel, not a kernel mapping.`],
+    [`The compiler optimises away the check and reads memory directly`,`The mechanism is hardware speculation, not a compiler optimisation.`]],
+ e:`Step 3 of the slide: trick the CPU into speculative execution so it guesses wrongly about array1_size. Step 4: read array2[array1[x]] to cache a cell. Step 5: time reads of array2 to infer array1[x].`},
+
+{level:3,topic:'VM escape',ref:'System Security: "Hypervisor Attack Example: VM Escape"',
+ q:`CVE-2015-3456 (VENOM) affects which component, and what class of attack is it?`,
+ a:`A virtual floppy disk controller in QEMU/Xen/KVM with an out-of-bounds write, enabling VM escape`,
+ w:[[`A VMware 3D acceleration driver`,`That is CVE-2017-4907.`],
+    [`An uninitialized stack flaw in VMware`,`That is CVE-2020-3960.`],
+    [`A Linux kernel copy-on-write race`,`That is Dirty COW, CVE-2016-5195.`]],
+ e:`VENOM: the QEMU/Xen/KVM virtual floppy disk controller allows a local guest user to cause an out-of-bounds write, potentially executing arbitrary code and escaping the VM.`},
+
+{level:3,topic:'Kernel attacks',ref:'System Security: "OS Attack Example: Kernel Privilege Escalation"',
+ q:`Dirty COW (CVE-2016-5195) is a Linux kernel race condition in copy-on-write. What does it allow?`,
+ a:`A local attacker to modify read-only files such as <code>/etc/passwd</code> to escalate privileges to root`,
+ w:[[`A remote attacker to escape a VM`,`Dirty COW is a kernel privilege escalation, not a hypervisor escape.`],
+    [`A guest to execute code on the host via SVGA`,`That is the VMware 3D acceleration flaw.`],
+    [`A user to read arbitrary CPU cache lines`,`That is Spectre.`]],
+ e:`The slide shows Dirty COW overwriting <code>/etc/passwd</code> and then <code>su</code> to root. It exploits a copy-on-write race in the Linux kernel.`},
+
+/* ===== LEVEL 4 ===== */
+{level:4,topic:'Privilege escalation',ref:'System Security: "OS Attacks" (attack chain)',
+ q:`Place the four-step OS attack chain from the lecture in the correct order.`,
+ a:`Gain unprivileged access → escalate to root/kernel → install persistent rootkit/backdoor → abuse the system (steal data, block access, attack others)`,
+ w:[[`Install rootkit → gain access → escalate → abuse`,`Installing a persistent rootkit usually requires privilege; this order is backwards.`],
+    [`Escalate → gain access → abuse → install rootkit`,`You cannot escalate before gaining access.`],
+    [`Abuse → escalate → gain access → install rootkit`,`Completely reversed.`]],
+ e:`The slide's four steps: (1) get unprivileged access, (2) escalate to root/kernel, (3) install a persistent rootkit/backdoor, (4) abuse the system to collect/steal data, block access, or attack other systems.`},
+
+{level:4,topic:'Ransomware',ref:'System Security: "System Software Attacks"',
+ q:`What is "double extortion" in advanced ransomware?`,
+ a:`Stealing data before encryption and threatening to publish it, in addition to demanding payment for decryption`,
+ w:[[`Encrypting files twice with two different keys`,`Not the definition given.`],
+    [`Demanding payment in two cryptocurrencies`,`Payment method is not the extortion tactic described.`],
+    [`Attacking both the victim and its backups`,`Targeting backups increases pressure but is not double extortion.`]],
+ e:`The slide: "advanced attacks steal data before encrypting it with the threat to publish the data." That is the second extortion lever on top of decryption payment.`},
+
+{level:4,topic:'VM escape',ref:'System Security: "Hypervisor Attack Example: VM Escape"',
+ q:`Which statement correctly pairs a VM escape CVE with its mechanism?`,
+ a:`CVE-2017-4907 — VMware Workstation 3D acceleration feature allows a guest to execute code on the host`,
+ w:[[`CVE-2015-3456 — uninitialized stack memory in VMware`,`CVE-2015-3456 is VENOM (virtual floppy controller); the uninitialized stack flaw is CVE-2020-3960.`],
+    [`CVE-2020-3960 — virtual floppy disk controller out-of-bounds write`,`That description belongs to VENOM/CVE-2015-3456.`],
+    [`CVE-2016-5195 — VMware SVGA driver flaw`,`CVE-2016-5195 is Dirty COW, a Linux kernel bug.`]],
+ e:`Slide pairs: CVE-2015-3456 (VENOM, virtual floppy), CVE-2017-4907 (VMware 3D acceleration), CVE-2020-3960 (uninitialized stack memory in VMware).`},
+
+{level:4,topic:'Virus anatomy',ref:'Malware Intro: "Viruses", "Virus Anatomy", "Triggers"',
+ q:`A virus modifies its own code each time it infects a new file, hides from AV, and on 1 January formats the disk. Identify the three aspects.`,
+ a:`Metamorphic mutation, concealment, time-bomb payload`,
+ w:[[`Polymorphic encryption, propagation, logic-bomb payload`,`The mutation is metamorphic (code change), not encryption; the trigger is a date, so time bomb.`],
+    [`Concealment, propagation, logic bomb`,`Misses the mutation aspect and mislabels the date trigger.`],
+    [`Metamorphic mutation, propagation, logic bomb`,`The payload triggers on a date, not an event.`]],
+ e:`Mutating its own code = metamorphic. Hiding from AV = concealment. Formatting on a date = time-bomb payload.`},
+
+{level:4,topic:'Dynamic linking',ref:'System Security: "System Software Attacks"',
+ q:`How can an attacker subvert a package manager according to the lecture?`,
+ a:`Use malicious signing keys to validate malicious packages, or exploit bugs in the package manager`,
+ w:[[`Encrypt the package repository's disks`,`That is destructive but not the described package-manager attack.`],
+    [`Replace the kernel with a Type-1 hypervisor`,`Unrelated to package management.`],
+    [`Use LD_PRELOAD to override the package manager`,`That is a dynamic linking attack, a different category.`]],
+ e:`The slide lists three package management attacks: malicious repository signing keys, malicious packages signed with those keys, and exploiting package manager bugs.`},
+
+{level:4,topic:'Kernel attacks',ref:'System Security: "OS Attacks" (kernel rootkit)',
+ q:`Why does the lecture say a complete re-installation is usually required after a kernel rootkit?`,
+ a:`Kernel rootkits are difficult to detect and can hide their presence at Ring 0, so trusting the compromised OS to clean itself is unsafe`,
+ w:[[`Because kernel rootkits always destroy the hard disk`,`Data destruction is not guaranteed; the issue is stealth and trust.`],
+    [`Because antivirus cannot run on Linux`,`False, and not the reason given.`],
+    [`Because rootkits only affect firmware`,`Kernel rootkits live in the OS kernel, not only firmware.`]],
+ e:`The slide: "Kernel rootkits are difficult to detect, and hence a complete re-installation is usually required." At Ring 0 the rootkit can hide itself from the OS it compromises.`},
+
+{level:4,topic:'Worm propagation',ref:'Malware Intro: "How Can It Move?"',
+ q:`Match the worm propagation technique to the example: Windows administrative shares, Unix remote shell scripts, Stuxnet print spooler, Morris password cracking.`,
+ a:`net share, rsh, networking software bug, automated password cracking`,
+ w:[[`Email attachment, USB drop, drive-by download, social engineering`,`Those are infection vectors, not the propagation techniques listed for worms.`],
+    [`Fault injection, hyperjacking, VM escape, LKM`,`Those are system attack classes, not worm propagation methods.`],
+    [`Logic bomb, time bomb, polymorphic, metamorphic`,`Those are virus features, not worm movement techniques.`]],
+ e:`Slide: worms move via Windows admin shares (net share), Unix remote shell scripts (rsh), bugs in networking software (Stuxnet print spooler), and password cracking (Morris worm).`},
+
+/* ===== LEVEL 5 ===== */
+{level:5,topic:'Malware fundamentals',ref:'Synthesis: Malware Intro + System Security',
+ q:`A worm exploits an SMB flaw to spread, drops a ransomware payload, and installs a backdoor for later access. Which statement best characterises this?`,
+ a:`A worm (propagation mechanism) carrying multiple payloads: ransomware (availability/integrity impact) and a backdoor (persistent access)`,
+ w:[[`A single virus with a logic bomb`,`A virus needs a host and user interaction; this spreads without them.`],
+    [`A trojan with a keylogger`,`No disguise and no keylogger are described.`],
+    [`A rootkit only`,`A rootkit is a stealth mechanism; it does not describe the propagation or ransom behaviour.`]],
+ e:`This combines worm propagation (SMB, like WannaCry), a ransomware payload (crypto-virology), and a backdoor (like EternalRocks). Malware often combines multiple capabilities.`},
+
+{level:5,topic:'Trojans & backdoors',ref:'Malware Intro: "Viruses", "Trojans"',
+ q:`Why is a Trojan not a virus, even if it contains malicious code?`,
+ a:`A Trojan does not self-replicate or attach to host files; it relies on disguise and user execution`,
+ w:[[`Because Trojans are always harmless`,`False: Trojans are malicious.`],
+    [`Because viruses are always encrypted and Trojans are not`,`Encryption is a virus variant, not the distinction.`],
+    [`Because Trojans only run on mobile devices`,`False.`]],
+ e:`The slide: Trojans are "hidden inside innocuous programs … Doesn't self-replicate." Viruses attach to hosts and replicate with user interaction. The key difference is self-replication and host attachment.`},
+
+{level:5,topic:'Spectre',ref:'System Security: "Hardware Attack Example: Spectre"',
+ q:`Why does the lecture say there is "no easy fix" for Spectre?`,
+ a:`It exploits a design problem in modern CPU microarchitecture, so mitigation requires hardware, compiler, and OS hardening rather than a simple patch`,
+ w:[[`Because the vulnerability is in a single application`,`Spectre is a CPU design issue, not an application bug.`],
+    [`Because it only affects obsolete CPUs`,`Modern CPUs are affected.`],
+    [`Because antivirus signatures can block it`,`Signature-based AV cannot reliably block a micro-architectural side channel.`]],
+ e:`The slide: "Spectre is exploiting a design problem in modern CPUs, and there is no easy fix for this hardware root cause, so a lot of work was spent in 2018 to harden systems."`},
+
+{level:5,topic:'Ransomware',ref:'System Security: "System Software Attack: Ransomware WannaCry"',
+ q:`Which combination best explains WannaCry's rapid spread and impact?`,
+ a:`An SMB exploit plus many organisations running unsupported Windows (XP/3.0) without patches, and a Bitcoin payment mechanism`,
+ w:[[`A Java applet that ran on any OS`,`That is Adwind, not WannaCry.`],
+    [`A virtual floppy controller bug in QEMU`,`That is VENOM.`],
+    [`A rootkit installed in an invisible VM`,`That is a VM rootkit.`]],
+ e:`Slide: WannaCry exploited SMB vulnerabilities across legacy/unsupported Windows, infected 200,000+ systems in 150+ countries, and demanded Bitcoin. Old unsupported systems were a major factor.`},
+
+{level:5,topic:'Hypervisors',ref:'System Security: "Hypervisor / Virtualization Attacks"',
+ q:`Which statement about detection difficulty is most consistent with the lecture?`,
+ a:`Hypervisor-level attacks (hyperjacking, VM rootkits) are hard to detect from inside the OS because the malicious layer sits beneath it`,
+ w:[[`Application-layer attacks are the hardest to detect`,`Applications are usually the most visible layer.`],
+    [`Hardware fault injection is easy to detect with antivirus`,`AV does not observe physical faults.`],
+    [`Worms are harder to detect than kernel rootkits`,`Kernel rootkits are explicitly described as difficult to detect.`]],
+ e:`Hyperjacking: "the presence of the malicious hypervisor is difficult to detect from the operating system." VM rootkits run in invisible VMs that are hard to detect.`},
+
+{level:5,topic:'Worm propagation',ref:'Malware Intro: "Worms" (mobile case study)',
+ q:`Why did the Ikee (Duh) worm target jailbroken iPhones specifically?`,
+ a:`Jailbreaking removed restrictions and left default SSH passwords unchanged, giving the worm a way in; it then built a botnet and stole financial data`,
+ w:[[`Because iPhones without jailbreak expose SSH by default`,`False: stock iPhones do not expose SSH this way.`],
+    [`Because the worm exploited a hypervisor bug in iOS`,`No hypervisor bug is involved.`],
+    [`Because it used LD_PRELOAD to override iOS libraries`,`LD_PRELOAD is a Linux mechanism, not the described vector.`]],
+ e:`The slide: Ikee/Duh targeted jailbroken iPhones, modified the default SSH password, established a botnet command centre in Lithuania, and copied/sent financial info to a database. Jailbreaking removed protections and left default credentials.`}
+];
+
+/* ---------- Randomised calculation generators ---------- */
+function genWormGrowth(){
+  const T=pick([8,10,12,15,20,30]);
+  const H=pick([1,2,3,4]);
+  const totalMin=H*60;
+  if(totalMin % T !== 0) return null;
+  const steps=totalMin/T;
+  if(steps<3||steps>15) return null;
+  const N0=pick([10,25,50,100]);
+  const ans=N0*Math.pow(2,steps);
+  const f=n=>n.toLocaleString('en-US');
+  return {level:3,topic:'Worm propagation',ref:'Malware Intro: "Worms", "How Can It Move?"',
+    q:`A worm has infected N<sub>0</sub> = ${N0} hosts. The number of infected hosts doubles every ${T} minutes. Assuming unchecked exponential growth, how many hosts are infected after ${H} hour${H>1?'s':''}?`,
+    a:f(ans),
+    w:[[f(N0*Math.pow(2,H)),`Uses ${H} doubling step${H>1?'s':''} (one per hour) instead of ${steps} steps (one per ${T} minutes).`],
+       [f(N0*Math.pow(2,steps-1)),`Off by one doubling: the initial ${N0} is step 0, and each ${T}-minute interval multiplies by 2.`],
+       [f(N0*(1+steps)),`Models linear growth (adds ${steps}×N<sub>0</sub>) instead of doubling.`],
+       [f(N0*Math.pow(2,steps+1)),`Counts one doubling too many (${steps+1} intervals instead of ${steps}).`]],
+    e:`Time = ${H} h = ${totalMin} min = ${steps} intervals of ${T} min.<br>Infected = N<sub>0</sub> × 2<sup>${steps}</sup> = ${N0} × ${Math.pow(2,steps)} = <strong>${f(ans)}</strong> hosts.<br>This is why fast-spreading worms (Morris, Blaster, Conficker, WannaCry) can saturate a network in hours.`,
+    meta:{kind:'worm',T,H,N0,steps}};
+}
+
+function genRansom(){
+  const M=pick([400,500,800,1000,1500,2000]);
+  const pct=pick([30,40,50,60,75]);
+  const R=pick([300,500,600]);
+  const infected=M*pct/100;
+  if(!Number.isInteger(infected)) return null;
+  const ans=infected*R;
+  const f=n=>'$'+n.toLocaleString('en-US');
+  return {level:3,topic:'Ransomware',ref:'System Security: "Ransomware", "WannaCry"',
+    q:`An organisation has ${M} machines. A ransomware outbreak encrypts ${pct}% of them. The attacker demands a ransom of $${R} per infected machine. Ignoring backups and any negotiation, what is the total ransom demanded?`,
+    a:f(ans),
+    w:[[f(M*R),`Uses all ${M} machines; only ${pct}% are infected.`],
+       [f(infected*R/2),`Uses half the per-machine ransom.`],
+       [f((M-infected)*R),`Uses the uninfected machines (${M-infected}) instead of the infected ones (${infected}).`],
+       [f(infected*R*2),`Doubles the ransom; the question states $${R} per infected machine.`]],
+    e:`Infected machines = ${M} × ${pct}% = ${infected}.<br>Total ransom = ${infected} × $${R} = <strong>${f(ans)}</strong>.<br>WannaCry's real demands were around $300–$600 per victim, but the aggregate impact (200,000+ systems in 150+ countries) was far larger.`,
+    meta:{kind:'ransom',M,pct,R}};
+}
+
+function genCrack(){
+  const D=pick([1000,5000,10000,20000,50000]);
+  const U=pick([10,20,50,100]);
+  const A=pick([100,500,1000,2000,5000]);
+  const sec=D*U/A;
+  if(!Number.isInteger(sec)||sec<1) return null;
+  const f=n=>n.toLocaleString('en-US')+' s';
+  return {level:4,topic:'Worm propagation',ref:'Malware Intro: "How Can It Move?" (password cracking)',
+    q:`The Morris worm tried passwords from a dictionary of ${D.toLocaleString('en-US')} words against ${U} user accounts. If each attempt takes 1/${A} second (i.e., ${A} attempts per second), how long would exhausting the dictionary take, assuming no account is skipped?`,
+    a:f(sec),
+    w:[[f(D/A),`One account only; there are ${U} accounts.`],
+       [f(U/A),`Uses accounts per attempt rate, ignoring the dictionary size.`],
+       [f(D*U*A),`Multiplies by the rate instead of dividing by it.`],
+       [f(D*U/A/60),`Divides by 60, but the raw result is already in seconds.`]],
+    e:`Total attempts = dictionary × accounts = ${D.toLocaleString('en-US')} × ${U} = ${(D*U).toLocaleString('en-US')}.<br>Time = attempts / rate = ${(D*U).toLocaleString('en-US')} / ${A} = ${sec.toLocaleString('en-US')} s = <strong>${f(sec)}</strong>.<br>The Morris worm used exactly this kind of automated password cracking to spread.`,
+    meta:{kind:'crack',D,U,A,sec}};
+}
+
+function genScan(){
+  const N=pick([50,100,200,500]);
+  const S=pick([10,20,50,100]);
+  const K=pick([500,1000,2000]);
+  const rate=N*S/K;
+  if(!Number.isInteger(rate)||rate<1) return null;
+  const f=n=>n.toLocaleString('en-US')+' new infections/s';
+  return {level:4,topic:'Worm propagation',ref:'Malware Intro: "How Can It Move?"',
+    q:`A worm has infected ${N} hosts. Each infected host scans ${S} addresses per second, and 1 in every ${K} addresses belongs to a vulnerable machine. Assuming every vulnerable address is new (no reinfection), what is the expected rate of new infections?`,
+    a:f(rate),
+    w:[[f(N*S),`Ignores the vulnerable fraction; only 1 in ${K} scans hits a vulnerable host.`],
+       [f(S/K),`Counts scans from only one infected host.`],
+       [f(N*S*K),`Multiplies by K instead of dividing; vulnerable addresses are rarer than all addresses.`],
+       [f(N*S/K*60),`Converts to per minute, not per second.`]],
+    e:`Each host finds vulnerable machines at ${S}/${K} per second. With ${N} infected hosts: ${N} × ${S}/${K} = <strong>${f(rate)}</strong>.<br>The Morris worm, Blaster, Conficker and WannaCry all relied on high-rate scanning to find vulnerable hosts faster than administrators could patch.`,
+    meta:{kind:'scan',N,S,K}};
+}
+
+const GENS=[genWormGrowth,genRansom,genCrack,genScan];
+
+function validQ(d){
+  if(!d||!d.w||d.w.length<3) return false;
+  const t=[d.a].concat(d.w.map(x=>x[0]));
+  return new Set(t).size===t.length;
+}
+function tryGen(fn){
+  for(let i=0;i<1000;i++){ const d=fn(); if(validQ(d)) return d; }
+  throw new Error('generator failed: '+fn.name);
+}
+function materialize(d){
+  const opts=shuffle([{t:d.a,ok:true,r:''}].concat(d.w.map(x=>({t:x[0],ok:false,r:x[1]}))));
+  return {level:d.level,topic:d.topic,ref:d.ref,q:d.q,e:d.e,opts,correct:opts.findIndex(o=>o.ok),
+          sel:null,submitted:false,meta:d.meta||null,a:d.a};
+}
+function buildQuiz(){
+  const all=[];
+  STATIC.forEach(d=>all.push(materialize(d)));
+  GENS.forEach(g=>all.push(materialize(tryGen(g))));
+  const by={1:[],2:[],3:[],4:[],5:[]};
+  all.forEach(q=>by[q.level].push(q));
+  const out=[];
+  [1,2,3,4,5].forEach(l=>shuffle(by[l]).forEach(q=>out.push(q)));
+  return out;
+}
+</script>
+
+<script id="ui">
+/* ================= UI ================= */
+const $=id=>document.getElementById(id);
+let quiz=[], cur=0;
+
+function show(id){ ['start','quiz','results'].forEach(s=>{$(s).hidden=(s!==id);}); window.scrollTo(0,0); }
+function stats(){
+  const ans=quiz.filter(q=>q.submitted);
+  const c=ans.filter(q=>q.sel===q.correct).length;
+  return {answered:ans.length,correct:c,wrong:ans.length-c,total:quiz.length};
+}
+function startQuiz(){ quiz=buildQuiz(); cur=0; show('quiz'); render(); }
+
+function render(){
+  const q=quiz[cur], st=stats(), L='ABCDE';
+  $('qnum').textContent='Question '+(cur+1)+' of '+quiz.length;
+  const lv=$('lvl'); lv.textContent='Level '+q.level+' · '+LEVELS[q.level]; lv.className='badge l'+q.level;
+  $('topic').textContent=q.topic;
+  $('bar').style.width=(st.answered/quiz.length*100)+'%';
+  $('sc-c').textContent=st.correct; $('sc-w').textContent=st.wrong;
+  $('sc-p').textContent=st.answered?Math.round(st.correct/st.answered*100)+'%':'–';
+  $('qtext').innerHTML=q.q;
+
+  $('chips').innerHTML=quiz.map((x,i)=>{
+    let cls='chip'+(i===cur?' cur':'')+(x.submitted?(x.sel===x.correct?' right':' wrong'):'');
+    return '<button class="'+cls+'" data-j="'+i+'" title="Question '+(i+1)+' (level '+x.level+')">'+(i+1)+'</button>';
+  }).join('');
+
+  $('opts').innerHTML=q.opts.map((o,i)=>{
+    let cls='opt';
+    if(q.submitted){ if(i===q.correct) cls+=' right'; else if(i===q.sel) cls+=' wrong'; }
+    else if(i===q.sel) cls+=' sel';
+    return '<button class="'+cls+'" data-i="'+i+'"'+(q.submitted?' disabled':'')+'><span class="L">'+L[i]+'</span><span>'+o.t+'</span></button>';
+  }).join('');
+
+  const fb=$('fb');
+  if(q.submitted){
+    const ok=q.sel===q.correct;
+    let why=q.opts.map((o,i)=>o.ok?'':'<li><strong>'+L[i]+'.</strong> '+o.r+'</li>').join('');
+    fb.className='fb '+(ok?'right':'wrong'); fb.hidden=false;
+    fb.innerHTML='<h3>'+(ok?'✓ Correct':'✗ Incorrect')+'</h3>'+
+      (ok?'':'<div>Correct answer: <strong>'+L[q.correct]+'.</strong> '+q.opts[q.correct].t+'</div>')+
+      '<div class="expl">'+q.e+'</div>'+
+      '<div><strong>Why the other options are wrong</strong><ul>'+why+'</ul></div>'+
+      '<div class="ref">Revisit: '+q.ref+'</div>';
+  } else { fb.hidden=true; fb.innerHTML=''; }
+
+  $('submitBtn').disabled=q.submitted||q.sel===null;
+  $('prevBtn').disabled=cur===0;
+  const all=st.answered===quiz.length;
+  const nb=$('nextBtn');
+  if(cur<quiz.length-1){ nb.textContent='Next →'; nb.disabled=false; }
+  else { nb.textContent=all?'See results':'Next unanswered →'; nb.disabled=false; }
+  $('finishRow').hidden=!all;
+}
+
+function selectOpt(i){ const q=quiz[cur]; if(q.submitted) return; q.sel=i; render(); }
+function submitAns(){ const q=quiz[cur]; if(q.submitted||q.sel===null) return; q.submitted=true; render(); }
+function nextQ(){
+  if(cur<quiz.length-1){ cur++; render(); window.scrollTo(0,0); return; }
+  const un=quiz.findIndex(q=>!q.submitted);
+  if(un===-1) showResults(); else { cur=un; render(); window.scrollTo(0,0); }
+}
+function prevQ(){ if(cur>0){ cur--; render(); window.scrollTo(0,0);} }
+
+function showResults(){
+  const st=stats(), L='ABCDE';
+  const pct=Math.round(st.correct/st.total*100);
+  const byLevel=[1,2,3,4,5].map(l=>{
+    const qs=quiz.filter(q=>q.level===l), c=qs.filter(q=>q.sel===q.correct).length;
+    return {l,n:qs.length,c,p:qs.length?c/qs.length:0};
+  });
+  const topics={};
+  quiz.forEach(q=>{
+    const t=topics[q.topic]||(topics[q.topic]={n:0,c:0,refs:new Set()});
+    t.n++; if(q.sel===q.correct) t.c++; else t.refs.add(q.ref);
+  });
+  const tlist=Object.keys(topics).map(k=>({name:k,n:topics[k].n,c:topics[k].c,refs:Array.from(topics[k].refs)}));
+  const weak=tlist.filter(t=>t.c<t.n).sort((a,b)=>a.c/a.n-b.c/b.n);
+  const meterCls=p=>p>=0.75?'':(p>=0.5?'mid':'low');
+
+  let h='<div class="card"><h1>Results</h1>'+
+    '<div class="row" style="gap:28px;margin:10px 0">'+
+    '<div><div class="big">'+st.correct+' / '+st.total+'</div><div class="sub" style="margin:0">Total score</div></div>'+
+    '<div><div class="big">'+pct+'%</div><div class="sub" style="margin:0">Overall percentage</div></div>'+
+    '<div><div class="big" style="color:var(--ok)">'+st.correct+'</div><div class="sub" style="margin:0">Correct</div></div>'+
+    '<div><div class="big" style="color:var(--bad)">'+st.wrong+'</div><div class="sub" style="margin:0">Incorrect</div></div></div>'+
+    '<button class="btn primary" id="restartBtn">Restart quiz (fresh numbers and order)</button></div>';
+
+  h+='<div class="card"><h2>Performance by difficulty level</h2><table><tr><th>Level</th><th>Score</th><th style="width:40%">Accuracy</th></tr>'+
+    byLevel.map(x=>'<tr><td><span class="badge l'+x.l+'">L'+x.l+'</span> '+LEVELS[x.l]+'</td><td>'+x.c+' / '+x.n+'</td><td><div class="meter"><div class="'+meterCls(x.p)+'" style="width:'+Math.round(x.p*100)+'%"></div></div></td></tr>').join('')+
+    '</table></div>';
+
+  h+='<div class="card"><h2>Concepts to revisit</h2>';
+  if(!weak.length) h+='<p>No missed topics. Re-run the quiz to practise with new numerical values.</p>';
+  else {
+    h+='<div class="note">Topics where you lost marks, weakest first. Re-read the slide sections listed under each.</div><table><tr><th>Topic</th><th>Score</th><th>Slides to review</th></tr>'+
+      weak.map(t=>'<tr><td>'+t.name+'</td><td>'+t.c+' / '+t.n+'</td><td>'+t.refs.join('<br>')+'</td></tr>').join('')+'</table>';
+  }
+  const strong=tlist.filter(t=>t.c===t.n).map(t=>t.name);
+  if(strong.length) h+='<p class="sub" style="margin-top:12px">Solid topics: '+strong.join(', ')+'.</p>';
+  h+='</div>';
+
+  h+='<div class="card"><h2>Full review</h2>'+quiz.map((q,i)=>{
+    const ok=q.sel===q.correct;
+    const why=q.opts.map((o,j)=>o.ok?'':'<li><strong>'+L[j]+'.</strong> '+o.r+'</li>').join('');
+    return '<div class="rev"><div class="qmeta"><span class="badge l'+q.level+'">Level '+q.level+'</span><span>Q'+(i+1)+' · '+q.topic+'</span> <span class="'+(ok?'tag-ok':'tag-bad')+'">'+(ok?'✓ Correct':'✗ Incorrect')+'</span></div>'+
+      '<div class="qtext" style="font-size:1rem">'+q.q+'</div>'+
+      '<div class="ans">Your answer: <strong>'+L[q.sel]+'.</strong> '+q.opts[q.sel].t+'</div>'+
+      (ok?'':'<div class="ans">Correct answer: <strong>'+L[q.correct]+'.</strong> '+q.opts[q.correct].t+'</div>')+
+      '<div class="expl" style="margin:8px 0">'+q.e+'</div>'+
+      '<details><summary>Why the other options are wrong</summary><ul>'+why+'</ul></details>'+
+      '<div class="ref">Revisit: '+q.ref+'</div></div>';
+  }).join('')+'</div>';
+
+  const r=$('results'); r.innerHTML=h; show('results');
+  $('restartBtn').addEventListener('click',startQuiz);
+}
+
+$('startBtn').addEventListener('click',startQuiz);
+$('opts').addEventListener('click',e=>{const b=e.target.closest('.opt'); if(b) selectOpt(+b.dataset.i);});
+$('chips').addEventListener('click',e=>{const b=e.target.closest('.chip'); if(b){cur=+b.dataset.j; render();}});
+$('submitBtn').addEventListener('click',submitAns);
+$('nextBtn').addEventListener('click',nextQ);
+$('prevBtn').addEventListener('click',prevQ);
+$('finishBtn').addEventListener('click',showResults);
+$('nq').textContent=STATIC.length+GENS.length;
+</script>
+</body>
+</html>
