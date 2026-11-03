@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AAI3001 L8 – Image-level Vision Quiz</title>
+<style>
+:root{--bg:#f4f5f9;--card:#fff;--ink:#1b1f2a;--mut:#5b6475;--line:#dde1ea;--acc:#3b5bdb;--accink:#fff;--ok:#1b8a4b;--okbg:#e6f6ec;--bad:#c0392b;--badbg:#fdecea;--warn:#b26a00;--warnbg:#fff4e0;--code:#eef0f6}
+@media(prefers-color-scheme:dark){:root{--bg:#12141a;--card:#1c1f28;--ink:#eceff6;--mut:#9aa3b5;--line:#2c3140;--acc:#7c93ff;--accink:#0d1020;--ok:#4cc37e;--okbg:#14301f;--bad:#ff7a6b;--badbg:#3a1b19;--warn:#f0b24a;--warnbg:#33260d;--code:#262a37}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.35rem;margin:0 0 2px}
+.sub{color:var(--mut);font-size:.9rem;margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px}
+.top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:.82rem;border:1px solid var(--line);border-radius:999px;padding:3px 11px;background:var(--card);color:var(--mut)}
+.chip b{color:var(--ink)}
+.lv{font-size:.8rem;font-weight:600;border-radius:999px;padding:3px 11px;background:var(--acc);color:var(--accink)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:18px}
+.bar>i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+.qn{color:var(--mut);font-size:.85rem;margin-bottom:6px}
+.qt{font-size:1.08rem;font-weight:550;margin-bottom:16px}
+code{background:var(--code);padding:1px 5px;border-radius:5px;font-size:.92em}
+.opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;font:inherit;color:inherit;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:11px 14px;margin-bottom:9px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--acc)}
+.opt .k{flex:0 0 26px;height:26px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--mut)}
+.opt.sel{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,var(--card))}
+.opt.sel .k{background:var(--acc);border-color:var(--acc);color:var(--accink)}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.ok .k{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt.no{border-color:var(--bad);background:var(--badbg)}
+.opt.no .k{background:var(--bad);border-color:var(--bad);color:#fff}
+.opt:disabled{cursor:default}
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 20px;background:var(--acc);color:var(--accink);cursor:pointer}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--acc);border:1.5px solid var(--acc)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.fb{margin-top:16px;border-radius:10px;padding:14px 16px;border:1px solid var(--line)}
+.fb.ok{background:var(--okbg);border-color:var(--ok)}
+.fb.no{background:var(--badbg);border-color:var(--bad)}
+.fb h3{margin:0 0 6px;font-size:1rem}
+.fb .ref{color:var(--mut);font-size:.82rem;margin-top:8px}
+.hide{display:none}
+.big{font-size:2.6rem;font-weight:700;line-height:1.1}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.stat{border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.stat small{display:block;color:var(--mut)}
+.brow{display:grid;grid-template-columns:minmax(150px,2fr) 3fr 64px;gap:10px;align-items:center;margin:7px 0;font-size:.93rem}
+.mini{height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+.mini>i{display:block;height:100%;background:var(--ok)}
+.mini>i.low{background:var(--bad)}.mini>i.mid{background:var(--warn)}
+.weak{background:var(--warnbg);border:1px solid var(--warn);border-radius:10px;padding:12px 16px;margin:8px 0}
+.rv{border:1px solid var(--line);border-radius:10px;margin:10px 0;background:var(--card)}
+.rv summary{cursor:pointer;padding:10px 14px;font-weight:550}
+.rv .in{padding:0 14px 14px}
+.tag{display:inline-block;font-size:.75rem;font-weight:700;border-radius:6px;padding:1px 8px;margin-right:6px}
+.tag.ok{background:var(--okbg);color:var(--ok)}.tag.no{background:var(--badbg);color:var(--bad)}
+h2{font-size:1.1rem;margin:22px 0 6px}
+@media(max-width:560px){.brow{grid-template-columns:1fr 2fr 56px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AAI3001 · L8 Image-level Vision</h1>
+  <div class="sub">Interactive quiz · one question at a time · built only from the L8 lecture slides</div>
+
+  <div id="intro" class="card">
+    <p><b>35 questions in 5 levels</b> of increasing difficulty: Foundational → Conceptual → Application → Analysis → Advanced critical thinking.</p>
+    <p>Topics: images as tensors &amp; preprocessing · dataset bias, augmentation &amp; data checks · CNN features, receptive fields &amp; embeddings · Vision Transformers · occlusion, saliency, CAM &amp; Grad-CAM · trusting explanations.</p>
+    <p>Numerical questions are regenerated with new values every time you start or restart. Answer options are re-shuffled each attempt. Keyboard: <code>A–E</code> select, <code>Enter</code> submit / next.</p>
+    <button class="btn" id="startBtn">Start quiz</button>
+  </div>
+
+  <div id="quiz" class="hide">
+    <div class="top">
+      <div class="chips">
+        <span class="lv" id="lvBadge"></span>
+        <span class="chip">✓ <b id="sOk">0</b></span>
+        <span class="chip">✗ <b id="sNo">0</b></span>
+        <span class="chip"><b id="sPct">0%</b></span>
+      </div>
+      <span class="chip" id="topicChip"></span>
+    </div>
+    <div class="bar"><i id="prog"></i></div>
+    <div class="card">
+      <div class="qn" id="qn"></div>
+      <div class="qt" id="qt"></div>
+      <div id="opts"></div>
+      <div class="row">
+        <button class="btn" id="submitBtn" disabled>Submit answer</button>
+        <button class="btn hide" id="nextBtn">Next question →</button>
+      </div>
+      <div id="fb" class="fb hide"></div>
+    </div>
+  </div>
+
+  <div id="results" class="hide"></div>
+</div>
+
+<script>
+/* ===================== helpers ===================== */
+const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const L=n=>n.toLocaleString('en-US');
+const t=(x,d=2)=>{let v=Number(x.toFixed(d));if(Object.is(v,-0))v=0;return v.toString();};
+const f2=x=>{let v=Math.round(x*100)/100;if(Object.is(v,-0)||v===0)v=0;return v.toFixed(2);};
+
+const LV={1:'Level 1 · Foundational',2:'Level 2 · Conceptual',3:'Level 3 · Application',4:'Level 4 · Analysis',5:'Level 5 · Advanced'};
+const LVS={1:'Foundational',2:'Conceptual',3:'Application',4:'Analysis',5:'Advanced'};
+const TOPICS={
+ pre:{n:'Images as tensors & preprocessing',s:'Slides 9–13',adv:'Re-read the four conversion pitfalls (channel order, axis order, range, normalisation) and redo the normalisation arithmetic by hand.'},
+ data:{n:'Dataset bias, augmentation & data checks',s:'Slides 14–19',adv:'Revisit how shortcuts leak into labels, what augmentation can and cannot fix, and the three data checks (annotation guide, class balance, leaks).'},
+ cnn:{n:'CNN features, receptive field & embeddings',s:'Slides 21–31',adv:'Review learned filters (ReLU(Σw·x+b)), receptive-field growth, GAP embeddings, and why layer2 vs layer4 vectors group differently.'},
+ vit:{n:'Vision Transformers & CNN vs ViT',s:'Slides 32–38',adv:'Review patch tokens + [CLS], the softmax(q·k/√d) attention calculation, global receptive field and the CNN-vs-ViT trade-off table.'},
+ xai:{n:'Explanation methods (occlusion → Grad-CAM)',s:'Slides 39–49, 52',adv:'Walk through the six attempts and the Explainability Scorecard: what each method needs, what it costs, and whether it answers “why this class?”.'},
+ trust:{n:'Trusting explanations & case studies',s:'Slides 31, 50–54',adv:'Revisit the doctor/nurse case study, attention vs rollout, the sanity-check teaser, and why “start with Grad-CAM, confirm with a counterfactual”.'}
+};
+
+/* ===================== question bank ===================== */
+const BANK=[];
+const S=(lv,topic,slide,q,correct,wrongs,exp)=>BANK.push({lv,topic,slide,make:()=>({q,opts:[correct,...wrongs],exp})});
+const D=(lv,topic,slide,make)=>BANK.push({lv,topic,slide,make});
+
+/* ---------- LEVEL 1 ---------- */
+S(1,'pre','Slides 9–11',
+ `You load a 224 × 224 colour photo with <code>cv2.imread(path)</code> and print its shape and dtype. Which statement describes what you actually have, and what a pretrained PyTorch model needs next?`,
+ `Shape (224, 224, 3), dtype uint8, channels in BGR order. Convert to RGB, permute to (C, H, W), scale to [0, 1], then normalise with the model's training mean/std.`,
+ [`Shape (3, 224, 224), dtype float32 in [0, 1], RGB order. Only the batch dimension is missing.`,
+  `Shape (224, 224, 3), dtype uint8, RGB order. Only a division by 255 is needed because normalisation is optional for pretrained models.`,
+  `Shape (224, 224, 3), dtype float32 in [0, 255], BGR order. Only the axis order has to change.`],
+ `<b>OpenCV returns H × W × C, uint8 integers in 0–255, with channels in BGR order.</b> The lecture's “4 conversions where things go wrong” are: channel order (<code>cvtColor BGR2RGB</code>), axis order (<code>permute(2,0,1)</code> → (C,H,W); a batch is (B,C,H,W)), range (÷255) and normalisation with the training mean/std. Skipping any one gives a silent failure (swapped colours, shape error, near-white/black images or an under-performing pretrained model).<br><br><b>Why the others fail:</b> cv2 does not return channels-first float32 or RGB; normalisation is <i>not</i> optional for a pretrained model, and OpenCV does not return floats.`);
+
+S(1,'cnn','Slide 22',
+ `In the lecture, “channel 33 of layer1” fires on the husky's fur and “channel 186” fires on the snow. Each output channel of a learned conv layer is computed as <code>ReLU(Σ w·x + b)</code> per position. What does one output channel represent?`,
+ `A map recording, at every position, how strongly that channel's learned pattern is present.`,
+ [`One of the three colour channels of the input photo, passed through unchanged.`,
+  `The class score for one of the ImageNet classes, computed at every pixel.`,
+  `A hand-designed edge or blur kernel chosen by the engineer before training starts.`],
+ `<b>“One channel per pattern. Each output channel says how much of my pattern is here.”</b> The weights w and bias b are <i>learned</i> (here on ImageNet) instead of being hand-designed like the Sobel/blur kernels on slide 21, and the ReLU keeps only positive evidence.<br><br><b>Why the others fail:</b> a feature channel is not an input colour channel; class scores only appear at the classifier head after pooling; and the point of the slide is that kernels are learned, not hand-crafted.`);
+
+S(1,'cnn','Slide 27',
+ `A ResNet-50 layer produces a feature map of shape (C, H, W). Global average pooling (GAP) is applied to turn it into an embedding. Which statement is correct?`,
+ `The result has shape (C,): it keeps <i>which</i> patterns are present but discards <i>where</i> they were.`,
+ [`The result has shape (H, W): it keeps <i>where</i> activity occurred but discards which pattern caused it.`,
+  `The result has shape (C, H, W) with smaller values, so spatial position is preserved.`,
+  `The result has shape (C,): it keeps both <i>what</i> and <i>where</i>, because the average is weighted by position.`],
+ `From the table on slide 27: <b>Feature map (C,H,W) keeps “where”; Embedding (C,) keeps “what”.</b> GAP averages every H × W map to a single number (e.g. fur map ch 33 → 0.90, snow map ch 186 → 0.11), giving “how much of each pattern” but no location.<br><br>This is also why CAM can later paint the head's weights back onto the maps <i>before</i> they were pooled.`);
+
+S(1,'data','Slides 4–5, 15',
+ `A wolf-vs-husky classifier scores 100% on its training photos. Every training wolf is on snow and every husky is on grass. On new photos it predicts “wolf” whenever there is snow. Which description is most accurate?`,
+ `A shortcut (spurious correlation): a collection habit leaked into the labels, so the model can score perfectly without learning what a wolf looks like.`,
+ [`Ordinary overfitting from too many parameters; a smaller network or dropout alone would remove the problem.`,
+  `Label noise: several training photos must carry the wrong label.`,
+  `Underfitting: the network is too shallow to separate the two animals, so it fell back on a simple feature.`],
+ `The labels were <i>correct</i> and the photos real; the hidden rule was “snow ⇒ wolf”. “Collection habits (e.g. where wolves are photographed) leak into the labels.” Accuracy alone says the model worked on these photos; only an explanation says <i>why</i>.<br><br><b>Why the others fail:</b> label noise is excluded (labels are correct); the model fits the training set perfectly, so it is not underfitting; and regularisation does not remove a correlation that is present in <i>every</i> training image.`);
+
+D(1,'pre','Slides 9–10',()=>{
+ const H=pick([128,160,224,256,320]),W=pick([128,160,224,256,320]),B=pick([4,8,16,32]),C=3;
+ const n=B*C*H*W;
+ const o=x=>L(x)+' bytes';
+ return{q:`A batch of <b>${B}</b> RGB photos, each <b>${H} × ${W}</b> pixels, is stored as a <code>uint8</code> PyTorch tensor of shape (B, C, H, W) = (${B}, 3, ${H}, ${W}). How many bytes do the raw pixel values occupy?`,
+  opts:[o(n),o(B*H*W),o(C*H*W),o(4*n),o(B*C*(H+W))],
+  exp:`<b>Formula:</b> elements = B × C × H × W = ${B} × 3 × ${H} × ${W} = <b>${L(n)}</b>. A <code>uint8</code> value is 1 byte, so the answer is <b>${L(n)} bytes</b>. (Slide 10: a 224 × 224 × 3 husky is 150,528 numbers.)<br><br><b>Why the others fail:</b> ${L(B*H*W)} forgets the 3 channels; ${L(C*H*W)} counts a single image, not the batch; ${L(4*n)} would be the size <i>after</i> converting to float32 (4 bytes each), but the tensor here is uint8; ${L(B*C*(H+W))} adds the spatial sizes instead of multiplying them.`};
+});
+
+D(1,'vit','Slide 34',()=>{
+ const P=pick([16,32]),S_=pick([224,256,384,448]);
+ const g=S_/P,tok=g*g+1;
+ return{q:`A Vision Transformer cuts a <b>${S_} × ${S_}</b> RGB image into non-overlapping <b>${P} × ${P}</b> patches and prepends one [CLS] token. How many tokens enter the first encoder block?`,
+  opts:[String(tok),String(g*g),String(S_*S_/P),String(g+1),String(P*P*3)],
+  exp:`<b>Patches per side</b> = ${S_}/${P} = ${g}. <b>Patches</b> = ${g}² = ${g*g}. <b>Add [CLS]</b> → <b>${tok} tokens</b> (cf. ViT-B/16: 14 × 14 = 196 patches + [CLS]).<br><br><b>Why the others fail:</b> ${g*g} forgets [CLS]; ${S_*S_/P} divides the pixel count by P instead of P²; ${g+1} counts only one row of patches; ${P*P*3} is the length of a flattened ${P}×${P}×3 patch (the token <i>feature dimension</i> before projection), not the number of tokens.`};
+});
+
+/* ---------- LEVEL 2 ---------- */
+S(2,'pre','Slides 11–13',
+ `A student standardises a uint8 photo directly with <code>(x − μ)/σ</code> and forgets the ÷255 step. For a red value of 200 (μ = 0.485, σ = 0.229) they obtain ≈ 871 instead of ≈ 1.31. What is the consequence?`,
+ `The first layer receives values far outside the ≈ ±2 range it saw during training, so activations saturate and the pretrained model under-performs even though the picture looks the same.`,
+ [`Nothing important: the extra scale is absorbed by later layers, so the predictions stay the same.`,
+  `PyTorch raises a shape error because the tensor is no longer in (C, H, W) order.`,
+  `Only the colours are affected: the image becomes a red/blue-swapped version of itself.`],
+ `Normalisation is <b>x′ = (x/255 − μ)/σ per channel</b>. Skipping step 1 puts values at ~871, “far off the scale”: the network's first layer saw values near ±2 during training, so “every activation saturates”. This is the “pretrained underperforms its training mean/std” pitfall.<br><br><b>Why the others fail:</b> the error is a <i>range</i> problem, not an axis problem (no shape error) and not a channel-order problem (that gives swapped colours). It is not harmless: pretrained weights were tuned for a specific input distribution.`);
+
+S(2,'data','Slides 17–18',
+ `An augmentation is valid only if a human would give the transformed image the same label. For which task is a <b>horizontal flip</b> the most dangerous?`,
+ `Distinguishing “turn-left” from “turn-right” road signs.`,
+ [`Distinguishing cats from dogs.`,
+  `Recognising bird species from side-view photographs.`,
+  `Detecting pneumonia on chest X-rays when the side of the lesion is not part of the label.`],
+ `A flip is unsafe <b>when left/right is part of the label</b>: mirroring a turn-left sign produces a turn-right sign (and mirrored house-number digits are not the same digits). A cat is still a cat, and a bird species does not change. The lecture notes that flip is common for chest X-rays and is unsafe only when left/right matters (e.g. situs inversus, side of a lesion).<br><br>Augmentation teaches invariances <i>you choose</i>, so you must choose ones that preserve the label.`);
+
+S(2,'data','Slide 18',
+ `Every training wolf photo is on snow. You add random flips, crops and colour jitter and retrain. The model still predicts “wolf” for any snowy photo. Why did augmentation not remove the shortcut?`,
+ `Each augmented wolf is still on snow: augmentation changes the image but not the background–label correlation, and it can only teach invariances you choose, not remove one present in every image.`,
+ [`The crops were too small; with a larger crop window the network would stop using snow.`,
+  `Colour jitter changed the label of some wolf photos, which re-introduced label noise.`,
+  `Augmentation only works at test time, so it cannot change what the network learns during training.`],
+ `Slide 18: “Flip, crop, colour jitter: every augmented wolf is still on snow. The shortcut survives.” <b>“The fix is data: wolves on grass, huskies on snow.”</b><br><br><b>Why the others fail:</b> crop size does not alter the correlation; jitter is label-preserving; and augmentation is applied during training (it is exactly how free label-preserving data is created).`);
+
+S(2,'vit','Slides 32, 37 · Poll 6',
+ `Which statement correctly contrasts the receptive field of a CNN with that of a Vision Transformer?`,
+ `A CNN's receptive field grows with depth (edges → textures → parts → concepts); a ViT's self-attention is global from layer 1, so the top-left patch can already attend to the bottom-right patch.`,
+ [`Both grow gradually with depth; a ViT's top-left patch can only reach distant patches after several layers.`,
+  `A CNN is global from the first layer, while a ViT is restricted to neighbouring patches until its last block.`,
+  `A ViT has the stronger built-in locality assumption, which is why it needs less training data than a CNN.`],
+ `From the CNN-vs-ViT table: CNN – <b>strong</b> built-in assumptions (locality, equivariance), receptive field grows with depth; ViT – <b>weak</b> assumptions (learns them), <b>global from layer 1</b> (answer C of Poll 6). Because the ViT learns locality instead of having it built in, it is data-hungry.<br><br><b>Why the others fail:</b> a ViT does not need depth to become global; CNNs are local; and a weaker inductive bias means <i>more</i>, not less, data is needed.`);
+
+S(2,'cnn','Slides 27–28',
+ `You compute GAP embeddings for 35 wolf/husky photos on snow and on grass. Layer2 vectors cluster by <b>ground</b> (snow vs grass) while layer4 vectors cluster by <b>animal</b>. What should you conclude for an image-search system?`,
+ `The layer you pool decides what “similar” means: early layers encode colour/texture/background, late layers encode parts and objects, so choose the layer deliberately.`,
+ [`Layer choice is irrelevant: every layer's GAP vector gives the same neighbours after normalisation.`,
+  `Layer2 is better for finding the same animal, because its feature maps have higher spatial resolution.`,
+  `Layer4 clusters by animal only because it has 2048 channels instead of 512; more channels always means better semantics.`],
+ `Slide 28: “Near vectors = images the model considers alike. The layer decides what ‘alike’ means.” Layer2 (28 × 28 × 512) mostly detects texture/colour such as snow or grass; layer4 (7 × 7 × 2048) responds to larger parts and objects.<br><br><b>Why the others fail:</b> the PCA plots clearly differ by layer; resolution does not give object semantics; and it is depth/receptive field, not channel count alone, that yields object-level features.`);
+
+S(2,'xai','Slide 42',
+ `“Max-activating patches” (Attempt 2) finds the crops that most excite one channel across many photos. Why does it <b>not</b> explain why this particular husky photo was classified as “wolf”?`,
+ `It shows what a unit likes across a large photo set, not which evidence in this photo drove this class score.`,
+ [`It can only be applied to the first convolutional layer.`,
+  `It requires retraining the network with a modified loss before it can be used.`,
+  `It is identical to occlusion, so it fails for the same reason: one patch at a time cannot hide evidence that is everywhere.`],
+ `The scorecard lists it as “no” for <i>answers “why this class?”</i>: it needs a large photo set and one forward pass per photo, and it characterises a <b>unit</b> (channel), not a <b>decision</b> about one photo.<br><br><b>Why the others fail:</b> it works at any layer (the lecture example is layer4[2].conv3); it needs only forward hooks, not retraining; and occlusion is a different method (mask the input and watch the class score drop).`);
+
+S(2,'xai','Slide 45',
+ `Gradient saliency |∂ logit(wolf)/∂ pixel| is computed with one backward pass, yet the map is noisy and pixel-level. What is the key reason it is a weak explanation?`,
+ `A gradient is local: it says what a tiny change to each pixel would do to the score, not which evidence the model actually used.`,
+ [`Gradients can only be computed for the final layer, so the map ignores early features.`,
+  `Gradients are class-agnostic, so the map is identical for “wolf” and “husky”.`,
+  `It needs a GAP + linear head, which most CNNs do not have.`],
+ `Slide 45: “A gradient is local: it says what a tiny change would do, not what the model used.” Large intensity everywhere, only somewhat more on the snow – “fast, but noisy and pixel-level”.<br><br><b>Why the others fail:</b> backprop reaches all the way to the input pixels; the gradient is taken w.r.t. a <i>specific</i> logit, so it is class-specific (the scorecard says “yes, noisy”); and the GAP + linear head requirement belongs to CAM, not saliency.`);
+
+D(2,'cnn','Slides 25–26 · Poll 4',()=>{
+ const k=pick([3,5]),n=ri(2,4);
+ const R=1+n*(k-1);
+ const o=x=>`${x} × ${x}`;
+ return{q:`A stack of <b>${n}</b> convolutional layers, each with a <b>${k} × ${k}</b> kernel, stride 1 and no pooling. What is the (theoretical) receptive field of one output cell on the input?`,
+  opts:[o(R),o(n*k),o(n*(k-1)),o(Math.pow(k,n)),o(k*k*n)],
+  exp:`Each additional k × k layer (stride 1) extends the receptive field by k − 1. <b>R = 1 + n(k − 1) = 1 + ${n}(${k} − 1) = ${R}</b>, i.e. ${R} × ${R} (slide 26: 3×3 → 5×5 → 7×7, growing by 2 per layer for k = 3).<br><br><b>Why the others fail:</b> ${n*k} adds the kernel widths and forgets that adjacent windows overlap; ${n*(k-1)} is off by one (forgets the centre pixel); ${Math.pow(k,n)} grows the field exponentially (it only does so with stride/pooling, not here); ${k*k*n} multiplies by the kernel <i>area</i>, a count of weights rather than of pixels per side.`};
+});
+
+/* ---------- LEVEL 3 ---------- */
+S(3,'pre','Slide 11',
+ `A pipeline shows three symptoms: <b>(i)</b> <code>imshow</code> of a float image with values 0–255 looks almost completely white; <b>(ii)</b> a [0, 1] float image cast directly to <code>uint8</code> and saved comes out almost black; <b>(iii)</b> a husky's fur looks blue-tinted. Which diagnosis of (i), (ii), (iii) is correct?`,
+ `(i) forgot ÷255 (floats are clipped at 1); (ii) forgot ×255 before casting; (iii) BGR/RGB channel order mix-up.`,
+ [`(i) forgot ×255; (ii) forgot ÷255; (iii) HWC vs CHW axis order.`,
+  `(i) BGR/RGB mix-up; (ii) forgot ÷255; (iii) forgot to normalise with mean/std.`,
+  `(i) HWC vs CHW axis order; (ii) forgot ×255 before casting; (iii) forgot ÷255.`],
+ `Slide 11 table: <b>Range, shown</b> – 0–255 floats in <code>imshow</code> are clipped to [0,1], so nearly white → fix ÷255. <b>Range, saved</b> – [0,1] floats cast to uint8 truncate to 0 → black → fix <code>(x*255).astype</code>. <b>Channel order</b> – red/blue swapped → <code>cv2.cvtColor(…BGR2RGB)</code>. Axis-order errors show up as shape errors, and missing normalisation shows up as a pretrained model under-performing, not as a visual tint.`);
+
+S(3,'xai','Slides 43, 52',
+ `You are given only API access to a third-party image classifier: it returns class probabilities for any image you send, but you cannot see its weights or gradients. Which explanation method can you still apply?`,
+ `Occlusion / counterfactual swap: it needs only forward passes (one per masked patch).`,
+ [`CAM, because it only needs a forward pass.`,
+  `Grad-CAM, because it needs just one backward pass at one layer.`,
+  `Gradient saliency, because it only needs gradients with respect to the input pixels.`],
+ `Explainability Scorecard: occlusion/swap “needs nothing (black box)”, cost = 1 forward pass per patch. <b>CAM</b> needs the GAP + linear head <i>weights</i>; <b>Grad-CAM</b> needs gradients at a conv layer; <b>saliency</b> needs gradients. None of those is available through a probability-only API.<br><br>Mask a region, re-query, and see how much the class score drops.`);
+
+S(3,'xai','Slides 46, 48',
+ `Model X: layer4 maps (7 × 7 × 2048) → GAP → one linear layer → classes. Model Y: layer4 maps → flatten → two fully-connected layers with ReLU → classes. Which statement is correct?`,
+ `CAM can be computed directly for X (head weights painted back onto the maps, forward pass only) but not for Y; Grad-CAM works for both.`,
+ [`CAM works for both, since it only needs a forward pass.`,
+  `Neither: both CAM and Grad-CAM require retraining the model with a GAP layer.`,
+  `CAM works for Y but not X, because Y has more weights to paint back onto the maps.`],
+ `CAM = Σ w_k A_k and <b>requires a GAP + linear head right after the maps</b> (otherwise retraining is required). That is true for X only. <b>Grad-CAM</b> replaces the weight by the average gradient, so it “works on any architecture and any layer → no GAP needed”.<br><br><b>Why the others fail:</b> Y's weights do not map one-to-one onto channels of the spatial maps; Grad-CAM needs no retraining.`);
+
+D(3,'pre','Slides 12–13 · Poll 2',()=>{
+ const ch=pick([['red',0.485,0.229],['green',0.456,0.224],['blue',0.406,0.225]]);
+ const v=ri(30,250),[nm,mu,sd]=ch;
+ const sc=v/255,ans=(sc-mu)/sd;
+ return{q:`A ${nm} pixel value is <b>${v}</b> (uint8). The model is normalised with ÷255 followed by ImageNet standardisation, with ${nm}-channel mean μ = ${mu} and std σ = ${sd}. What value does the model receive? (2 decimal places)`,
+  opts:[f2(ans),f2((v-mu)/sd),f2(sc),f2((sc-mu)*sd),f2((sc+mu)/sd)],
+  exp:`<b>x′ = (x/255 − μ)/σ</b><br>Step 1: ${v}/255 = ${t(sc,4)}<br>Step 2: (${t(sc,4)} − ${mu})/${sd} = ${t(sc-mu,4)}/${sd} = <b>${f2(ans)}</b>.<br><br><b>Why the others fail:</b> ${f2((v-mu)/sd)} skips the ÷255 (values far outside the trained range); ${f2(sc)} only rescales to [0,1] and never standardises; ${f2((sc-mu)*sd)} multiplies by σ instead of dividing; ${f2((sc+mu)/sd)} adds the mean instead of subtracting it.`};
+});
+
+D(3,'data','Slide 18',()=>{
+ const H=pick([224,256,320]),fr=pick([0.25,0.375,0.625,0.75]);
+ const a=H*fr,w=fr*fr;
+ return{q:`CutMix pastes an <b>${a} × ${a}</b> patch cut from a <b>dog</b> image into a <b>${H} × ${H}</b> <b>cat</b> image. The target label is mixed by area. What soft-label weight does “dog” receive?`,
+  opts:[t(w,4),t(fr,4),t(1-w,4),t(1-fr,4),t(2*w,4)],
+  exp:`Label weight = patch area / image area = ${a}² / ${H}² = (${a}/${H})² = ${t(fr,3)}² = <b>${t(w,4)}</b>. (Slide 18: a 112 × 112 patch on a 224 × 224 image → 0.25 / 0.75.)<br><br><b>Why the others fail:</b> ${t(fr,4)} uses the side ratio instead of the area ratio; ${t(1-w,4)} is the weight for “cat”; ${t(1-fr,4)} is one minus the side ratio; ${t(2*w,4)} doubles the area.`};
+});
+
+D(3,'data','Slide 19',()=>{
+ const N=pick([1000,2000,5000]),fr=pick([0.04,0.05,0.08,0.10]),r=pick([0.1,0.2,0.3,0.4,0.5,0.6]);
+ const m=Math.round(N*fr),k=Math.round(m*r),acc=(N-m+k)/N*100;
+ return{q:`A test set has <b>${L(N)}</b> images, of which <b>${m}</b> (${t(fr*100,0)}%) belong to the minority class B. A classifier labels <i>every</i> majority-class image correctly and reports an overall accuracy of <b>${t(acc,2)}%</b>. What is its recall on class B?`,
+  opts:[t(r*100,1)+'%',t(acc,2)+'%',t(100-acc,2)+'%',t(k/N*100,2)+'%','100%'],
+  exp:`Correct predictions = ${t(acc,2)}% × ${L(N)} = ${L(N-m+k)}. Majority images are all correct: ${L(N-m)}. So correct B images k = ${L(N-m+k)} − ${L(N-m)} = ${k}. <b>Recall(B) = k / m = ${k} / ${m} = ${t(r*100,1)}%</b>.<br><br>Slide 19: with 95% A / 5% B, always answering “A” scores 95% accuracy and 0% recall on B, so report <b>per-class recall / F1</b>.<br><br><b>Why the others fail:</b> ${t(acc,2)}% is overall accuracy (dominated by the majority class); ${t(100-acc,2)}% is the overall error rate; ${t(k/N*100,2)}% divides by the whole test set instead of the ${m} minority images; 100% is the majority-class recall.`};
+});
+
+D(3,'cnn','Slides 26–27',()=>{
+ const S_=pick([192,224,288,320,416,448]),g=S_/32;
+ return{q:`A ResNet-50 has an overall stride of 32 and 2048 channels in layer4. You feed a <b>${S_} × ${S_}</b> image. How many numbers are in the layer4 feature map <i>before</i> global average pooling?`,
+  opts:[L(2048*g*g),'2,048',L(g*g),L(2048*g),L(2048*S_*S_)],
+  exp:`Spatial size = ${S_}/32 = ${g}, so the map is ${g} × ${g} × 2048 (for 224 × 224 this is the 7 × 7 × 2048 of the lecture; each cell stands for a 32 × 32 block of the input). Numbers = ${g} × ${g} × 2048 = <b>${L(2048*g*g)}</b>.<br><br><b>Why the others fail:</b> 2,048 is the GAP <i>embedding</i> (after pooling); ${L(g*g)} counts only the spatial cells; ${L(2048*g)} uses one spatial dimension; ${L(2048*S_*S_)} wrongly keeps the full input resolution.`};
+});
+
+D(3,'xai','Slide 43',()=>{
+ const [w,s]=pick([[32,16],[32,32],[32,8],[16,16],[16,8],[64,16],[64,32],[48,16],[48,8]]);
+ const n=(224-w)/s+1,tot=n*n;
+ return{q:`Occlusion saliency slides a <b>${w} × ${w}</b> grey patch over a <b>224 × 224</b> photo with stride <b>${s}</b> (no padding), running one forward pass per mask position. How many forward passes are needed for the heat-map (ignore the un-occluded baseline pass)?`,
+  opts:[L(tot),L(Math.pow(224/s,2)),L(Math.pow((224-w)/s,2)),L(n),L(Math.pow(224/w,2))],
+  exp:`Positions per axis = (224 − ${w})/${s} + 1 = ${n}. Total = ${n}² = <b>${L(tot)}</b> forward passes. (Scorecard: occlusion costs “1 forward pass per patch”.)<br><br><b>Why the others fail:</b> ${L(Math.pow(224/s,2))} ignores that the window cannot slide past the border; ${L(Math.pow((224-w)/s,2))} forgets the “+1” (the starting position); ${L(n)} counts one axis only; ${L(Math.pow(224/w,2))} assumes non-overlapping tiles with stride = window size.`};
+});
+
+/* ---------- LEVEL 4 ---------- */
+S(4,'trust','Slides 29–31, 47',
+ `Heads A (on layer2 GAP features) and B (on layer4 GAP features) both reach 100% on the 16 training photos (wolves on snow, huskies on grass). On 19 reversed-background test photos, Head A labels 12 of 12 huskies “wolf” and 5 of 7 wolves “husky”, while Head B makes 0 mistakes. CAM for Head A is red over the snow; CAM for Head B is blue over the husky's face. Which conclusion is best supported?`,
+ `Training accuracy could not distinguish them: A learned the background shortcut from low-level colour/texture features, B used animal-level features; only explanations and a reversed-background test exposed the difference.`,
+ [`Head B has more weights (2048 vs 512), so it overfit less; the CAM maps are decoration and add no information.`,
+  `Head A is simply under-trained; training it longer on the same 16 photos will make it use the face.`,
+  `The reversed-background test set is unrepresentative, so Head A's failure says little about the model.`],
+ `Slide 31: “Same photos, same 100% in training, opposite rules. We need to see which pixels each used.” Head A's evidence for “wolf” lies on the snow (CAM red over snow); Head B's evidence for “husky” sits on the face. Layer2 vectors cluster by <i>ground</i>, layer4 by <i>animal</i> (slide 28), so a linear head on layer2 finds the cheapest separating rule: snow vs grass.<br><br><b>Why the others fail:</b> the number of weights does not explain which feature was used; more epochs on a perfectly separable set cannot remove the shortcut; and the reversed-background test is precisely the intervention that breaks the spurious correlation.`);
+
+S(4,'trust','Slide 54',
+ `You randomise the weights of a trained classifier layer by layer from the top. The saliency map for a fixed photo barely changes. What should you conclude?`,
+ `The map is mostly explaining the image (e.g. its edges), not the model's decision, so it is not a faithful explanation even though it looks plausible.`,
+ [`The explanation is highly reliable, because it is stable under changes to the model.`,
+  `The classifier is robust: randomising its weights does not change its behaviour.`,
+  `The sanity check is inconclusive until the weights are randomised from the bottom (input side) instead of the top.`],
+ `Slide 54 (Adebayo et al.): “If randomizing the model does not change its explanation, the map is explaining the image and not the model decision. A plausible-looking saliency map is not automatically a faithful explanation. It must change when the learned model is meaningfully changed.”<br><br><b>Why the others fail:</b> stability under randomisation is a <i>failure</i>, not reliability; randomising weights would of course destroy the classifier's predictions (the test is about the <i>explanation</i>); and the lecture's check randomises layer by layer from the top.`);
+
+S(4,'xai','Slides 38, 49',
+ `For the same photo, ResNet-50 predicts “Egyptian cat” (95%) and ViT-B/16 predicts “espresso” (51%). Grad-CAM for each model's own predicted class lights up the cat for ResNet-50 and the cup for ViT-B/16. What is the best interpretation?`,
+ `Both answers have evidence in the image: the two models rely on different objects, and Grad-CAM is class-discriminative, so different target classes give different evidence.`,
+ [`At least one model is malfunctioning, because two correct models must highlight the same region.`,
+  `The two models must have received differently pre-processed pixels; identical pixels always give identical Grad-CAM maps.`,
+  `Grad-CAM is class-agnostic, so the maps differ only because the two architectures differ in layer depth.`],
+ `Slide 49: “Back to slide 38: ResNet-50 looked at the cat, ViT at the cup. Both answers had evidence.” and “Same photo, same model, different class → different evidence. That is what ‘class-discriminative’ means.” Slide 38 states explicitly that it was the <i>same image (pixels)</i>.<br><br><b>Why the others fail:</b> different models legitimately use different cues; the pixels were identical; and Grad-CAM <i>is</i> class-specific (it backpropagates from the target class score only, one-hot).`);
+
+S(4,'trust','Slide 50',
+ `A VGG-16 fine-tuned on web images of “doctor” and “nurse” has good validation accuracy but only 82% on a gender-balanced test set. Grad-CAM shows it looks at faces and hair. Which conclusion and remedy match the case study?`,
+ `The model learned a gender shortcut instead of profession; the fix is data (add male nurses and female doctors), after which Grad-CAM shifts to the white coat, stethoscope and sleeves.`,
+ [`Validation accuracy is the decisive metric, so the model is fine; the Grad-CAM maps are only cosmetic.`,
+  `The fix is a deeper network, which will automatically learn to ignore faces.`,
+  `The fix is to blur the Grad-CAM heat-map so the model stops using faces.`],
+ `Slide 50: “The explanation found the bias; the fix was data. Same lesson as our snow.” The validation set shared the training bias, so it hid the problem; the gender-balanced test exposed it, and Grad-CAM showed <i>why</i>.<br><br><b>Why the others fail:</b> a biased validation set cannot reveal the shortcut; depth does not remove a correlation that exists in the labels; the heat-map is a read-out of the model, and altering it changes nothing about what the model uses.`);
+
+S(4,'xai','Slides 47, 28',
+ `Head B's CAM (layer4, 7 × 7) is visibly blurrier than Head A's CAM (layer2, 28 × 28). What does this reveal about choosing the layer for a CAM / Grad-CAM?`,
+ `Each layer4 cell covers a 32 × 32 pixel block, so deeper layers give more object-level evidence but coarser localisation; shallower layers localise finely but are dominated by colour/texture.`,
+ [`The blur is caused by global average pooling, which averages away all spatial detail in the heat-map.`,
+  `The blur is caused by the ReLU, which clips negative evidence and softens edges.`,
+  `The blur shows that Head B is less accurate than Head A at locating the husky.`],
+ `Slide 47: “Head B: evidence for ‘husky’ sits on the face. Blurrier: 7 × 7 cells of 32 px.” The CAM is computed on the stored <i>maps</i> (before pooling), so its resolution is the map's resolution. Deeper features are semantic (parts/objects) but coarse; layer2 is sharp but encodes low-level cues, which is exactly why Head A's evidence landed on snow.<br><br><b>Why the others fail:</b> GAP is applied to a <i>separate</i> branch to make the embedding, while CAM uses the maps themselves; ReLU is not the cause of coarseness; and Head B is the one that was correct on all 19 test photos.`);
+
+D(4,'vit','Slide 35',()=>{
+ for(;;){
+  const q=[ri(1,4),ri(1,4)],k1=[ri(0,4),ri(0,4)],k2=[ri(0,4),ri(0,4)];
+  const d1=q[0]*k1[0]+q[1]*k1[1],d2=q[0]*k2[0]+q[1]*k2[1];
+  if(d1===d2||d1+d2===0)continue;
+  const s1=d1/Math.SQRT2,s2=d2/Math.SQRT2;
+  const p1=Math.exp(s1)/(Math.exp(s1)+Math.exp(s2));
+  if(Math.abs(p1-0.5)<0.06)continue;
+  const ns=Math.exp(d1)/(Math.exp(d1)+Math.exp(d2));
+  return{q:`A toy [CLS] query is <b>q = [${q[0]}, ${q[1]}]</b>. Two patch keys are <b>k₁ = [${k1[0]}, ${k1[1]}]</b> and <b>k₂ = [${k2[0]}, ${k2[1]}]</b> (key dimension d = 2). Using scaled dot-product attention, <code>softmax(q·k/√d)</code>, what attention weight does [CLS] give to patch 1? (2 decimal places)`,
+   opts:[f2(p1),f2(ns),f2(1-p1),f2(d1/(d1+d2)),'0.50'],
+   exp:`<b>Scores:</b> q·k₁ = ${q[0]}·${k1[0]} + ${q[1]}·${k1[1]} = ${d1}; q·k₂ = ${d2}.<br><b>Scale by √d = √2 ≈ 1.414:</b> s₁ = ${t(s1,3)}, s₂ = ${t(s2,3)}.<br><b>Softmax:</b> e^s₁ = ${t(Math.exp(s1),3)}, e^s₂ = ${t(Math.exp(s2),3)} → weight₁ = ${t(Math.exp(s1),3)}/(${t(Math.exp(s1),3)} + ${t(Math.exp(s2),3)}) = <b>${f2(p1)}</b>.<br><br><b>Why the others fail:</b> ${f2(ns)} skips the 1/√d scaling (the softmax then becomes sharper); ${f2(1-p1)} is the weight on patch 2; ${f2(d1/(d1+d2))} normalises the raw dot products linearly instead of with softmax; 0.50 would require equal scores.`};
+ }
+});
+
+D(4,'xai','Slide 48',()=>{
+ for(;;){
+  const g1=[0,0,0,0].map(()=>ri(-3,5)),g2=[0,0,0,0].map(()=>ri(-3,5));
+  const A1=ri(1,6),A2=ri(1,6);
+  const a1=sum(g1)/4,a2=sum(g2)/4,raw=a1*A1+a2*A2;
+  const neg=Math.random()<0.5;
+  if(neg?raw>-0.5:raw<0.5)continue;
+  const ans=Math.max(0,raw);
+  const d1=neg?raw:(a1*A2+a2*A1);
+  const fm=g=>`[[${g[0]}, ${g[1]}], [${g[2]}, ${g[3]}]]`;
+  return{q:`Grad-CAM, target class “wolf”. The gradients of the class score w.r.t. two 2 × 2 feature maps are <b>∂y/∂A¹ = ${fm(g1)}</b> and <b>∂y/∂A² = ${fm(g2)}</b>. At one spatial location the activations are <b>A¹ = ${A1}</b> and <b>A² = ${A2}</b>. Compute the Grad-CAM value at that location, <code>L = ReLU(Σₖ αₖ Aₖ)</code>, where αₖ is the average gradient over the map. (2 decimal places)`,
+   opts:[f2(ans),f2(d1),f2(4*raw),f2(a1*A1),f2(a1+a2)],
+   exp:`<b>Step 1 – weights (average gradient):</b> α₁ = (${g1.join(' + ')})/4 = ${t(a1,2)}; α₂ = (${g2.join(' + ')})/4 = ${t(a2,2)}.<br><b>Step 2 – weighted sum at the location:</b> ${t(a1,2)}·${A1} + ${t(a2,2)}·${A2} = ${t(raw,2)}.<br><b>Step 3 – ReLU:</b> max(0, ${t(raw,2)}) = <b>${f2(ans)}</b>.${neg?' The pre-ReLU value is negative, so this location gives evidence <i>against</i> “wolf” and is clipped to 0.':''}<br><br><b>Why the others fail:</b> ${f2(d1)} ${neg?'forgets the ReLU (keeps the negative evidence)':'pairs each weight with the wrong channel\'s activation'}; ${f2(4*raw)} uses the <i>sum</i> of the gradients instead of the average; ${f2(a1*A1)} uses channel 1 only; ${f2(a1+a2)} adds the weights and ignores the activations.`};
+ }
+});
+
+/* ---------- LEVEL 5 ---------- */
+S(5,'trust','Slides 48, 50–52, 54',
+ `A colleague says: “Grad-CAM for the predicted class “husky” sits on the dog's face, so the model uses no shortcut; let's deploy.” What is the best critique?`,
+ `One coarse heat-map on one photo at one layer cannot rule out a shortcut; confirm with counterfactuals (e.g. swap backgrounds on a test set), per-class metrics and a sanity check on the explanation.`,
+ [`Grad-CAM is invalid for CNNs; only CAM may be used, because it needs no gradients.`,
+  `The reasoning is sound: a face-centred Grad-CAM proves the model ignores the background everywhere.`,
+  `Heat-maps are class-agnostic, so the map would look the same for “wolf”; hence it says nothing about this prediction.`],
+ `Scorecard advice: <b>“Start with Grad-CAM; confirm with a counterfactual (occlude or swap what it points at).”</b> In the lecture, Head A's snow shortcut was shown by swapping backgrounds (0.91 → 0.03 for a husky moved to a lawn). Grad-CAM is also coarse (7 × 7 at layer4), and slide 54 warns that a plausible map is not automatically faithful.<br><br><b>Why the others fail:</b> Grad-CAM works on any CNN (it is the general method); a single map does not prove anything about other photos; and Grad-CAM is class-<i>discriminative</i> (different class → different evidence).`);
+
+S(5,'vit','Slide 51',
+ `For a ViT, you plot the raw last-layer [CLS] attention on a dog photo and see bright dots in the background rather than on the dog. What is the best interpretation and next step?`,
+ `Those dots are high-norm “register” tokens (storage, not evidence); raw attention is not an explanation, so use attention rollout or Grad-CAM on tokens and confirm with a counterfactual.`,
+ [`The ViT is classifying the dog from its background; collect photos with different backgrounds.`,
+  `Raw last-layer attention is the correct and complete explanation; the background dots show which patches the model valued most.`,
+  `The attention heads are broken; the ViT must be retrained with fewer heads.`],
+ `Slide 51: “Raw [CLS] attention in the last layer: bright dots in the background, not on the dog. Those are high-norm ‘register’ tokens: storage, not evidence. The ViT paper's famous maps are rollout, not raw attention. Attention is not explanation!” Attention rollout multiplies the head-averaged attention of all layers (with the residual added). The scorecard marks attention/rollout as “no” for <i>why this class?</i> (class-agnostic), while Grad-CAM on tokens is class-specific.<br><br><b>Why the others fail:</b> you cannot infer a background shortcut from register tokens; raw attention is exactly the thing the lecture says not to trust; nothing is “broken”.`);
+
+S(5,'data','Slides 14–19, 47, 50',
+ `A wolf/husky model learned the snow shortcut. You can collect 100 more photos. Which plan both fixes the cause and gives trustworthy evidence that it is fixed?`,
+ `Collect wolves on grass and huskies on snow to break the correlation; retrain; then test on a reversed-background set and check Grad-CAM plus a background-swap counterfactual.`,
+ [`Apply heavier flip/crop/colour-jitter augmentation to the existing photos and judge the result by training accuracy.`,
+  `Train a bigger network for more epochs and judge the result by validation accuracy drawn from the same snow/grass distribution.`,
+  `Collect 100 more wolves on snow, because more data of the same kind makes the model more confident.`],
+ `“The fix is data: wolves on grass, huskies on snow.” Verification must break the shortcut again: a <b>reversed-background test</b> (huskies on snow, wolves on grass), <b>Grad-CAM</b> to see where the evidence lies, and a <b>counterfactual swap</b> to confirm. Augmentation cannot remove a correlation present in every image; validation drawn from the same biased distribution (as in the doctor/nurse case) cannot reveal the shortcut; and more wolves-on-snow strengthens it.`);
+
+S(5,'data','Slides 19, 15, 50–52',
+ `A chest-X-ray screening model is trained on a dataset that is 95% “normal” and 5% “pneumonia”. It reports 95.5% accuracy, and Grad-CAM for “pneumonia” highlights a hospital text tag in the image corner. What is the right interpretation?`,
+ `95.5% is barely above the 95% “always normal” baseline, and the Grad-CAM tag shows a data leak (hospital identity correlated with prevalence). Report per-class recall/F1, de-confound by hospital, and re-check with explanations.`,
+ [`95.5% is above 95%, so the model is clearly useful; the tag is a small outlier that can be ignored.`,
+  `The tag is helpful: extra metadata makes the classifier more accurate, so keep it as a feature.`,
+  `The imbalance is the only problem; resampling to 50/50 fixes it without removing the tag cue.`],
+ `Slide 19: “95% class A, 5% class B: always answering ‘A’ scores 95% accuracy and 0% recall on B. Report per-class recall / F1.” and “Hunt for data leaks: what else differs between the classes? Background, hospital, watermark, date. The snow is this check failing.” Slide 15 lists real-world medical leaks (Zech et al. 2018). Grad-CAM pointing at a tag instead of lung tissue is the same kind of evidence as snow in the wolf/husky model.<br><br><b>Why the others fail:</b> a 0.5-point gain over the trivial baseline says nothing without per-class recall; a leak is not a legitimate feature; and rebalancing classes does not remove a background/hospital/watermark cue.`);
+
+S(5,'vit','Slide 37',
+ `A start-up has 3,000 labelled images, 1280 × 1280 inputs, and must run on an edge device. They are choosing between a ViT trained from scratch and a CNN (ideally ImageNet-pretrained). Using the lecture's comparison, what is the best choice and why?`,
+ `A (pretrained) CNN: strong locality/equivariance built in, learns from modest data, and compute scales well with image size, whereas a ViT is data-hungry and its attention cost grows with tokens².`,
+ [`A ViT from scratch, because global attention from layer 1 removes the need for training data.`,
+  `A ViT, because its attention maps are faithful explanations, which matters more than data efficiency.`,
+  `Either one: the table shows no meaningful differences in data needs or compute.`],
+ `Slide 37: CNN – built-in assumptions strong, “learns from modest data”, “scales well (local)”, best when limited data or edge deployment. ViT – assumptions weak (learns them), “data-hungry (needs large data or pretraining)”, “attention is O(tokens²)”, best with lots of data / pretrained. Slide 51 also shows raw attention is <i>not</i> a faithful explanation.<br><br><b>Why the others fail:</b> weak inductive bias means <i>more</i> data is needed; attention is not explanation; and the table lists several clear differences.`);
+
+D(5,'vit','Slides 34, 37',()=>{
+ const s=pick([2,3,4]);
+ return{q:`A ViT-B/16 processes a 224 × 224 image (14 × 14 = 196 patches; ignore [CLS]). You instead feed an image with <b>${s}×</b> the side length (${224*s} × ${224*s}), keeping 16 × 16 patches. By what factor does the size of one attention-score matrix (per head, per layer) grow?`,
+  opts:[`${Math.pow(s,4)}×`,`${s*s}×`,`${s}×`,`${2*s*s}×`],
+  exp:`Tokens N = (14·${s})² = ${196*s*s} = ${s*s} × 196. Self-attention builds an <b>N × N</b> score matrix, so its size grows by (${s*s})² = <b>${Math.pow(s,4)}×</b> (slide 37: attention is O(tokens²)).<br><br><b>Why the others fail:</b> ${s*s}× is the growth in the number of <i>tokens</i> (and roughly the growth in a CNN's cost, which scales with pixel count); ${s}× is just the side length; ${2*s*s}× has no basis in the calculation.<br><br>This is why a ViT's cost on large images grows much faster than a CNN's, which matters for edge deployment.`};
+});
+
+/* ===================== quiz engine ===================== */
+function instantiate(d){
+ let o,ok=false;
+ for(let i=0;i<1000&&!ok;i++){
+  o=d.make();
+  ok=new Set(o.opts).size===o.opts.length && !o.opts.some(x=>/NaN|undefined|Infinity/.test(x));
+ }
+ if(!ok)throw new Error('could not build question');
+ const items=shuffle(o.opts.map((tx,i)=>({tx,c:i===0})));
+ return{lv:d.lv,topic:d.topic,slide:d.slide,q:o.q,opts:items.map(x=>x.tx),correct:items.findIndex(x=>x.c),exp:o.exp,chosen:null};
+}
+function buildQuiz(){
+ const out=[];
+ for(let lv=1;lv<=5;lv++)shuffle(BANK.filter(d=>d.lv===lv)).forEach(d=>out.push(instantiate(d)));
+ return out;
+}
+/*__ENGINE_END__*/
+
+let quiz=[],cur=0,locked=false,sel=null;
+const $=id=>document.getElementById(id);
+const KEYS='ABCDE';
+function showOnly(id){['intro','quiz','results'].forEach(x=>$(x).classList.toggle('hide',x!==id));window.scrollTo(0,0);}
+function startQuiz(){quiz=buildQuiz();cur=0;locked=false;sel=null;showOnly('quiz');render();}
+function tally(){const ok=quiz.filter(q=>q.chosen!==null&&q.chosen===q.correct).length;const n=quiz.filter(q=>q.chosen!==null).length;return{ok,no:n-ok,n};}
+function render(){
+ const q=quiz[cur];locked=false;sel=null;
+ $('qn').textContent=`Question ${cur+1} of ${quiz.length}`;
+ $('lvBadge').textContent=LV[q.lv];
+ $('topicChip').textContent=TOPICS[q.topic].n;
+ $('qt').innerHTML=q.q;
+ $('prog').style.width=(cur/quiz.length*100)+'%';
+ const ob=$('opts');ob.innerHTML='';
+ q.opts.forEach((tx,i)=>{
+  const b=document.createElement('button');b.className='opt';b.type='button';
+  b.innerHTML=`<span class="k">${KEYS[i]}</span><span>${tx}</span>`;
+  b.onclick=()=>choose(i);ob.appendChild(b);
+ });
+ $('fb').classList.add('hide');$('fb').innerHTML='';
+ $('submitBtn').classList.remove('hide');$('submitBtn').disabled=true;
+ $('nextBtn').classList.add('hide');
+ const s=tally();$('sOk').textContent=s.ok;$('sNo').textContent=s.no;$('sPct').textContent=s.n?Math.round(s.ok/s.n*100)+'%':'0%';
+}
+function choose(i){
+ if(locked)return;sel=i;
+ [...$('opts').children].forEach((b,j)=>b.classList.toggle('sel',j===i));
+ $('submitBtn').disabled=false;
+}
+function submit(){
+ if(locked||sel===null)return;locked=true;
+ const q=quiz[cur];q.chosen=sel;
+ const good=sel===q.correct;
+ [...$('opts').children].forEach((b,j)=>{b.disabled=true;b.classList.remove('sel');if(j===q.correct)b.classList.add('ok');else if(j===sel)b.classList.add('no');});
+ const fb=$('fb');fb.className='fb '+(good?'ok':'no');
+ fb.innerHTML=`<h3>${good?'✓ Correct':'✗ Incorrect'}${good?'':` — the correct answer is ${KEYS[q.correct]}`}</h3><div>${q.exp}</div><div class="ref">Lecture reference: ${TOPICS[q.topic].n} (${q.slide})</div>`;
+ $('submitBtn').classList.add('hide');
+ const nb=$('nextBtn');nb.classList.remove('hide');nb.textContent=cur===quiz.length-1?'Finish & see results':'Next question →';
+ const s=tally();$('sOk').textContent=s.ok;$('sNo').textContent=s.no;$('sPct').textContent=Math.round(s.ok/s.n*100)+'%';
+ $('prog').style.width=((cur+1)/quiz.length*100)+'%';
+}
+function next(){if(!locked)return;if(cur<quiz.length-1){cur++;render();}else results();}
+
+function barCls(p){return p<50?'low':p<70?'mid':'';}
+function results(){
+ showOnly('results');
+ const s=tally(),pct=Math.round(s.ok/quiz.length*100);
+ const byLv={},byTp={};
+ quiz.forEach(q=>{
+  const ok=q.chosen===q.correct?1:0;
+  (byLv[q.lv]=byLv[q.lv]||{ok:0,n:0}).n++;byLv[q.lv].ok+=ok;
+  (byTp[q.topic]=byTp[q.topic]||{ok:0,n:0}).n++;byTp[q.topic].ok+=ok;
+ });
+ const row=(label,o)=>{const p=Math.round(o.ok/o.n*100);return`<div class="brow"><div>${label}</div><div class="mini"><i class="${barCls(p)}" style="width:${p}%"></i></div><div>${o.ok}/${o.n}</div></div>`;};
+ let h=`<div class="card"><div class="qn">Quiz complete</div><div class="big">${s.ok} / ${quiz.length} <span style="font-size:1.2rem;color:var(--mut)">(${pct}%)</span></div>
+ <div class="grid"><div class="stat"><small>Correct</small><b>${s.ok}</b></div><div class="stat"><small>Incorrect</small><b>${quiz.length-s.ok}</b></div><div class="stat"><small>Overall</small><b>${pct}%</b></div></div>
+ <div class="row"><button class="btn" id="restartBtn">Restart with new values</button><button class="btn ghost" id="wrongBtn">Show only incorrect</button></div></div>`;
+ h+=`<div class="card"><h2 style="margin-top:0">Performance by difficulty</h2>`;
+ for(let lv=1;lv<=5;lv++)h+=row(LV[lv],byLv[lv]);
+ h+=`<h2>Performance by topic</h2>`;
+ Object.keys(TOPICS).forEach(k=>{if(byTp[k])h+=row(TOPICS[k].n,byTp[k]);});
+ const weak=Object.keys(TOPICS).filter(k=>byTp[k]&&byTp[k].ok/byTp[k].n<0.7);
+ h+=`<h2>Concepts to revisit in the L8 slides</h2>`;
+ if(!weak.length)h+=`<div class="weak" style="background:var(--okbg);border-color:var(--ok)">No topic is below 70%. Restart for fresh numerical values and shuffled options to keep the calculations sharp.</div>`;
+ weak.forEach(k=>{const o=byTp[k];h+=`<div class="weak"><b>${TOPICS[k].n}</b> — ${o.ok}/${o.n} correct (${TOPICS[k].s})<br>${TOPICS[k].adv}</div>`;});
+ h+=`</div><div class="card"><h2 style="margin-top:0">Question review</h2><div id="rvList">`;
+ quiz.forEach((q,i)=>{
+  const good=q.chosen===q.correct;
+  h+=`<details class="rv" data-good="${good?1:0}"><summary><span class="tag ${good?'ok':'no'}">${good?'✓':'✗'}</span>Q${i+1} · ${LVS[q.lv]} · ${TOPICS[q.topic].n}</summary><div class="in"><p>${q.q}</p><p><b>Your answer:</b> ${KEYS[q.chosen]}. ${q.opts[q.chosen]}</p><p><b>Correct answer:</b> ${KEYS[q.correct]}. ${q.opts[q.correct]}</p><div>${q.exp}</div><div class="ref" style="color:var(--mut);font-size:.82rem;margin-top:8px">Lecture reference: ${q.slide}</div></div></details>`;
+ });
+ h+=`</div></div>`;
+ $('results').innerHTML=h;
+ $('restartBtn').onclick=startQuiz;
+ let onlyWrong=false;
+ $('wrongBtn').onclick=()=>{onlyWrong=!onlyWrong;$('wrongBtn').textContent=onlyWrong?'Show all questions':'Show only incorrect';document.querySelectorAll('#rvList .rv').forEach(d=>{d.classList.toggle('hide',onlyWrong&&d.dataset.good==='1');if(onlyWrong&&d.dataset.good==='0')d.open=true;});};
+}
+
+$('startBtn').onclick=startQuiz;
+$('submitBtn').onclick=submit;
+$('nextBtn').onclick=next;
+document.addEventListener('keydown',e=>{
+ if($('quiz').classList.contains('hide')||e.ctrlKey||e.metaKey||e.altKey)return;
+ const k=e.key.toUpperCase(),q=quiz[cur];
+ if(!locked&&KEYS.includes(k)&&KEYS.indexOf(k)<q.opts.length){choose(KEYS.indexOf(k));return;}
+ if(e.key==='Enter'){e.preventDefault();if(document.activeElement)document.activeElement.blur();locked?next():submit();}
+});
+</script>
+</body>
+</html>
