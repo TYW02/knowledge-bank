@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>W3.1 Digital Communication Quiz: UART, SPI, I2C (INF2005)</title>
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1b2333; --muted:#5d6881; --line:#dde3ef;
+  --brand:#2f5bea; --brand-ink:#ffffff; --ok:#12805c; --ok-bg:#e3f6ee; --bad:#b3261e; --bad-bg:#fdeceb;
+  --warn:#9a6700; --warn-bg:#fff6dd; --chip:#e9edf6;
+  --l1:#2e7d6b; --l2:#2f5bea; --l3:#8a4fd3; --l4:#d9741a; --l5:#c0262d;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#0f1420; --card:#171e2e; --ink:#e8ecf6; --muted:#9aa6c1; --line:#2a3550;
+    --brand:#6b8cff; --brand-ink:#0b1020; --ok:#4cd6a2; --ok-bg:#12332a; --bad:#ff8a80; --bad-bg:#3a1c1a;
+    --warn:#f2c14e; --warn-bg:#3a3012; --chip:#222c43; }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+#app{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.5rem;margin:0 0 4px}
+h2{font-size:1.2rem;margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 18px;border-radius:10px;font-weight:600}
+.btn:hover:not(:disabled){border-color:var(--brand)}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spread{justify-content:space-between}
+.pill{background:var(--chip);border-radius:999px;padding:4px 12px;font-size:.88rem;font-weight:600}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.bad{background:var(--bad-bg);color:var(--bad)}
+.badge{display:inline-block;color:#fff;border-radius:6px;padding:3px 10px;font-size:.8rem;font-weight:700;letter-spacing:.02em}
+.badge.l1{background:var(--l1)} .badge.l2{background:var(--l2)} .badge.l3{background:var(--l3)} .badge.l4{background:var(--l4)} .badge.l5{background:var(--l5)}
+.progress{height:8px;background:var(--chip);border-radius:99px;overflow:hidden;margin:12px 0}
+.progress>div{height:100%;width:0;background:var(--brand);transition:width .25s}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.chip{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--chip);color:var(--ink);font-weight:700;font-size:.85rem;padding:0}
+.chip.cur{outline:2px solid var(--brand);outline-offset:1px}
+.chip.right{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
+.chip.wrong{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.qmeta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;color:var(--muted);font-size:.9rem}
+.qtext{font-size:1.1rem;font-weight:600;margin:6px 0 16px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.92em}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:10px;padding:12px 14px}
+.opt:hover:not(:disabled){border-color:var(--brand)}
+.opt .L{flex:0 0 28px;height:28px;border-radius:50%;background:var(--chip);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.opt.sel{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 9%,var(--card))}
+.opt.sel .L{background:var(--brand);color:var(--brand-ink)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)} .opt.right .L{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)} .opt.wrong .L{background:var(--bad);color:#fff}
+.opt:disabled{cursor:default;color:var(--ink)}
+.fb{margin-top:18px;border-radius:10px;padding:16px;border:1px solid var(--line)}
+.fb.right{background:var(--ok-bg);border-color:var(--ok)} .fb.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.fb h3{margin:0 0 6px;font-size:1.05rem}
+.fb .expl{margin:8px 0}
+.fb ul{margin:6px 0 0;padding-left:20px}
+.ref{color:var(--muted);font-size:.88rem;margin-top:8px}
+.nav{margin-top:18px}
+.big{font-size:2.6rem;font-weight:800;line-height:1.1}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);font-size:.95rem}
+.meter{height:8px;background:var(--chip);border-radius:99px;overflow:hidden;min-width:90px}
+.meter>div{height:100%;background:var(--ok)} .meter>div.low{background:var(--bad)} .meter>div.mid{background:var(--warn)}
+.note{background:var(--warn-bg);border:1px solid var(--warn);border-radius:10px;padding:12px 14px;color:var(--ink)}
+.rev{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.rev .ans{margin:4px 0}
+.tag-ok{color:var(--ok);font-weight:700}.tag-bad{color:var(--bad);font-weight:700}
+[hidden]{display:none!important}
+@media (max-width:520px){.card{padding:16px}.big{font-size:2.1rem}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- START -->
+<section id="start" class="card">
+  <h1>W3.1 Digital Communication: UART, SPI, I2C</h1>
+  <p class="sub">University-level practice quiz built from the INF2005 revision list.</p>
+  <p>The quiz has <strong id="nq">39</strong> questions in five levels, from foundational to advanced:</p>
+  <ol>
+    <li>Foundational understanding</li>
+    <li>Conceptual understanding</li>
+    <li>Application</li>
+    <li>Analysis &amp; problem solving</li>
+    <li>Advanced critical thinking</li>
+  </ol>
+  <p>Calculation questions use fresh random numbers every time you start or restart. Answers are locked once submitted. You can jump to any question using the numbered boxes at the top, and the results page shows which topics to revisit.</p>
+  <p id="startErr" style="color:var(--bad);font-weight:600;margin:8px 0 0"></p>
+  <button class="btn primary" id="startBtn">Start quiz</button>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" hidden>
+  <div class="card">
+    <div class="row spread">
+      <strong id="qnum">Question 1</strong>
+      <div class="row">
+        <span class="pill ok">Correct <span id="sc-c">0</span></span>
+        <span class="pill bad">Incorrect <span id="sc-w">0</span></span>
+        <span class="pill">Accuracy <span id="sc-p">–</span></span>
+      </div>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="chips" id="chips" aria-label="Question navigator"></div>
+  </div>
+
+  <div class="card">
+    <div class="qmeta"><span id="lvl" class="badge l1">Level 1</span><span id="topic"></span></div>
+    <div class="qtext" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+    <div id="fb" hidden></div>
+    <div class="row spread nav">
+      <button class="btn" id="prevBtn">← Previous</button>
+      <div class="row">
+        <button class="btn primary" id="submitBtn">Submit answer</button>
+        <button class="btn" id="nextBtn">Next →</button>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px" id="finishRow" hidden>
+      <button class="btn primary" id="finishBtn">All answered: see results</button>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results" hidden></section>
+
+</div>
+
+<script id="engine">
+/* ================= ENGINE: questions, generators, builder (no DOM access) ================= */
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=arr=>arr[rnd(0,arr.length-1)];
+function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=rnd(0,i);const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+const fmt=(x,dp)=>String(+x.toFixed(dp===undefined?2:dp));
+const hex=n=>'0x'+(n&255).toString(16).toUpperCase().padStart(2,'0');
+
+const LEVELS=['','Foundational understanding','Conceptual understanding','Application','Analysis & problem solving','Advanced critical thinking'];
+
+/* ---------- Static question bank ---------- */
+const STATIC=[
+/* ===== LEVEL 1 ===== */
+{level:1,topic:'Parallel vs serial',ref:'W3.1 §1.1: Parallel vs. Serial Communication',
+ q:`What is the primary engineering tradeoff between parallel and serial communication?`,
+ a:`Parallel transfers multiple bits simultaneously over many wires (fast but high pin count); serial sends bits sequentially over fewer wires (smaller footprint)`,
+ w:[[`Serial is always faster than parallel because it uses fewer wires`,`Fewer wires do not make serial faster; parallel can move more bits per clock edge.`],
+    [`Parallel uses a clock and serial does not`,`Parallel can be clocked, and synchronous serial also uses a clock.`],
+    [`Serial transmits in both directions simultaneously while parallel cannot`,`Duplex is an independent design choice; parallel can be bidirectional too.`]],
+ e:`Parallel: 8+ dedicated data wires, multiple bits at once, large physical footprint and high pin count. Serial: bits one after another over a reduced number of wires, vastly reduced footprint, the universal standard for chip-to-chip embedded communication.`},
+
+{level:1,topic:'Synchronous vs asynchronous',ref:'W3.1 §1.2: The Three Core Engineering Variables (Timing)',
+ q:`Which property distinguishes synchronous serial communication from asynchronous serial communication?`,
+ a:`Synchronous shares a dedicated physical clock line; asynchronous has no clock line and relies on a pre-agreed baud rate with start/stop framing`,
+ w:[[`Synchronous uses start and stop bits; asynchronous uses a clock`,`Reversed: start/stop framing is the asynchronous mechanism.`],
+    [`Synchronous is always half-duplex; asynchronous is always full-duplex`,`Duplex is an independent choice, not tied to timing.`],
+    [`Asynchronous is faster because it omits the clock`,`Omitting the clock does not imply faster; it adds framing overhead.`]],
+ e:`Synchronous: devices share SCLK/SCL and the receiver latches data on clock transitions. Asynchronous: no physical clock; both sides must be pre-configured to the exact same baud rate and use start/stop framing bits around the payload.`},
+
+{level:1,topic:'Duplex modes',ref:'W3.1 §1.2: Direction of Data Flow',
+ q:`Which statement correctly defines full-duplex communication?`,
+ a:`Two-way communication where data flows in both directions at the same time over separate lines`,
+ w:[[`Two-way communication where only one device transmits at a time over a shared line`,`That is half-duplex.`],
+    [`Strict one-way communication from transmitter to receiver`,`That is simplex.`],
+    [`Multiple masters sharing one bus with collision management`,`That is a multi-master topology, not a duplex mode.`]],
+ e:`Simplex: strict one-way. Half-duplex: two-way but only one transmitter at a time over a shared line. Full-duplex: simultaneous two-way communication over separate lines.`},
+
+{level:1,topic:'UART idle & start bit',ref:'W3.1 §2.2: Data Frame Structure & Line Behavior',
+ q:`What is the idle state of a UART line, and what signals the start of a frame?`,
+ a:`Idle HIGH (1); a transition to LOW (0) is the start bit`,
+ w:[[`Idle LOW (0); a transition to HIGH (1) is the start bit`,`Reversed: the line idles HIGH and drops LOW to start.`],
+    [`Idle at 0 V; a clock pulse is the start bit`,`UART is asynchronous and has no clock line.`],
+    [`Idle in a random state; a sync pattern is the start bit`,`The idle state is defined as HIGH.`]],
+ e:`UART holds the line HIGH when inactive. A drop to LOW signals the start of a frame. Data bits (5–8) follow LSB-first, then optional parity, then 1 or 2 stop bits returning the line to HIGH.`},
+
+{level:1,topic:'UART start bit purpose',ref:'W3.1 §2.1: Configuration & Purpose; §2.2',
+ q:`Why does UART need a start bit?`,
+ a:`Because there is no clock line, a start bit signals the beginning of a frame so the receiver can align its sampling`,
+ w:[[`To synchronise a clock between sender and receiver`,`UART has no clock line to synchronise.`],
+    [`To select which slave the master is addressing`,`UART is point-to-point, not addressed.`],
+    [`To indicate the parity mode in use`,`Parity is a separate configurable field, not the start bit.`]],
+ e:`In asynchronous serial there is no shared clock, so the start bit (a HIGH→LOW transition from idle) marks the frame boundary. Both sides must still agree on the baud rate so the receiver samples each bit at the right time.`},
+
+{level:1,topic:'SPI signal lines',ref:'W3.1 §3.2: Signal Lines & Operating Mechanism',
+ q:`What do MOSI and MISO stand for in SPI?`,
+ a:`Master Out Slave In (data from master to slave) and Master In Slave Out (data from slave to master)`,
+ w:[[`Master Out Slave In and Master In Slave Out — both are clock lines`,`They are data lines; SCK is the clock.`],
+    [`MOSI is the master's clock output; MISO is the slave's clock input`,`Neither is a clock line.`],
+    [`They are bidirectional shared data lines`,`SPI uses separate MOSI and MISO lines, enabling full-duplex.`]],
+ e:`SPI signals: SCK (clock from master), MOSI (master → slave data), MISO (slave → master data), CSn/SS (active-LOW chip select, one per slave).`},
+
+{level:1,topic:'I2C signal lines',ref:'W3.1 §4.2: Electrical Mechanics & Open-Drain Drivers',
+ q:`Which two lines make up the I2C bus?`,
+ a:`SDA (Serial Data) and SCL (Serial Clock)`,
+ w:[[`TX and RX`,`Those are UART lines.`],
+    [`MOSI and MISO`,`Those are SPI data lines.`],
+    [`SCK and CSn`,`Those are SPI clock and chip-select lines.`]],
+ e:`I2C uses two shared lines: SDA (data) and SCL (clock). Both are open-drain with external pull-up resistors to 3.3 V.`},
+
+{level:1,topic:'I2C open-drain',ref:'W3.1 §4.2: Electrical Mechanics & Open-Drain Drivers',
+ q:`What does open-drain mean for I2C bus lines?`,
+ a:`Drivers can only actively pull lines LOW to GND; external pull-up resistors pull them HIGH when released`,
+ w:[[`Drivers can only actively pull lines HIGH; external pull-downs pull LOW`,`Reversed: LOW is driven actively, HIGH comes from pull-ups.`],
+    [`Drivers can actively drive both HIGH and LOW, like push-pull`,`That describes push-pull drivers (SPI), not open-drain.`],
+    [`Drivers use differential signalling over twisted pairs`,`That describes RS-485, not I2C.`]],
+ e:`I2C uses open-drain topology: drivers pull LOW to GND; when released, external pull-up resistors to 3.3 V drag the line HIGH. This enables multi-master arbitration and clock stretching without short circuits.`},
+
+/* ===== LEVEL 2 ===== */
+{level:2,topic:'Baud rate matching',ref:'W3.1 §2.1: Configuration & Purpose; §2.3',
+ q:`Why must sender and receiver agree on the same UART baud rate?`,
+ a:`Without a clock line, the receiver times each bit from the start edge using the baud rate; a mismatch shifts the sampling points and causes framing errors`,
+ w:[[`UART auto-negotiates the baud rate at the start of each frame`,`No auto-negotiation exists in standard UART.`],
+    [`The baud rate only affects how often the CPU is interrupted`,`It determines bit timing, not just CPU load.`],
+    [`A mismatch only corrupts the first data bit`,`All bits after the start bit shift out of alignment.`]],
+ e:`Asynchronous UART times bits from the start-bit edge. If the baud rates differ, the sampling points drift and the receiver may read the wrong bits or miss stop bits, producing framing errors.`},
+
+{level:2,topic:'Why I2C uses open-drain',ref:'W3.1 §4.2; §4.4: Multi-Master Arbitration',
+ q:`Why does I2C use open-drain drivers with pull-ups rather than push-pull drivers?`,
+ a:`It allows multiple masters on the same bus to arbitrate safely (LOW wins) and lets slow slaves hold SCL LOW (clock stretching) without short circuits`,
+ w:[[`Because open-drain is faster than push-pull`,`Open-drain is actually slower due to RC rise times.`],
+    [`Because push-pull drivers cannot produce a valid LOW level`,`They can, but multiple push-pull drivers would short if they drove opposite levels.`],
+    [`Because pull-ups eliminate the need for a clock line`,`I2C still has SCL; pull-ups do not remove the clock.`]],
+ e:`Open-drain + pull-up creates a wired-AND: if any driver pulls LOW, the bus is LOW. This lets several masters arbitrate (a master sending HIGH while reading LOW loses without corrupting the bus) and lets a slave stretch the clock by holding SCL LOW.`},
+
+{level:2,topic:'CPOL & CPHA',ref:'W3.1 §3.3: SPI Clock Modes (CPOL / CPHA)',
+ q:`What do CPOL and CPHA control in SPI?`,
+ a:`CPOL sets the clock's idle level; CPHA selects which clock edge samples data`,
+ w:[[`CPOL sets the bit order; CPHA sets the clock frequency`,`Neither controls bit order or frequency.`],
+    [`CPOL sets the data direction; CPHA sets which slave is selected`,`Direction is fixed by MOSI/MISO, and slave selection is done by CSn.`],
+    [`Both together set the number of data bits per frame`,`Frame length is a separate configuration.`]],
+ e:`CPOL (Clock Polarity): idle level (0 = LOW, 1 = HIGH). CPHA (Clock Phase): sampling edge (0 = first edge, 1 = second edge). Combined they give four SPI modes 0–3.`},
+
+{level:2,topic:'SPI CSn addressing',ref:'W3.1 §3.2: Signal Lines & Operating Mechanism',
+ q:`Why does an SPI master need a separate CSn line for each slave?`,
+ a:`SPI has no address field in the data stream; the master selects a slave by pulling its dedicated CSn LOW`,
+ w:[[`CSn carries the slave's 7-bit address as a serial code`,`CSn is a single select line, not an address bus.`],
+    [`CSn indicates the clock polarity for that slave`,`Polarity is set by CPOL, not by CSn.`],
+    [`All slaves share one CSn and use arbitration to take turns`,`That is not SPI's mechanism; each slave has its own CSn.`]],
+ e:`Unlike I2C, SPI has no software addressing. Each slave has its own CSn pin, and the master pulls only the target slave's CSn LOW. This is why multi-slave SPI uses more pins than I2C.`},
+
+{level:2,topic:'UART parity',ref:'W3.1 §2.2: Data Frame Structure & Line Behavior',
+ q:`What is the purpose of a UART parity bit?`,
+ a:`Basic single-bit error detection (not correction)`,
+ w:[[`It corrects single-bit errors automatically`,`Parity only detects a single-bit error; it does not correct it.`],
+    [`It encrypts the data payload`,`Parity adds no encryption.`],
+    [`It selects which slave is addressed`,`UART is point-to-point and has no addressing.`]],
+ e:`Parity is an optional bit (None/Even/Odd) that gives basic single-bit error checking. It cannot correct errors; higher layers must handle recovery.`},
+
+{level:2,topic:'SPI shift register',ref:'W3.1 §3.2: Signal Lines & Operating Mechanism',
+ q:`How does SPI achieve full-duplex communication?`,
+ a:`It operates like a circular shift register: on each clock pulse one bit shifts out on MOSI while one bit shifts in on MISO simultaneously`,
+ w:[[`It time-multiplexes MOSI and MISO so they never overlap`,`MOSI and MISO are separate lines used simultaneously.`],
+    [`It buffers a full frame then swaps buffers between master and slave`,`There is no buffer-swap; bits move every clock edge.`],
+    [`It uses two clock phases, one for each direction`,`There is one clock; both directions transfer on the same edges.`]],
+ e:`SPI acts as a circular shift register: every clock pulse shifts one bit out on MOSI and one bit in on MISO at the same time, so transmission and reception happen simultaneously (full-duplex).`},
+
+{level:2,topic:'I2C START/STOP',ref:'W3.1 §4.3: Protocol Packet Structure & Addressing',
+ q:`How is an I2C START condition defined?`,
+ a:`SDA transitions HIGH→LOW while SCL is HIGH`,
+ w:[[`SDA transitions LOW→HIGH while SCL is HIGH`,`That is the STOP condition.`],
+    [`SCL goes LOW while SDA is stable`,`That is normal data transfer.`],
+    [`Both SDA and SCL go LOW simultaneously`,`That is not a defined I2C condition.`]],
+ e:`START: SDA HIGH→LOW while SCL is HIGH. STOP: SDA LOW→HIGH while SCL is HIGH. Data changes are only allowed while SCL is LOW, so transitions during SCL HIGH are reserved for these conditions (or a repeated START).`},
+
+{level:2,topic:'RS-232 vs RS-485',ref:'W3.1 §2.4: Flow Control & Noise/Distance Variations',
+ q:`What distinguishes RS-485 from basic UART/RS-232 signalling?`,
+ a:`RS-485 converts UART signals into differential signalling over twisted wire pairs for long-distance, high-noise industrial environments`,
+ w:[[`RS-485 uses higher baud rates than RS-232`,`Baud rate is not the defining difference; differential signalling is.`],
+    [`RS-485 uses open-drain drivers like I2C`,`RS-485 uses differential transceivers, not open-drain.`],
+    [`RS-485 adds a dedicated clock line to UART`,`RS-485 remains asynchronous; it does not add a clock.`]],
+ e:`RS-232 uses higher bipolar voltage swings (e.g. −15 V to +15 V) for noise immunity. RS-485 goes further with differential signalling over twisted pairs, supporting long-distance, high-noise industrial links.`},
+
+/* ===== LEVEL 3 ===== */
+{level:3,topic:'UART TX/RX cross-wiring',ref:'W3.1 §2.1: Configuration & Purpose',
+ q:`Device A must send data to device B over UART. How should their TX and RX pins be connected?`,
+ a:`A's TX → B's RX and B's TX → A's RX`,
+ w:[[`A's TX → B's TX and A's RX → B's RX`,`TX-to-TX would drive both outputs into each other.`],
+    [`A's TX → B's TX and leave RX unconnected`,`RX must be connected to receive data.`],
+    [`Tie both TX lines together and both RX lines together`,`Two TX outputs tied together would conflict.`]],
+ e:`UART is cross-wired: each device's TX connects to the other's RX. This is why the wiring is often described as TX→RX, RX←TX.`},
+
+{level:3,topic:'I2C packet order',ref:'W3.1 §4.3: Protocol Packet Structure & Addressing',
+ q:`Which sequence correctly describes an I2C write transaction on SDA?`,
+ a:`START → 7-bit slave address + W bit → ACK → 8-bit data byte → ACK → STOP`,
+ w:[[`START → data byte → slave address + W → ACK → STOP`,`Address must come before data.`],
+    [`Slave address + W → START → data byte → ACK → STOP`,`START must come first.`],
+    [`START → slave address + R bit → ACK → data byte → ACK → STOP`,`A write uses R/W = 0, not 1.`]],
+ e:`I2C packet order: START → 7-bit address → R/W bit (0 = write) → ACK → 8-bit data → ACK → STOP (or repeated START). Each byte is acknowledged by the receiver pulling SDA LOW.`},
+
+{level:3,topic:'Hardware vs software flow control',ref:'W3.1 §2.4: Flow Control & Noise/Distance Variations',
+ q:`What is the difference between RTS/CTS flow control and XON/XOFF flow control?`,
+ a:`RTS/CTS uses two extra physical lines; XON/XOFF sends control characters inline in the data stream`,
+ w:[[`RTS/CTS is software flow control; XON/XOFF is hardware`,`Reversed: RTS/CTS is hardware, XON/XOFF is software.`],
+    [`They are identical mechanisms under different names`,`They use completely different signalling.`],
+    [`XON/XOFF requires a dedicated clock line`,`XON/XOFF is still asynchronous; it does not add a clock.`]],
+ e:`Hardware flow control uses extra wires RTS/CTS to pause the peer and prevent FIFO overflows. Software flow control embeds XON/XOFF characters in the data stream to request pause/resume.`},
+
+{level:3,topic:'Protocol selection (speed)',ref:'W3.1 §3.1: SPI Configuration & Purpose; §4.1: I2C',
+ q:`A high-resolution LCD needs roughly 50 Mbps. Which protocol is the most suitable choice?`,
+ a:`SPI (10–50+ MHz with push-pull drivers)`,
+ w:[[`UART (9.6–115.2 kbps)`,`UART is orders of magnitude too slow.`],
+    [`I2C (100 kbps–1 Mbps)`,`I2C is far too slow and half-duplex.`],
+    [`RS-232`,`RS-232 is a UART variant; nowhere near 50 Mbps.`]],
+ e:`SPI supports 10 MHz to 50+ MHz with push-pull drivers, making it the standard for high-throughput data pipelines such as LCDs, OLEDs, SD cards, and fast ADCs.`},
+
+{level:3,topic:'I2C ACK',ref:'W3.1 §4.3: Protocol Packet Structure & Addressing',
+ q:`How does an I2C slave acknowledge a byte it has received?`,
+ a:`The slave pulls SDA LOW during the ACK clock pulse`,
+ w:[[`The slave sends a 0xFF byte back`,`ACK is a single bit, not a byte.`],
+    [`The slave drives SCL HIGH`,`The master controls SCL; the slave does not raise it for ACK.`],
+    [`The slave sends a NACK to indicate success`,`NACK indicates failure or end-of-read.`]],
+ e:`After each byte, the receiver acknowledges by pulling SDA LOW during the next clock pulse. A NACK (SDA left HIGH) indicates failure or the end of a read sequence.`},
+
+{level:3,topic:'SPI multi-slave CSn count',ref:'W3.1 §3.2: Signal Lines & Operating Mechanism',
+ q:`An SPI master needs to talk to three slaves. How many CSn lines are required?`,
+ a:`Three, one per slave`,
+ w:[[`One, shared by all slaves`,`A shared CSn would activate all slaves simultaneously.`],
+    [`Two, binary-encoded to address 3 slaves`,`CSn is not binary-encoded; each slave has its own line.`],
+    [`Zero; SPI uses software addresses`,`SPI has no software addressing.`]],
+ e:`SPI has no address field. The master selects a slave by pulling that slave's dedicated CSn LOW. Three slaves means three CSn lines (plus shared SCK/MOSI/MISO).`},
+
+/* ===== LEVEL 4 ===== */
+{level:4,topic:'I2C arbitration',ref:'W3.1 §4.4: Multi-Master Arbitration',
+ q:`Master A tries to send a 1 (releases SDA to float HIGH) while Master B sends a 0 (pulls SDA LOW). Who wins, and why?`,
+ a:`B wins: open-drain LOW dominates, so A reads LOW while trying to send HIGH and loses arbitration without corrupting the bus`,
+ w:[[`A wins because it transmitted first`,`Order of transmission is not the arbitration rule.`],
+    [`Both frames are corrupted and must restart`,`Arbitration prevents corruption; only the loser backs off.`],
+    [`A random winner is chosen each time`,`Arbitration is deterministic, not random.`]],
+ e:`Because the bus is open-drain with pull-ups, LOW always dominates. A master that sends HIGH (releases) but reads LOW (another master is pulling LOW) detects the collision, loses arbitration, and backs off — the winning master's frame continues intact.`},
+
+{level:4,topic:'RP2040 FIFO comparison',ref:'W3.1 §5.1: RP2040 On-Chip Peripheral Specifications',
+ q:`Compare the RP2040 FIFO depths for UART, SPI, and I2C.`,
+ a:`UART: 32-byte TX/RX; SPI: 8-entry TX/RX; I2C: 16-entry TX/RX`,
+ w:[[`All three have identical 16-byte FIFOs`,`They differ: UART is deepest, SPI is shallowest.`],
+    [`SPI: 32-byte; UART: 8-entry; I2C: 16-entry`,`SPI and UART are swapped.`],
+    [`UART: 8-byte; SPI: 16-entry; I2C: 32-entry`,`All values are wrong.`]],
+ e:`Per the RP2040 datasheet summary: UART has 32-byte TX/RX FIFOs, SPI has 8-entry TX/RX FIFOs, I2C has 16-entry TX/RX FIFOs. All three support DMA.`},
+
+{level:4,topic:'Clock stretching',ref:'W3.1 §4.4: Advanced I2C Concepts',
+ q:`How does clock stretching work in I2C?`,
+ a:`A slow slave holds SCL LOW after receiving a byte; the master waits until the slave releases SCL before continuing`,
+ w:[[`The slave increases its own clock frequency`,`The slave has no clock generator; the master drives SCL.`],
+    [`The slave sends an XOFF character`,`XOFF is UART software flow control, not I2C.`],
+    [`The slave pulls SDA LOW permanently to block the bus`,`That would stall all traffic, not stretch the clock.`]],
+ e:`Clock stretching: a slave that needs more time pulls SCL LOW after the ACK bit and releases it when ready. Since SCL is open-drain, the slave can hold it LOW without fighting the master.`},
+
+{level:4,topic:'Protocol selection (sensor network)',ref:'W3.1 §4.1: I2C Configuration & Purpose',
+ q:`An RP2040 must read 12 temperature sensors at 10 Hz each. Which protocol is most suitable?`,
+ a:`I2C: a single 2-wire bus with 7-bit addressing handles all 12 sensors; 100 kbps easily covers 12 × 10 × 4 bytes/s`,
+ w:[[`SPI: needs 12 CSn lines (or a decoder) and far more pins`,`SPI would work but wastes pins for a low-speed sensor network.`],
+    [`UART: needs 12 UART peripherals, but the RP2040 only has 2`,`Impossible on-chip; UART is point-to-point.`],
+    [`RS-232: not suitable for multi-drop`,`RS-232 is point-to-point.`]],
+ e:`I2C is designed for exactly this: many low-speed sensors on a shared 2-wire bus with software addressing. The bandwidth requirement is trivial compared with 100 kbps. SPI would work but costs 12 CSn pins.`},
+
+{level:4,topic:'UART overrun',ref:'W3.1 §2.4: Flow Control & Noise/Distance Variations',
+ q:`What happens if the UART RX FIFO overflows, and how is it prevented?`,
+ a:`A receive overrun error occurs and new data may be lost; flow control (RTS/CTS or XON/XOFF) lets the receiver pause the sender`,
+ w:[[`The UART automatically increases its baud rate`,`Baud rate is fixed by configuration, not adjusted on overflow.`],
+    [`The UART stops receiving permanently`,`It reports an error; it does not lock up permanently.`],
+    [`Data is buffered in flash until space is available`,`Flash is not a FIFO extension.`]],
+ e:`If the receiver cannot drain the FIFO fast enough, new bytes overwrite unread ones and a receive overrun is flagged. Flow control prevents this: hardware RTS/CTS uses dedicated lines; software XON/XOFF uses inline characters.`},
+
+{level:4,topic:'SPI mode mismatch',ref:'W3.1 §3.3: SPI Clock Modes (CPOL / CPHA)',
+ q:`A master is configured for Mode 0 but the slave is Mode 3. What is the likely result?`,
+ a:`The sampling edge and idle level differ, so data is shifted out/in at the wrong times and transfers fail or are corrupted`,
+ w:[[`SPI auto-negotiates the correct mode`,`SPI has no negotiation; both sides must match.`],
+    [`Only the first byte is corrupted, then it recovers`,`All bytes are affected because the mismatch persists.`],
+    [`The clock frequency doubles automatically`,`Frequency is set by the divider, not by the mode.`]],
+ e:`Mode 0 and Mode 3 differ in both idle level and sampling edge. The master samples on the wrong edge and the slave drives on the wrong edge, so bits are misaligned — transfers typically fail or yield garbage.`},
+
+/* ===== LEVEL 5 ===== */
+{level:5,topic:'Design problem (three applications)',ref:'W3.1 §3.1, §4.1, §2.1',
+ q:`An RP2040 must connect to: (i) a 50 MHz LCD, (ii) 12 temperature sensors at 10 Hz, (iii) a GPS module at 9600 baud. Which protocol for each?`,
+ a:`(i) SPI, (ii) I2C, (iii) UART`,
+ w:[[`(i) I2C, (ii) SPI, (iii) UART`,`I2C cannot reach 50 MHz, and SPI would waste pins on 12 sensors.`],
+    [`(i) UART, (ii) I2C, (iii) SPI`,`UART cannot reach 50 MHz, and GPS modules are typically UART.`],
+    [`(i) SPI, (ii) UART, (iii) I2C`,`The RP2040 has only 2 UARTs; 12 sensors via UART is impractical.`]],
+ e:`(i) LCD needs high speed → SPI (10–50+ MHz). (ii) 12 sensors need multi-drop addressing → I2C (2 wires, 7-bit addresses). (iii) GPS modules are classic UART peripherals at 9600 baud.`},
+
+{level:5,topic:'I2C losing master & clock stretching',ref:'W3.1 §4.4: Advanced I2C Concepts',
+ q:`Master B loses I2C arbitration to Master A. Can B still stretch the clock to slow the bus?`,
+ a:`No: a master that has lost arbitration must release both SDA and SCL and cannot influence the bus`,
+ w:[[`Yes: all masters can stretch regardless of arbitration outcome`,`Once arbitration is lost, the master loses control of the bus.`],
+    [`Yes, but only by driving SDA LOW`,`Driving SDA LOW would corrupt A's frame.`],
+    [`Only if B is also acting as a slave`,`B is acting as a master; loss of arbitration removes its control.`]],
+ e:`Arbitration is won by the master sending the lowest bit pattern. The loser backs off immediately, releasing SDA and SCL. It cannot stretch the clock or otherwise interfere until the bus is free again.`},
+
+{level:5,topic:'UART framing error diagnosis',ref:'W3.1 §2.2, §2.3',
+ q:`A UART link consistently reports framing errors. Which combination of causes is most plausible?`,
+ a:`Baud rate mismatch, incorrect frame configuration (data/parity/stop bits), or severe line noise corrupting the stop bit`,
+ w:[[`TX and RX are not cross-connected`,`No data would arrive at all, not framing errors.`],
+    [`Parity is disabled`,`That is a valid configuration; it does not cause framing errors.`],
+    [`The CPU is too fast for the UART`,`UART timing is set by the baud generator, not by CPU speed.`]],
+ e:`Framing errors mean the receiver cannot find a valid stop bit at the expected position. Common causes: baud rate mismatch (sampling drift), wrong frame configuration (data/parity/stop bits), or noise corrupting the stop bit.`},
+
+{level:5,topic:'SPI vs I2C pin count',ref:'W3.1 §3.2, §4.2; §5.2 Comparison Matrix',
+ q:`Compare I2C and SPI for connecting 8 sensors to an RP2040. What are the pin counts?`,
+ a:`I2C: 2 pins (SDA + SCL) shared by all 8; SPI: 3 shared (SCK + MOSI + MISO) + 8 CSn = 11 pins`,
+ w:[[`I2C: 8 pins; SPI: 4 pins`,`I2C uses only 2 pins; SPI needs CSn per slave.`],
+    [`Both use 2 pins because both are buses`,`SPI needs a CSn line per slave (unless an external decoder is used).`],
+    [`I2C: 3 pins; SPI: 4 pins`,`I2C uses 2 signal lines; SPI needs CSn per slave.`]],
+ e:`I2C's 7-bit addressing lets all 8 sensors share SDA + SCL = 2 pins. SPI has no software addressing, so each slave needs its own CSn: 3 shared + 8 CSn = 11 pins.`},
+
+{level:5,topic:'Full-duplex at physical layer',ref:'W3.1 §3.2, §4.2; §5.2 Comparison Matrix',
+ q:`Why is SPI full-duplex but I2C half-duplex, at the physical-layer level?`,
+ a:`SPI has separate MOSI and MISO lines (simultaneous transfer); I2C has one shared SDA line (one direction at a time)`,
+ w:[[`SPI uses two clocks, one per direction`,`SPI uses a single SCK line.`],
+    [`I2C uses push-pull drivers that force one direction`,`I2C uses open-drain, not push-pull.`],
+    [`SPI uses open-drain to allow both directions on one line`,`SPI uses push-pull and separate lines.`]],
+ e:`SPI: separate MOSI and MISO with push-pull drivers → both directions transfer simultaneously on every clock edge. I2C: one shared SDA line with open-drain drivers → data flows one direction at a time, with direction set by the R/W bit.`},
+
+{level:5,topic:'Protocol-to-application matching',ref:'W3.1 §2.1, §3.1, §4.1; §5.2 Comparison Matrix',
+ q:`Match the application to the best protocol: (i) SD card, (ii) temperature sensor on a shared bus, (iii) GPS module.`,
+ a:`(i) SPI, (ii) I2C, (iii) UART`,
+ w:[[`(i) UART, (ii) SPI, (iii) I2C`,`SD cards need high throughput (SPI); temperature sensors share a bus (I2C); GPS uses UART.`],
+    [`(i) I2C, (ii) UART, (iii) SPI`,`I2C is too slow for an SD card; UART cannot share a bus for sensors; SPI is wrong for GPS.`],
+    [`(i) SPI, (ii) UART, (iii) I2C`,`Temperature sensors do not typically use UART; GPS does.`]],
+ e:`SD card: high-throughput block device → SPI (SD cards support SPI mode). Temperature sensor on a shared bus → I2C (multi-slave addressing, 2 wires). GPS module → UART (classic 9600 baud asynchronous link).`}
+];
+
+/* ---------- Randomised calculation generators (each constructs a valid question deterministically) ---------- */
+function genBaud(){
+  const charRate=pick([50,100,120,150,200,300,600]);
+  const N=pick([7,8]);
+  const P=pick([0,1]);
+  const M=pick([1,2]);
+  const total=1+N+P+M;
+  const baud=charRate*total;
+  const f=n=>n.toLocaleString('en-US');
+  return {level:3,topic:'UART baud calculation',ref:'W3.1 §2.3: Baud Rate & Frame Timing Calculations',
+    q:`A UART frame uses ${N} data bits, ${P?'even parity':'no parity'}, and ${M} stop bit${M>1?'s':''}. The link must transmit ${f(charRate)} characters per second. What baud rate is required?`,
+    a:`${f(baud)} baud`,
+    w:[[`${f(charRate*(total-1))} baud`,`Forgets the start bit: total bits = 1 + data + parity + stop.`],
+       [`${f(charRate*N)} baud`,`Counts only data bits; framing bits also take time.`],
+       [`${f(charRate*(N+P+M))} baud`,`Counts data + parity + stop but drops the start bit.`]],
+    e:`Total bits per frame = 1 start + ${N} data + ${P} parity + ${M} stop = ${total} bits.<br>Baud rate = character rate × bits per character = ${f(charRate)} × ${total} = <strong>${f(baud)} baud</strong>.`,
+    meta:{kind:'baud',baud,N,P,M,total,charRate}};
+}
+
+function genFrameTime(){
+  const baud=pick([9600,19200,38400,57600,115200]);
+  const N=pick([7,8]);
+  const P=pick([0,1]);
+  const M=pick([1,2]);
+  const total=1+N+P+M;
+  const us=total*1e6/baud;
+  const f=x=>fmt(x,2)+' µs';
+  return {level:4,topic:'UART frame time',ref:'W3.1 §2.3: Baud Rate & Frame Timing Calculations',
+    q:`A UART link runs at ${baud.toLocaleString('en-US')} baud with ${N} data bits, ${P?'even parity':'no parity'}, and ${M} stop bit${M>1?'s':''}. Using T<sub>bit</sub> = 1 / baud rate, what is the total time to transmit one complete frame? (Answer in µs, 2 decimal places.)`,
+    a:f(us),
+    w:[[f(1e6/baud),`That is only the bit period T<sub>bit</sub>; a frame contains ${total} bits.`],
+       [f((total-1)*1e6/baud),`Forgets one framing bit (the start bit) in the total.`],
+       [f((total-2)*1e6/baud),`Drops two bits from the frame; the total is 1 + ${N} + ${P} + ${M} = ${total}.`],
+       [f((total+1)*1e6/baud),`Adds an extra bit that is not part of the frame.`]],
+    e:`Frame bits = 1 start + ${N} data + ${P} parity + ${M} stop = ${total} bits.<br>T<sub>bit</sub> = 1 / ${baud} s = ${fmt(1e6/baud,2)} µs.<br>T<sub>frame</sub> = ${total} × ${fmt(1e6/baud,2)} µs = <strong>${f(us)}</strong>.`,
+    meta:{kind:'ftime',baud,N,P,M,total}};
+}
+
+function genSPIMode(){
+  const modes=[
+    {m:0,cpol:0,cpha:0,idle:'LOW',edge:'first (rising)'},
+    {m:1,cpol:0,cpha:1,idle:'LOW',edge:'second (falling)'},
+    {m:2,cpol:1,cpha:0,idle:'HIGH',edge:'first (falling)'},
+    {m:3,cpol:1,cpha:1,idle:'HIGH',edge:'second (rising)'}
+  ];
+  const correct=pick(modes);
+  const others=modes.filter(x=>x.m!==correct.m);
+  const why={
+    0:'Mode 0: CPOL=0 (idle LOW) and CPHA=0 (sample on first/rising edge).',
+    1:'Mode 1: CPOL=0 (idle LOW) and CPHA=1 (sample on second/falling edge).',
+    2:'Mode 2: CPOL=1 (idle HIGH) and CPHA=0 (sample on first/falling edge).',
+    3:'Mode 3: CPOL=1 (idle HIGH) and CPHA=1 (sample on second/rising edge).'
+  };
+  return {level:3,topic:'SPI mode identification',ref:'W3.1 §3.3: SPI Clock Modes (CPOL / CPHA)',
+    q:`An SPI slave's datasheet specifies an idle clock of ${correct.idle} and data sampled on the ${correct.edge} clock edge. Which SPI mode should the master use?`,
+    a:`Mode ${correct.m} (CPOL=${correct.cpol}, CPHA=${correct.cpha})`,
+    w:others.map(o=>[`Mode ${o.m} (CPOL=${o.cpol}, CPHA=${o.cpha})`,why[o.m]+' That does not match the described idle level and sampling edge.']),
+    e:`CPOL sets the idle level: ${correct.idle} → CPOL=${correct.cpol}. CPHA selects the edge: ${correct.edge} → CPHA=${correct.cpha}. Mode = (CPOL << 1) | CPHA = (${correct.cpol} << 1) | ${correct.cpha} = <strong>Mode ${correct.m}</strong>.`,
+    meta:{kind:'spimode',mode:correct.m}};
+}
+
+function genI2CAddr(){
+  const addrs=[0x08,0x0A,0x0C,0x0E,0x10,0x12,0x14,0x16,0x18,0x1A,0x20,0x22,0x24,0x26,0x28,0x2A,0x30,0x32,0x34,0x36,0x38,0x3A,0x40,0x42,0x44,0x46,0x48,0x4A,0x50,0x52,0x54,0x56,0x58,0x5A,0x60,0x62,0x64,0x66,0x68,0x6A,0x6E];
+  const addr=pick(addrs);
+  const rw=pick([0,1]);
+  const correct=((addr<<1)|rw)&0xFF;
+  const d1=addr;
+  const d2=((addr<<1)|(1-rw))&0xFF;
+  const d3=(correct+3)&0xFF;
+  const f=n=>hex(n);
+  return {level:3,topic:'I2C address byte',ref:'W3.1 §4.3: Protocol Packet Structure & Addressing',
+    q:`An I2C master targets 7-bit slave address <code>${hex(addr)}</code> with R/W = ${rw} (${rw===0?'write':'read'}). What byte is actually transmitted on SDA right after the START condition? (Answer in hex.)`,
+    a:f(correct),
+    w:[[f(d1),`That is the raw 7-bit address; the address is shifted left by 1 to make room for the R/W bit.`],
+       [f(d2),`That uses the opposite R/W bit (${1-rw} instead of ${rw}).`],
+       [f(d3),`Off by three in the assembled byte; check the shift and OR with the R/W bit.`]],
+    e:`The I2C address byte is (7-bit address << 1) | R/W.<br>= (<code>${hex(addr)}</code> << 1) | ${rw} = <code>${hex((addr<<1)&0xFF)}</code> | ${rw} = <strong>${hex(correct)}</strong>.<br>R/W = 0 means write, R/W = 1 means read.`,
+    meta:{kind:'i2caddr',addr,rw}};
+}
+
+function genThroughput(){
+  const baud=pick([9600,19200,38400,57600,115200]);
+  const N=pick([7,8]);
+  const P=pick([0,1]);
+  const M=pick([1,2]);
+  const total=1+N+P+M;
+  const eff=baud*N/total;
+  const f=x=>fmt(x,2)+' bps';
+  return {level:4,topic:'Effective throughput',ref:'W3.1 §2.3: Baud Rate & Frame Timing Calculations',
+    q:`A UART link runs at ${baud.toLocaleString('en-US')} baud with ${N} data bits, ${P?'even parity':'no parity'}, and ${M} stop bit${M>1?'s':''}. What is the effective <em>data</em> throughput in bits per second? (Answer to 2 decimal places.)`,
+    a:f(eff),
+    w:[[f(baud),`That is the raw line rate; framing bits consume bandwidth without carrying data.`],
+       [f(baud*N/(N+P+M)),`Forgets the start bit in the overhead calculation.`],
+       [f(baud*(N+1)/total),`Uses N+1 data bits; the frame has ${N} data bits.`],
+       [f(baud/total),`Drops the data-bit numerator; effective throughput is baud × (data bits / total bits).`]],
+    e:`Total frame = 1 + ${N} + ${P} + ${M} = ${total} bits, of which ${N} are data.<br>Effective throughput = ${baud} × ${N} / ${total} = <strong>${f(eff)}</strong>.<br>Framing overhead (start, parity, stop) reduces useful throughput below the raw baud rate.`,
+    meta:{kind:'thru',baud,N,P,M,total}};
+}
+
+const GENS=[genBaud,genSPIMode,genI2CAddr,genFrameTime,genThroughput];
+
+function validQ(d){
+  if(!d||!d.w||d.w.length<3) return false;
+  const t=[d.a].concat(d.w.map(x=>x[0]));
+  return new Set(t).size===t.length;
+}
+function tryGen(fn){
+  let d=null;
+  for(let i=0;i<300;i++){
+    d=fn();
+    if(validQ(d)) return d;
+  }
+  return d; /* never throw; caller skips invalid */
+}
+function materialize(d){
+  const opts=shuffle([{t:d.a,ok:true,r:''}].concat(d.w.map(x=>({t:x[0],ok:false,r:x[1]}))));
+  return {level:d.level,topic:d.topic,ref:d.ref,q:d.q,e:d.e,opts,correct:opts.findIndex(o=>o.ok),
+          sel:null,submitted:false,meta:d.meta||null,a:d.a};
+}
+function buildQuiz(){
+  const all=[];
+  STATIC.forEach(d=>all.push(materialize(d)));
+  GENS.forEach(g=>{
+    let d=null;
+    try{ d=tryGen(g); }catch(e){ d=null; }
+    if(d && validQ(d)) all.push(materialize(d));
+  });
+  const by={1:[],2:[],3:[],4:[],5:[]};
+  all.forEach(q=>by[q.level].push(q));
+  const out=[];
+  [1,2,3,4,5].forEach(l=>shuffle(by[l]).forEach(q=>out.push(q)));
+  return out;
+}
+</script>
+
+<script id="ui">
+/* ================= UI ================= */
+const $=id=>document.getElementById(id);
+let quiz=[], cur=0;
+
+function show(id){ ['start','quiz','results'].forEach(s=>{$(s).hidden=(s!==id);}); window.scrollTo(0,0); }
+function stats(){
+  const ans=quiz.filter(q=>q.submitted);
+  const c=ans.filter(q=>q.sel===q.correct).length;
+  return {answered:ans.length,correct:c,wrong:ans.length-c,total:quiz.length};
+}
+function startQuiz(){
+  try{
+    quiz=buildQuiz(); cur=0;
+    if(!quiz.length) throw new Error('No questions were generated.');
+    show('quiz'); render();
+    $('startErr').textContent='';
+  }catch(e){
+    $('startErr').textContent='Could not start quiz: '+e.message;
+    console.error(e);
+  }
+}
+
+function render(){
+  const q=quiz[cur], st=stats(), L='ABCDE';
+  $('qnum').textContent='Question '+(cur+1)+' of '+quiz.length;
+  const lv=$('lvl'); lv.textContent='Level '+q.level+' · '+LEVELS[q.level]; lv.className='badge l'+q.level;
+  $('topic').textContent=q.topic;
+  $('bar').style.width=(st.answered/quiz.length*100)+'%';
+  $('sc-c').textContent=st.correct; $('sc-w').textContent=st.wrong;
+  $('sc-p').textContent=st.answered?Math.round(st.correct/st.answered*100)+'%':'–';
+  $('qtext').innerHTML=q.q;
+
+  $('chips').innerHTML=quiz.map((x,i)=>{
+    let cls='chip'+(i===cur?' cur':'')+(x.submitted?(x.sel===x.correct?' right':' wrong'):'');
+    return '<button class="'+cls+'" data-j="'+i+'" title="Question '+(i+1)+' (level '+x.level+')">'+(i+1)+'</button>';
+  }).join('');
+
+  $('opts').innerHTML=q.opts.map((o,i)=>{
+    let cls='opt';
+    if(q.submitted){ if(i===q.correct) cls+=' right'; else if(i===q.sel) cls+=' wrong'; }
+    else if(i===q.sel) cls+=' sel';
+    return '<button class="'+cls+'" data-i="'+i+'"'+(q.submitted?' disabled':'')+'><span class="L">'+L[i]+'</span><span>'+o.t+'</span></button>';
+  }).join('');
+
+  const fb=$('fb');
+  if(q.submitted){
+    const ok=q.sel===q.correct;
+    let why=q.opts.map((o,i)=>o.ok?'':'<li><strong>'+L[i]+'.</strong> '+o.r+'</li>').join('');
+    fb.className='fb '+(ok?'right':'wrong'); fb.hidden=false;
+    fb.innerHTML='<h3>'+(ok?'✓ Correct':'✗ Incorrect')+'</h3>'+
+      (ok?'':'<div>Correct answer: <strong>'+L[q.correct]+'.</strong> '+q.opts[q.correct].t+'</div>')+
+      '<div class="expl">'+q.e+'</div>'+
+      '<div><strong>Why the other options are wrong</strong><ul>'+why+'</ul></div>'+
+      '<div class="ref">Revisit: '+q.ref+'</div>';
+  } else { fb.hidden=true; fb.innerHTML=''; }
+
+  $('submitBtn').disabled=q.submitted||q.sel===null;
+  $('prevBtn').disabled=cur===0;
+  const all=st.answered===quiz.length;
+  const nb=$('nextBtn');
+  if(cur<quiz.length-1){ nb.textContent='Next →'; nb.disabled=false; }
+  else { nb.textContent=all?'See results':'Next unanswered →'; nb.disabled=false; }
+  $('finishRow').hidden=!all;
+}
+
+function selectOpt(i){ const q=quiz[cur]; if(q.submitted) return; q.sel=i; render(); }
+function submitAns(){ const q=quiz[cur]; if(q.submitted||q.sel===null) return; q.submitted=true; render(); }
+function nextQ(){
+  if(cur<quiz.length-1){ cur++; render(); window.scrollTo(0,0); return; }
+  const un=quiz.findIndex(q=>!q.submitted);
+  if(un===-1) showResults(); else { cur=un; render(); window.scrollTo(0,0); }
+}
+function prevQ(){ if(cur>0){ cur--; render(); window.scrollTo(0,0);} }
+
+function showResults(){
+  const st=stats(), L='ABCDE';
+  const pct=Math.round(st.correct/st.total*100);
+  const byLevel=[1,2,3,4,5].map(l=>{
+    const qs=quiz.filter(q=>q.level===l), c=qs.filter(q=>q.sel===q.correct).length;
+    return {l,n:qs.length,c,p:qs.length?c/qs.length:0};
+  });
+  const topics={};
+  quiz.forEach(q=>{
+    const t=topics[q.topic]||(topics[q.topic]={n:0,c:0,refs:new Set()});
+    t.n++; if(q.sel===q.correct) t.c++; else t.refs.add(q.ref);
+  });
+  const tlist=Object.keys(topics).map(k=>({name:k,n:topics[k].n,c:topics[k].c,refs:Array.from(topics[k].refs)}));
+  const weak=tlist.filter(t=>t.c<t.n).sort((a,b)=>a.c/a.n-b.c/b.n);
+  const meterCls=p=>p>=0.75?'':(p>=0.5?'mid':'low');
+
+  let h='<div class="card"><h1>Results</h1>'+
+    '<div class="row" style="gap:28px;margin:10px 0">'+
+    '<div><div class="big">'+st.correct+' / '+st.total+'</div><div class="sub" style="margin:0">Total score</div></div>'+
+    '<div><div class="big">'+pct+'%</div><div class="sub" style="margin:0">Overall percentage</div></div>'+
+    '<div><div class="big" style="color:var(--ok)">'+st.correct+'</div><div class="sub" style="margin:0">Correct</div></div>'+
+    '<div><div class="big" style="color:var(--bad)">'+st.wrong+'</div><div class="sub" style="margin:0">Incorrect</div></div></div>'+
+    '<button class="btn primary" id="restartBtn">Restart quiz (fresh numbers and order)</button></div>';
+
+  h+='<div class="card"><h2>Performance by difficulty level</h2><table><tr><th>Level</th><th>Score</th><th style="width:40%">Accuracy</th></tr>'+
+    byLevel.map(x=>'<tr><td><span class="badge l'+x.l+'">L'+x.l+'</span> '+LEVELS[x.l]+'</td><td>'+x.c+' / '+x.n+'</td><td><div class="meter"><div class="'+meterCls(x.p)+'" style="width:'+Math.round(x.p*100)+'%"></div></div></td></tr>').join('')+
+    '</table></div>';
+
+  h+='<div class="card"><h2>Concepts to revisit</h2>';
+  if(!weak.length) h+='<p>No missed topics. Re-run the quiz to practise with new numerical values.</p>';
+  else {
+    h+='<div class="note">Topics where you lost marks, weakest first. Re-read the revision-list sections listed under each.</div><table><tr><th>Topic</th><th>Score</th><th>Material to review</th></tr>'+
+      weak.map(t=>'<tr><td>'+t.name+'</td><td>'+t.c+' / '+t.n+'</td><td>'+t.refs.join('<br>')+'</td></tr>').join('')+'</table>';
+  }
+  const strong=tlist.filter(t=>t.c===t.n).map(t=>t.name);
+  if(strong.length) h+='<p class="sub" style="margin-top:12px">Solid topics: '+strong.join(', ')+'.</p>';
+  h+='</div>';
+
+  h+='<div class="card"><h2>Full review</h2>'+quiz.map((q,i)=>{
+    const ok=q.sel===q.correct;
+    const why=q.opts.map((o,j)=>o.ok?'':'<li><strong>'+L[j]+'.</strong> '+o.r+'</li>').join('');
+    return '<div class="rev"><div class="qmeta"><span class="badge l'+q.level+'">Level '+q.level+'</span><span>Q'+(i+1)+' · '+q.topic+'</span> <span class="'+(ok?'tag-ok':'tag-bad')+'">'+(ok?'✓ Correct':'✗ Incorrect')+'</span></div>'+
+      '<div class="qtext" style="font-size:1rem">'+q.q+'</div>'+
+      '<div class="ans">Your answer: <strong>'+L[q.sel]+'.</strong> '+q.opts[q.sel].t+'</div>'+
+      (ok?'':'<div class="ans">Correct answer: <strong>'+L[q.correct]+'.</strong> '+q.opts[q.correct].t+'</div>')+
+      '<div class="expl" style="margin:8px 0">'+q.e+'</div>'+
+      '<details><summary>Why the other options are wrong</summary><ul>'+why+'</ul></details>'+
+      '<div class="ref">Revisit: '+q.ref+'</div></div>';
+  }).join('')+'</div>';
+
+  const r=$('results'); r.innerHTML=h; show('results');
+  $('restartBtn').addEventListener('click',startQuiz);
+}
+
+try{
+  $('startBtn').addEventListener('click',startQuiz);
+  $('opts').addEventListener('click',e=>{const b=e.target.closest('.opt'); if(b) selectOpt(+b.dataset.i);});
+  $('chips').addEventListener('click',e=>{const b=e.target.closest('.chip'); if(b){cur=+b.dataset.j; render();}});
+  $('submitBtn').addEventListener('click',submitAns);
+  $('nextBtn').addEventListener('click',nextQ);
+  $('prevBtn').addEventListener('click',prevQ);
+  $('finishBtn').addEventListener('click',showResults);
+  $('nq').textContent=STATIC.length+GENS.length;
+}catch(e){ console.error(e); }
+</script>
+</body>
+</html>

@@ -1,8 +1,7 @@
 ---
 title: W3 DigComm
 ---
-##### Link to PDF
-[[W3.1 DigComm.pdf|Click here]]
+<iframe src="/static/quiz/embed_w3.1_prac.html" width="100%" height="750px" style="border: 1px solid var(--lightgray); border-radius: 8px;"></iframe>
 
 # Hardware Constraint
 
