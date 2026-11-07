@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>W3.2 Timers Quiz: Hardware Timers, PWM, DMA (INF2005)</title>
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1b2333; --muted:#5d6881; --line:#dde3ef;
+  --brand:#2f5bea; --brand-ink:#ffffff; --ok:#12805c; --ok-bg:#e3f6ee; --bad:#b3261e; --bad-bg:#fdeceb;
+  --warn:#9a6700; --warn-bg:#fff6dd; --chip:#e9edf6;
+  --l1:#2e7d6b; --l2:#2f5bea; --l3:#8a4fd3; --l4:#d9741a; --l5:#c0262d;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#0f1420; --card:#171e2e; --ink:#e8ecf6; --muted:#9aa6c1; --line:#2a3550;
+    --brand:#6b8cff; --brand-ink:#0b1020; --ok:#4cd6a2; --ok-bg:#12332a; --bad:#ff8a80; --bad-bg:#3a1c1a;
+    --warn:#f2c14e; --warn-bg:#3a3012; --chip:#222c43; }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+#app{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.5rem;margin:0 0 4px}
+h2{font-size:1.2rem;margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 18px;border-radius:10px;font-weight:600}
+.btn:hover:not(:disabled){border-color:var(--brand)}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spread{justify-content:space-between}
+.pill{background:var(--chip);border-radius:999px;padding:4px 12px;font-size:.88rem;font-weight:600}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.bad{background:var(--bad-bg);color:var(--bad)}
+.badge{display:inline-block;color:#fff;border-radius:6px;padding:3px 10px;font-size:.8rem;font-weight:700;letter-spacing:.02em}
+.badge.l1{background:var(--l1)} .badge.l2{background:var(--l2)} .badge.l3{background:var(--l3)} .badge.l4{background:var(--l4)} .badge.l5{background:var(--l5)}
+.progress{height:8px;background:var(--chip);border-radius:99px;overflow:hidden;margin:12px 0}
+.progress>div{height:100%;width:0;background:var(--brand);transition:width .25s}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.chip{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--chip);color:var(--ink);font-weight:700;font-size:.85rem;padding:0}
+.chip.cur{outline:2px solid var(--brand);outline-offset:1px}
+.chip.right{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
+.chip.wrong{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.qmeta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;color:var(--muted);font-size:.9rem}
+.qtext{font-size:1.1rem;font-weight:600;margin:6px 0 16px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.92em}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:10px;padding:12px 14px}
+.opt:hover:not(:disabled){border-color:var(--brand)}
+.opt .L{flex:0 0 28px;height:28px;border-radius:50%;background:var(--chip);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.opt.sel{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 9%,var(--card))}
+.opt.sel .L{background:var(--brand);color:var(--brand-ink)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)} .opt.right .L{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)} .opt.wrong .L{background:var(--bad);color:#fff}
+.opt:disabled{cursor:default;color:var(--ink)}
+.fb{margin-top:18px;border-radius:10px;padding:16px;border:1px solid var(--line)}
+.fb.right{background:var(--ok-bg);border-color:var(--ok)} .fb.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.fb h3{margin:0 0 6px;font-size:1.05rem}
+.fb .expl{margin:8px 0}
+.fb ul{margin:6px 0 0;padding-left:20px}
+.ref{color:var(--muted);font-size:.88rem;margin-top:8px}
+.nav{margin-top:18px}
+.big{font-size:2.6rem;font-weight:800;line-height:1.1}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);font-size:.95rem}
+.meter{height:8px;background:var(--chip);border-radius:99px;overflow:hidden;min-width:90px}
+.meter>div{height:100%;background:var(--ok)} .meter>div.low{background:var(--bad)} .meter>div.mid{background:var(--warn)}
+.note{background:var(--warn-bg);border:1px solid var(--warn);border-radius:10px;padding:12px 14px;color:var(--ink)}
+.rev{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.rev .ans{margin:4px 0}
+.tag-ok{color:var(--ok);font-weight:700}.tag-bad{color:var(--bad);font-weight:700}
+[hidden]{display:none!important}
+@media (max-width:520px){.card{padding:16px}.big{font-size:2.1rem}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<section id="start" class="card">
+  <h1>W3.2 Timers: Hardware Timers, PWM, DMA</h1>
+  <p class="sub">University-level practice quiz built from the INF2005 revision list.</p>
+  <p>The quiz has <strong id="nq">42</strong> questions in five levels, from foundational to advanced:</p>
+  <ol>
+    <li>Foundational understanding</li>
+    <li>Conceptual understanding</li>
+    <li>Application</li>
+    <li>Analysis &amp; problem solving</li>
+    <li>Advanced critical thinking</li>
+  </ol>
+  <p>Calculation questions use fresh random numbers every time you start or restart. Answers are locked once submitted. You can jump to any question using the numbered boxes at the top, and the results page shows which topics to revisit.</p>
+  <p id="startErr" style="color:var(--bad);font-weight:600;margin:8px 0 0"></p>
+  <button class="btn primary" id="startBtn">Start quiz</button>
+</section>
+
+<section id="quiz" hidden>
+  <div class="card">
+    <div class="row spread">
+      <strong id="qnum">Question 1</strong>
+      <div class="row">
+        <span class="pill ok">Correct <span id="sc-c">0</span></span>
+        <span class="pill bad">Incorrect <span id="sc-w">0</span></span>
+        <span class="pill">Accuracy <span id="sc-p">–</span></span>
+      </div>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="chips" id="chips" aria-label="Question navigator"></div>
+  </div>
+
+  <div class="card">
+    <div class="qmeta"><span id="lvl" class="badge l1">Level 1</span><span id="topic"></span></div>
+    <div class="qtext" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+    <div id="fb" hidden></div>
+    <div class="row spread nav">
+      <button class="btn" id="prevBtn">← Previous</button>
+      <div class="row">
+        <button class="btn primary" id="submitBtn">Submit answer</button>
+        <button class="btn" id="nextBtn">Next →</button>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px" id="finishRow" hidden>
+      <button class="btn primary" id="finishBtn">All answered: see results</button>
+    </div>
+  </div>
+</section>
+
+<section id="results" hidden></section>
+
+</div>
+
+<script id="engine">
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=arr=>arr[rnd(0,arr.length-1)];
+function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=rnd(0,i);const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+const fmt=(x,dp)=>String(+x.toFixed(dp===undefined?2:dp));
+
+const LEVELS=['','Foundational understanding','Conceptual understanding','Application','Analysis & problem solving','Advanced critical thinking'];
+
+/* ============ STATIC QUESTION BANK (36) ============ */
+const STATIC=[
+/* ---------- LEVEL 1 (8) ---------- */
+{level:1,topic:'Hardware timer purpose',ref:'W3.2 §1.2: Core Purpose of Hardware Timers',
+ q:`What is the core purpose of a hardware timer in an embedded system?`,
+ a:`To offload timing logic into dedicated hardware counters so the CPU is not trapped in blocking delay loops`,
+ w:[[`To increase the CPU clock speed for faster execution`,`Timers do not change the CPU clock; they count clock ticks independently.`],
+    [`To replace the need for interrupts entirely`,`Timers often generate interrupts; they do not remove the need for them.`],
+    [`To store program code for timing functions in flash`,`Timers are hardware counters, not code storage.`]],
+ e:`Hardware timers offload timing into dedicated counters. This unblocks the CPU so it can read sensors, process inputs, and handle emergency events while timing runs in hardware.`},
+
+{level:1,topic:'Software delay problem',ref:'W3.2 §1.1: The Software Delay Problem',
+ q:`Why is a software delay such as <code>sleep()</code> or <code>delay()</code> problematic in an embedded system?`,
+ a:`It is 100% blocking: the CPU spins in an empty loop and cannot do any other work (sensors, inputs, emergency handling)`,
+ w:[[`It consumes no CPU cycles but corrupts memory`,`It consumes all CPU cycles in the delay loop.`],
+    [`It only works when interrupts are disabled`,`Blocking delays work regardless of interrupt state.`],
+    [`It permanently disables the hardware timer`,`It does not touch timer hardware.`]],
+ e:`Software delays are 100% blocking, resulting in zero multitasking. The CPU is trapped checking time instead of doing useful work.`},
+
+{level:1,topic:'Prescaler definition',ref:'W3.2 §2.2: The Prescaler',
+ q:`What does the prescaler do in a timer peripheral?`,
+ a:`It divides the high-frequency system clock before it reaches the counter, slowing the tick rate`,
+ w:[[`It multiplies the clock to increase timer resolution`,`A prescaler divides, it does not multiply.`],
+    [`It stores the compare value that sets PWM duty cycle`,`That is the compare register (CCR), not the prescaler.`],
+    [`It counts overflow events for cascading into another timer`,`That is the cascade mechanism, not the prescaler.`]],
+ e:`The prescaler mathematically divides the system clock. Example: a prescaler of 125 divides 125 MHz to 1 MHz, so each tick is 1 µs.`},
+
+{level:1,topic:'Watchdog timer',ref:'W3.2 §1.3: Watchdog Timer (WDT)',
+ q:`What is a watchdog timer (WDT)?`,
+ a:`A hardware failsafe that forces a reboot if software fails to reset ("pet") it before the down-counter reaches zero`,
+ w:[[`A timer that keeps calendar time with a coin-cell battery`,`That is the RTC.`],
+    [`A timer that generates PWM signals for motors`,`That is a general-purpose timer in PWM mode.`],
+    [`A counter that measures external pulse widths`,`That is input capture.`]],
+ e:`The WDT is a hardware safety failsafe. Software must periodically reset a down-counting timer; if code freezes and the count hits zero, the WDT forces a hard hardware reboot.`},
+
+{level:1,topic:'Real-time clock',ref:'W3.2 §1.3: Real-Time Clock (RTC)',
+ q:`What is a Real-Time Clock (RTC) dedicated to?`,
+ a:`Human timekeeping (year, month, day, hour, minute, second) in an ultra-low-power domain with coin-cell backup`,
+ w:[[`High-speed PWM generation for motor control`,`That is a general-purpose timer.`],
+    [`Measuring external signal timing with input capture`,`That is a timer capture feature.`],
+    [`Forcing a reboot when software freezes`,`That is the watchdog timer.`]],
+ e:`The RTC keeps calendar time and runs in an ultra-low-power domain with a coin-cell battery backup, so it keeps time even when the main system is off.`},
+
+{level:1,topic:'Up-counting mode',ref:'W3.2 §3.1: Up-Counting Mode',
+ q:`Which description matches up-counting (sawtooth) mode?`,
+ a:`The counter starts at 0, increments to MAX/period, then instantly resets to 0`,
+ w:[[`The counter starts at MAX, decrements to 0, then reloads MAX`,`That is down-counting.`],
+    [`The counter counts up to MAX then down to 0, creating a triangle`,`That is center-aligned mode.`],
+    [`The counter increments only when an external edge arrives`,`That would be an event counter, not standard up-counting.`]],
+ e:`Up-counting is the standard sawtooth mode: 0 → MAX → 0. The stopwatch analogy: it counts elapsed time upward from 0:00.`},
+
+{level:1,topic:'Input capture',ref:'W3.2 §5.1: Input Capture',
+ q:`What is input capture?`,
+ a:`An external state change on a GPIO pin causes hardware to instantly copy the current timer count into a capture register and fire an IRQ`,
+ w:[[`The CPU polls a GPIO pin in a loop and stores the value itself`,`Input capture is a hardware feature, not CPU polling.`],
+    [`The timer copies the compare register into RAM on overflow`,`That is not input capture.`],
+    [`The DMA controller samples an ADC channel on a timer trigger`,`That is timer-triggered DMA, not input capture.`]],
+ e:`Input capture is a hardware "digital stopwatch": an external edge (e.g. rising edge) triggers an instant snapshot of the counter into a capture register plus an IRQ.`},
+
+{level:1,topic:'PWM purpose',ref:'W3.2 §6.1: Purpose of PWM',
+ q:`Why is PWM used to dim an LED or control a motor speed?`,
+ a:`It rapidly switches the output HIGH/LOW to control average energy delivery without wasting excess voltage as heat`,
+ w:[[`It converts the digital pin into a true analog voltage level`,`PWM simulates analog behaviour on average; the pin is still digital.`],
+    [`It increases the supply voltage to the load`,`PWM does not boost voltage.`],
+    [`It reduces the timer's clock frequency`,`PWM does not change the timer clock.`]],
+ e:`PWM switches between HIGH and LOW rapidly. The average voltage is ≈ D × V_supply, so it controls energy delivery without the resistive heat loss of a linear regulator.`},
+
+/* ---------- LEVEL 2 (8) ---------- */
+{level:2,topic:'N−1 off-by-one rule',ref:'W3.2 §2.3: Off-by-One (N−1 Rule)',
+ q:`Why must you write N − 1 into a prescaler register to divide the clock by N?`,
+ a:`Hardware registers are zero-indexed: counting 0 to N−1 is N steps, so writing N divides by N+1`,
+ w:[[`Because the prescaler always adds one in software`,`The hardware itself counts from 0, so writing N gives N+1 counts.`],
+    [`Because N−1 is the maximum value the register can hold`,`The register can hold much larger values; this is about zero-indexing.`],
+    [`Because the clock is inverted at each count`,`Inversion is not the issue; the count sequence is.`]],
+ e:`To divide by 100, write 99 (0 to 99 is 100 steps). Writing 100 divides by 101, causing timing drift that accumulates over time.`},
+
+{level:2,topic:'Center-aligned mode',ref:'W3.2 §3.3: Center-Aligned / Up-Down Mode',
+ q:`Why is center-aligned (up-down) mode preferred for motor control?`,
+ a:`It produces symmetrical pulses aligned in the center, drastically reducing electromagnetic noise and smoothing motor operation`,
+ w:[[`It doubles the PWM frequency without changing the clock`,`It does not double the frequency; the period is two ramps.`],
+    [`It eliminates the need for a prescaler`,`A prescaler is still needed to set the tick rate.`],
+    [`It guarantees a 50% duty cycle regardless of CCR`,`Duty cycle still depends on CCR; only the alignment changes.`]],
+ e:`Center-aligned mode creates a triangle wave. Pulses are aligned in the center, which reduces electromagnetic noise and smooths motor operation.`},
+
+{level:2,topic:'Overflow vs compare match',ref:'W3.2 §4.1–4.2: Overflow and Compare Match Interrupts',
+ q:`What is the difference between an overflow interrupt and a compare-match interrupt?`,
+ a:`Overflow fires when the counter rolls over at MAX/period; compare-match fires when the counter equals the compare register value`,
+ w:[[`Overflow fires on external edges; compare-match fires on the system clock`,`Neither is defined by external edges.`],
+    [`Overflow sets the duty cycle; compare-match sets the frequency`,`The period register sets frequency; the compare register sets duty.`],
+    [`Overflow only works in down-counting mode; compare-match only in up-counting`,`Both work in either direction.`]],
+ e:`Overflow: counter reaches its period/MAX and rolls over. Compare match (output compare): hardware continuously checks counter against the compare register and fires an IRQ or toggles a pin when they match.`},
+
+{level:2,topic:'Infinite ISR trap',ref:'W3.2 §4.3: The Infinite ISR Configuration Trap',
+ q:`A bare-metal timer ISR fires once, main() freezes, and the ISR re-enters immediately. What is the likely cause?`,
+ a:`The ISR never cleared the timer hardware interrupt flag, so the pending interrupt is re-asserted on exit`,
+ w:[[`The prescaler was written as N−1`,`That is correct configuration, not a cause of re-entry.`],
+    [`The timer was configured in center-aligned mode`,`Center-aligned mode is a valid mode and does not cause re-entry.`],
+    [`The compare register was left at zero`,`That would affect match timing, not cause a stuck pending flag.`]],
+ e:`Bare-metal C requires manually clearing the timer hardware interrupt flag before exiting the ISR. Forgetting it causes immediate re-entry, freezing main program execution.`},
+
+{level:2,topic:'GP timer PWM vs dedicated PWM',ref:'W3.2 §6.3: General-Purpose Timer PWM vs Dedicated PWM',
+ q:`What does a dedicated PWM peripheral offer over a general-purpose timer in PWM mode?`,
+ a:`Multi-channel synchronisation, complementary outputs, dead-time insertion, and fault/brake inputs for immediate shutdown`,
+ w:[[`A higher maximum clock frequency than any general-purpose timer`,`Clock frequency is not the distinguishing feature.`],
+    [`The ability to generate interrupts`,`General-purpose timers already generate interrupts.`],
+    [`The ability to use a prescaler`,`General-purpose timers already use prescalers.`]],
+ e:`General-purpose timer PWM: single timer mode using counter + period register + compare register + output logic. Dedicated PWM peripheral: multi-channel sync, complementary outputs, dead-time insertion, fault/brake inputs.`},
+
+{level:2,topic:'Timer-triggered DMA vs interrupt',ref:'W3.2 §5.2: Timer-Triggered DMA',
+ q:`How does timer-triggered DMA differ from a timer interrupt?`,
+ a:`The timer signals the DMA controller directly in hardware, which moves data without CPU involvement; an interrupt would wake the CPU to do the work`,
+ w:[[`DMA runs on the CPU core but skips the ISR prologue`,`DMA runs independently of the CPU core.`],
+    [`Interrupts are faster because they bypass the DMA controller`,`DMA avoids CPU involvement entirely, which is the point.`],
+    [`DMA only works with input capture, never with timer overflow`,`DMA can be triggered by overflow or match.`]],
+ e:`Timer-triggered DMA is the "invisible hand": the timer's overflow/match signal goes directly to the DMA controller, which moves data (e.g. ADC sample to RAM) independently. Use cases: audio at 44.1 kHz, continuous sensor streams, NeoPixels.`},
+
+{level:2,topic:'Torn reads',ref:'W3.2 §5.4: 16-bit Reads on 8-bit Buses',
+ q:`Why do 16-bit counter reads across an 8-bit bus require hardware shadow/latch registers?`,
+ a:`The two byte reads are not atomic, so the value can change between them, producing a corrupted (torn) result`,
+ w:[[`Because 8-bit buses cannot carry 16-bit addresses`,`The issue is data width and atomicity, not addresses.`],
+    [`Because the counter must be stopped before any read`,`Stopping is one mitigation, but shadow registers are the hardware solution.`],
+    [`Because the compare register overrides the counter value on read`,`No such override exists.`]],
+ e:`Torn reads: read high byte, counter overflows, read low byte → inconsistent combined value. Hardware shadow/latch registers guarantee an atomic snapshot.`},
+
+{level:2,topic:'Clock tree illusions',ref:'W3.2 §2.3: Clock Tree Illusions',
+ q:`A CPU runs at 100 MHz but the timer peripheral bus is divided to 50 MHz. What is the practical consequence?`,
+ a:`The timer ticks at 50 MHz, so all prescaler and period calculations must use 50 MHz, not the CPU frequency`,
+ w:[[`The timer cannot be used at all`,`It works fine, just at the lower bus clock.`],
+    [`The timer still runs at 100 MHz but with half the resolution`,`The timer input clock is the bus clock, not the CPU clock.`],
+    [`The prescaler is bypassed automatically`,`No automatic bypass occurs.`]],
+ e:`Peripheral buses may have hardware dividers. Always use the timer's actual input clock (the bus clock), not the CPU frequency, when computing prescaler and period values.`},
+
+/* ---------- LEVEL 3 (6) ---------- */
+{level:3,topic:'Choose timer type',ref:'W3.2 §1.3: Classification of Timers',
+ q:`A system needs a calendar timestamp for each logged event. Which timer is the correct choice?`,
+ a:`Real-time clock (RTC)`,
+ w:[[`Watchdog timer (WDT)`,`The WDT is a failsafe, not a timekeeper.`],
+    [`General-purpose timer in up-counting mode`,`A GP timer counts ticks, not calendar time.`],
+    [`Input capture`,`Input capture measures external edges, not calendar time.`]],
+ e:`The RTC is dedicated to human timekeeping (year, month, day, hour, minute, second) and runs on a coin-cell backup, making it the correct choice for calendar timestamps.`},
+
+{level:3,topic:'Choose counting mode',ref:'W3.2 §3.2: Down-Counting Mode',
+ q:`A microwave's countdown display starts at a user-set time and decrements to zero. Which timer mode matches this behaviour?`,
+ a:`Down-counting mode`,
+ w:[[`Up-counting mode`,`Up-counting counts upward from 0, like a stopwatch.`],
+    [`Center-aligned mode`,`Center-aligned counts up then down in a triangle.`],
+    [`Input capture mode`,`Input capture measures external events.`]],
+ e:`Down-counting starts at MAX/period, decrements to 0, then reloads MAX — exactly the microwave timer analogy from the slides.`},
+
+{level:3,topic:'Input capture use case',ref:'W3.2 §5.1: Input Capture',
+ q:`A Hall-effect sensor produces one pulse per motor revolution and you need to compute RPM. Which timer feature should you use?`,
+ a:`Input capture — timestamp each rising edge and compute the period between captures`,
+ w:[[`Overflow interrupt counting rollovers`,`That measures long durations, not per-revolution timing.`],
+    [`Center-aligned PWM output`,`PWM is an output feature, not a measurement feature.`],
+    [`DMA from the ADC`,`That samples analog data, not digital pulse timing.`]],
+ e:`Input capture is the digital stopwatch. Each rising edge snapshots the counter; the difference between consecutive captures gives the revolution period, from which RPM is derived.`},
+
+{level:3,topic:'DMA for audio',ref:'W3.2 §5.2: Timer-Triggered DMA',
+ q:`A 44.1 kHz audio stream must be fed to a DAC with minimal CPU overhead. Which approach is best?`,
+ a:`Timer-triggered DMA: the timer's match/overflow signal triggers DMA to move each sample to the DAC register`,
+ w:[[`A timer ISR that pushes each sample in software`,`44,100 interrupts per second would consume significant CPU time.`],
+    [`Polling the timer flag in a busy loop`,`Polling wastes CPU cycles and scales poorly.`],
+    [`Input capture on the DAC output`,`Input capture is for measuring inputs, not driving outputs.`]],
+ e:`DMA moves data without CPU involvement, triggered by the timer. At 44.1 kHz the CPU never enters an ISR per sample; this is the canonical timer+DMA use case.`},
+
+{level:3,topic:'Timer cascading',ref:'W3.2 §5.3: Timer Cascading',
+ q:`Two 16-bit timers are cascaded. What is the resulting counter width, and why is it useful?`,
+ a:`32-bit; the overflow of Timer A clocks Timer B, allowing very long durations without frequent software overflow counting`,
+ w:[[`8-bit; cascading increases resolution`,`Cascading adds width, not resolution of a single tick.`],
+    [`16-bit; cascading does not change width`,`Cascading two 16-bit timers yields 32 bits.`],
+    [`64-bit; each timer contributes 32 bits`,`Each timer is 16 bits, so the pair is 32 bits.`]],
+ e:`Cascading is the odometer analogy: Timer A overflow becomes Timer B's clock tick. Two 16-bit timers combine into a 32-bit timer for long-duration tracking.`},
+
+{level:3,topic:'NeoPixel timing',ref:'W3.2 §5.2: Timer-Triggered DMA',
+ q:`WS2812B (NeoPixel) LED strips need precisely timed pulses at ~800 kHz. Which combination avoids CPU overhead?`,
+ a:`Timer-triggered DMA writing the bit pattern to the GPIO/PIO, with zero CPU involvement per bit`,
+ w:[[`A high-priority ISR toggling the pin per bit`,`Per-bit interrupts at 800 kHz would consume the CPU.`],
+    [`Polling the timer flag in a tight loop`,`Polling leaves no CPU time for other work.`],
+    [`Input capture on the LED data line`,`Input capture measures inputs; it cannot drive the LED line.`]],
+ e:`Timer + DMA is exactly the invisible-hand use case: the timer paces the data, DMA moves it, and the CPU does other work. This is a standard NeoPixel driving technique.`},
+
+/* ---------- LEVEL 4 (5) ---------- */
+{level:4,topic:'Diagnose timing drift',ref:'W3.2 §2.3: Off-by-One (N−1 Rule)',
+ q:`A timer configured for a 1 ms period drifts several milliseconds slow after an hour. The ISR logic is correct. What is the most likely cause?`,
+ a:`The prescaler register was written with the divide ratio N instead of N−1, so the actual divide is N+1 and each period is slightly longer`,
+ w:[[`The compare register is too small`,`A too-small compare value would change duty, not the overflow period.`],
+    [`The ISR clears the flag twice`,`Double-clearing does not lengthen the period.`],
+    [`The timer is in center-aligned mode`,`Center-aligned changes waveform shape, not a slow drift.`]],
+ e:`The off-by-one N−1 rule: writing N instead of N−1 divides by N+1, so every period is slightly longer and the error accumulates — classic timing drift.`},
+
+{level:4,topic:'Diagnose ISR re-entry',ref:'W3.2 §4.3: The Infinite ISR Configuration Trap',
+ q:`A timer ISR fires continuously and main() never runs again. Which fix is correct?`,
+ a:`Clear the timer's hardware interrupt flag inside the ISR before returning`,
+ w:[[`Increase the prescaler`,`Prescaling changes period, not the pending-flag behaviour.`],
+    [`Switch to down-counting mode`,`Mode does not clear the pending flag.`],
+    [`Disable the compare register`,`The compare register is not the issue if the pending flag is never cleared.`]],
+ e:`The infinite ISR trap: if the hardware interrupt flag is not cleared, the interrupt is immediately re-asserted on exit, trapping the CPU. Clear the flag in the ISR.`},
+
+{level:4,topic:'Diagnose too-fast overflow',ref:'W3.2 §2.1–2.2: Clock Source and Prescaler',
+ q:`A 16-bit timer with a 125 MHz clock and no prescaler overflows in about 0.52 ms, not the 1 s you expected. What is the explanation?`,
+ a:`With no prescaler the tick is 8 ns, so 65,536 ticks ≈ 0.52 ms; you need a prescaler and/or a suitable ARR to reach 1 s`,
+ w:[[`The timer is in center-aligned mode, which halves the period`,`Center-aligned changes waveform, not the raw overflow time.`],
+    [`The compare register is set too low`,`Compare match timing does not determine overflow time.`],
+    [`The watchdog is resetting the timer`,`That would reset the chip, not produce 0.52 ms overflows.`]],
+ e:`65536 ticks ÷ 125 MHz ≈ 524 µs ≈ 0.52 ms. To reach 1 s, prescale the clock and/or set an appropriate period (ARR) so the tick count is large enough.`},
+
+{level:4,topic:'Center vs edge noise',ref:'W3.2 §3.3: Center-Aligned Mode',
+ q:`Why does center-aligned PWM reduce electromagnetic noise compared to edge-aligned PWM?`,
+ a:`Pulses are centred so the current switching transitions are symmetrically distributed, reducing harmonic content and mechanical/electrical stress`,
+ w:[[`It runs at half the frequency so there is less switching`,`Frequency is set by the period, not by alignment.`],
+    [`It eliminates the need for a prescaler`,`A prescaler is still needed.`],
+    [`It disables the compare register`,`The compare register is still used to set duty.`]],
+ e:`The triangle wave aligns pulses in the centre, distributing switching events symmetrically. This lowers harmonic content and reduces electromagnetic noise and motor stress.`},
+
+{level:4,topic:'Torn read scenario',ref:'W3.2 §5.4: 16-bit Reads on 8-bit Buses',
+ q:`A 16-bit counter on an 8-bit bus reads 0x01FF. Software reads the high byte (0x01), then the counter overflows to 0x0200 before the low byte is read (0x00), giving 0x0100. What is this and how is it fixed?`,
+ a:`A torn read; use the hardware shadow/latch register (or a re-read verification loop) to obtain an atomic snapshot`,
+ w:[[`A prescaler overflow; increase the prescaler`,`Prescaling does not fix atomicity.`],
+    [`A compare-match collision; disable the compare interrupt`,`The compare interrupt is unrelated to the read sequence.`],
+    [`A DMA underrun; increase the DMA burst size`,`DMA is not involved in this read.`]],
+ e:`The two byte reads are not atomic. Between them the counter changes, producing an inconsistent combined value. Shadow/latch registers snapshot the counter atomically; software re-read loops can mitigate but not perfectly guarantee atomicity.`},
+
+/* ---------- LEVEL 5 (9) ---------- */
+{level:5,topic:'Motor control system design',ref:'W3.2 §6.3; §3.3; §5.2',
+ q:`A motor controller needs 20 kHz centre-aligned PWM, 20 kHz current sensing, and an immediate emergency stop on fault. Which combination is most appropriate?`,
+ a:`Dedicated PWM peripheral with complementary outputs and dead-time, ADC triggered by the timer, and a fault/brake input for immediate shutdown`,
+ w:[[`A single general-purpose timer with a high-priority ISR doing everything`,`A single GP timer lacks complementary outputs, dead-time, and a hardware fault path.`],
+    [`Software PWM in the main loop plus polling for faults`,`Software PWM is imprecise and polling adds latency; neither is suitable for motor control.`],
+    [`Input capture for PWM generation and DMA for the fault`,`Input capture is a measurement feature, not a PWM generator.`]],
+ e:`Dedicated PWM peripherals exist for exactly this: multi-channel synchronisation, complementary outputs, dead-time insertion, and fault/brake inputs that shut down outputs immediately in hardware.`},
+
+{level:5,topic:'WDT during long operations',ref:'W3.2 §1.3: Watchdog Timer',
+ q:`Firmware performs a 2-second flash erase, but the WDT timeout is 1 second. What is the correct approach?`,
+ a:`Feed the watchdog at safe checkpoints during the erase (or use a longer hardware timeout), but never disable it permanently without a documented recovery path`,
+ w:[[`Disable the WDT permanently at startup`,`This defeats the failsafe and is unsafe for production firmware.`],
+    [`Remove the WDT and rely on software checks`,`Software checks cannot recover a hung system.`],
+    [`Increase the CPU clock so the erase finishes faster`,`Clock speed may not be changeable and does not address the design issue.`]],
+ e:`The WDT is a hardware failsafe. The correct pattern is periodic petting at known-safe points, or choosing a hardware timeout that accommodates the longest legitimate operation. Permanent disable removes protection.`},
+
+{level:5,topic:'32-bit timing via cascading',ref:'W3.2 §5.3: Timer Cascading',
+ q:`You need a 10-second timestamp with 1 µs resolution and have two 16-bit timers. Which approach is best?`,
+ a:`Cascade the two 16-bit timers into a 32-bit counter clocked at 1 MHz, giving ~71 minutes of range at 1 µs resolution`,
+ w:[[`Use one 16-bit timer at 1 MHz and count overflows in software`,`Software overflow counting costs an ISR per wrap and adds jitter.`],
+    [`Use one 16-bit timer at the maximum clock and accept the wrap`,`A 16-bit counter at 1 MHz wraps every 65.5 ms — far too short for 10 s.`],
+    [`Use input capture on a 1 Hz reference`,`Input capture measures edges; it does not build a long-range counter.`]],
+ e:`Cascading gives 32 bits: 2^32 µs ≈ 4295 s ≈ 71.6 minutes at 1 µs resolution. It is a hardware solution that avoids per-wrap software overhead.`},
+
+{level:5,topic:'Torn read edge case',ref:'W3.2 §5.4: 16-bit Reads on 8-bit Buses',
+ q:`Why is "read low byte, then high byte" not a complete fix for torn reads on a 16-bit counter over an 8-bit bus?`,
+ a:`The counter can still increment between the two reads, so a re-read/verification loop or a hardware shadow register is required`,
+ w:[[`Low-byte reads are always atomic, so it is a complete fix`,`A single byte read is atomic, but the two-byte sequence is not.`],
+    [`The counter cannot overflow during a read`,`The counter runs independently of the bus read.`],
+    [`The bus always latches both bytes simultaneously`,`An 8-bit bus transfers one byte at a time.`]],
+ e:`Any two-step read can be split by an increment. Hardware shadow/latch registers are the robust solution. Software re-read loops reduce but do not eliminate the window.`},
+
+{level:5,topic:'Dead-time necessity',ref:'W3.2 §6.3: Dedicated PWM Peripheral',
+ q:`Why can a general-purpose timer in PWM mode not safely drive a complementary motor bridge without extra hardware?`,
+ a:`It lacks dead-time insertion, so simultaneous high-side and low-side switching could cause shoot-through; a dedicated PWM peripheral provides dead-time and complementary outputs`,
+ w:[[`It cannot generate a 50% duty cycle`,`A GP timer can generate any duty cycle.`],
+    [`It cannot use a prescaler`,`A GP timer has a prescaler.`],
+    [`It cannot generate interrupts`,`A GP timer generates interrupts.`]],
+ e:`Dead-time insertion and complementary outputs are dedicated PWM peripheral features. Without dead-time, a complementary bridge can have both transistors on briefly, causing a destructive shoot-through current.`},
+
+{level:5,topic:'WDT in a safety-critical system',ref:'W3.2 §1.3: Watchdog Timer',
+ q:`A pacemaker must recover if its firmware hangs. Which timer is the correct failsafe, and why?`,
+ a:`Watchdog timer — it forces a hardware reboot when software fails to pet it, exactly the failsafe needed for hung firmware`,
+ w:[[`RTC — it keeps calendar time`,`The RTC keeps time; it does not detect a hang.`],
+    [`General-purpose timer in centre-aligned mode`,`Centre-aligned PWM shapes output; it does not recover a hung system.`],
+    [`Input capture`,`Input capture measures external events; it does not reset the system.`]],
+ e:`The WDT is the hardware safety failsafe. If the firmware hangs and stops petting the watchdog, the count reaches zero and the hardware forces a reboot.`},
+
+{level:5,topic:'Timer + DMA + input capture combined',ref:'W3.2 §5.1–5.2',
+ q:`A system uses a timer to trigger ADC conversions via DMA at 44.1 kHz, and also uses input capture to measure an incoming PWM signal. Which statement is correct?`,
+ a:`Both are hardware-timer features: the timer's match/overflow drives DMA for the ADC, and input capture timestamps external edges — the CPU is free for other work`,
+ w:[[`Both require the CPU to poll in a loop`,`Both are hardware features that run without CPU polling.`],
+    [`DMA and input capture cannot be used simultaneously`,`They are independent features and can coexist on the same timer or across timers.`],
+    [`Input capture replaces the need for a timer`,`Input capture is a timer feature; it depends on the timer.`]],
+ e:`Timer-triggered DMA and input capture are independent hardware features. Together they offload high-rate sampling and precise edge timing from the CPU, which can focus on application logic.`},
+
+{level:5,topic:'PWM average vs frequency',ref:'W3.2 §6.2: PWM Definitions and Formulas',
+ q:`Two PWM signals have the same 50% duty cycle but different frequencies (1 kHz vs 20 kHz). What differs?`,
+ a:`The average voltage is the same; the ripple frequency and switching losses differ — higher frequency means smaller ripple but more switching loss`,
+ w:[[`The average voltage doubles at 20 kHz`,`Average voltage depends on duty cycle and supply, not frequency.`],
+    [`The 1 kHz signal produces no average voltage`,`Any nonzero duty cycle produces an average voltage.`],
+    [`Duty cycle changes with frequency`,`Duty cycle is independent of frequency.`]],
+ e:`V_avg ≈ D × V_supply is independent of frequency. Frequency affects ripple amplitude, audible noise, and switching losses — a key design tradeoff.`},
+
+{level:5,topic:'Center-aligned period length',ref:'W3.2 §3.3: Center-Aligned Mode',
+ q:`In centre-aligned mode, why does one full PWM period correspond to two ramps (up and down) rather than ARR+1 counts?`,
+ a:`The counter goes up from 0 to ARR and back down to 0, so a full period is the up ramp plus the down ramp`,
+ w:[[`Because the prescaler is halved in centre-aligned mode`,`The prescaler is unchanged.`],
+    [`Because the compare register is doubled`,`The compare register sets duty, not period length.`],
+    [`Because the counter skips odd values`,`No values are skipped.`]],
+ e:`Up-down mode creates a triangle wave. One period = up ramp (0→ARR) + down ramp (ARR→0), which is why the effective frequency is half that of an equivalent edge-aligned configuration for the same ARR.`}
+];
+
+/* ============ RANDOMISED CALCULATION GENERATORS (6) ============ */
+
+function genPrescaler(){
+  const sys = pick([125,100,84,72,64,48,80]);
+  const cfg = pick([
+    {tf:1, tick:'1 µs'},
+    {tf:2, tick:'0.5 µs'},
+    {tf:0.5, tick:'2 µs'},
+    {tf:0.25, tick:'4 µs'},
+    {tf:0.1, tick:'10 µs'}
+  ]);
+  const ratio = sys/cfg.tf;
+  if(!Number.isInteger(ratio) || ratio < 3) return null;
+  const psc = ratio - 1;
+  const ans = String(psc);
+  const w = [
+    [String(ratio), `That is the divide ratio N. Registers are zero-indexed, so you must write N−1; writing ${ratio} would divide by ${ratio+1}.`],
+    [String(psc+1), `That is one too many: writing ${psc+1} divides by ${ratio+1}, not ${ratio}.`],
+    [String(psc-1), `That is one too few: writing ${psc-1} divides by ${ratio-1}, not ${ratio}.`]
+  ];
+  const all = [ans].concat(w.map(x=>x[0]));
+  if(new Set(all).size !== 4) return null;
+  return {
+    level:3, topic:'Prescaler register (N−1 rule)',
+    ref:'W3.2 §2.2–2.3: Prescaler and Off-by-One Trap',
+    q:`A timer's input clock is ${sys} MHz. You need the timer to tick every ${cfg.tick} (i.e. at ${cfg.tf} MHz). What value must be written into the prescaler (PSC) register?`,
+    a: ans, w,
+    e:`Divide ratio N = f_sys / f_timer = ${sys} MHz / ${cfg.tf} MHz = ${ratio}.<br>The PSC register is zero-indexed: write N − 1 = ${ratio} − 1 = <strong>${psc}</strong>.<br>Writing ${ratio} would divide by ${ratio+1}, producing a slow timing drift.`,
+    meta:{kind:'psc'}
+  };
+}
+
+function genOverflow(){
+  const sys = pick([125,100,84,72,64,48]);
+  const psc = pick([9,49,99,124,249,999]);
+  const arr = pick([999,4999,9999,19999,49999,65535]);
+  const ticks = (psc+1)*(arr+1);
+  const period_ms = ticks/(sys*1000);
+  const fm = x => {
+    if (x >= 1000) return x.toFixed(1)+' ms';
+    if (x >= 1) return x.toFixed(3)+' ms';
+    if (x >= 0.01) return x.toFixed(4)+' ms';
+    return x.toFixed(6)+' ms';
+  };
+  const ans = fm(period_ms);
+  const w = [
+    [fm(psc*(arr+1)/(sys*1000)), `Forgot the +1 on PSC: writing PSC=${psc} divides by ${psc+1}, so the period is (PSC+1)(ARR+1)/f, not PSC(ARR+1)/f.`],
+    [fm((psc+1)*arr/(sys*1000)), `Forgot the +1 on ARR: the counter counts 0..ARR, which is ARR+1 ticks per period.`],
+    [fm(psc*arr/(sys*1000)), `Forgot both +1 terms: PSC and ARR are zero-indexed, so each contributes one extra count.`]
+  ];
+  const all = [ans].concat(w.map(x=>x[0]));
+  if(new Set(all).size !== 4) return null;
+  return {
+    level:4, topic:'Timer overflow period',
+    ref:'W3.2 §2.2–2.3; §4.1: Prescaler, Period, Overflow',
+    q:`A timer runs from a ${sys} MHz input clock with PSC = ${psc} and ARR = ${arr}. Using T = (PSC+1)(ARR+1)/f_timer, what is the overflow period?`,
+    a: ans, w,
+    e:`T = (PSC+1)(ARR+1) / f_timer<br>= ${psc+1} × ${arr+1} / ${sys} MHz<br>= ${ticks.toLocaleString('en-US')} / ${(sys*1e6).toLocaleString('en-US')} s<br>= <strong>${ans}</strong>.<br>Both PSC and ARR are zero-indexed, hence the +1 terms.`,
+    meta:{kind:'ovf'}
+  };
+}
+
+function genPwmFreq(){
+  const ft = pick([1e6,2e6,4e6,8e6,16e6,72e6,84e6]);
+  const psc = pick([1,3,7,9,15,99]);
+  const arr = pick([99,199,499,999,1999,4999]);
+  const freq = ft/((psc+1)*(arr+1));
+  const fm = x => x >= 1000 ? (x/1000).toFixed(2)+' kHz' : x.toFixed(2)+' Hz';
+  const ans = fm(freq);
+  const w = [
+    [fm(ft/(psc*arr)), `Forgot both +1 terms: f = f_timer/((PSC+1)(ARR+1)), not f_timer/(PSC·ARR).`],
+    [fm(ft/((psc+1)*arr)), `Forgot the +1 on ARR: the counter counts 0..ARR, i.e. ARR+1 ticks.`],
+    [fm(ft/(psc*(arr+1))), `Forgot the +1 on PSC: writing PSC=${psc} divides by ${psc+1}.`]
+  ];
+  const all = [ans].concat(w.map(x=>x[0]));
+  if(new Set(all).size !== 4) return null;
+  return {
+    level:3, topic:'PWM frequency',
+    ref:'W3.2 §7.1: PWM Frequency Formula',
+    q:`A timer with f_timer = ${(ft/1e6).toFixed(0)} MHz is configured in edge-aligned up-count mode with PSC = ${psc} and ARR = ${arr}. Using f_PWM = f_timer/((PSC+1)(ARR+1)), what is the PWM frequency?`,
+    a: ans, w,
+    e:`f_PWM = f_timer / ((PSC+1)(ARR+1))<br>= ${(ft/1e6).toFixed(0)} MHz / (${psc+1} × ${arr+1})<br>= ${ft.toLocaleString('en-US')} / ${((psc+1)*(arr+1)).toLocaleString('en-US')}<br>= <strong>${ans}</strong>.`,
+    meta:{kind:'pwmf'}
+  };
+}
+
+function genDuty(){
+  const arr = pick([99,199,499,999,1999,4999]);
+  const ccr = rnd(1, arr);
+  const d = ccr/(arr+1)*100;
+  const fm = x => x.toFixed(2)+' %';
+  const ans = fm(d);
+  const w = [
+    [fm(ccr/arr*100), `Forgot the +1 on ARR: the counter counts 0..ARR, so the period is ARR+1 ticks.`],
+    [fm((ccr+1)/(arr+1)*100), `Used CCR+1 instead of CCR for the HIGH duration.`],
+    [fm((arr+1-ccr)/(arr+1)*100), `That is the complement (LOW fraction), not the HIGH duty cycle.`]
+  ];
+  const all = [ans].concat(w.map(x=>x[0]));
+  if(new Set(all).size !== 4) return null;
+  return {
+    level:3, topic:'PWM duty cycle',
+    ref:'W3.2 §7.2: Duty Cycle Formula',
+    q:`A timer has ARR = ${arr} and the compare register CCR = ${ccr}. Using D ≈ CCR/(ARR+1) × 100%, what is the duty cycle?`,
+    a: ans, w,
+    e:`D ≈ CCR/(ARR+1) × 100%<br>= ${ccr} / (${arr}+1) × 100%<br>= ${ccr} / ${arr+1} × 100%<br>= <strong>${ans}</strong>.`,
+    meta:{kind:'duty'}
+  };
+}
+
+function genVavg(){
+  const vs = pick([3.3,5,12]);
+  const p = pick([20,25,30,40,50,60,70,75,80]);
+  const v = vs*p/100;
+  const fm = x => x.toFixed(2)+' V';
+  const ans = fm(v);
+  const w = [
+    [fm(vs*(1-p/100)), `That uses the complement duty cycle (1−D). The average is D × V_supply, not (1−D) × V_supply.`],
+    [fm(vs), `That is the full supply voltage: it ignores the duty cycle entirely.`],
+    [fm(vs*Math.sqrt(p/100)), `That is the RMS formula V_supply·√D, not the average V_supply·D.`]
+  ];
+  const all = [ans].concat(w.map(x=>x[0]));
+  if(new Set(all).size !== 4) return null;
+  return {
+    level:3, topic:'Average simulated voltage',
+    ref:'W3.2 §6.2: Average Simulated Analog Voltage',
+    q:`A PWM signal with duty cycle ${p}% drives a load from a ${vs} V supply. Using V_average ≈ D × V_supply, what is the average voltage?`,
+    a: ans, w,
+    e:`D = ${p}% = ${(p/100).toFixed(2)}.<br>V_average ≈ D × V_supply = ${(p/100).toFixed(2)} × ${vs} V = <strong>${ans}</strong>.`,
+    meta:{kind:'vavg'}
+  };
+}
+
+function genCapture(){
+  const sys = pick([125,100,84,72,64,48]);
+  const psc = pick([9,49,99]);
+  const t1 = rnd(100,3000);
+  const t2 = t1 + rnd(500,9000);
+  const count = t2 - t1;
+  const width = count*(psc+1)/sys;
+  const fm = x => {
+    if (x >= 1000) return x.toFixed(1)+' µs';
+    return x.toFixed(2)+' µs';
+  };
+  const ans = fm(width);
+  const w = [
+    [fm((t2+t1)*(psc+1)/sys), `Added the two capture values instead of subtracting. Pulse width = (T2 − T1) × tick period.`],
+    [fm(count*psc/sys), `Used PSC instead of PSC+1: the prescaler is zero-indexed, so the actual divide is PSC+1.`],
+    [fm(t2*(psc+1)/sys), `Used T2 alone as if it were a duration; you must subtract T1 to get the elapsed time.`]
+  ];
+  const all = [ans].concat(w.map(x=>x[0]));
+  if(new Set(all).size !== 4) return null;
+  return {
+    level:4, topic:'Input capture pulse width',
+    ref:'W3.2 §5.1: Input Capture',
+    q:`A timer runs from a ${sys} MHz clock with PSC = ${psc}. Input capture records T1 = ${t1} and T2 = ${t2} at the rising and falling edges of an external pulse. Using tick = (PSC+1)/f_timer, what is the pulse width in µs?`,
+    a: ans, w,
+    e:`Tick period = (PSC+1)/f_timer = ${psc+1}/${sys} MHz = ${fmt((psc+1)/sys,4)} µs.<br>Count difference = T2 − T1 = ${t2} − ${t1} = ${count}.<br>Pulse width = ${count} × ${fmt((psc+1)/sys,4)} µs = <strong>${ans}</strong>.`,
+    meta:{kind:'cap'}
+  };
+}
+
+const GENS=[genPrescaler, genOverflow, genPwmFreq, genDuty, genVavg, genCapture];
+
+/* ============ ENGINE HELPERS ============ */
+function validQ(d){
+  if(!d || !d.w || d.w.length<3) return false;
+  const t=[d.a].concat(d.w.map(x=>x[0]));
+  return new Set(t).size === t.length;
+}
+function tryGen(fn){
+  let d=null;
+  for(let i=0;i<400;i++){
+    try{ d=fn(); }catch(e){ d=null; }
+    if(validQ(d)) return d;
+  }
+  return null;
+}
+function materialize(d){
+  const opts=shuffle([{t:d.a,ok:true,r:''}].concat(d.w.map(x=>({t:x[0],ok:false,r:x[1]}))));
+  return {level:d.level,topic:d.topic,ref:d.ref,q:d.q,e:d.e,opts,
+          correct:opts.findIndex(o=>o.ok), sel:null, submitted:false, a:d.a};
+}
+function buildQuiz(){
+  const all=[];
+  STATIC.forEach(d=>all.push(materialize(d)));
+  GENS.forEach(g=>{
+    const d=tryGen(g);
+    if(d && validQ(d)) all.push(materialize(d));
+  });
+  const by={1:[],2:[],3:[],4:[],5:[]};
+  all.forEach(q=>by[q.level].push(q));
+  const out=[];
+  [1,2,3,4,5].forEach(l=>shuffle(by[l]).forEach(q=>out.push(q)));
+  return out;
+}
+</script>
+
+<script id="ui">
+const $=id=>document.getElementById(id);
+let quiz=[], cur=0;
+
+function show(id){ ['start','quiz','results'].forEach(s=>{$(s).hidden=(s!==id);}); window.scrollTo(0,0); }
+function stats(){
+  const ans=quiz.filter(q=>q.submitted);
+  const c=ans.filter(q=>q.sel===q.correct).length;
+  return {answered:ans.length,correct:c,wrong:ans.length-c,total:quiz.length};
+}
+function startQuiz(){
+  try{
+    quiz=buildQuiz(); cur=0;
+    if(!quiz.length) throw new Error('No questions were generated.');
+    $('startErr').textContent='';
+    show('quiz'); render();
+  }catch(e){
+    $('startErr').textContent='Could not start quiz: '+e.message;
+    console.error(e);
+  }
+}
+
+function render(){
+  const q=quiz[cur], st=stats(), L='ABCDE';
+  $('qnum').textContent='Question '+(cur+1)+' of '+quiz.length;
+  const lv=$('lvl'); lv.textContent='Level '+q.level+' · '+LEVELS[q.level]; lv.className='badge l'+q.level;
+  $('topic').textContent=q.topic;
+  $('bar').style.width=(st.answered/quiz.length*100)+'%';
+  $('sc-c').textContent=st.correct; $('sc-w').textContent=st.wrong;
+  $('sc-p').textContent=st.answered?Math.round(st.correct/st.answered*100)+'%':'–';
+  $('qtext').innerHTML=q.q;
+
+  $('chips').innerHTML=quiz.map((x,i)=>{
+    let cls='chip'+(i===cur?' cur':'')+(x.submitted?(x.sel===x.correct?' right':' wrong'):'');
+    return '<button class="'+cls+'" data-j="'+i+'" title="Question '+(i+1)+' (level '+x.level+')">'+(i+1)+'</button>';
+  }).join('');
+
+  $('opts').innerHTML=q.opts.map((o,i)=>{
+    let cls='opt';
+    if(q.submitted){ if(i===q.correct) cls+=' right'; else if(i===q.sel) cls+=' wrong'; }
+    else if(i===q.sel) cls+=' sel';
+    return '<button class="'+cls+'" data-i="'+i+'"'+(q.submitted?' disabled':'')+'><span class="L">'+L[i]+'</span><span>'+o.t+'</span></button>';
+  }).join('');
+
+  const fb=$('fb');
+  if(q.submitted){
+    const ok=q.sel===q.correct;
+    let why=q.opts.map((o,i)=>o.ok?'':'<li><strong>'+L[i]+'.</strong> '+o.r+'</li>').join('');
+    fb.className='fb '+(ok?'right':'wrong'); fb.hidden=false;
+    fb.innerHTML='<h3>'+(ok?'✓ Correct':'✗ Incorrect')+'</h3>'+
+      (ok?'':'<div>Correct answer: <strong>'+L[q.correct]+'.</strong> '+q.opts[q.correct].t+'</div>')+
+      '<div class="expl">'+q.e+'</div>'+
+      '<div><strong>Why the other options are wrong</strong><ul>'+why+'</ul></div>'+
+      '<div class="ref">Revisit: '+q.ref+'</div>';
+  } else { fb.hidden=true; fb.innerHTML=''; }
+
+  $('submitBtn').disabled=q.submitted||q.sel===null;
+  $('prevBtn').disabled=cur===0;
+  const all=st.answered===quiz.length;
+  const nb=$('nextBtn');
+  if(cur<quiz.length-1){ nb.textContent='Next →'; nb.disabled=false; }
+  else { nb.textContent=all?'See results':'Next unanswered →'; nb.disabled=false; }
+  $('finishRow').hidden=!all;
+}
+
+function selectOpt(i){ const q=quiz[cur]; if(q.submitted) return; q.sel=i; render(); }
+function submitAns(){ const q=quiz[cur]; if(q.submitted||q.sel===null) return; q.submitted=true; render(); }
+function nextQ(){
+  if(cur<quiz.length-1){ cur++; render(); window.scrollTo(0,0); return; }
+  const un=quiz.findIndex(q=>!q.submitted);
+  if(un===-1) showResults(); else { cur=un; render(); window.scrollTo(0,0); }
+}
+function prevQ(){ if(cur>0){ cur--; render(); window.scrollTo(0,0);} }
+
+function showResults(){
+  const st=stats(), L='ABCDE';
+  const pct=Math.round(st.correct/st.total*100);
+  const byLevel=[1,2,3,4,5].map(l=>{
+    const qs=quiz.filter(q=>q.level===l), c=qs.filter(q=>q.sel===q.correct).length;
+    return {l,n:qs.length,c,p:qs.length?c/qs.length:0};
+  });
+  const topics={};
+  quiz.forEach(q=>{
+    const t=topics[q.topic]||(topics[q.topic]={n:0,c:0,refs:new Set()});
+    t.n++; if(q.sel===q.correct) t.c++; else t.refs.add(q.ref);
+  });
+  const tlist=Object.keys(topics).map(k=>({name:k,n:topics[k].n,c:topics[k].c,refs:Array.from(topics[k].refs)}));
+  const weak=tlist.filter(t=>t.c<t.n).sort((a,b)=>a.c/a.n-b.c/b.n);
+  const meterCls=p=>p>=0.75?'':(p>=0.5?'mid':'low');
+
+  let h='<div class="card"><h1>Results</h1>'+
+    '<div class="row" style="gap:28px;margin:10px 0">'+
+    '<div><div class="big">'+st.correct+' / '+st.total+'</div><div class="sub" style="margin:0">Total score</div></div>'+
+    '<div><div class="big">'+pct+'%</div><div class="sub" style="margin:0">Overall percentage</div></div>'+
+    '<div><div class="big" style="color:var(--ok)">'+st.correct+'</div><div class="sub" style="margin:0">Correct</div></div>'+
+    '<div><div class="big" style="color:var(--bad)">'+st.wrong+'</div><div class="sub" style="margin:0">Incorrect</div></div></div>'+
+    '<button class="btn primary" id="restartBtn">Restart quiz (fresh numbers and order)</button></div>';
+
+  h+='<div class="card"><h2>Performance by difficulty level</h2><table><tr><th>Level</th><th>Score</th><th style="width:40%">Accuracy</th></tr>'+
+    byLevel.map(x=>'<tr><td><span class="badge l'+x.l+'">L'+x.l+'</span> '+LEVELS[x.l]+'</td><td>'+x.c+' / '+x.n+'</td><td><div class="meter"><div class="'+meterCls(x.p)+'" style="width:'+Math.round(x.p*100)+'%"></div></div></td></tr>').join('')+
+    '</table></div>';
+
+  h+='<div class="card"><h2>Concepts to revisit</h2>';
+  if(!weak.length) h+='<p>No missed topics. Re-run the quiz to practise with new numerical values.</p>';
+  else {
+    h+='<div class="note">Topics where you lost marks, weakest first. Re-read the revision-list sections listed under each.</div><table><tr><th>Topic</th><th>Score</th><th>Material to review</th></tr>'+
+      weak.map(t=>'<tr><td>'+t.name+'</td><td>'+t.c+' / '+t.n+'</td><td>'+t.refs.join('<br>')+'</td></tr>').join('')+'</table>';
+  }
+  const strong=tlist.filter(t=>t.c===t.n).map(t=>t.name);
+  if(strong.length) h+='<p class="sub" style="margin-top:12px">Solid topics: '+strong.join(', ')+'.</p>';
+  h+='</div>';
+
+  h+='<div class="card"><h2>Full review</h2>'+quiz.map((q,i)=>{
+    const ok=q.sel===q.correct;
+    const why=q.opts.map((o,j)=>o.ok?'':'<li><strong>'+L[j]+'.</strong> '+o.r+'</li>').join('');
+    return '<div class="rev"><div class="qmeta"><span class="badge l'+q.level+'">Level '+q.level+'</span><span>Q'+(i+1)+' · '+q.topic+'</span> <span class="'+(ok?'tag-ok':'tag-bad')+'">'+(ok?'✓ Correct':'✗ Incorrect')+'</span></div>'+
+      '<div class="qtext" style="font-size:1rem">'+q.q+'</div>'+
+      '<div class="ans">Your answer: <strong>'+L[q.sel]+'.</strong> '+q.opts[q.sel].t+'</div>'+
+      (ok?'':'<div class="ans">Correct answer: <strong>'+L[q.correct]+'.</strong> '+q.opts[q.correct].t+'</div>')+
+      '<div class="expl" style="margin:8px 0">'+q.e+'</div>'+
+      '<details><summary>Why the other options are wrong</summary><ul>'+why+'</ul></details>'+
+      '<div class="ref">Revisit: '+q.ref+'</div></div>';
+  }).join('')+'</div>';
+
+  const r=$('results'); r.innerHTML=h; show('results');
+  $('restartBtn').addEventListener('click',startQuiz);
+}
+
+try{
+  $('startBtn').addEventListener('click',startQuiz);
+  $('opts').addEventListener('click',e=>{const b=e.target.closest('.opt'); if(b) selectOpt(+b.dataset.i);});
+  $('chips').addEventListener('click',e=>{const b=e.target.closest('.chip'); if(b){cur=+b.dataset.j; render();}});
+  $('submitBtn').addEventListener('click',submitAns);
+  $('nextBtn').addEventListener('click',nextQ);
+  $('prevBtn').addEventListener('click',prevQ);
+  $('finishBtn').addEventListener('click',showResults);
+  $('nq').textContent=STATIC.length+GENS.length;
+}catch(e){ console.error(e); }
+</script>
+</body>
+</html>
