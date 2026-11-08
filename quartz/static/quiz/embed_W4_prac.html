@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>W4 Quiz: RTOS &amp; State Machines (INF2005)</title>
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1b2333; --muted:#5d6881; --line:#dde3ef;
+  --brand:#2f5bea; --brand-ink:#ffffff; --ok:#12805c; --ok-bg:#e3f6ee; --bad:#b3261e; --bad-bg:#fdeceb;
+  --warn:#9a6700; --warn-bg:#fff6dd; --chip:#e9edf6;
+  --l1:#2e7d6b; --l2:#2f5bea; --l3:#8a4fd3; --l4:#d9741a; --l5:#c0262d;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#0f1420; --card:#171e2e; --ink:#e8ecf6; --muted:#9aa6c1; --line:#2a3550;
+    --brand:#6b8cff; --brand-ink:#0b1020; --ok:#4cd6a2; --ok-bg:#12332a; --bad:#ff8a80; --bad-bg:#3a1c1a;
+    --warn:#f2c14e; --warn-bg:#3a3012; --chip:#222c43; }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+#app{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.5rem;margin:0 0 4px}
+h2{font-size:1.2rem;margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 18px;border-radius:10px;font-weight:600}
+.btn:hover:not(:disabled){border-color:var(--brand)}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spread{justify-content:space-between}
+.pill{background:var(--chip);border-radius:999px;padding:4px 12px;font-size:.88rem;font-weight:600}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.bad{background:var(--bad-bg);color:var(--bad)}
+.badge{display:inline-block;color:#fff;border-radius:6px;padding:3px 10px;font-size:.8rem;font-weight:700;letter-spacing:.02em}
+.badge.l1{background:var(--l1)} .badge.l2{background:var(--l2)} .badge.l3{background:var(--l3)} .badge.l4{background:var(--l4)} .badge.l5{background:var(--l5)}
+.progress{height:8px;background:var(--chip);border-radius:99px;overflow:hidden;margin:12px 0}
+.progress>div{height:100%;width:0;background:var(--brand);transition:width .25s}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.chip{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--chip);color:var(--ink);font-weight:700;font-size:.85rem;padding:0}
+.chip.cur{outline:2px solid var(--brand);outline-offset:1px}
+.chip.right{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
+.chip.wrong{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.qmeta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;color:var(--muted);font-size:.9rem}
+.qtext{font-size:1.1rem;font-weight:600;margin:6px 0 16px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.92em}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:10px;padding:12px 14px}
+.opt:hover:not(:disabled){border-color:var(--brand)}
+.opt .L{flex:0 0 28px;height:28px;border-radius:50%;background:var(--chip);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.opt.sel{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 9%,var(--card))}
+.opt.sel .L{background:var(--brand);color:var(--brand-ink)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)} .opt.right .L{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)} .opt.wrong .L{background:var(--bad);color:#fff}
+.opt:disabled{cursor:default;color:var(--ink)}
+.fb{margin-top:18px;border-radius:10px;padding:16px;border:1px solid var(--line)}
+.fb.right{background:var(--ok-bg);border-color:var(--ok)} .fb.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.fb h3{margin:0 0 6px;font-size:1.05rem}
+.fb .expl{margin:8px 0}
+.fb ul{margin:6px 0 0;padding-left:20px}
+.ref{color:var(--muted);font-size:.88rem;margin-top:8px}
+.nav{margin-top:18px}
+.big{font-size:2.6rem;font-weight:800;line-height:1.1}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);font-size:.95rem}
+.meter{height:8px;background:var(--chip);border-radius:99px;overflow:hidden;min-width:90px}
+.meter>div{height:100%;background:var(--ok)} .meter>div.low{background:var(--bad)} .meter>div.mid{background:var(--warn)}
+.note{background:var(--warn-bg);border:1px solid var(--warn);border-radius:10px;padding:12px 14px;color:var(--ink)}
+.rev{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.rev .ans{margin:4px 0}
+.tag-ok{color:var(--ok);font-weight:700}.tag-bad{color:var(--bad);font-weight:700}
+[hidden]{display:none!important}
+@media (max-width:520px){.card{padding:16px}.big{font-size:2.1rem}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<section id="start" class="card">
+  <h1>W4: RTOS &amp; State Machines</h1>
+  <p class="sub">University-level practice quiz built from the INF2005 revision list.</p>
+  <p>The quiz has <strong id="nq">42</strong> questions in five levels, from foundational to advanced:</p>
+  <ol>
+    <li>Foundational understanding</li>
+    <li>Conceptual understanding</li>
+    <li>Application</li>
+    <li>Analysis &amp; problem solving</li>
+    <li>Advanced critical thinking</li>
+  </ol>
+  <p>Calculation questions use fresh random numbers every time you start or restart. Answers are locked once submitted. You can jump to any question using the numbered boxes at the top, and the results page shows which topics to revisit.</p>
+  <p id="startErr" style="color:var(--bad);font-weight:600;margin:8px 0 0"></p>
+  <button class="btn primary" id="startBtn">Start quiz</button>
+</section>
+
+<section id="quiz" hidden>
+  <div class="card">
+    <div class="row spread">
+      <strong id="qnum">Question 1</strong>
+      <div class="row">
+        <span class="pill ok">Correct <span id="sc-c">0</span></span>
+        <span class="pill bad">Incorrect <span id="sc-w">0</span></span>
+        <span class="pill">Accuracy <span id="sc-p">–</span></span>
+      </div>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="chips" id="chips" aria-label="Question navigator"></div>
+  </div>
+
+  <div class="card">
+    <div class="qmeta"><span id="lvl" class="badge l1">Level 1</span><span id="topic"></span></div>
+    <div class="qtext" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+    <div id="fb" hidden></div>
+    <div class="row spread nav">
+      <button class="btn" id="prevBtn">← Previous</button>
+      <div class="row">
+        <button class="btn primary" id="submitBtn">Submit answer</button>
+        <button class="btn" id="nextBtn">Next →</button>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px" id="finishRow" hidden>
+      <button class="btn primary" id="finishBtn">All answered: see results</button>
+    </div>
+  </div>
+</section>
+
+<section id="results" hidden></section>
+
+</div>
+
+<script id="engine">
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=arr=>arr[rnd(0,arr.length-1)];
+function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=rnd(0,i);const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+const fmt=(x,dp)=>String(+x.toFixed(dp===undefined?2:dp));
+const hex=n=>'0x'+(n&255).toString(16).toUpperCase().padStart(2,'0');
+
+const LEVELS=['','Foundational understanding','Conceptual understanding','Application','Analysis & problem solving','Advanced critical thinking'];
+
+/* ============ STATIC (36) ============ */
+const STATIC=[
+/* ---------- LEVEL 1 (8) ---------- */
+{level:1,topic:'Real-time determinism',ref:'W4 §1.1: Core Real-Time Principles',
+ q:`What does "real-time determinism" mean for an RTOS?`,
+ a:`System correctness depends on producing logically correct output within strict time constraints — measured by worst-case latency, not average throughput`,
+ w:[[`The system always runs at maximum average throughput`,`Throughput is an average metric; real-time correctness is about worst-case latency.`],
+    [`All tasks complete in the same amount of time`,`Tasks have different timing requirements; determinism is about meeting deadlines.`],
+    [`The CPU clock is deterministic at every cycle`,`Clock determinism is not the principle; timing correctness is.`]],
+ e:`An RTOS makes concurrency and timing explicit. Correctness = logical correctness + temporal correctness (worst-case execution latency). Average throughput is not the metric that matters.`},
+
+{level:1,topic:'Preemptive scheduling',ref:'W4 §1.1: Preemptive Priority-Based Scheduling',
+ q:`Under preemptive priority-based scheduling, what happens when a higher-priority task becomes READY?`,
+ a:`The scheduler immediately preempts the running lower-priority task and dispatches the higher-priority task`,
+ w:[[`The running task finishes its time slice before the higher-priority task runs`,`Preemption is immediate on the higher-priority task becoming ready.`],
+    [`The higher-priority task waits for the next scheduler tick`,`The scheduler reacts to the readiness event, not just tick boundaries.`],
+    [`The lower-priority task voluntarily yields at a safe point`,`Preemption is involuntary; the scheduler forces the switch.`]],
+ e:`The scheduler always allocates CPU execution to the highest-priority READY task. When a higher-priority task becomes ready (via interrupt, semaphore, flag, or message), it immediately preempts the running lower-priority task.`},
+
+{level:1,topic:'Priority = timing urgency',ref:'W4 §1.1: Priority Assignment Rule',
+ q:`What do priority numbers encode in an RTOS?`,
+ a:`Timing urgency — meeting worst-case deadlines — not human-perceived importance`,
+ w:[[`The task's memory footprint`,`Memory is not what priority encodes.`],
+    [`The order in which tasks were created`,`Creation order does not define priority.`],
+    [`How important the task is to the user`,`Priority encodes timing urgency, not human importance.`]],
+ e:`Priority numbers strictly encode timing urgency (meeting worst-case deadlines), not human "importance". A numerically higher priority means the task's deadline is more urgent.`},
+
+{level:1,topic:'Task states',ref:'W4 §1.2: Task States',
+ q:`Which set correctly names the four task states in the μT-Kernel execution model?`,
+ a:`RUNNING, READY, BLOCKED, TERMINATED`,
+ w:[[`IDLE, BUSY, WAITING, DEAD`,`These are not the named states.`],
+    [`NEW, RUNNABLE, SLEEPING, EXITED`,`These are process states from other OS models, not the μT-Kernel names.`],
+    [`ACTIVE, PAUSED, SUSPENDED, DELETED`,`These are not the defined states.`]],
+ e:`RUNNING (on CPU), READY (runnable, waiting for the scheduler), BLOCKED (waiting for event/timer/semaphore/mutex/message), TERMINATED (exited or deleted via tk_del_tsk).`},
+
+{level:1,topic:'TCB contents',ref:'W4 §1.3: Task Control Block (TCB)',
+ q:`What does a Task Control Block (TCB) store?`,
+ a:`The task's state, priority, stack pointers, and minimal CPU context registers`,
+ w:[[`The task's source code and all global variables`,`Code and globals live in program memory, not the TCB.`],
+    [`The RTOS kernel's global configuration table`,`The kernel configuration is separate from the per-task TCB.`],
+    [`The peripheral register map allocated to the task`,`Peripherals are memory-mapped; the TCB stores task context.`]],
+ e:`The TCB is the kernel structure that maintains task state, priority, stack pointers, and minimal CPU context registers, which is exactly what is saved and restored during a context switch.`},
+
+{level:1,topic:'Semaphore definition',ref:'W4 §2.1: Synchronization Primitives Comparison',
+ q:`Which statement correctly describes a semaphore?`,
+ a:`A countable availability/event signal with no owner; any task or ISR can signal it`,
+ w:[[`An exclusive lock with strict ownership`,`That is a mutex.`],
+    [`A bitmask for complex multi-condition waits`,`That is an event flag.`],
+    [`A queue of 32-bit pointers for zero-copy handoff`,`That is a mailbox.`]],
+ e:`Semaphores are countable, ownership-free synchronization primitives used for managing N identical resources or producer/consumer signaling. Any task or ISR can signal.`},
+
+{level:1,topic:'Mutex ownership',ref:'W4 §2.1: Synchronization Primitives Comparison',
+ q:`What is the defining property of a mutex?`,
+ a:`Strict ownership: only the task that locked the mutex can unlock it`,
+ w:[[`It can be signaled by any task or ISR`,`That is a semaphore or event flag.`],
+    [`It carries a variable-length byte payload`,`That is a message buffer.`],
+    [`It is the only primitive that can be used from an ISR`,`No blocking primitive can be used from an ISR.`]],
+ e:`Mutex enforces exclusive ownership: only the locking task can call tk_unl_mtx. This ownership is what enables priority inheritance.`},
+
+{level:1,topic:'FSM state equation',ref:'W4 §5.1: FSM Core Operational Rule',
+ q:`Which equation correctly describes an FSM transition?`,
+ a:`Current State + Event + Guard → Action + Next State`,
+ w:[[`Event + Action → State`,`Missing the guard and conflating action with state.`],
+    [`State + Action → Event`,`Reversed: events drive actions, not the other way around.`],
+    [`Guard + State → Event + Action`,`Missing the event trigger and the next state.`]],
+ e:`The state equation: Current State + Event + Guard → Action + Next State. The guard is a condition that must hold for the transition to fire.`},
+
+/* ---------- LEVEL 2 (8) ---------- */
+{level:2,topic:'Task vs function',ref:'W4 §1.2: Task vs Function',
+ q:`What distinguishes an RTOS task from an ordinary C function?`,
+ a:`A function runs synchronously when called; a task runs independently in its own thread, looping and blocking on events`,
+ w:[[`A task runs only in interrupt context`,`Tasks run in thread context, not interrupt context.`],
+    [`A function has its own stack but a task does not`,`A task has its own stack; a function uses the caller's stack.`],
+    [`A task cannot call functions`,`Tasks call functions normally.`]],
+ e:`A function executes synchronously on the caller's thread. A task runs independently in its own execution thread, typically in an infinite loop that blocks while waiting for events and processes work when unblocked.`},
+
+{level:2,topic:'Bounded context switch',ref:'W4 §1.3: Bounded Latency Requirement',
+ q:`Why must context-switch latency be strictly bounded in an RTOS?`,
+ a:`So worst-case execution time (WCET) bounds can be computed; unbounded overhead would break real-time determinism`,
+ w:[[`Because the CPU cannot otherwise save registers`,`Register saving is possible either way; the issue is predictability.`],
+    [`To reduce power consumption`,`Power is unrelated to the bound.`],
+    [`Because interrupts would otherwise be disabled too long`,`Interrupt latency is separate from context-switch overhead.`]],
+ e:`Context switch overhead in clock cycles must be bounded so WCET bounds can be calculated. Unbounded overhead would make timing analysis impossible and break real-time guarantees.`},
+
+{level:2,topic:'Equal priority resolution',ref:'W4 §1.1: Equal Priority Resolution',
+ q:`How are tasks at the same priority level managed in a preemptive priority RTOS?`,
+ a:`First-In First-Out or round-robin time slicing`,
+ w:[[`By task creation order forever, with no preemption`,`That would starve later-created tasks; FIFO/round-robin applies.`],
+    [`Randomly each tick`,`Round-robin is deterministic, not random.`],
+    [`By the size of each task's stack`,`Stack size is not a scheduling criterion.`]],
+ e:`Tasks sharing equal priority levels are managed via First-In First-Out or round-robin time slicing.`},
+
+{level:2,topic:'TWF_ANDW vs TWF_ORW',ref:'W4 §3.1: Event Flags (tk_wai_flg Modes)',
+ q:`What is the difference between TWF_ANDW and TWF_ORW?`,
+ a:`TWF_ANDW blocks until ALL requested bits are set; TWF_ORW unblocks as soon as ANY requested bit is set`,
+ w:[[`TWF_ANDW unblocks on any bit; TWF_ORW waits for all bits`,`Reversed.`],
+    [`Both wait for all requested bits`,`Only ANDW requires all bits.`],
+    [`Both unblock on any requested bit`,`Only ORW uses any-bit semantics.`]],
+ e:`TWF_ANDW: the task remains blocked until all requested condition bits are set simultaneously (Bit0 && Bit1). TWF_ORW: the task unblocks as soon as any requested bit is set (Bit0 || Bit1).`},
+
+{level:2,topic:'Critical section forbidden ops',ref:'W4 §2.2: Critical Section Rules',
+ q:`Which operations are forbidden inside a critical section?`,
+ a:`Slow I/O, dynamic memory allocation, serial logging, and blocking kernel calls`,
+ w:[[`Arithmetic on local variables`,`Arithmetic is fine; it is short and bounded.`],
+    [`Reading a shared register once`,`A single bounded read is exactly what critical sections protect.`],
+    [`Briefly disabling interrupts`,`Disabling interrupts briefly is one way to implement a critical section.`]],
+ e:`Keep critical sections as short as possible. Never perform slow I/O, malloc, serial logging, or blocking kernel calls while holding protection; they lengthen blocking latency for higher-priority tasks.`},
+
+{level:2,topic:'Mailbox vs message buffer',ref:'W4 §3.2: IPC Payloads',
+ q:`What is the fundamental difference between a mailbox and a message buffer?`,
+ a:`A message buffer copies payload bytes into kernel memory; a mailbox queues 32-bit pointers (zero-copy)`,
+ w:[[`A mailbox copies bytes; a message buffer queues pointers`,`Reversed.`],
+    [`Both copy bytes, but the mailbox is faster`,`A mailbox does not copy the payload.`],
+    [`A message buffer is only for fixed 32-bit messages`,`A message buffer supports variable-length byte payloads.`]],
+ e:`Message buffer: copies bytes into kernel buffer, variable length, safe lifetime, copy overhead scales with size. Mailbox: queues 32-bit pointers, zero-copy, fast, but producer and consumer must agree on lifetime.`},
+
+{level:2,topic:'Fixed pool vs malloc',ref:'W4 §3.3: Fixed Memory Pools vs Dynamic Heap',
+ q:`Why are fixed memory pools preferred over malloc/free in time-critical RTOS tasks?`,
+ a:`Fixed pools give O(1) bounded allocation/free latency and zero external fragmentation; malloc has non-deterministic, unbounded search times`,
+ w:[[`Fixed pools use less total memory than the heap`,`They may use more memory, not less; the benefit is determinism.`],
+    [`malloc cannot allocate more than 64 bytes`,`malloc has no such limit.`],
+    [`Fixed pools support variable block sizes`,`Fixed pools use uniform block sizes.`]],
+ e:`malloc/free have non-deterministic, unbounded search times and cause external fragmentation. Fixed pools pre-allocate uniform blocks for O(1) allocation/free and no external fragmentation, at the cost of internal waste when payloads vary.`},
+
+{level:2,topic:'FSM non-blocking actions',ref:'W4 §5.1: Non-Blocking Action Constraint',
+ q:`What does the non-blocking action constraint require of FSM actions?`,
+ a:`Actions must never wait or block (no sleep_ms or polling loops); initiate hardware work and handle completion as new events`,
+ w:[[`Actions must always complete in one CPU cycle`,`That is impossible in general; the rule is no blocking.`],
+    [`Actions must run in an ISR`,`FSM actions run in the owning task.`],
+    [`Actions may block if the FSM has a timeout`,`Blocking inside an action breaks the state machine's responsiveness.`]],
+ e:`FSM actions must never wait or block. Initiate hardware work immediately, then handle completion, error, or timeout as new incoming events.`},
+
+/* ---------- LEVEL 3 (7) ---------- */
+{level:3,topic:'Producer/consumer signaling',ref:'W4 §2.1: Synchronization Primitives',
+ q:`A producer task fills a shared ring buffer and a consumer task drains it. Which primitive is the best fit for signaling?`,
+ a:`A semaphore`,
+ w:[[`A mutex`,`A mutex imposes unnecessary strict ownership for a signaling role.`],
+    [`A fixed memory pool`,`A memory pool manages memory, not signaling.`],
+    [`A watchdog timer`,`A watchdog detects hangs; it does not signal data flow.`]],
+ e:`Semaphores are ownership-free, countable signals ideal for producer/consumer synchronization. A mutex would impose unnecessary ownership and prevent the ISR from signaling.`},
+
+{level:3,topic:'Shared I2C peripheral',ref:'W4 §2.1: Synchronization Primitives',
+ q:`Two tasks access the same I2C peripheral. Which primitive protects it?`,
+ a:`A mutex`,
+ w:[[`A semaphore`,`A semaphore has no ownership; either task could unlock it.`],
+    [`An event flag`,`An event flag is a bit pattern, not an exclusive lock.`],
+    [`A mailbox`,`A mailbox passes pointers; it does not protect a resource.`]],
+ e:`A shared hardware peripheral is an exclusive resource. A mutex with strict ownership ensures only one task drives the bus at a time and enables priority inheritance.`},
+
+{level:3,topic:'4 KB payload handoff',ref:'W4 §3.2: IPC Payloads',
+ q:`A task must hand a 4 KB image to another task with minimal copy overhead. Which IPC mechanism?`,
+ a:`A mailbox (zero-copy pointer handoff)`,
+ w:[[`A message buffer (4 KB copy per transfer)`,`The copy cost dominates for large payloads.`],
+    [`An event flag with a bitmask`,`An event flag carries no payload.`],
+    [`A semaphore`,`A semaphore carries no payload.`]],
+ e:`Message buffers copy the entire payload into kernel memory, so 4 KB per transfer is costly. A mailbox passes a pointer with zero copy; the tasks must agree on lifetime.`},
+
+{level:3,topic:'Variable-length messages',ref:'W4 §3.2: IPC Payloads',
+ q:`Messages vary between 8 and 200 bytes. Which IPC mechanism handles this naturally?`,
+ a:`A message buffer (variable-length byte copy)`,
+ w:[[`A mailbox (fixed 32-bit pointers)`,`A mailbox queues pointers; variable sizes need separate allocation.`],
+    [`An event flag`,`An event flag has no payload.`],
+    [`A mutex`,`A mutex is a lock, not a transport.`]],
+ e:`Message buffers copy variable-length bytes into kernel memory, handling size variation naturally. A mailbox only queues 32-bit pointers, so variable sizes require separate allocation.`},
+
+{level:3,topic:'1 ms periodic release',ref:'W4 §4.1: RTOS Timing Services',
+ q:`A task must run every 1 ms without cumulative drift, even though its work takes a variable 100–300 µs. Which timing service?`,
+ a:`A cyclic handler (tk_cre_cyc / tk_sta_cyc)`,
+ w:[[`tk_dly_tsk(1) inside a loop`,`The delay adds the execution time each cycle, producing cumulative drift.`],
+    [`A one-shot alarm handler`,`One-shot alarms fire once, not periodically.`],
+    [`A watchdog timer`,`The watchdog detects hangs; it does not schedule periodic work.`]],
+ e:`tk_dly_tsk inside a periodic loop introduces cumulative drift equal to the execution time per cycle. A cyclic handler fires at exact N·T boundaries regardless of execution time, eliminating cumulative drift.`},
+
+{level:3,topic:'Linear FSM implementation',ref:'W4 §5.2: Pattern A - Lookup Table',
+ q:`An FSM has four states and transitions only on a single "next" event in a linear sequence. Which implementation is best?`,
+ a:`A lookup table (O(1) array indexing)`,
+ w:[[`A switch-case with nested guards`,`Switch-case is better for non-linear transitions with guards.`],
+    [`One task per state`,`That anti-pattern requires synchronization overhead.`],
+    [`A linked list of transitions`,`A linked list is O(n); a lookup table is O(1).`]],
+ e:`Linear/sequential transitions without guards suit a lookup table: on_next[state] gives the next state in O(1). Switch-case is better for non-linear transitions with guards.`},
+
+{level:3,topic:'Deferred ISR pattern',ref:'W4 §4.2: Deferred Interrupt Processing',
+ q:`What is the correct deferred-interrupt pattern?`,
+ a:`ISR acknowledges hardware, captures minimal data, signals a task, and exits; a high-priority task does the heavy processing`,
+ w:[[`ISR performs the full processing to minimize latency`,`Heavy processing in an ISR blocks other interrupts and starves the system.`],
+    [`ISR calls tk_wai_sem to wait for more data`,`Blocking calls are forbidden in an ISR.`],
+    [`ISR polls the peripheral until data is ready`,`Polling in an ISR wastes interrupt context.`]],
+ e:`Never execute blocking calls in an ISR. The ISR should be minimal: acknowledge, capture, signal, exit. A deferred task handles heavy processing.`},
+
+/* ---------- LEVEL 4 (7) ---------- */
+{level:4,topic:'Priority inversion analysis',ref:'W4 §2.3: Priority Inversion',
+ q:`Task L holds mutex M. Task H becomes ready and blocks on M. Task M (medium priority) becomes ready. Without priority inheritance, what happens to H's wait?`,
+ a:`H waits for L's remaining critical section PLUS M's entire execution — potentially unbounded, because M preempts L`,
+ w:[[`H waits only for L's remaining critical section`,`That is the wait with priority inheritance.`],
+    [`H preempts M because H has higher priority than M`,`H is blocked on the mutex; it cannot preempt M while waiting.`],
+    [`H is temporarily boosted to L's priority`,`That is the priority inheritance solution, not the no-PI behaviour.`]],
+ e:`L cannot run to release M while M preempts it. H's wait = L's remaining critical-section time + M's execution time + any further medium-priority work. This is unbounded priority inversion.`},
+
+{level:4,topic:'Copy overhead scaling',ref:'W4 §3.2: Message Buffers vs Mailboxes',
+ q:`Why does message-buffer overhead grow linearly with payload size while mailbox overhead is constant?`,
+ a:`The message buffer copies every payload byte into kernel memory; the mailbox copies only a 32-bit pointer`,
+ w:[[`The mailbox uses DMA while the message buffer does not`,`DMA is not implied by the mailbox design.`],
+    [`The message buffer encrypts each byte`,`No encryption is implied.`],
+    [`The mailbox has a larger FIFO`,`FIFO size does not explain the asymptotic difference.`]],
+ e:`Message buffer cost = O(payload bytes). Mailbox cost = O(1) pointer copy. For large payloads, the mailbox is much faster but requires lifetime management.`},
+
+{level:4,topic:'ISR blocking diagnosis',ref:'W4 §4.2: ISR Guidelines',
+ q:`An ISR calls tk_wai_sem and the system hangs. Why?`,
+ a:`Blocking calls are forbidden in ISRs; the ISR runs outside task scheduling context and cannot be resumed, so it suspends the interrupt handler indefinitely`,
+ w:[[`The semaphore was not created`,`Creation is unrelated to the hang mechanism.`],
+    [`The ISR priority is too low`,`Priority does not make a blocking call legal in an ISR.`],
+    [`The semaphore count was zero`,`A zero count would block the ISR either way — that is the point.`]],
+ e:`ISRs run outside task scheduling. Calling tk_wai_sem (a blocking call) inside an ISR suspends the interrupt handler indefinitely — a hard hang. Defer to a task instead.`},
+
+{level:4,topic:'One task per state anti-pattern',ref:'W4 §5.3: RTOS State Machine Architecture',
+ q:`Why is "one task per FSM state" considered an anti-pattern?`,
+ a:`It creates race conditions and synchronization overhead; a single task owning the FSM and processing events sequentially is simpler and correct`,
+ w:[[`It uses too much flash memory`,`Flash usage is not the core problem.`],
+    [`Each task would need its own mutex`,`Mutexes would add overhead, but the deeper problem is races and complexity.`],
+    [`The RTOS cannot schedule that many tasks`,`RTOSes can schedule many tasks; that is not the reason.`]],
+ e:`The single-task ownership rule: one task owns the FSM and processes events sequentially from a queue. Multiple state-tasks require synchronization and invite races. Do not create one task per state.`},
+
+{level:4,topic:'TA_INHERIT reversion',ref:'W4 §2.3: Priority Inheritance Protocol',
+ q:`Task L holds a mutex. Task H blocks on it. The kernel elevates L to H's priority (TA_INHERIT). When does L revert?`,
+ a:`When L releases the mutex (tk_unl_mtx), its priority automatically returns to its original low level`,
+ w:[[`When H completes`,`L's priority reverts at mutex release, not when H finishes.`],
+    [`After a fixed 1 ms timeout`,`Priority inheritance is event-driven, not timeout-driven.`],
+    [`Never; L stays at high priority forever`,`The protocol explicitly reverts L on release.`]],
+ e:`Priority inheritance temporarily elevates L to H's priority so medium-priority tasks cannot preempt. On tk_unl_mtx, L's priority automatically reverts to its original level.`},
+
+{level:4,topic:'Internal fragmentation',ref:'W4 §3.3: Fixed Memory Pools',
+ q:`A fixed memory pool uses 64-byte blocks. A 150-byte message is stored. How many blocks are consumed and how much internal waste results?`,
+ a:`3 blocks, 42 bytes of internal waste`,
+ w:[[`2 blocks, 0 bytes`,`2 × 64 = 128 bytes, which is less than 150; the message does not fit.`],
+    [`2 blocks, 22 bytes`,`128 < 150, so 2 blocks are insufficient.`],
+    [`3 blocks, 0 bytes`,`3 × 64 = 192 bytes, so 192 − 150 = 42 bytes are wasted.`]],
+ e:`ceil(150 / 64) = 3 blocks. Total allocated = 3 × 64 = 192 bytes. Internal waste = 192 − 150 = 42 bytes.`},
+
+{level:4,topic:'RTOS FSM event queue',ref:'W4 §5.3: Single Task Ownership',
+ q:`Which pattern correctly implements an RTOS state machine?`,
+ a:`A single task blocks on an event queue; on each event it dispatches the FSM and publishes the new state`,
+ w:[[`Each state runs in its own task, synchronized with a mutex`,`That is the one-task-per-state anti-pattern.`],
+    [`The ISR runs the FSM dispatch directly`,`The ISR should signal a task, not run the FSM.`],
+    [`The FSM polls all possible events in a tight loop`,`Polling wastes CPU and is not event-driven.`]],
+ e:`Assign one single task to own the state machine and process events sequentially from a message queue. Do not create one task per state. The dispatch loop blocks on the queue, dispatches the event, and publishes the new state.`},
+
+/* ---------- LEVEL 5 (6) ---------- */
+{level:5,topic:'Sensor pipeline design',ref:'W4 §4.3: Sensor Pipeline Integration Matrix',
+ q:`Design a real-time sensor pipeline: ADC → acquire → filter/control FSM → logger. Which integration is most appropriate?`,
+ a:`ADC ISR signals a semaphore; an acquire task uses fixed memory pool blocks and sends via message buffer to a filter/control FSM task; a logger task guards I2C with a mutex; a cyclic handler releases the FSM at 1 ms`,
+ w:[[`ADC ISR performs filtering and logging directly`,`Heavy work in an ISR violates the deferred-interrupt rule.`],
+    [`One task per pipeline stage with shared global buffers and no synchronization`,`Shared globals without synchronization cause races.`],
+    [`A single task polls the ADC, filters, and logs in one loop`,`Polling wastes CPU and couples all stages.`]],
+ e:`The integrated pipeline: ISR acknowledges and signals (semaphore). Acquire task uses fixed-pool blocks (bounded latency, no fragmentation) and passes via message buffer. Filter/control FSM task runs on a cyclic 1 ms release. Logger task guards I2C with a mutex.`},
+
+{level:5,topic:'PI timing comparison',ref:'W4 §2.3: Priority Inheritance Protocol',
+ q:`Without PI: H waits L's remaining 50 µs + M's 200 µs = 250 µs. With PI: L inherits H's priority and M cannot preempt. What is H's wait?`,
+ a:`50 µs — L completes its remaining critical section at H's priority, then H runs immediately`,
+ w:[[`250 µs — PI only changes the order M runs`,`M cannot preempt L at all under PI.`],
+    [`0 µs — PI eliminates the wait entirely`,`L still has to finish its remaining critical section.`],
+    [`200 µs — M still runs first`,`M is preempted by L's elevated priority.`]],
+ e:`With PI, L runs at H's priority, so M cannot preempt. L finishes the remaining 50 µs, releases the mutex, and H runs. M runs after H. H's wait = 50 µs.`},
+
+{level:5,topic:'Mailbox lifetime edge case',ref:'W4 §3.2: Mailbox Lifetime Management',
+ q:`A task sends a pointer to a local stack buffer via a mailbox and then returns. What is the bug?`,
+ a:`The pointer becomes invalid when the stack frame is destroyed; the receiver may read garbage or crash — lifetime must outlive the queue`,
+ w:[[`The mailbox copies the buffer, so this is safe`,`A mailbox queues pointers; it does not copy the payload.`],
+    [`The pointer is automatically nulled by the RTOS`,`The RTOS does not track pointer lifetimes.`],
+    [`The mailbox rejects stack pointers at runtime`,`No such runtime check exists.`]],
+ e:`Mailboxes are zero-copy pointer queues. The producer must ensure the pointed-to memory outlives the queue. A local stack buffer is destroyed on return, so the receiver reads invalid memory.`},
+
+{level:5,topic:'Filter vs control FSM',ref:'W4 §5.4: Separating Mathematics from Control Logic',
+ q:`In a signal-processing architecture, what is the correct division of responsibility between the numerical filter and the control FSM?`,
+ a:`The filter performs the mathematical transformation (averaging, noise suppression); the control FSM tracks validity states (RESET → WARM_UP → VALID → DEGRADED) and gates whether downstream uses the output`,
+ w:[[`The filter decides trustworthiness; the FSM computes averages`,`Responsibility reversed.`],
+    [`Both run in the ISR for minimum latency`,`Running both in the ISR violates the deferred-processing rule.`],
+    [`The FSM replaces the filter when data is invalid`,`The FSM gates output; it does not replace the filter.`]],
+ e:`Numerical filter: mathematical transformation of samples (averages, noise suppression). Control FSM: tracks operational validity and controls whether downstream applications may use the filtered values. Clear separation of responsibilities.`},
+
+{level:5,topic:'Combined diagnostic',ref:'W4 §2–4: Multiple Primitive Violations',
+ q:`A system has: a task waiting on a mutex held by a blocked task, a mailbox whose producer freed the payload, and an ISR calling tk_dly_tsk. Which diagnosis is most complete?`,
+ a:`Deadlock/long-block on the mutex; use-after-free on the mailbox; ISR hang on the blocking call — three distinct violations`,
+ w:[[`A single priority inversion explains all three`,`The three issues are independent and cannot be explained by one cause.`],
+    [`Only the ISR issue is real; the others are warnings`,`The mailbox use-after-free is a real bug; the mutex wait may deadlock.`],
+    [`The mailbox is safe because it copies`,`A mailbox queues pointers; it does not copy.`]],
+ e:`Mutex held by a blocked task can deadlock or cause long blocking. Mailbox use-after-free is a real bug (zero-copy requires lifetime management). ISR blocking call hangs the interrupt handler. All three are distinct, real violations.`},
+
+{level:5,topic:'Cyclic vs delay drift',ref:'W4 §4.1: Task Delay vs Cyclic Handlers',
+ q:`A 1 ms task uses tk_dly_tsk(1) and the work takes 200 µs. After 10,000 cycles, how much cumulative drift, and what fixes it?`,
+ a:`2 s of drift (10,000 × 200 µs); a cyclic handler fires at exact 1 ms boundaries regardless of execution time`,
+ w:[[`Zero drift, because tk_dly_tsk compensates`,`tk_dly_tsk does not compensate for execution time.`],
+    [`200 µs total, because drift is per-cycle only`,`Drift accumulates over cycles.`],
+    [`1 s of drift, because the work time is halved`,`No halving occurs; drift is cycles × execution time.`]],
+ e:`Each cycle's actual period = 1 ms + 200 µs = 1.2 ms. Over 10,000 cycles, drift = 10,000 × 200 µs = 2,000,000 µs = 2 s. A cyclic handler (tk_cre_cyc/tk_sta_cyc) fires at exact N·T boundaries, eliminating cumulative drift.`}
+];
+
+/* ============ GENERATORS (6) ============ */
+
+function genCSOverhead(){
+  const cs = pick([1,2,3,5,10]);
+  const f  = pick([1000,2000,5000,10000,20000,50000]);
+  const pct = cs*f/10000;
+  if(pct >= 90) return null;
+  const fm = x => x.toFixed(2)+' %';
+  const ans = fm(pct);
+  const w = [
+    [fm(cs*f/100000), `Off by 10: the percentage is (cs µs × f / s) / 10,000, not / 100,000.`],
+    [fm(cs*f/1e6),    `Forgot the ×100 for percentage: this is the raw fraction of time, not a percentage.`],
+    [fm((cs+1)*f/10000), `Used cs+1 instead of cs: off by one in the context-switch duration.`]
+  ];
+  if(new Set([ans, ...w.map(x=>x[0])]).size < 4) return null;
+  return {
+    level:3, topic:'Context-switch overhead',
+    ref:'W4 §1.3: Context Switch Dynamics &amp; TCB',
+    q:`A context switch takes ${cs} µs. The system performs ${f.toLocaleString('en-US')} context switches per second. Using overhead = (cs µs × switches/s) / 10,000, what percentage of the CPU is spent on context switching?`,
+    a: ans, w,
+    e:`Overhead fraction = cs × f / 1,000,000 = ${cs} × ${f} / 1,000,000 = ${(cs*f/1e6).toFixed(6)}.<br>Percentage = ${(cs*f/1e6).toFixed(6)} × 100 = <strong>${ans}</strong>.<br>Bounded context-switch overhead lets WCET analysis include this cost explicitly.`,
+    meta:{kind:'cso'}
+  };
+}
+
+function genPriorityInversion(){
+  const tc = pick([50,100,150,200]);
+  const tm = pick([100,200,400,800]);
+  const ans = (tc+tm)+' µs';
+  const w = [
+    [tc+' µs', `That is H's wait WITH priority inheritance: L runs at H's priority and M cannot preempt.`],
+    [tm+' µs', `That counts only M's execution, ignoring L's remaining critical section.`],
+    [(tc+2*tm)+' µs', `Double-counts M's execution; the worst case is L's remaining time plus one M run.`]
+  ];
+  if(new Set([ans, ...w.map(x=>x[0])]).size < 4) return null;
+  return {
+    level:4, topic:'Priority-inversion wait',
+    ref:'W4 §2.3: Priority Inversion &amp; Priority Inheritance',
+    q:`Task L holds mutex M with ${tc} µs of critical section remaining. Task H becomes ready and blocks on M. Task M (medium priority, unrelated to M) becomes ready and runs for ${tm} µs. Without priority inheritance, what is H's total wait?`,
+    a: ans, w,
+    e:`Without PI, L is preempted by M, so H waits for both L's remaining section and M's execution.<br>H's wait = L's remaining (${tc} µs) + M's execution (${tm} µs) = <strong>${tc+tm} µs</strong>.<br>With priority inheritance, L would inherit H's priority, M could not preempt, and H's wait would be only ${tc} µs.`,
+    meta:{kind:'pi'}
+  };
+}
+
+function genCopyTime(){
+  const bytes = pick([256,512,1024,2048,4096]);
+  const rate  = pick([50,100,200]);
+  const us = bytes/rate;
+  const fm = x => x.toFixed(2)+' µs';
+  const ans = fm(us);
+  const w = [
+    [bytes+' µs', `Treats each byte as 1 µs; the copy rate determines how many bytes per µs.`],
+    [fm(bytes*rate), `Multiplies instead of divides: copy time = bytes / rate.`],
+    [fm(bytes/(rate*10)), `Off by 10: divides by 10× the rate.`]
+  ];
+  if(new Set([ans, ...w.map(x=>x[0])]).size < 4) return null;
+  return {
+    level:4, topic:'Message-buffer copy time',
+    ref:'W4 §3.2: Message Buffers vs Mailboxes',
+    q:`A message buffer must copy a ${bytes.toLocaleString('en-US')}-byte payload. The kernel copies at ${rate} MB/s (= ${rate} bytes/µs). What is the copy time?`,
+    a: ans, w,
+    e:`Copy time = bytes / copy rate = ${bytes} / ${rate} bytes/µs = <strong>${ans}</strong>.<br>A mailbox would transfer the same payload via a 32-bit pointer in O(1), avoiding this O(size) cost — at the price of lifetime management.`,
+    meta:{kind:'copy'}
+  };
+}
+
+function genDrift(){
+  const e = pick([10,20,50,100,200]);
+  const n = pick([1000,10000,100000]);
+  const drift_us = e*n;
+  const fm = x => {
+    if (x >= 1e6) return (x/1e6).toFixed(2)+' s';
+    return x.toFixed(2)+' ms';
+  };
+  const ans = fm(drift_us/1000);
+  const per = fm(e/1000);
+  const half = fm(drift_us/2/1000);
+  const dbl  = fm(drift_us*2/1000);
+  if(new Set([ans,per,half,dbl]).size < 4) return null;
+  return {
+    level:3, topic:'tk_dly_tsk cumulative drift',
+    ref:'W4 §4.1: Task Delay vs Cyclic Handlers',
+    q:`A task runs in a periodic loop with tk_dly_tsk(T). Its work takes ${e} µs each cycle, and the loop runs ${n.toLocaleString('en-US')} cycles. Using drift = cycles × per-cycle execution time, what is the cumulative drift?`,
+    a: ans,
+    w: [
+      [per, `That is the drift contributed by a single cycle, not the cumulative drift over ${n.toLocaleString('en-US')} cycles.`],
+      [half, `Half the true drift; each cycle contributes the full ${e} µs.`],
+      [dbl, `Double the true drift; the per-cycle contribution is ${e} µs, not 2×${e} µs.`]
+    ],
+    e:`Per cycle: tk_dly_tsk(T) adds T to the actual period, so each cycle slips by the execution time ${e} µs.<br>Cumulative drift = ${n.toLocaleString('en-US')} × ${e} µs = ${drift_us.toLocaleString('en-US')} µs = <strong>${ans}</strong>.<br>A cyclic handler (tk_cre_cyc / tk_sta_cyc) would fire at exact N·T boundaries and eliminate this drift.`,
+    meta:{kind:'drift'}
+  };
+}
+
+function genPoolWaste(){
+  const B = pick([16,32,64,128]);
+  const blocks = pick([1,2,3,4,5]);
+  const P = (blocks-1)*B + rnd(1, B-1);
+  const waste = blocks*B - P;
+  if(waste === P || waste === 0 || waste === B) return null;
+  const ans = waste+' bytes';
+  const w = [
+    ['0 bytes', `Blocks are fixed-size; the payload does not fill the last block exactly, so there is internal waste.`],
+    [B+' bytes', `That is one block size; the waste is the unused tail across the blocks consumed.`],
+    [P+' bytes', `That is the payload size, not the wasted space.`]
+  ];
+  if(new Set([ans, ...w.map(x=>x[0])]).size < 4) return null;
+  return {
+    level:3, topic:'Fixed-pool internal waste',
+    ref:'W4 §3.3: Fixed Memory Pools',
+    q:`A fixed memory pool uses ${B}-byte blocks. A ${P}-byte message is stored using the minimum number of blocks. What is the internal waste?`,
+    a: ans, w,
+    e:`Blocks needed = ceil(${P} / ${B}) = ${blocks}.<br>Total allocated = ${blocks} × ${B} = ${blocks*B} bytes.<br>Internal waste = ${blocks*B} − ${P} = <strong>${waste} bytes</strong>.<br>Fixed pools trade this internal waste for O(1) allocation and zero external fragmentation.`,
+    meta:{kind:'pool'}
+  };
+}
+
+function genFlagMode(){
+  const mask = pick([0x03,0x05,0x06,0x07,0x09,0x0A,0x0C,0x0F,0x11,0x13,0x1C,0x33,0x55,0xAA,0xF0]);
+  const flags = rnd(0,255);
+  const andR = flags & mask;
+  let correct, wrongs;
+  if(andR === 0){
+    correct = 'Neither TWF_ANDW nor TWF_ORW unblocks';
+    wrongs = [
+      ['Both TWF_ANDW and TWF_ORW unblock', 'No mask bits are set (flags AND mask = 0x00), so neither mode is satisfied.'],
+      ['Only TWF_ORW unblocks', 'OR also requires at least one mask bit to be set; flags AND mask = 0x00.'],
+      ['Only TWF_ANDW unblocks', 'AND requires all mask bits; none are set.']
+    ];
+  } else if(andR === mask){
+    correct = 'Both TWF_ANDW and TWF_ORW unblock';
+    wrongs = [
+      ['Only TWF_ORW unblocks', 'All mask bits are set (flags AND mask = mask), so AND is also satisfied.'],
+      ['Only TWF_ANDW unblocks', 'All mask bits are set, so OR is also satisfied (any bit).'],
+      ['Neither TWF_ANDW nor TWF_ORW unblocks', 'All mask bits are set, so both modes unblock.']
+    ];
+  } else {
+    correct = 'Only TWF_ORW unblocks';
+    wrongs = [
+      ['Both TWF_ANDW and TWF_ORW unblock', 'Only some mask bits are set (flags AND mask != mask), so AND blocks.'],
+      ['Only TWF_ANDW unblocks', 'AND requires all mask bits; some are missing. OR is the mode that unblocks.'],
+      ['Neither TWF_ANDW nor TWF_ORW unblocks', 'Some mask bits are set (flags AND mask != 0x00), so OR unblocks.']
+    ];
+  }
+  return {
+    level:4, topic:'Event-flag AND/OR outcome',
+    ref:'W4 §3.1: Event Flags (tk_wai_flg Modes)',
+    q:`An event flag currently holds <code>${hex(flags)}</code>. A task waits with requested mask <code>${hex(mask)}</code>. Which modes unblock?`,
+    a: correct, w: wrongs,
+    e:`AND result = <code>flags AND mask = ${hex(flags)} AND ${hex(mask)} = ${hex(andR)}</code>.<br>TWF_ANDW unblocks iff (flags AND mask) == mask; TWF_ORW unblocks iff (flags AND mask) != 0.<br>Here <code>${hex(andR)}</code> vs mask <code>${hex(mask)}</code>: <strong>${correct}</strong>.`,
+    meta:{kind:'flag',flags,mask,andR}
+  };
+}
+
+const GENS=[genCSOverhead, genPriorityInversion, genCopyTime, genDrift, genPoolWaste, genFlagMode];
+
+/* ============ ENGINE HELPERS ============ */
+function validQ(d){
+  if(!d || !d.w || d.w.length<3) return false;
+  const t=[d.a].concat(d.w.map(x=>x[0]));
+  return new Set(t).size === t.length;
+}
+function tryGen(fn){
+  let d=null;
+  for(let i=0;i<400;i++){
+    try{ d=fn(); }catch(e){ d=null; }
+    if(validQ(d)) return d;
+  }
+  return null;
+}
+function materialize(d){
+  const opts=shuffle([{t:d.a,ok:true,r:''}].concat(d.w.map(x=>({t:x[0],ok:false,r:x[1]}))));
+  return {level:d.level,topic:d.topic,ref:d.ref,q:d.q,e:d.e,opts,
+          correct:opts.findIndex(o=>o.ok), sel:null, submitted:false, a:d.a};
+}
+function buildQuiz(){
+  const all=[];
+  STATIC.forEach(d=>all.push(materialize(d)));
+  GENS.forEach(g=>{
+    const d=tryGen(g);
+    if(d && validQ(d)) all.push(materialize(d));
+  });
+  const by={1:[],2:[],3:[],4:[],5:[]};
+  all.forEach(q=>by[q.level].push(q));
+  const out=[];
+  [1,2,3,4,5].forEach(l=>shuffle(by[l]).forEach(q=>out.push(q)));
+  return out;
+}
+</script>
+
+<script id="ui">
+const $=id=>document.getElementById(id);
+let quiz=[], cur=0;
+
+function show(id){ ['start','quiz','results'].forEach(s=>{$(s).hidden=(s!==id);}); window.scrollTo(0,0); }
+function stats(){
+  const ans=quiz.filter(q=>q.submitted);
+  const c=ans.filter(q=>q.sel===q.correct).length;
+  return {answered:ans.length,correct:c,wrong:ans.length-c,total:quiz.length};
+}
+function startQuiz(){
+  try{
+    quiz=buildQuiz(); cur=0;
+    if(!quiz.length) throw new Error('No questions were generated.');
+    $('startErr').textContent='';
+    show('quiz'); render();
+  }catch(e){
+    $('startErr').textContent='Could not start quiz: '+e.message;
+    console.error(e);
+  }
+}
+
+function render(){
+  const q=quiz[cur], st=stats(), L='ABCDE';
+  $('qnum').textContent='Question '+(cur+1)+' of '+quiz.length;
+  const lv=$('lvl'); lv.textContent='Level '+q.level+' · '+LEVELS[q.level]; lv.className='badge l'+q.level;
+  $('topic').textContent=q.topic;
+  $('bar').style.width=(st.answered/quiz.length*100)+'%';
+  $('sc-c').textContent=st.correct; $('sc-w').textContent=st.wrong;
+  $('sc-p').textContent=st.answered?Math.round(st.correct/st.answered*100)+'%':'–';
+  $('qtext').innerHTML=q.q;
+
+  $('chips').innerHTML=quiz.map((x,i)=>{
+    let cls='chip'+(i===cur?' cur':'')+(x.submitted?(x.sel===x.correct?' right':' wrong'):'');
+    return '<button class="'+cls+'" data-j="'+i+'" title="Question '+(i+1)+' (level '+x.level+')">'+(i+1)+'</button>';
+  }).join('');
+
+  $('opts').innerHTML=q.opts.map((o,i)=>{
+    let cls='opt';
+    if(q.submitted){ if(i===q.correct) cls+=' right'; else if(i===q.sel) cls+=' wrong'; }
+    else if(i===q.sel) cls+=' sel';
+    return '<button class="'+cls+'" data-i="'+i+'"'+(q.submitted?' disabled':'')+'><span class="L">'+L[i]+'</span><span>'+o.t+'</span></button>';
+  }).join('');
+
+  const fb=$('fb');
+  if(q.submitted){
+    const ok=q.sel===q.correct;
+    let why=q.opts.map((o,i)=>o.ok?'':'<li><strong>'+L[i]+'.</strong> '+o.r+'</li>').join('');
+    fb.className='fb '+(ok?'right':'wrong'); fb.hidden=false;
+    fb.innerHTML='<h3>'+(ok?'✓ Correct':'✗ Incorrect')+'</h3>'+
+      (ok?'':'<div>Correct answer: <strong>'+L[q.correct]+'.</strong> '+q.opts[q.correct].t+'</div>')+
+      '<div class="expl">'+q.e+'</div>'+
+      '<div><strong>Why the other options are wrong</strong><ul>'+why+'</ul></div>'+
+      '<div class="ref">Revisit: '+q.ref+'</div>';
+  } else { fb.hidden=true; fb.innerHTML=''; }
+
+  $('submitBtn').disabled=q.submitted||q.sel===null;
+  $('prevBtn').disabled=cur===0;
+  const all=st.answered===quiz.length;
+  const nb=$('nextBtn');
+  if(cur<quiz.length-1){ nb.textContent='Next →'; nb.disabled=false; }
+  else { nb.textContent=all?'See results':'Next unanswered →'; nb.disabled=false; }
+  $('finishRow').hidden=!all;
+}
+
+function selectOpt(i){ const q=quiz[cur]; if(q.submitted) return; q.sel=i; render(); }
+function submitAns(){ const q=quiz[cur]; if(q.submitted||q.sel===null) return; q.submitted=true; render(); }
+function nextQ(){
+  if(cur<quiz.length-1){ cur++; render(); window.scrollTo(0,0); return; }
+  const un=quiz.findIndex(q=>!q.submitted);
+  if(un===-1) showResults(); else { cur=un; render(); window.scrollTo(0,0); }
+}
+function prevQ(){ if(cur>0){ cur--; render(); window.scrollTo(0,0);} }
+
+function showResults(){
+  const st=stats(), L='ABCDE';
+  const pct=Math.round(st.correct/st.total*100);
+  const byLevel=[1,2,3,4,5].map(l=>{
+    const qs=quiz.filter(q=>q.level===l), c=qs.filter(q=>q.sel===q.correct).length;
+    return {l,n:qs.length,c,p:qs.length?c/qs.length:0};
+  });
+  const topics={};
+  quiz.forEach(q=>{
+    const t=topics[q.topic]||(topics[q.topic]={n:0,c:0,refs:new Set()});
+    t.n++; if(q.sel===q.correct) t.c++; else t.refs.add(q.ref);
+  });
+  const tlist=Object.keys(topics).map(k=>({name:k,n:topics[k].n,c:topics[k].c,refs:Array.from(topics[k].refs)}));
+  const weak=tlist.filter(t=>t.c<t.n).sort((a,b)=>a.c/a.n-b.c/b.n);
+  const meterCls=p=>p>=0.75?'':(p>=0.5?'mid':'low');
+
+  let h='<div class="card"><h1>Results</h1>'+
+    '<div class="row" style="gap:28px;margin:10px 0">'+
+    '<div><div class="big">'+st.correct+' / '+st.total+'</div><div class="sub" style="margin:0">Total score</div></div>'+
+    '<div><div class="big">'+pct+'%</div><div class="sub" style="margin:0">Overall percentage</div></div>'+
+    '<div><div class="big" style="color:var(--ok)">'+st.correct+'</div><div class="sub" style="margin:0">Correct</div></div>'+
+    '<div><div class="big" style="color:var(--bad)">'+st.wrong+'</div><div class="sub" style="margin:0">Incorrect</div></div></div>'+
+    '<button class="btn primary" id="restartBtn">Restart quiz (fresh numbers and order)</button></div>';
+
+  h+='<div class="card"><h2>Performance by difficulty level</h2><table><tr><th>Level</th><th>Score</th><th style="width:40%">Accuracy</th></tr>'+
+    byLevel.map(x=>'<tr><td><span class="badge l'+x.l+'">L'+x.l+'</span> '+LEVELS[x.l]+'</td><td>'+x.c+' / '+x.n+'</td><td><div class="meter"><div class="'+meterCls(x.p)+'" style="width:'+Math.round(x.p*100)+'%"></div></div></td></tr>').join('')+
+    '</table></div>';
+
+  h+='<div class="card"><h2>Concepts to revisit</h2>';
+  if(!weak.length) h+='<p>No missed topics. Re-run the quiz to practise with new numerical values.</p>';
+  else {
+    h+='<div class="note">Topics where you lost marks, weakest first. Re-read the revision-list sections listed under each.</div><table><tr><th>Topic</th><th>Score</th><th>Material to review</th></tr>'+
+      weak.map(t=>'<tr><td>'+t.name+'</td><td>'+t.c+' / '+t.n+'</td><td>'+t.refs.join('<br>')+'</td></tr>').join('')+'</table>';
+  }
+  const strong=tlist.filter(t=>t.c===t.n).map(t=>t.name);
+  if(strong.length) h+='<p class="sub" style="margin-top:12px">Solid topics: '+strong.join(', ')+'.</p>';
+  h+='</div>';
+
+  h+='<div class="card"><h2>Full review</h2>'+quiz.map((q,i)=>{
+    const ok=q.sel===q.correct;
+    const why=q.opts.map((o,j)=>o.ok?'':'<li><strong>'+L[j]+'.</strong> '+o.r+'</li>').join('');
+    return '<div class="rev"><div class="qmeta"><span class="badge l'+q.level+'">Level '+q.level+'</span><span>Q'+(i+1)+' · '+q.topic+'</span> <span class="'+(ok?'tag-ok':'tag-bad')+'">'+(ok?'✓ Correct':'✗ Incorrect')+'</span></div>'+
+      '<div class="qtext" style="font-size:1rem">'+q.q+'</div>'+
+      '<div class="ans">Your answer: <strong>'+L[q.sel]+'.</strong> '+q.opts[q.sel].t+'</div>'+
+      (ok?'':'<div class="ans">Correct answer: <strong>'+L[q.correct]+'.</strong> '+q.opts[q.correct].t+'</div>')+
+      '<div class="expl" style="margin:8px 0">'+q.e+'</div>'+
+      '<details><summary>Why the other options are wrong</summary><ul>'+why+'</ul></details>'+
+      '<div class="ref">Revisit: '+q.ref+'</div></div>';
+  }).join('')+'</div>';
+
+  const r=$('results'); r.innerHTML=h; show('results');
+  $('restartBtn').addEventListener('click',startQuiz);
+}
+
+try{
+  $('startBtn').addEventListener('click',startQuiz);
+  $('opts').addEventListener('click',e=>{const b=e.target.closest('.opt'); if(b) selectOpt(+b.dataset.i);});
+  $('chips').addEventListener('click',e=>{const b=e.target.closest('.chip'); if(b){cur=+b.dataset.j; render();}});
+  $('submitBtn').addEventListener('click',submitAns);
+  $('nextBtn').addEventListener('click',nextQ);
+  $('prevBtn').addEventListener('click',prevQ);
+  $('finishBtn').addEventListener('click',showResults);
+  $('nq').textContent=STATIC.length+GENS.length;
+}catch(e){ console.error(e); }
+</script>
+</body>
+</html>
