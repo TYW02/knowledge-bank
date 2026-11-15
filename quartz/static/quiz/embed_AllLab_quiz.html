@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Embedded C Bug Hunt — Revision Quiz</title>
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1b2333; --muted:#5d6881; --line:#dde3ef;
+  --brand:#2f5bea; --brand-ink:#ffffff; --ok:#12805c; --ok-bg:#e3f6ee; --bad:#b3261e; --bad-bg:#fdeceb;
+  --warn:#9a6700; --warn-bg:#fff6dd; --chip:#e9edf6;
+  --l1:#2e7d6b; --l2:#2f5bea; --l3:#8a4fd3; --l4:#d9741a; --l5:#c0262d;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#0f1420; --card:#171e2e; --ink:#e8ecf6; --muted:#9aa6c1; --line:#2a3550;
+    --brand:#6b8cff; --brand-ink:#0b1020; --ok:#4cd6a2; --ok-bg:#12332a; --bad:#ff8a80; --bad-bg:#3a1c1a;
+    --warn:#f2c14e; --warn-bg:#3a3012; --chip:#222c43; }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+#app{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.5rem;margin:0 0 4px}
+h2{font-size:1.2rem;margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 18px;border-radius:10px;font-weight:600}
+.btn:hover:not(:disabled){border-color:var(--brand)}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spread{justify-content:space-between}
+.pill{background:var(--chip);border-radius:999px;padding:4px 12px;font-size:.88rem;font-weight:600}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.bad{background:var(--bad-bg);color:var(--bad)}
+.badge{display:inline-block;color:#fff;border-radius:6px;padding:3px 10px;font-size:.8rem;font-weight:700;letter-spacing:.02em}
+.badge.l1{background:var(--l1)} .badge.l2{background:var(--l2)} .badge.l3{background:var(--l3)} .badge.l4{background:var(--l4)} .badge.l5{background:var(--l5)}
+.progress{height:8px;background:var(--chip);border-radius:99px;overflow:hidden;margin:12px 0}
+.progress>div{height:100%;width:0;background:var(--brand);transition:width .25s}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.chip{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--chip);color:var(--ink);font-weight:700;font-size:.85rem;padding:0}
+.chip.cur{outline:2px solid var(--brand);outline-offset:1px}
+.chip.right{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
+.chip.wrong{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.qmeta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;color:var(--muted);font-size:.9rem}
+.qtext{font-size:1.1rem;font-weight:600;margin:6px 0 16px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.92em}
+.codeblock{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--chip);padding:10px 14px;border-radius:8px;font-size:.88em;white-space:pre;overflow-x:auto;margin:10px 0;line-height:1.65;color:var(--ink)}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:10px;padding:12px 14px}
+.opt:hover:not(:disabled){border-color:var(--brand)}
+.opt .L{flex:0 0 28px;height:28px;border-radius:50%;background:var(--chip);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.opt.sel{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 9%,var(--card))}
+.opt.sel .L{background:var(--brand);color:var(--brand-ink)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)} .opt.right .L{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)} .opt.wrong .L{background:var(--bad);color:#fff}
+.opt:disabled{cursor:default;color:var(--ink)}
+.fb{margin-top:18px;border-radius:10px;padding:16px;border:1px solid var(--line)}
+.fb.right{background:var(--ok-bg);border-color:var(--ok)} .fb.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.fb h3{margin:0 0 6px;font-size:1.05rem}
+.fb .expl{margin:8px 0}
+.fb ul{margin:6px 0 0;padding-left:20px}
+.ref{color:var(--muted);font-size:.88rem;margin-top:8px}
+.nav{margin-top:18px}
+.big{font-size:2.6rem;font-weight:800;line-height:1.1}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);font-size:.95rem}
+.meter{height:8px;background:var(--chip);border-radius:99px;overflow:hidden;min-width:90px}
+.meter>div{height:100%;background:var(--ok)} .meter>div.low{background:var(--bad)} .meter>div.mid{background:var(--warn)}
+.note{background:var(--warn-bg);border:1px solid var(--warn);border-radius:10px;padding:12px 14px;color:var(--ink)}
+.rev{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.rev .ans{margin:4px 0}
+.tag-ok{color:var(--ok);font-weight:700}.tag-bad{color:var(--bad);font-weight:700}
+[hidden]{display:none!important}
+@media (max-width:520px){.card{padding:16px}.big{font-size:2.1rem}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<section id="start" class="card">
+  <h1>Embedded C Bug Hunt</h1>
+  <p class="sub">Revision quiz built from the complete defect checklist (Labs 1–6).</p>
+  <p>The quiz has <strong id="nq">46</strong> questions in five levels, from foundational to advanced:</p>
+  <ol>
+    <li>Foundational understanding</li>
+    <li>Conceptual understanding</li>
+    <li>Application</li>
+    <li>Analysis &amp; problem solving</li>
+    <li>Advanced critical thinking</li>
+  </ol>
+  <p>Calculation questions use fresh random numbers every time you start or restart. Answers are locked once submitted. You can jump to any question using the numbered boxes at the top, and the results page shows which topics to revisit.</p>
+  <p id="startErr" style="color:var(--bad);font-weight:600;margin:8px 0 0"></p>
+  <button class="btn primary" id="startBtn">Start quiz</button>
+</section>
+
+<section id="quiz" hidden>
+  <div class="card">
+    <div class="row spread">
+      <strong id="qnum">Question 1</strong>
+      <div class="row">
+        <span class="pill ok">Correct <span id="sc-c">0</span></span>
+        <span class="pill bad">Incorrect <span id="sc-w">0</span></span>
+        <span class="pill">Accuracy <span id="sc-p">–</span></span>
+      </div>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="chips" id="chips" aria-label="Question navigator"></div>
+  </div>
+
+  <div class="card">
+    <div class="qmeta"><span id="lvl" class="badge l1">Level 1</span><span id="topic"></span></div>
+    <div class="qtext" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+    <div id="fb" hidden></div>
+    <div class="row spread nav">
+      <button class="btn" id="prevBtn">← Previous</button>
+      <div class="row">
+        <button class="btn primary" id="submitBtn">Submit answer</button>
+        <button class="btn" id="nextBtn">Next →</button>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px" id="finishRow" hidden>
+      <button class="btn primary" id="finishBtn">All answered: see results</button>
+    </div>
+  </div>
+</section>
+
+<section id="results" hidden></section>
+
+</div>
+
+<script id="engine">
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=arr=>arr[rnd(0,arr.length-1)];
+function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=rnd(0,i);const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+const LEVELS=['','Foundational understanding','Conceptual understanding','Application','Analysis & problem solving','Advanced critical thinking'];
+
+/* ============ STATIC (40) ============ */
+const STATIC=[
+/* ---------- LEVEL 1 (8) ---------- */
+{level:1,topic:'Missing semicolon',ref:'§1.1 Missing semicolon',
+ q:`A function contains <code>uint8_t count = 0</code> (no semicolon) followed by <code>while (...)</code>. The compiler reports <code>expected ';' before 'while'</code>. Where is the bug?`,
+ a:`On the line above <code>while</code> — the declaration is missing its terminating semicolon`,
+ w:[[`On the <code>while</code> line itself — the compiler names the offending token`,`The compiler names the <em>next</em> token, not the offending line. Look one line above.`],
+    [`In the function signature — semicolons do not go there`,`Semicolons terminate declarations and statements, not function signatures.`],
+    [`After the <code>while</code> body — a missing statement`,`The error is a missing terminator, not a missing statement.`]],
+ e:`C requires <code>;</code> after every declaration. The compiler reports the <em>next</em> token, so the fix is one line above the reported token. Add <code>;</code> after the declaration.`},
+
+{level:1,topic:'Missing brace before else',ref:'§1.2 Missing closing brace before else',
+ q:`The compiler reports <code>expected '}' before 'else'</code> in an if/else construct. What is the bug?`,
+ a:`The <code>if</code> block is missing its closing <code>}</code> — <code>else</code> must immediately follow it`,
+ w:[[`The <code>else</code> keyword is misspelled`,`The error would be different (a missing or misspelled keyword gives a different diagnostic).`],
+    [`There is an extra <code>{</code> somewhere`,`An extra opening brace would give an unbalanced-brace error, not "expected '}' before 'else'".`],
+    [`The <code>if</code> condition is malformed`,`A malformed condition gives a different error on the condition line, not on <code>else</code>.`]],
+ e:`<code>else</code> must immediately follow the closing <code>}</code> of the <code>if</code> block. Count braces: every <code>if { ... } else { ... }</code> has two closing braces. Error "expected '}' before 'else'" → missing <code>}</code> on the line above.`},
+
+{level:1,topic:'Operator precedence: & vs ==',ref:'§3.1 Operator precedence (& vs ==)',
+ q:`What does <code>return (mask &amp; 1u &lt;&lt; pin == 0);</code> return, and why?`,
+ a:`Always 0 (false) — <code>&lt;&lt;</code> binds tighter than <code>==</code>, which binds tighter than <code>&amp;</code>, so it evaluates as <code>mask &amp; ((1u &lt;&lt; pin) == 0)</code> = <code>mask &amp; 0</code> = 0`,
+ w:[[`Correctly tests whether bit <code>pin</code> of <code>mask</code> is zero`,`That would require <code>(mask &amp; (1u &lt;&lt; pin)) == 0</code> — the parentheses change the grouping.`],
+    [`Always 1 (true) — the shift result is nonzero`,`<code>(1u &lt;&lt; pin)</code> is nonzero, so <code>== 0</code> gives 0, and <code>mask &amp; 0</code> is 0.`],
+    [`Depends on <code>mask</code> — the bitwise AND happens first`,`The bitwise AND happens <em>last</em>, after <code>==</code>. The precedence is <code>&lt;&lt;</code> → <code>==</code> → <code>&amp;</code>.`]],
+ e:`Precedence (tightest first): <code>&lt;&lt; &gt;&gt;</code> → <code>== !=</code> → <code>&amp;</code> → <code>^</code> → <code>|</code>. So <code>mask &amp; 1u &lt;&lt; pin == 0</code> becomes <code>mask &amp; ((1u &lt;&lt; pin) == 0)</code> = <code>mask &amp; 0</code> = 0. Fix: <code>return (mask &amp; (1u &lt;&lt; pin)) == 0;</code>`},
+
+{level:1,topic:'Shift by width',ref:'§3.2 Shift by width or negative count',
+ q:`What is wrong with this loop?<div class="codeblock">for (int i = 0; i &lt;= 32; i++)
+    r |= ((v &gt;&gt; i) &amp; 1u) &lt;&lt; (31 - i);</div>`,
+ a:`At i = 32, <code>v &gt;&gt; 32</code> shifts by the type's width (UB) and <code>31 - 32 = -1</code> shifts by a negative count (also UB)`,
+ w:[[`Nothing — 32 iterations is correct`,`For a 32-bit type, the valid shift counts are 0..31. i = 32 is out of range.`],
+    [`Only the second shift is UB; the first is fine`,`Shifting by the width (32) is also undefined behaviour.`],
+    [`The loop runs 33 times, but the extra iteration is harmless`,`UB is never harmless — the compiler may do anything, including eliminate the loop.`]],
+ e:`For a 32-bit type, valid shift counts are 0..31. <code>v &gt;&gt; 32</code> shifts by the type's width (UB), and <code>31 - 32 = -1</code> shifts by a negative count (UB). Fix: <code>for (int i = 0; i &lt; 32; i++)</code> — loop bound is <code>&lt; N</code>, never <code>&lt;= N</code>.`},
+
+{level:1,topic:'Unsigned subtraction wraps',ref:'§2.2 Unsigned subtraction wraps',
+ q:`What is the value of <code>d</code> here?<div class="codeblock">uint32_t x = 1000, y = 3000;
+uint32_t d = x - y;</div>`,
+ a:`0xFFFFF830 ≈ 4.29 billion — unsigned subtraction wraps modulo 2³² when the result would be negative`,
+ w:[[`−2000 — unsigned types can hold negative values`,`Unsigned types cannot hold negative values; the bit pattern is reinterpreted as a large positive number.`],
+    [`2000 — the operands are unsigned, so the result is absolute`,`Unsigned arithmetic does not take the absolute value; it wraps modulo 2³².`],
+    [`0 — unsigned subtraction clamps to zero on underflow`,`Unsigned arithmetic does not clamp; it wraps around.`]],
+ e:`Unsigned arithmetic is defined modulo 2³². <code>x - y</code> when <code>x &lt; y</code> produces <code>2³² + (x − y)</code> ≈ 4.29 billion. Fix: cast operands to <code>int32_t</code> before subtracting — <code>int32_t d = (int32_t)x - (int32_t)y;</code>`},
+
+{level:1,topic:'`< 0` on unsigned',ref:'§2.3 `< 0` on unsigned is always false',
+ q:`What is wrong with this code?<div class="codeblock">uint32_t delta = TARGET_MV - mv;
+if (delta &lt; 0) { duty--; }</div>`,
+ a:`The condition is always false. When <code>mv &gt; TARGET_MV</code>, <code>delta</code> wraps to a huge positive value, never negative`,
+ w:[[`The comparison should be <code>delta &lt;= 0</code>`,`<code>delta &lt;= 0</code> is also always false for unsigned — only <code>== 0</code> can be true.`],
+    [`<code>delta</code> needs to be <code>int</code> for the comparison to work`,`Changing the type of <code>delta</code> to <code>int</code> would fix it, but the <em>bug</em> is comparing an unsigned value to 0.`],
+    [`Nothing — this correctly detects <code>mv &gt; TARGET_MV</code>`,`It does the opposite: the branch is dead code, so the downward adjustment never happens.`]],
+ e:`Unsigned types cannot hold negative values. When <code>mv &gt; TARGET_MV</code>, <code>delta = 2³² + (TARGET_MV − mv)</code> — a huge positive number. The <code>delta &lt; 0</code> branch is dead code. Fix: compare directly (<code>if (mv &lt; TARGET_MV)</code>) or use a signed delta.`},
+
+{level:1,topic:'Return pointer to local',ref:'§7.1 Return pointer to local',
+ q:`What is wrong with this function?<div class="codeblock">char *format_reading(void)
+{
+    char buf[32];
+    snprintf(buf, sizeof buf, "...");
+    return buf;
+}</div>`,
+ a:`<code>buf</code> is a local array — returning its address leaves a dangling pointer once the stack frame is destroyed`,
+ w:[[`<code>snprintf</code> is not allowed to write to a local array`,`<code>snprintf</code> can write anywhere; the problem is returning the local's address.`],
+    [`<code>buf</code> must be declared <code>volatile</code>`,`<code>volatile</code> does not extend a stack variable's lifetime.`],
+    [`Nothing — the compiler copies the array on return`,`Arrays are not copied on return; the function returns a pointer to the destroyed frame.`]],
+ e:`Local arrays live on the stack and are invalid after the function returns. The caller receives a pointer to memory that will be reused. Fix: use <code>static char buf[32]</code> (single caller only — not thread-safe), a caller-provided buffer (thread-safe), or <code>malloc</code>.`},
+
+{level:1,topic:'`malloc(strlen)` missing +1',ref:'§7.2 `malloc(strlen(s))` missing +1',
+ q:`What is wrong with this code?<div class="codeblock">char *out = malloc(strlen(name));
+strcpy(out, name);</div>`,
+ a:`<code>strlen</code> excludes the <code>'\0'</code>; <code>strcpy</code> writes it past the allocated block, corrupting heap metadata`,
+ w:[[`<code>malloc</code> needs a cast to <code>char *</code>`,`A cast is unnecessary in C (and hides missing <code>stdlib.h</code>). The bug is the missing <code>+1</code>.`],
+    [`<code>strcpy</code> is deprecated — use <code>strncpy</code>`,`<code>strncpy</code> has its own pitfalls; the immediate bug is the allocation size.`],
+    [`Nothing — <code>strlen</code> includes the terminator`,`<code>strlen</code> returns the number of characters before the <code>'\0'</code>, not including it.`]],
+ e:`<code>strlen("abc")</code> returns 3, but <code>strcpy</code> writes 4 bytes (<code>abc\\0</code>). The overflow corrupts the heap allocator's bookkeeping for the next block. Fix: <code>malloc(strlen(name) + 1)</code> — the <code>+1</code> is not optional.`},
+
+/* ---------- LEVEL 2 (10) ---------- */
+{level:2,topic:'Integer promotion before shift',ref:'§3.3 Integer promotion → signed overflow',
+ q:`<code>payload[5]</code> is <code>uint8_t</code>. Is <code>(payload[5] &lt;&lt; 24)</code> well-defined when <code>payload[5] &gt;= 0x80</code>?`,
+ a:`No — <code>payload[5]</code> promotes to signed <code>int</code> first; <code>0x80 &lt;&lt; 24 = 0x80000000</code> overflows positive <code>int</code> (UB)`,
+ w:[[`Yes — <code>uint8_t</code> is unsigned, so the shift is always defined`,`Integer promotion converts <code>uint8_t</code> to <code>int</code> (signed), so the shift operates on a signed value.`],
+    [`Yes — the result is just <code>uint32_t</code>`,`The shift is performed in <code>int</code>; the conversion to <code>uint32_t</code> happens after, too late to avoid the UB.`],
+    [`No — but only because <code>uint8_t</code> does not fit in <code>int</code>`,`<code>uint8_t</code> always fits in <code>int</code>. The issue is the sign bit being set after the shift.`]],
+ e:`Integer promotion: <code>uint8_t</code> → <code>int</code> (signed 32-bit). If <code>payload[5] &gt;= 0x80</code>, the shifted result sets bit 31, which overflows positive <code>int</code>. Fix: <code>((uint32_t)payload[5] &lt;&lt; 24)</code> — cast the <em>operand</em> before shifting, not the result.`},
+
+{level:2,topic:'Integer overflow in narrow assignment',ref:'§2.4 Integer overflow in narrow assignment',
+ q:`What goes wrong here with <code>raw</code> up to 4095 and <code>VREF_MV = 3300</code>?<div class="codeblock">uint16_t scaled = raw * VREF_MV;
+return scaled / ADC_MAX;</div>`,
+ a:`<code>raw * VREF_MV</code> fits in <code>int</code> (13.5M), but the assignment to <code>uint16_t</code> truncates to 16 bits — <code>scaled</code> gets <code>13,513,500 &amp; 0xFFFF = 32,956</code>`,
+ w:[[`<code>raw * VREF_MV</code> overflows <code>int</code> at 13.5M`,`The product fits comfortably in a 32-bit <code>int</code> (max ~2.1 billion).`],
+    [`The multiplication is undefined behaviour`,`The multiplication is well-defined; the narrowing assignment is the bug.`],
+    [`Nothing — <code>uint16_t</code> holds values up to 65535`,`The product 13.5M exceeds 65535, so it truncates on assignment.`]],
+ e:`The multiplication is fine (fits in <code>int</code>), but the narrowing assignment truncates. Fix: <code>uint32_t scaled = (uint32_t)raw * VREF_MV;</code> then divide.`},
+
+{level:2,topic:'Division before multiplication',ref:'§2.5 Division before multiplication',
+ q:`What does this return when <code>raw = 4094</code> and <code>ADC_MAX = 4095</code>?<div class="codeblock">return (raw / ADC_MAX) * wrap;</div>`,
+ a:`Always 0 — integer division truncates: <code>4094 / 4095 = 0</code>, then <code>0 * wrap = 0</code>`,
+ w:[[`A value near <code>wrap</code>`,`<code>4094 / 4095</code> is 0 in integer arithmetic, so the product is 0 regardless of <code>wrap</code>.`],
+    [`A value proportional to <code>raw</code>`,`Integer division truncates <em>before</em> the multiplication, so the proportionality is lost.`],
+    [`Depends on <code>wrap</code>`,`The division result is always 0 for <code>raw &lt; ADC_MAX</code>, so <code>wrap</code> is multiplied by 0.`]],
+ e:`Integer division truncates toward zero. For <code>raw &lt; ADC_MAX</code>, <code>raw / ADC_MAX = 0</code>. Fix: pre-multiply — <code>((uint32_t)raw * wrap) / ADC_MAX</code>.`},
+
+{level:2,topic:'Off-by-one in copy loop',ref:'§6.1 Off-by-one in copy loop',
+ q:`With <code>len = 9</code>, how many bytes does this loop copy?<div class="codeblock">for (uint8_t i = 0; i &lt; len - 1; i++)
+    out[n++] = payload[i];</div>`,
+ a:`8 bytes — <code>i</code> runs 0..7, so the last payload byte is never copied`,
+ w:[[`9 bytes — <code>&lt; len - 1</code> gives 9 iterations`,`<code>&lt; len - 1</code> with <code>len = 9</code> gives 8 iterations, not 9.`],
+    [`10 bytes — the loop runs once too many`,`The loop runs once too few, not too many.`],
+    [`Infinite — <code>i</code> wraps around`,`<code>i</code> goes 0..7 and exits cleanly; no wrap.`]],
+ e:`With <code>len = 9</code>, <code>len - 1 = 8</code>, so <code>i = 0..7</code> → 8 iterations. The last byte is dropped. Fix: <code>for (i = 0; i &lt; len; i++)</code>. "Last index" is <code>len - 1</code>; "loop bound" is <code>len</code>.`},
+
+{level:2,topic:'Missing in_len bounds check',ref:'§6.2 Missing in_len bounds check',
+ q:`The parser checks <code>if (in_len &lt; 3) return false;</code> then reads <code>in[2 + len]</code>. With <code>in_len = 4</code> and <code>len = 200</code>, what happens?`,
+ a:`It reads 198 bytes past the end — <code>in_len &lt; 3</code> guarantees only 3 bytes, not <code>2 + len + 1</code>`,
+ w:[[`Safe — the check covers any <code>len</code>`,`The check only guarantees 3 bytes regardless of <code>len</code>.`],
+    [`<code>in_len &lt; 3</code> also covers <code>len</code>`,`The check does not know about <code>len</code>; it just ensures 3 header bytes.`],
+    [`The loop never runs because <code>len</code> is too large`,`The loop runs from 0 to <code>len - 1</code>; nothing stops it.`]],
+ e:`<code>in_len &lt; 3</code> only guarantees 3 bytes. With <code>len = 200</code>, the parser reads <code>in[2..201]</code> — past the end. Fix: <code>if (in_len &lt; 2 + len + 1) return false;</code> after reading <code>len</code> and before the copy.`},
+
+{level:2,topic:'Missing len == SPEC check',ref:'§6.3 Missing len == SPEC check',
+ q:`A fixed-length frame has no <code>if (len == SPEC)</code> check. What can a hostile frame do?`,
+ a:`Send <code>len = 200</code> → downstream stack overflow; or <code>len = 3</code> → downstream garbage reads`,
+ w:[[`Nothing — <code>len</code> is validated by the buffer size`,`Without the check, any length is accepted and copied.`],
+    [`The checksum catches it`,`The checksum is computed over whatever length arrives; it cannot know the intended length.`],
+    [`It is only a protocol concern, not a safety issue`,`With <code>len = 200</code> into a fixed 16-byte buffer, it is a stack overflow — a safety issue.`]],
+ e:`Two separate checks are needed: protocol (<code>len == SPEC</code>) and buffer (<code>in_len &gt;= 2 + len + 1</code>). Without the protocol check, any length is accepted, and downstream code reads garbage or overflows.`},
+
+{level:2,topic:'No destination size check',ref:'§6.4 No destination size check',
+ q:`A parser copies <code>len</code> bytes into <code>uint8_t payload[16]</code> with no size check. An attacker sends <code>len = 200</code>. What happens?`,
+ a:`A 184-byte stack overflow — writes past <code>payload[16]</code>`,
+ w:[[`The copy stops at 16 bytes`,`The loop runs <code>i &lt; len</code>; nothing stops at 16.`],
+    [`The kernel catches the overflow`,`The kernel does not bound-check arbitrary memory writes.`],
+    [`<code>len</code> is bounded by the protocol`,`Without an explicit check, nothing bounds <code>len</code>.`]],
+ e:`<code>for (i = 0; i &lt; len; i++) payload[i] = in[2 + i];</code> writes <code>len</code> bytes. With <code>len = 200</code> into a 16-byte buffer, 184 bytes past the end. Fix: <code>if (len &gt; sizeof(payload)) return false;</code> before the copy.`},
+
+{level:2,topic:'Array [N] with loop <= N',ref:'§6.5 Array size [N] with loop <= N',
+ q:`What is wrong here?<div class="codeblock">static uint8_t crc_table[255];
+for (int i = 0; i &lt; 256; i++)
+    crc_table[i] = ...;</div>`,
+ a:`<code>crc_table[255]</code> is the last valid index; <code>i = 255</code> writes one byte past the end`,
+ w:[[`Nothing — 256 entries fit in <code>[255]</code>`,`<code>arr[255]</code> has 255 elements, indices 0..254. Index 255 is out of bounds.`],
+    [`The loop should start at 1`,`Starting at 1 would leave entry 0 uninitialised; the issue is the upper bound.`],
+    [`<code>i</code> should be <code>uint8_t</code>`,`Making <code>i</code> narrower would make things worse (wrap issues); the bug is the array size.`]],
+ e:`<code>arr[N]</code> has indices <code>0..N−1</code>. Writing <code>arr[N]</code> is one byte past the end. Fix: declare <code>crc_table[256]</code> — a 256-entry table needs 256 elements.`},
+
+{level:2,topic:'Signed right-shift infinite loop',ref:'§2.1 Signed right-shift infinite loop',
+ q:`What happens when <code>value = -1</code>?<div class="codeblock">int value;
+while (value) {
+    count += value &amp; 1;
+    value &gt;&gt;= 1;
+}</div>`,
+ a:`An infinite loop — right-shifting a negative signed <code>int</code> is arithmetic: <code>-1 &gt;&gt; 1 == -1</code> forever`,
+ w:[[`It terminates because <code>value</code> becomes 0`,`Arithmetic right-shift replicates the sign bit, so <code>-1</code> stays <code>-1</code>.`],
+    [`It counts 32 bits correctly`,`It never terminates for negative input.`],
+    [`It counts 1 bit and stops`,`The sign bit keeps replicating, so the loop never sees zero.`]],
+ e:`Right-shifting a negative signed integer is implementation-defined; on ARM/x86 it is arithmetic (sign-bit replication). <code>-1 &gt;&gt; 1</code> stays <code>-1</code>. Fix: cast to <code>uint32_t</code> before shifting, or change the parameter type to <code>uint32_t</code>.`},
+
+{level:2,topic:'Uninitialised local read',ref:'§7.3 Uninitialised local read',
+ q:`What is wrong with this code?<div class="codeblock">uint8_t crc;
+uint8_t c = crc_table[crc ^ data[0]];</div>`,
+ a:`<code>crc</code> is indeterminate — <code>crc ^ data[0]</code> reads a random table index`,
+ w:[[`The compiler initialises locals to 0`,`The C standard does not initialise locals; they contain whatever was on the stack.`],
+    [`<code>crc_table</code> is uninitialised`,`The table is assumed initialised; the bug is the index.`],
+    [`Nothing — <code>uint8_t</code> defaults to 0`,`Only <code>static</code> locals are zero-initialised; automatic locals are not.`]],
+ e:`Local variables have indeterminate values. <code>crc</code> starts as garbage, so the CRC output is unpredictable. Fix: <code>uint8_t crc = 0;</code> (or the spec's init value — 0x00 for CRC-8/ATM, 0xFF for CRC-8/SAE-J1850).`},
+
+/* ---------- LEVEL 3 (8) ---------- */
+{level:3,topic:'Raw struct copy onto the wire',ref:'§5.1 Raw struct copy (endianness + padding)',
+ q:`A byte loop copies <code>sizeof(reading_t)</code> bytes from <code>(const uint8_t *)r</code> to the wire. What three bugs does this introduce?`,
+ a:`(1) Little-endian memory layout instead of wire big-endian. (2) Padding bytes copied as data. (3) Field order may not match the wire format`,
+ w:[[`Only endianness — padding is fine on the wire`,`Padding bytes are garbage and corrupt the wire format.`],
+    [`Only padding — endianness matches the wire`,`ARM is little-endian; the wire is usually big-endian.`],
+    [`Only field order — endianness and padding are correct`,`All three problems apply.`]],
+ e:`ARM is little-endian, so multi-byte fields are stored low-byte-first. Padding bytes appear as garbage. Fix: encode field-by-field in spec order and endianness — never <code>memcpy</code> a struct onto the wire.`},
+
+{level:3,topic:'Missing volatile on ISR-shared state',ref:'§8.1 Missing volatile on ISR-shared',
+ q:`<code>static uint32_t pulse_count = 0;</code> is written by an ISR and read in <code>while (pulse_count &lt; TARGET)</code>. At <code>-O3</code> the loop hangs. Why?`,
+ a:`Without <code>volatile</code>, the compiler caches <code>pulse_count</code> in a register and never sees the ISR's updates`,
+ w:[[`The ISR does not run at <code>-O3</code>`,`The ISR runs; the compiler just does not re-read the variable.`],
+    [`The loop condition is evaluated once by design`,`The compiler may hoist the load, but that is the bug, not the design.`],
+    [`<code>-O3</code> breaks atomicity`,`Atomicity is a separate issue; here the compiler optimises away the reload.`]],
+ e:`The compiler sees no writes to <code>pulse_count</code> in the loop body, so it hoists the load out. Fix: <code>static volatile uint32_t pulse_count = 0;</code>. This is the classic works-at-<code>-O0</code>/hangs-at-<code>-O3</code> bug.`},
+
+{level:3,topic:'printf inside an ISR',ref:'§8.3 printf in ISR',
+ q:`An ISR calls <code>printf("edge: ...")</code>. What is the bug?`,
+ a:`<code>printf</code> is not ISR-safe — it uses stdio locks and buffers, so an interrupt during another <code>printf</code> corrupts or deadlocks`,
+ w:[[`<code>printf</code> is too slow but otherwise safe`,`It is unsafe: re-entry corrupts the stdio state.`],
+    [`The ISR just needs a higher priority`,`Priority does not make <code>printf</code> re-entrant.`],
+    [`The bug is the format string`,`The format string is fine; the problem is calling <code>printf</code> from interrupt context at all.`]],
+ e:`<code>printf</code> uses stdio locks and buffers designed for single-context use. If the ISR preempts another <code>printf</code>, the buffer corrupts or deadlocks. Also, at 115200 baud a <code>printf</code> takes ~3.5 ms — edges arriving faster re-enter and corrupt state. Fix: set a flag, print in the main loop.`},
+
+{level:3,topic:'Mutex created but never used',ref:'§8.4 Mutex created but not used',
+ q:`<code>ring_mutex = xSemaphoreCreateMutex();</code> is created but never taken or given. Two tasks call <code>ring_push</code>. What happens?`,
+ a:`A data race on <code>ring[]</code>, <code>head</code>, <code>tail</code>, and <code>fill</code> — the ring is corrupted`,
+ w:[[`FreeRTOS auto-protects shared data`,`FreeRTOS does not auto-protect user data; the mutex must be taken explicitly.`],
+    [`The mutex is optional for writes`,`Every access to shared data must take the mutex.`],
+    [`Race conditions cannot occur with two tasks`,`Two tasks without synchronisation absolutely can race.`]],
+ e:`A mutex protects data only when every access takes it. Creating is not protecting. Fix: <code>xSemaphoreTake(ring_mutex, portMAX_DELAY); ... xSemaphoreGive(ring_mutex);</code> around every access.`},
+
+{level:3,topic:'Message buffer single-consumer',ref:'§9.1 Message buffer single-consumer',
+ q:`Two tasks call <code>xMessageBufferReceive</code> on the same message buffer. What is the issue?`,
+ a:`Each message goes to exactly one receiver — the tasks race for messages, each getting roughly half at random`,
+ w:[[`FreeRTOS broadcasts to all receivers`,`Message buffers are one-to-one per message.`],
+    [`The buffer duplicates messages for each reader`,`No duplication occurs; each message is consumed once.`],
+    [`Only the first task receives; the second starves`,`Both tasks race; neither starves, but neither gets all messages.`]],
+ e:`Message buffers are one-to-one per message. Two concurrent receives race. Fix: two separate buffers, and the producer sends to both.`},
+
+{level:3,topic:'static in multi-task helper',ref:'§9.2 static in multi-task helper',
+ q:`What is wrong with this helper called by two tasks?<div class="codeblock">float running_mean(int16_t v)
+{
+    static float acc;
+    static int n;
+    acc += v; n++;
+    return acc / n;
+}</div>`,
+ a:`<code>static</code> means one instance shared by every caller — the two tasks interleave samples in one accumulator`,
+ w:[[`<code>static</code> prevents sharing`,`<code>static</code> does the opposite: one instance for all callers.`],
+    [`Each task gets its own copy of <code>static</code>`,`Only one copy exists; it is shared across all calls and tasks.`],
+    [`The compiler replicates <code>static</code> per thread`,`The compiler has no notion of tasks; <code>static</code> is a single instance.`]],
+ e:`<code>static</code> in a function means one instance for all callers. Fix: pass state in (<code>float *acc, int *n</code>), or use a per-caller array.`},
+
+{level:3,topic:'sizeof(&x) is pointer size',ref:'§9.4 sizeof(&x) pointer size',
+ q:`What is wrong here?<div class="codeblock">xMessageBufferSend(mbuf, &amp;sample, sizeof(&amp;sample), 0);</div>`,
+ a:`<code>sizeof(&amp;sample)</code> is pointer size (4 bytes), not the sample size (2 bytes) — 4 bytes sent, half garbage`,
+ w:[[`<code>sizeof(&amp;sample)</code> returns the sample size`,`<code>&amp;sample</code> is a pointer; <code>sizeof</code> of a pointer is the pointer size.`],
+    [`The buffer rejects oversized messages`,`It accepts whatever size you pass; there is no automatic check.`],
+    [`Nothing — <code>sizeof</code> follows the pointer to the object`,`<code>sizeof</code> does not follow pointers; it reports the pointer's size.`]],
+ e:`<code>sizeof(&amp;sample)</code> = 4 (pointer), <code>sizeof sample</code> = 2 (object). Fix: <code>sizeof sample</code>.`},
+
+{level:3,topic:'Missing break in switch',ref:'§13.9 Missing break in switch',
+ q:`In a state-machine switch, <code>case ENC_IDLE:</code> falls through to <code>case ENC_SLOT:</code> because there is no <code>break</code>. What is the effect?`,
+ a:`Both branches execute — <code>slot_width_us</code> is computed from a <code>slot_start_us</code> set in the same call, giving ~0`,
+ w:[[`The compiler inserts a <code>break</code> automatically`,`C requires an explicit <code>break</code>; without it, execution falls through.`],
+    [`Only the second case runs`,`Both cases run, in order.`],
+    [`The fall-through is harmless`,`It causes the second case to use uninitialised or just-set state, producing ~0 width.`]],
+ e:`Without <code>break</code>, execution continues into the next case. In this state machine, the width calculation runs before <code>slot_start_us</code> is meaningful. Fix: add <code>break;</code> after each case (or <code>// fallthrough</code> for intentional fall-through).`},
+
+/* ---------- LEVEL 4 (7) ---------- */
+{level:4,topic:'volatile not needed with mutex',ref:'§8.2 volatile not needed with mutex',
+ q:`Two tasks share <code>latest</code> under a mutex. Should <code>latest</code> be declared <code>volatile</code>?`,
+ a:`No — the mutex take/give are compiler barriers that prevent hoisting; <code>volatile</code> is unnecessary (and would not add atomicity)`,
+ w:[[`Yes, <code>volatile</code> is always required for shared data`,`<code>volatile</code> is required only when the writer is invisible to the compiler (ISR, signal handler).`],
+    [`Yes, but only when reading`,`Both reads and writes are protected by the mutex barrier; <code>volatile</code> is unnecessary.`],
+    [`Only if the mutex is a binary semaphore`,`The primitive does not change the visibility argument; a mutex is a barrier.`]],
+ e:`<code>volatile</code> fixes visibility for data shared with an <em>invisible</em> writer (ISR, signal handler). Task-to-task sharing under a mutex is already visible to the compiler across the barrier. Fix: no <code>volatile</code> needed.`},
+
+{level:4,topic:'xQueueSend with zero timeout',ref:'§9.5 xQueueSend(..., 0) silent drop',
+ q:`<code>xQueueSend(print_q, &amp;m, 0);</code> with the return ignored. What is the bug?`,
+ a:`A zero timeout means "return immediately" — if the queue is full, the message is silently dropped`,
+ w:[[`A zero timeout blocks forever`,`Zero means do not wait; <code>portMAX_DELAY</code> blocks forever.`],
+    [`A zero timeout is the safest option for real-time`,`It is the most lossy: data is dropped without warning.`],
+    [`The kernel retries automatically`,`The kernel does not retry; the return value tells you whether it succeeded.`]],
+ e:`A <code>0</code> timeout means "I accept losing this message." That is never true for data. Fix: use a real timeout and check the return: <code>if (xQueueSend(print_q, &amp;m, pdMS_TO_TICKS(10)) != pdTRUE) { /* handle drop */ }</code>.`},
+
+{level:4,topic:'Empty configASSERT',ref:'§9.6 configASSERT empty',
+ q:`<code>#define configASSERT(x)</code> (empty). What is the consequence?`,
+ a:`All kernel invariant checks (stack overflow, null handle, wrong context) compile out — silent corruption instead of an immediate panic`,
+ w:[[`The kernel catches errors anyway`,`The kernel relies on <code>configASSERT</code> for these checks; an empty definition removes them.`],
+    [`<code>configASSERT</code> is optional and has no effect`,`It is the kernel's primary debug hook; an empty definition removes all checks.`],
+    [`Empty is fine for debug builds`,`Debug is exactly when you want the checks on.`]],
+ e:`In debug, all safety checks should be on. The kernel can only catch bugs you let it catch. Fix: <code>#define configASSERT(x) if ((x) == 0) { taskDISABLE_INTERRUPTS(); for (;;); }</code>.`},
+
+{level:4,topic:'Task stack too small for printf',ref:'§9.7 Task stack too small for printf',
+ q:`A task calling <code>printf</code> is created with <code>configMINIMAL_STACK_SIZE</code>. Why is that a bug?`,
+ a:`<code>printf</code> needs 200–500 bytes for its formatting buffer plus call frames — <code>configMINIMAL_STACK_SIZE</code> is the bare minimum for a trivial task`,
+ w:[[`<code>configMINIMAL_STACK_SIZE</code> is always enough`,`It is the minimum for a trivial task, not one calling <code>printf</code>.`],
+    [`<code>printf</code> uses the heap, not the stack`,`<code>printf</code>'s formatting buffer and call frames live on the task stack.`],
+    [`The stack only matters for recursion`,`Stack usage includes call frames and local buffers, regardless of recursion.`]],
+ e:`Size by what the task calls, not by the minimum. Fix: <code>configMINIMAL_STACK_SIZE * 4</code> (or measure actual usage with <code>uxTaskGetStackHighWaterMark</code>).`},
+
+{level:4,topic:'Works at -O0, hangs at -O3',ref:'§10.2 Works at -O0, hangs at -O3',
+ q:`A loop works at <code>-O0</code> but hangs at <code>-O3</code>. What is the almost-certain cause?`,
+ a:`A missing <code>volatile</code> on a variable written by an ISR (or other invisible context) — the optimiser caches it in a register`,
+ w:[[`<code>-O3</code> has a compiler bug`,`The compiler is doing its job; the program has UB (missing <code>volatile</code>).`],
+    [`The linker script is wrong at <code>-O3</code>`,`Linking does not change with optimisation level.`],
+    [`The stack size changes at <code>-O3</code>`,`Stack size is determined by the code, but a hang in a polling loop is the classic <code>volatile</code> symptom.`]],
+ e:`If the only writer is an ISR, the compiler cannot see it and hoists the load out of the loop. Fix: <code>volatile</code> on the shared variable. This is the classic symptom.`},
+
+{level:4,topic:'Moving average divided by capacity',ref:'§11.2 Moving average divided by capacity',
+ q:`During warm-up (<code>fill &lt; RING_LEN</code>), the code uses <code>ring_sum() / RING_LEN</code>. What is wrong?`,
+ a:`<code>ring_sum()</code> sums only <code>fill</code> items, but the divisor is <code>RING_LEN</code> — the average is biased downward by <code>fill/RING_LEN</code>`,
+ w:[[`The sum is wrong, not the divisor`,`<code>ring_sum()</code> correctly sums <code>fill</code> items; the divisor is the bug.`],
+    [`<code>RING_LEN</code> is the correct divisor`,`Dividing by the capacity when fewer items are present biases the result downward.`],
+    [`Warm-up is only cosmetic`,`The biased average is published downstream and affects control decisions.`]],
+ e:`Divide by the actual count, not the capacity. Fix: <code>ring_sum() / (fill ? fill : 1)</code>.`},
+
+{level:4,topic:'Empty delay loop optimised away',ref:'§10.1 Empty delay loop optimised away',
+ q:`What happens to this delay at <code>-O2</code>?<div class="codeblock">for (i = 0; i &lt; 6000; i++);</div>`,
+ a:`The loop is deleted — no observable side effects, so the optimiser removes it entirely; the delay is zero`,
+ w:[[`The loop runs but faster`,`There is nothing to keep it; it is removed entirely.`],
+    [`The delay doubles`,`The loop is removed; there is no delay.`],
+    [`The compiler warns and keeps the loop`,`The compiler may or may not warn; the standard permits removal.`]],
+ e:`Empty loops with no observable effect are deleted. Fix: <code>for (volatile uint32_t i = 0; i &lt; 6000; i++)</code>, or use an SDK delay (<code>busy_wait_us</code>, <code>tight_loop_contents</code>).`},
+
+/* ---------- LEVEL 5 (7) ---------- */
+{level:5,topic:'%u on uint64_t',ref:'§12.1 %u on uint64_t',
+ q:`<code>printf("%u", finished_at)</code> with <code>uint64_t finished_at</code>. What is the bug?`,
+ a:`<code>%u</code> expects <code>unsigned int</code> (4 bytes); <code>printf</code> reads 4 bytes and treats the other 4 as the next argument — UB, garbage output`,
+ w:[[`<code>%u</code> promotes to 64-bit automatically`,`<code>printf</code> does not promote; the format specifier determines how many bytes are read.`],
+    [`<code>%u</code> is a synonym for <code>%llu</code>`,`They are different specifiers; <code>%u</code> is 32-bit on most platforms.`],
+    [`Nothing — <code>uint64_t</code> is just <code>unsigned long</code> on this platform`,`On a 32-bit platform <code>unsigned long</code> is 32-bit; you need <code>unsigned long long</code> and <code>%llu</code>.`]],
+ e:`Every <code>%</code> specifier must match the argument's promoted type. <code>uint64_t</code> needs <code>%llu</code> (with a cast to <code>unsigned long long</code>). <code>size_t</code> needs <code>%zu</code>. <code>float</code> needs <code>%f</code>.`},
+
+{level:5,topic:'%d on float',ref:'§12.2 %d on float',
+ q:`<code>printf("%d V", v)</code> with <code>float v</code>. What happens?`,
+ a:`<code>%d</code> reads from a general-purpose register; the float argument is in a floating-point register — garbage output`,
+ w:[[`<code>%d</code> truncates the float to int`,`<code>printf</code> does not convert; it reads a different register entirely.`],
+    [`The compiler warns and converts`,`The compiler may warn (with <code>-Wformat</code>) but does not convert.`],
+    [`<code>%d</code> is fine for small floats`,`Format specifiers must match the argument type; <code>float</code> needs <code>%f</code>.`]],
+ e:`<code>float</code> in a variadic call promotes to <code>double</code> and is passed in an FP register. <code>%d</code> reads from a GP register. Fix: <code>printf("%.2f V", (double)v);</code>. Enable <code>-Wformat</code> to catch these.`},
+
+{level:5,topic:'Unaligned 32-bit read',ref:'§13.3 Unaligned 32-bit read',
+ q:`<code>uint32_t ts = *(uint32_t *)&amp;frame[2];</code> on Cortex-M0+. What is wrong?`,
+ a:`Unaligned 32-bit load faults (HardFault); also native little-endian instead of wire big-endian; also strict-aliasing UB`,
+ w:[[`Only endianness — unaligned loads work on all ARMs`,`Cortex-M0+ faults on unaligned 32-bit loads.`],
+    [`Only alignment — the compiler handles endianness`,`The compiler does not fix endianness for a cast-and-deref.`],
+    [`Nothing — <code>uint32_t</code> reads are always aligned`,`<code>frame[2]</code> is at an arbitrary alignment; the cast does not align it.`]],
+ e:`Cortex-M0+ faults on unaligned 32-bit loads. Also strict-aliasing UB and wrong endianness. Fix: byte-assemble — <code>((uint32_t)frame[2] &lt;&lt; 24) | ((uint32_t)frame[3] &lt;&lt; 16) | ...</code>.`},
+
+{level:5,topic:'ADC read before select',ref:'§13.4 ADC read before select',
+ q:`<code>adc_read()</code> is called before <code>adc_select_input(0)</code>. What does the first read return?`,
+ a:`Whatever channel was selected previously — not channel 0`,
+ w:[[`Channel 0 always`,`The ADC reads the currently-selected channel; it does not default to 0.`],
+    [`A zero value`,`It returns a sample from the previously-selected channel.`],
+    [`The average of all channels`,`The ADC has one selected input at a time.`]],
+ e:`<code>adc_read</code> reads the currently-selected channel. Fix: <code>adc_select_input(0); uint16_t raw_a = adc_read(); adc_select_input(1); uint16_t raw_b = adc_read();</code>`},
+
+{level:5,topic:'UART CRLF translation on binary',ref:'§13.7 UART CRLF translation on binary',
+ q:`<code>uart_set_translate_crlf(uart, true)</code> on a binary frame link. What is the bug?`,
+ a:`Any payload byte equal to <code>0x0D</code> or <code>0x0A</code> gets corrupted — CRLF translation converts <code>\\r</code> ↔ <code>\\r\\n</code>`,
+ w:[[`CRLF translation only affects text logs`,`It operates on the byte stream, including binary payloads.`],
+    [`The UART driver detects binary and disables translation`,`The driver does not inspect payload content; translation is unconditional.`],
+    [`Nothing — CRLF is a no-op for binary`,`It is not a no-op; it inserts or removes bytes.`]],
+ e:`Binary link → all text-mode translation off. A timestamp like <code>0x0A0B0C0D</code> contains bytes the translation mangles. Fix: <code>uart_set_translate_crlf(LINK_UART, false);</code>`},
+
+{level:5,topic:'No SOF resync',ref:'§13.8 No SOF resync',
+ q:`A parser counts bytes and resets on <code>n == 12</code>, but never checks for SOF. One byte is dropped. What happens?`,
+ a:`The parser is permanently one byte off; every subsequent frame fails the SOF check with no recovery`,
+ w:[[`The parser self-corrects on the next frame`,`Without hunting for SOF, it has no way to find the boundary.`],
+    [`The checksum catches and resyncs`,`The checksum catches the error but does not resync.`],
+    [`Only the current frame is lost`,`Every subsequent frame is misaligned.`]],
+ e:`Without a SOF hunt, the receiver has no way to find the next frame boundary independently. Fix: <code>if (n == 0 &amp;&amp; b != FRAME_SOF) continue;</code> before buffering.`},
+
+{level:5,topic:'crc8 before crc_init',ref:'§13.2 crc8 before crc_init',
+ q:`<code>crc8</code> uses a table built by <code>crc_init</code>, but <code>crc_ready</code> is set and never read. What is the bug?`,
+ a:`If <code>crc8</code> runs before <code>crc_init</code>, the table is all zeros — it returns 0 for everything`,
+ w:[[`<code>crc_ready</code> being set means it is initialised`,`The flag is set by <code>crc_init</code>; before that, the table is zero.`],
+    [`The linker initialises the table`,`Only static/global variables are zero-initialised; the table is filled at runtime by <code>crc_init</code>.`],
+    [`<code>crc_init</code> is called by the runtime`,`C does not call initialisers automatically; you must call <code>crc_init</code>.`]],
+ e:`A "must call init first" contract is a hope, not a guarantee. Fix: lazy init — <code>if (!crc_ready) crc_init();</code> at the top of <code>crc8</code>, or assert that <code>crc_ready</code> is true.`}
+];
+
+/* ============ GENERATORS (6) ============ */
+
+function genStructPad(){
+  const STRUCTS=[
+    {fields:[['uint16_t','sensor_id'],['uint8_t','status'],['int16_t','temp_c_x10'],['uint32_t','timestamp_ms']],sizeof:12,wire:9},
+    {fields:[['uint8_t','id'],['uint16_t','value'],['uint8_t','flags'],['uint32_t','ts']],sizeof:12,wire:8},
+    {fields:[['uint32_t','counter'],['uint8_t','status'],['uint16_t','reading']],sizeof:8,wire:7},
+    {fields:[['uint8_t','addr'],['uint32_t','data'],['uint8_t','crc']],sizeof:12,wire:6},
+    {fields:[['uint8_t','mode'],['uint16_t','count'],['uint32_t','stamp'],['uint8_t','tag']],sizeof:12,wire:8},
+  ];
+  const s=pick(STRUCTS);
+  const code='typedef struct {\n'+s.fields.map(f=>'    '+f[0].padEnd(10)+' '+f[1]+';').join('\n')+'\n} reading_t;';
+  const ans=s.wire+' bytes';
+  const cands=[s.sizeof,s.wire+1,s.wire-1,s.wire+2,s.sizeof+2];
+  const used=new Set([s.wire]), wrongs=[];
+  for(const c of cands){
+    if(c>0&&!used.has(c)){used.add(c);wrongs.push(c);}
+    if(wrongs.length===3)break;
+  }
+  if(wrongs.length<3)return null;
+  const reasons=c=>{
+    if(c===s.sizeof)return `That's <code>sizeof(reading_t)</code> — it includes ${s.sizeof-s.wire} byte${s.sizeof-s.wire>1?'s':''} of padding, so it does not match the tightly-packed wire format.`;
+    if(c===s.wire+1)return `Off by one — count the field sizes: ${s.fields.map(f=>f[0]).join(' + ')}.`;
+    if(c===s.wire-1)return `Off by one — the wire size is the sum of field sizes, ${s.wire}.`;
+    if(c===s.wire+2)return `Too large — the wire size is the sum of the field sizes.`;
+    return `Larger than <code>sizeof(reading_t)</code>, which already includes padding.`;
+  };
+  return {
+    level:2, topic:'sizeof(struct) vs wire size',
+    ref:'§4.1 sizeof(struct) ≠ wire size',
+    q:`The wire spec says the payload is the fields tightly packed, in declaration order. What should the length constant be?<div class="codeblock">${code}</div>`,
+    a:ans, w:wrongs.map(c=>[c+' bytes',reasons(c)]),
+    e:`Wire size = sum of field sizes = ${s.fields.map(f=>f[0]).join(' + ')}.<br>On ARM the compiler inserts padding for alignment, so <code>sizeof(reading_t) = ${s.sizeof}</code>, which is ${s.sizeof-s.wire} byte${s.sizeof-s.wire>1?'s':''} larger than the wire format.<br>The length constant must be <strong>${s.wire}</strong> — never <code>sizeof</code>.`,
+    meta:{kind:'struct'}
+  };
+}
+
+function genPWMWrap(){
+  const div=pick([1,2,4,8]);
+  const hz=pick([1000,2000,5000,10000]);
+  const period=Math.round(125e6/div/hz);
+  if(period<100||period>60000)return null;
+  const ans=(period-1)+' ticks';
+  const w=[
+    [period+' ticks',`That's the period in ticks. The counter runs 0..TOP inclusive, so TOP = period − 1.`],
+    [(period-2)+' ticks',`Off by one too far — the correct value is period − 1 = ${period-1}.`],
+    [(period+1)+' ticks',`Off in the other direction — TOP is one less than the period.`]
+  ];
+  if(new Set([ans,...w.map(x=>x[0])]).size<4)return null;
+  return {
+    level:3, topic:'PWM wrap register value',
+    ref:'§11.3 PWM wrap off-by-one',
+    q:`An RP2040 PWM is configured with <code>sys_clk = 125 MHz</code>, <code>clk_div = ${div}</code>, target frequency <code>${hz.toLocaleString('en-US')} Hz</code>. The counter runs <code>0..TOP</code> inclusive, so the period in ticks is <code>TOP + 1</code>. What value should be written to TOP?`,
+    a:ans, w,
+    e:`Period in ticks = sys_clk / clk_div / hz = 125 MHz / ${div} / ${hz.toLocaleString('en-US')} Hz = ${period} ticks.<br>Since the counter runs <code>0..TOP</code> inclusive, <code>TOP + 1 = ${period}</code>, so <code>TOP = ${period-1}</code>.<br>Writing <code>${period}</code> gives a period of <code>${period+1}</code> ticks — a frequency error.`,
+    meta:{kind:'pwm'}
+  };
+}
+
+function genDebounce(){
+  const rpm=pick([100,200,300,600,1000,1500]);
+  const slots=pick([10,20,40,60]);
+  const edge_us=60e6/(rpm*slots);
+  const ans=Math.round(edge_us)+' µs';
+  const w=[
+    [Math.round(60e6/rpm)+' µs',`That's the period for one slot per revolution — forgot to divide by ${slots} slots.`],
+    [Math.round(60e6/slots)+' µs',`That's not RPM-dependent — forgot to multiply by the rotation rate.`],
+    [Math.round(rpm*slots/60e6*1e6)+' µs',`Inverted formula — this is RPM × slots / 60e6, not the period.`]
+  ];
+  if(new Set([ans,...w.map(x=>x[0])]).size<4)return null;
+  return {
+    level:4, topic:'Encoder edge period / debounce limit',
+    ref:'§13.6 Debounce too long for signal',
+    q:`An encoder wheel has <code>${slots}</code> slots and rotates at <code>${rpm} RPM</code>. What is the minimum time between consecutive edges? (The debounce period must be less than this.)`,
+    a:ans, w,
+    e:`One revolution takes 60 / RPM seconds. With ${slots} slots per revolution, the time between edges is:<br><code>edge period = 60e6 / (RPM × slots) = 60,000,000 / (${rpm} × ${slots}) = ${Math.round(edge_us)} µs</code>.<br>The debounce period must be strictly less than this, or alternate edges will be swallowed.`,
+    meta:{kind:'debounce'}
+  };
+}
+
+function genTaskTicks(){
+  const tick_hz=pick([100,250,500,2000]);
+  const ms=pick([2,4,10,20,40,100,200]);
+  const ticks=ms*tick_hz/1000;
+  if(!Number.isInteger(ticks)||ticks<1||ticks>100000)return null;
+  const cands=[ms,ms*tick_hz,tick_hz,ms*tick_hz/100];
+  const used=new Set([ticks]), wrongs=[];
+  for(const c of cands){
+    if(Number.isInteger(c)&&c>0&&!used.has(c)){used.add(c);wrongs.push(c);}
+    if(wrongs.length===3)break;
+  }
+  if(wrongs.length<3)return null;
+  const reasons=c=>{
+    if(c===ms)return `That's the raw milliseconds. <code>vTaskDelay</code> takes ticks; at ${tick_hz} Hz, ${ms} ms = ${ticks} ticks.`;
+    if(c===ms*tick_hz)return `That's ms × Hz = ${c}, which is 1000× too large. The formula is ms × Hz / 1000.`;
+    if(c===tick_hz)return `That's one second's worth of ticks, not the delay for ${ms} ms.`;
+    if(c===ms*tick_hz/100)return `Off by 10× — divide by 1000, not 100.`;
+    return `Not the correct number of ticks.`;
+  };
+  return {
+    level:3, topic:'vTaskDelay ticks vs milliseconds',
+    ref:'§9.3 vTaskDelay(1) ≠ 1 ms',
+    q:`<code>configTICK_RATE_HZ = ${tick_hz}</code>. To delay a task by <code>${ms} ms</code>, what should be passed to <code>vTaskDelay</code>?`,
+    a:ticks+' ticks', w:wrongs.map(c=>[c+' ticks',reasons(c)]),
+    e:`<code>vTaskDelay</code> takes ticks, not milliseconds. The correct conversion is <code>pdMS_TO_TICKS(${ms})</code>.<br>At <code>configTICK_RATE_HZ = ${tick_hz}</code>:<br><code>ticks = ms × tick_hz / 1000 = ${ms} × ${tick_hz} / 1000 = <strong>${ticks}</strong></code>.<br>Never pass raw milliseconds — use <code>pdMS_TO_TICKS(ms)</code>.`,
+    meta:{kind:'ticks'}
+  };
+}
+
+function genWrapElapsed(){
+  const last=0xFFFFFFFF-rnd(10,500);
+  const now=rnd(1,400);
+  const elapsed=now-last+0x100000000;
+  if(elapsed<1||elapsed>1000000)return null;
+  const ans=elapsed+' µs';
+  const hexLast='0x'+last.toString(16).toUpperCase().padStart(8,'0');
+  const hexNow='0x'+now.toString(16).toUpperCase().padStart(8,'0');
+  const w=[
+    ['0 µs',`That's what a <code>now &gt; last + interval</code> comparison gives when the counter wraps — the comparison thinks no time has elapsed.`],
+    [(0x100000000-elapsed)+' µs',`That's the two's-complement magnitude without the +2³² wrap — the elapsed time is small, not huge.`],
+    [(elapsed+0x100000000)+' µs',`Double-counted the wrap — the correct elapsed is ${elapsed} µs.`]
+  ];
+  if(new Set([ans,...w.map(x=>x[0])]).size<4)return null;
+  return {
+    level:4, topic:'Elapsed time across counter wrap',
+    ref:'§11.1 now > last + interval at wrap',
+    q:`A 32-bit microsecond counter has wrapped. <code>last_debounce_us = ${hexLast}</code>, <code>now = ${hexNow}</code>. What does <code>(uint32_t)(now - last_debounce_us)</code> equal?`,
+    a:ans, w,
+    e:`Subtraction is defined to wrap modulo 2³², giving the correct elapsed time even across the wrap:<br><code>(uint32_t)(now − last) = (uint32_t)(${hexNow} − ${hexLast}) = ${elapsed} µs</code>.<br>Never write <code>now &gt; last + interval</code> — the addition overflows at the wrap and the comparison misbehaves. Use <code>(uint32_t)(now − last) &gt; interval</code>.`,
+    meta:{kind:'wrap'}
+  };
+}
+
+function genFrameBounds(){
+  const payload=pick([4,6,8,9,12,16,20,24]);
+  const trailer=pick([1,2,4]);
+  const header=2;
+  const total=header+payload+trailer;
+  const ans='in_len &lt; '+total;
+  const w=[
+    ['in_len &lt; '+(header+trailer),`That's only header + trailer — it ignores the ${payload} payload bytes.`],
+    ['in_len &lt; '+(total-1),`Off by one — the frame needs ${total} bytes: ${header} header + ${payload} payload + ${trailer} trailer.`],
+    ['in_len &lt; '+payload,`That's only the payload size — ignores the ${header} header and ${trailer} trailer bytes.`]
+  ];
+  return {
+    level:2, topic:'Frame bounds check',
+    ref:'§6.2 Missing in_len bounds check',
+    q:`A frame is spec'd as: <code>SOF (1 byte)</code>, <code>LEN (1 byte)</code>, <code>payload (LEN bytes)</code>, <code>trailer (${trailer} byte${trailer>1?'s':''})</code>. A frame arrives with <code>LEN = ${payload}</code>. Which check guarantees the whole frame is present before reading any payload byte?`,
+    a:ans, w,
+    e:`Frame total = header (${header}) + payload (${payload}) + trailer (${trailer}) = <strong>${total} bytes</strong>.<br>The check must be <code>in_len &lt; ${total}</code> — before any read past the header.<br>Checking only <code>in_len &lt; ${header+trailer}</code> or <code>in_len &lt; ${payload}</code> leaves reads past the end possible.`,
+    meta:{kind:'bounds'}
+  };
+}
+
+const GENS=[genStructPad, genPWMWrap, genDebounce, genTaskTicks, genWrapElapsed, genFrameBounds];
+
+/* ============ ENGINE HELPERS ============ */
+function validQ(d){
+  if(!d||!d.w||d.w.length<3)return false;
+  const t=[d.a].concat(d.w.map(x=>x[0]));
+  return new Set(t).size===t.length;
+}
+function tryGen(fn){
+  let d=null;
+  for(let i=0;i<400;i++){
+    try{d=fn();}catch(e){d=null;}
+    if(validQ(d))return d;
+  }
+  return null;
+}
+function materialize(d){
+  const opts=shuffle([{t:d.a,ok:true,r:''}].concat(d.w.map(x=>({t:x[0],ok:false,r:x[1]}))));
+  return {level:d.level,topic:d.topic,ref:d.ref,q:d.q,e:d.e,opts,
+          correct:opts.findIndex(o=>o.ok),sel:null,submitted:false,a:d.a};
+}
+function buildQuiz(){
+  const all=[];
+  STATIC.forEach(d=>all.push(materialize(d)));
+  GENS.forEach(g=>{
+    const d=tryGen(g);
+    if(d&&validQ(d))all.push(materialize(d));
+  });
+  const by={1:[],2:[],3:[],4:[],5:[]};
+  all.forEach(q=>by[q.level].push(q));
+  const out=[];
+  [1,2,3,4,5].forEach(l=>shuffle(by[l]).forEach(q=>out.push(q)));
+  return out;
+}
+</script>
+
+<script id="ui">
+const $=id=>document.getElementById(id);
+let quiz=[],cur=0;
+
+function show(id){['start','quiz','results'].forEach(s=>{$(s).hidden=(s!==id);});window.scrollTo(0,0);}
+function stats(){
+  const ans=quiz.filter(q=>q.submitted);
+  const c=ans.filter(q=>q.sel===q.correct).length;
+  return {answered:ans.length,correct:c,wrong:ans.length-c,total:quiz.length};
+}
+function startQuiz(){
+  try{
+    quiz=buildQuiz();cur=0;
+    if(!quiz.length)throw new Error('No questions were generated.');
+    $('startErr').textContent='';
+    show('quiz');render();
+  }catch(e){
+    $('startErr').textContent='Could not start quiz: '+e.message;
+    console.error(e);
+  }
+}
+
+function render(){
+  const q=quiz[cur],st=stats(),L='ABCDE';
+  $('qnum').textContent='Question '+(cur+1)+' of '+quiz.length;
+  const lv=$('lvl');lv.textContent='Level '+q.level+' · '+LEVELS[q.level];lv.className='badge l'+q.level;
+  $('topic').textContent=q.topic;
+  $('bar').style.width=(st.answered/quiz.length*100)+'%';
+  $('sc-c').textContent=st.correct;$('sc-w').textContent=st.wrong;
+  $('sc-p').textContent=st.answered?Math.round(st.correct/st.answered*100)+'%':'–';
+  $('qtext').innerHTML=q.q;
+
+  $('chips').innerHTML=quiz.map((x,i)=>{
+    let cls='chip'+(i===cur?' cur':'')+(x.submitted?(x.sel===x.correct?' right':' wrong'):'');
+    return '<button class="'+cls+'" data-j="'+i+'" title="Question '+(i+1)+' (level '+x.level+')">'+(i+1)+'</button>';
+  }).join('');
+
+  $('opts').innerHTML=q.opts.map((o,i)=>{
+    let cls='opt';
+    if(q.submitted){if(i===q.correct)cls+=' right';else if(i===q.sel)cls+=' wrong';}
+    else if(i===q.sel)cls+=' sel';
+    return '<button class="'+cls+'" data-i="'+i+'"'+(q.submitted?' disabled':'')+'><span class="L">'+L[i]+'</span><span>'+o.t+'</span></button>';
+  }).join('');
+
+  const fb=$('fb');
+  if(q.submitted){
+    const ok=q.sel===q.correct;
+    let why=q.opts.map((o,i)=>o.ok?'':'<li><strong>'+L[i]+'.</strong> '+o.r+'</li>').join('');
+    fb.className='fb '+(ok?'right':'wrong');fb.hidden=false;
+    fb.innerHTML='<h3>'+(ok?'✓ Correct':'✗ Incorrect')+'</h3>'+
+      (ok?'':'<div>Correct answer: <strong>'+L[q.correct]+'.</strong> '+q.opts[q.correct].t+'</div>')+
+      '<div class="expl">'+q.e+'</div>'+
+      '<div><strong>Why the other options are wrong</strong><ul>'+why+'</ul></div>'+
+      '<div class="ref">Revisit: '+q.ref+'</div>';
+  }else{fb.hidden=true;fb.innerHTML='';}
+
+  $('submitBtn').disabled=q.submitted||q.sel===null;
+  $('prevBtn').disabled=cur===0;
+  const all=st.answered===quiz.length;
+  const nb=$('nextBtn');
+  if(cur<quiz.length-1){nb.textContent='Next →';nb.disabled=false;}
+  else{nb.textContent=all?'See results':'Next unanswered →';nb.disabled=false;}
+  $('finishRow').hidden=!all;
+}
+
+function selectOpt(i){const q=quiz[cur];if(q.submitted)return;q.sel=i;render();}
+function submitAns(){const q=quiz[cur];if(q.submitted||q.sel===null)return;q.submitted=true;render();}
+function nextQ(){
+  if(cur<quiz.length-1){cur++;render();window.scrollTo(0,0);return;}
+  const un=quiz.findIndex(q=>!q.submitted);
+  if(un===-1)showResults();else{cur=un;render();window.scrollTo(0,0);}
+}
+function prevQ(){if(cur>0){cur--;render();window.scrollTo(0,0);}}
+
+function showResults(){
+  const st=stats(),L='ABCDE';
+  const pct=Math.round(st.correct/st.total*100);
+  const byLevel=[1,2,3,4,5].map(l=>{
+    const qs=quiz.filter(q=>q.level===l),c=qs.filter(q=>q.sel===q.correct).length;
+    return {l,n:qs.length,c,p:qs.length?c/qs.length:0};
+  });
+  const topics={};
+  quiz.forEach(q=>{
+    const t=topics[q.topic]||(topics[q.topic]={n:0,c:0,refs:new Set()});
+    t.n++;if(q.sel===q.correct)t.c++;else t.refs.add(q.ref);
+  });
+  const tlist=Object.keys(topics).map(k=>({name:k,n:topics[k].n,c:topics[k].c,refs:Array.from(topics[k].refs)}));
+  const weak=tlist.filter(t=>t.c<t.n).sort((a,b)=>a.c/a.n-b.c/b.n);
+  const meterCls=p=>p>=0.75?'':(p>=0.5?'mid':'low');
+
+  let h='<div class="card"><h1>Results</h1>'+
+    '<div class="row" style="gap:28px;margin:10px 0">'+
+    '<div><div class="big">'+st.correct+' / '+st.total+'</div><div class="sub" style="margin:0">Total score</div></div>'+
+    '<div><div class="big">'+pct+'%</div><div class="sub" style="margin:0">Overall percentage</div></div>'+
+    '<div><div class="big" style="color:var(--ok)">'+st.correct+'</div><div class="sub" style="margin:0">Correct</div></div>'+
+    '<div><div class="big" style="color:var(--bad)">'+st.wrong+'</div><div class="sub" style="margin:0">Incorrect</div></div></div>'+
+    '<button class="btn primary" id="restartBtn">Restart quiz (fresh numbers and order)</button></div>';
+
+  h+='<div class="card"><h2>Performance by difficulty level</h2><table><tr><th>Level</th><th>Score</th><th style="width:40%">Accuracy</th></tr>'+
+    byLevel.map(x=>'<tr><td><span class="badge l'+x.l+'">L'+x.l+'</span> '+LEVELS[x.l]+'</td><td>'+x.c+' / '+x.n+'</td><td><div class="meter"><div class="'+meterCls(x.p)+'" style="width:'+Math.round(x.p*100)+'%"></div></div></td></tr>').join('')+
+    '</table></div>';
+
+  h+='<div class="card"><h2>Concepts to revisit</h2>';
+  if(!weak.length)h+='<p>No missed topics. Re-run the quiz to practise with new numerical values.</p>';
+  else{
+    h+='<div class="note">Topics where you lost marks, weakest first. Re-read the checklist sections listed under each.</div><table><tr><th>Topic</th><th>Score</th><th>Material to review</th></tr>'+
+      weak.map(t=>'<tr><td>'+t.name+'</td><td>'+t.c+' / '+t.n+'</td><td>'+t.refs.join('<br>')+'</td></tr>').join('')+'</table>';
+  }
+  const strong=tlist.filter(t=>t.c===t.n).map(t=>t.name);
+  if(strong.length)h+='<p class="sub" style="margin-top:12px">Solid topics: '+strong.join(', ')+'.</p>';
+  h+='</div>';
+
+  h+='<div class="card"><h2>Full review</h2>'+quiz.map((q,i)=>{
+    const ok=q.sel===q.correct;
+    const why=q.opts.map((o,j)=>o.ok?'':'<li><strong>'+L[j]+'.</strong> '+o.r+'</li>').join('');
+    return '<div class="rev"><div class="qmeta"><span class="badge l'+q.level+'">Level '+q.level+'</span><span>Q'+(i+1)+' · '+q.topic+'</span> <span class="'+(ok?'tag-ok':'tag-bad')+'">'+(ok?'✓ Correct':'✗ Incorrect')+'</span></div>'+
+      '<div class="qtext" style="font-size:1rem">'+q.q+'</div>'+
+      '<div class="ans">Your answer: <strong>'+L[q.sel]+'.</strong> '+q.opts[q.sel].t+'</div>'+
+      (ok?'':'<div class="ans">Correct answer: <strong>'+L[q.correct]+'.</strong> '+q.opts[q.correct].t+'</div>')+
+      '<div class="expl" style="margin:8px 0">'+q.e+'</div>'+
+      '<details><summary>Why the other options are wrong</summary><ul>'+why+'</ul></details>'+
+      '<div class="ref">Revisit: '+q.ref+'</div></div>';
+  }).join('')+'</div>';
+
+  const r=$('results');r.innerHTML=h;show('results');
+  $('restartBtn').addEventListener('click',startQuiz);
+}
+
+try{
+  $('startBtn').addEventListener('click',startQuiz);
+  $('opts').addEventListener('click',e=>{const b=e.target.closest('.opt');if(b)selectOpt(+b.dataset.i);});
+  $('chips').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b){cur=+b.dataset.j;render();}});
+  $('submitBtn').addEventListener('click',submitAns);
+  $('nextBtn').addEventListener('click',nextQ);
+  $('prevBtn').addEventListener('click',prevQ);
+  $('finishBtn').addEventListener('click',showResults);
+  $('nq').textContent=STATIC.length+GENS.length;
+}catch(e){console.error(e);}
+</script>
+</body>
+</html>
