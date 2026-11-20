@@ -1,0 +1,1981 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 8 Revision Studio: NoSQL Database Systems</title>
+<style>
+  :root {
+    --bg-primary: #f1f5f9;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-alt: #f8fafc;
+    --bg-stage: #0f172a;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --accent-indigo: #4f46e5;
+    --accent-indigo-glow: rgba(79, 70, 229, 0.14);
+    --accent-teal: #0d9488;
+    --accent-teal-glow: rgba(13, 148, 136, 0.14);
+    --accent-sky: #0284c7;
+    --accent-amber: #d97706;
+    --accent-amber-glow: rgba(217, 119, 6, 0.14);
+    --accent-rose: #e11d48;
+    --accent-rose-glow: rgba(225, 29, 72, 0.14);
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow-card: 0 4px 16px rgba(15, 23, 42, 0.06);
+  }
+
+  [data-theme="dark"] {
+    --bg-primary: #090d16;
+    --bg-secondary: #111827;
+    --bg-card: #162033;
+    --bg-card-alt: #1d2942;
+    --bg-stage: #070b12;
+    --border-color: #26344e;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-indigo: #6366f1;
+    --accent-indigo-glow: rgba(99, 102, 241, 0.25);
+    --accent-teal: #14b8a6;
+    --accent-teal-glow: rgba(20, 184, 166, 0.22);
+    --accent-sky: #38bdf8;
+    --accent-amber: #f59e0b;
+    --accent-amber-glow: rgba(245, 158, 11, 0.2);
+    --accent-rose: #f43f5e;
+    --accent-rose-glow: rgba(244, 63, 94, 0.2);
+    --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.28);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 305px;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    transition: transform 0.3s ease, background-color 0.25s ease;
+  }
+
+  .sidebar-header {
+    padding: 1.15rem 1.35rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.45rem;
+  }
+
+  .course-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--accent-teal);
+    background: var(--accent-teal-glow);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(20, 184, 166, 0.35);
+  }
+
+  .theme-toggle-btn {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 4px 9px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.76rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+  }
+  .theme-toggle-btn:hover { border-color: var(--accent-indigo); }
+
+  .sidebar-title { font-size: 1.02rem; font-weight: 800; line-height: 1.28; }
+  .sidebar-sub { font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.15rem; }
+
+  .sidebar-search {
+    padding: 0.68rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 0.5rem 0.82rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    outline: none;
+  }
+  .search-input:focus { border-color: var(--accent-indigo); }
+
+  .search-results-dropdown {
+    position: absolute;
+    left: 1.25rem;
+    right: 1.25rem;
+    top: calc(100% - 4px);
+    background: var(--bg-card);
+    border: 1px solid var(--accent-indigo);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 60;
+    display: none;
+  }
+  .search-results-dropdown.open { display: block; }
+
+  .search-hit {
+    padding: 0.55rem 0.8rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    font-size: 0.78rem;
+  }
+  .search-hit:last-child { border-bottom: none; }
+  .search-hit:hover { background: var(--accent-indigo-glow); }
+
+  .progress-box {
+    padding: 0.72rem 1.35rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.73rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.32rem;
+  }
+
+  .progress-track {
+    height: 7px;
+    background: var(--bg-primary);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 12.5%;
+    background: linear-gradient(90deg, var(--accent-indigo), var(--accent-teal));
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+
+  .nav-list {
+    list-style: none;
+    padding: 0.55rem;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.24rem;
+  }
+
+  .nav-btn {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.68rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+
+  .nav-btn:hover { background: var(--bg-card-alt); color: var(--text-primary); }
+
+  .nav-btn.active {
+    background: linear-gradient(135deg, var(--accent-indigo-glow), var(--accent-teal-glow));
+    border-color: rgba(99, 102, 241, 0.45);
+    color: var(--text-primary);
+  }
+
+  .nav-num {
+    flex-shrink: 0;
+    width: 23px;
+    height: 23px;
+    border-radius: 6px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-top: 1px;
+  }
+
+  .nav-btn.active .nav-num { background: var(--accent-indigo); border-color: var(--accent-indigo); color: #fff; }
+  .nav-btn.visited .nav-num { background: var(--accent-teal); border-color: var(--accent-teal); color: #fff; }
+
+  .nav-title { display: block; font-size: 0.81rem; font-weight: 700; line-height: 1.24; }
+  .nav-desc { display: block; font-size: 0.69rem; color: var(--text-muted); margin-top: 2px; }
+
+  .sidebar-footer { padding: 0.8rem 1.25rem; border-top: 1px solid var(--border-color); }
+
+  .download-btn {
+    width: 100%;
+    padding: 0.62rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(20, 184, 166, 0.45);
+    background: var(--accent-teal-glow);
+    color: var(--accent-teal);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+  .download-btn:hover { background: var(--accent-teal); color: #ffffff; }
+
+  /* Mobile Topbar */
+  .mobile-topbar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 58px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 1rem;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 45;
+  }
+
+  .hamburger-btn {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 11px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 48;
+  }
+
+  /* Main Area */
+  .main-content {
+    margin-left: 305px;
+    flex: 1;
+    padding: 2.1rem 2.6rem 4rem;
+    max-width: 1280px;
+  }
+
+  .module-section { display: none; animation: fadeSlide 0.28s ease-out; }
+  .module-section.active { display: block; }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .module-header {
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+
+  .module-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--accent-teal);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.28rem;
+  }
+
+  .module-title { font-size: 1.72rem; font-weight: 800; letter-spacing: -0.02em; }
+  .module-subtitle { color: var(--text-secondary); font-size: 0.91rem; max-width: 820px; margin-top: 0.35rem; }
+
+  /* Cards & Grids */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.45rem;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 1.65rem;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .card-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.55rem; }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 6px;
+    text-transform: uppercase;
+  }
+
+  .tag-indigo { background: var(--accent-indigo-glow); color: var(--accent-indigo); border: 1px solid rgba(99, 102, 241, 0.38); }
+  .tag-teal { background: var(--accent-teal-glow); color: var(--accent-teal); border: 1px solid rgba(20, 184, 166, 0.38); }
+  .tag-amber { background: var(--accent-amber-glow); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.38); }
+  .tag-rose { background: var(--accent-rose-glow); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.38); }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.95rem; }
+
+  .concept-box {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent-indigo);
+    border-radius: var(--radius-md);
+    padding: 0.95rem 1.1rem;
+  }
+  .concept-box.teal { border-left-color: var(--accent-teal); }
+  .concept-box.amber { border-left-color: var(--accent-amber); }
+  .concept-box.rose { border-left-color: var(--accent-rose); }
+
+  .concept-box h4 { font-size: 0.92rem; font-weight: 700; margin-bottom: 0.32rem; color: var(--text-primary); }
+  .concept-box p, .concept-box li { font-size: 0.83rem; color: var(--text-secondary); }
+
+  /* Pill Tabs */
+  .pill-bar { display: flex; flex-wrap: wrap; gap: 0.48rem; margin-bottom: 1.1rem; }
+
+  .pill-btn {
+    padding: 0.48rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 0.79rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .pill-btn:hover { border-color: var(--accent-indigo); color: var(--text-primary); }
+  .pill-btn.active { background: var(--accent-indigo); border-color: var(--accent-indigo); color: #fff; }
+
+  /* Diagram Stage */
+  .diagram-stage {
+    background: #090e1a;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    position: relative;
+    overflow-x: auto;
+  }
+
+  .diagram-stage svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+
+  .inspector-panel {
+    margin-top: 0.95rem;
+    background: var(--bg-card-alt);
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    border-radius: var(--radius-md);
+    padding: 1.05rem 1.2rem;
+  }
+
+  .terminal-box {
+    background: #090e1a;
+    border: 1px solid #26344e;
+    border-radius: var(--radius-md);
+    padding: 0.92rem 1.15rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: #e2e8f0;
+    line-height: 1.62;
+  }
+
+  /* Tables */
+  .data-table-wrap { overflow-x: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left; }
+  th {
+    background: var(--bg-card-alt);
+    color: var(--accent-teal);
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    text-transform: uppercase;
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  td { padding: 0.72rem 0.9rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+
+  .form-input {
+    padding: 0.5rem 0.8rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--accent-indigo); }
+
+  input[type="range"] { width: 100%; accent-color: var(--accent-indigo); cursor: pointer; }
+
+  /* Disk Blocks for Columnar vs Row-wise */
+  .disk-block {
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 3px;
+    border-radius: 5px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    transition: all 0.2s ease;
+  }
+  .disk-block.hl {
+    background: var(--accent-teal-glow);
+    border-color: var(--accent-teal);
+    color: var(--accent-teal);
+    transform: scale(1.04);
+  }
+
+  /* Bar Chart */
+  .bar-row { margin-bottom: 0.75rem; }
+  .bar-meta { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; }
+  .bar-track { height: 14px; background: var(--bg-primary); border-radius: 999px; overflow: hidden; border: 1px solid var(--border-color); }
+  .bar-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+
+  /* Checklist Advisor */
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card-alt);
+    cursor: pointer;
+    font-size: 0.83rem;
+    margin-bottom: 0.5rem;
+  }
+  .check-item input { margin-top: 3px; accent-color: var(--accent-indigo); width: 16px; height: 16px; }
+
+  /* Quiz */
+  .quiz-card {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.2rem;
+    margin-bottom: 1.1rem;
+  }
+  .quiz-q { font-weight: 700; font-size: 0.94rem; margin-bottom: 0.8rem; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 0.48rem; }
+  .quiz-opt {
+    padding: 0.72rem 0.95rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    gap: 0.65rem;
+    transition: all 0.18s ease;
+  }
+  .quiz-opt:hover:not(:disabled) { border-color: var(--accent-indigo); background: var(--accent-indigo-glow); }
+  .quiz-opt.correct { border-color: var(--accent-teal); background: rgba(20, 184, 166, 0.2); }
+  .quiz-opt.incorrect { border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.2); }
+  .quiz-exp { margin-top: 0.72rem; padding: 0.72rem 0.95rem; border-radius: var(--radius-sm); font-size: 0.82rem; display: none; }
+  .quiz-exp.show { display: block; }
+
+  /* Footer Nav */
+  .module-footer-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--border-color);
+    gap: 1rem;
+  }
+
+  .btn-primary, .btn-secondary {
+    padding: 0.66rem 1.18rem;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: 0.83rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .btn-primary { background: var(--accent-indigo); color: #fff; border: 1px solid var(--accent-indigo); }
+  .btn-primary:hover { opacity: 0.92; }
+  .btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+  .btn-secondary:hover { border-color: var(--accent-teal); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--accent-teal);
+    color: var(--text-primary);
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    font-size: 0.84rem;
+    font-weight: 600;
+    z-index: 100;
+    transform: translateY(130%);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 980px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-backdrop.open { display: block; }
+    .mobile-topbar { display: flex; }
+    .main-content { margin-left: 0; padding: 5rem 1.2rem 3rem; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Mobile Topbar -->
+  <header class="mobile-topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="hamburger-btn" id="menuToggle" aria-label="Toggle Menu">&#9776;</button>
+      <span style="font-weight:700;font-size:0.92rem;">Ch. 8: NoSQL Database Systems</span>
+    </div>
+    <span class="tag tag-teal" id="mobileProgressTag">13%</span>
+  </header>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="header-top-row">
+        <span class="course-badge">&#9679; DB // LECTURE 08</span>
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Light/Dark Mode">&#9788; Theme</button>
+      </div>
+      <h1 class="sidebar-title">NoSQL Database Systems</h1>
+      <p class="sidebar-sub">Interactive Architecture &amp; Models Studio</p>
+    </div>
+
+    <div class="sidebar-search">
+      <input type="text" class="search-input" id="globalSearchInput" placeholder="Search Scale Out, Redis, MongoDB, Cassandra, Neo4j...">
+      <div class="search-results-dropdown" id="searchResultsDropdown"></div>
+    </div>
+
+    <div class="progress-box">
+      <div class="progress-meta">
+        <span>Revision Coverage</span>
+        <span id="progressPercent">13%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <ul class="nav-list" id="navList">
+      <li>
+        <button class="nav-btn active" data-module="1">
+          <span class="nav-num">01</span>
+          <div>
+            <span class="nav-title">Motivation &amp; Scalability</span>
+            <span class="nav-desc">Centralized RDBMS vs. Horizontal Scale Out</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="2">
+          <span class="nav-num">02</span>
+          <div>
+            <span class="nav-title">4 NoSQL Categories</span>
+            <span class="nav-desc">Key-Value, Document, Columnar, Graph</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="3">
+          <span class="nav-num">03</span>
+          <div>
+            <span class="nav-title">Key-Value &amp; Redis CLI Lab</span>
+            <span class="nav-desc">O(1) Hash Table, SET/GET/DEL, RAM+Disk</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="4">
+          <span class="nav-num">04</span>
+          <div>
+            <span class="nav-title">Document DB &amp; MongoDB</span>
+            <span class="nav-desc">BSON, SQL Mapping, db.ppl CRUD, Sharding</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="5">
+          <span class="nav-num">05</span>
+          <div>
+            <span class="nav-title">Columnar DB &amp; Cassandra</span>
+            <span class="nav-desc">Row vs. Column Layout &amp; Facebook 0.12ms</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="6">
+          <span class="nav-num">06</span>
+          <div>
+            <span class="nav-title">Graph DB &amp; Neo4j Explorer</span>
+            <span class="nav-desc">Index-Free Adjacency &amp; Property Graph</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="7">
+          <span class="nav-num">07</span>
+          <div>
+            <span class="nav-title">Migration &amp; Decision Guide</span>
+            <span class="nav-desc">3 Migration Schemes &amp; SQL vs. NoSQL Advisor</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="8">
+          <span class="nav-num">08</span>
+          <div>
+            <span class="nav-title">Exam Readiness Quiz</span>
+            <span class="nav-desc">10 Active Recall Questions</span>
+          </div>
+        </button>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <button class="download-btn" id="downloadHtmlBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Self-Contained HTML
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- ==================== MODULE 1 ==================== -->
+    <section class="module-section active" id="module-1">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Topic 1 // Relational Strengths &amp; The Scalability Gap</div>
+          <h2 class="module-title">Motivation for NoSQL: Vertical vs. Horizontal Scaling</h2>
+          <p class="module-subtitle">Compare the strengths and centralization bottlenecks of traditional relational databases against modern big-data realities and horizontal cluster scaling.</p>
+        </div>
+        <span class="tag tag-indigo">Scale Up vs. Scale Out</span>
+      </div>
+
+      <!-- 1.1 Relational Strengths & Centralization Pros/Cons -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.1 Relational Database Strengths &amp; Centralized Architecture Trade-Offs</h3>
+          <span class="tag tag-teal">ACID &amp; SQL</span>
+        </div>
+
+        <div class="grid-3">
+          <div class="concept-box">
+            <h4>Core RDBMS Advantages</h4>
+            <ul style="padding-left:1.1rem;">
+              <li>Strict transactional integrity (<strong>ACID</strong>).</li>
+              <li>Robust concurrency control &amp; automated recovery.</li>
+              <li>Solid mathematical foundation (relational algebra &amp; set theory).</li>
+              <li>Standardized SQL &amp; mature tool ecosystem.</li>
+            </ul>
+          </div>
+          <div class="concept-box teal">
+            <h4>Pros of Centralization (Single Node)</h4>
+            <ul style="padding-left:1.1rem;">
+              <li>Fast local table joins in memory/disk.</li>
+              <li>Simpler administration and configuration.</li>
+              <li>Straightforward single-point transaction processing.</li>
+            </ul>
+          </div>
+          <div class="concept-box rose">
+            <h4>Cons of Centralization</h4>
+            <ul style="padding-left:1.1rem;">
+              <li><strong>Single point of failure</strong>.</li>
+              <li>Severe hardware resource ceilings (CPU/RAM/Disk).</li>
+              <li>Difficult to partition or distribute across geographic regions.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.2 Interactive Scale Up vs. Scale Out Simulator -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.2 Interactive Scalability Simulator: Scale Up (SQL) vs. Scale Out (NoSQL)</h3>
+          <span class="tag tag-amber" id="trafficLoadBadge">Traffic Load: 40% (Moderate)</span>
+        </div>
+
+        <div style="margin-bottom:0.95rem;">
+          <label style="font-size:0.84rem;font-weight:700;display:block;margin-bottom:0.35rem;">Adjust Concurrent Data &amp; Traffic Demand (Big Data + Geo-Distribution):</label>
+          <input type="range" min="1" max="5" value="2" id="scaleWorkloadSlider">
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 820 230" width="820" height="230" id="scalabilitySvg"></svg>
+        </div>
+        <div class="inspector-panel" id="scalabilityInspector"></div>
+      </div>
+
+      <div class="module-footer-nav">
+        <span style="font-size:0.8rem;color:var(--text-muted);">Module 1 of 8</span>
+        <button class="btn-primary" onclick="goToModule(2)">Next: 4 NoSQL Categories &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 2 ==================== -->
+    <section class="module-section" id="module-2">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Topic 2 // Taxonomy &amp; Philosophical Goals</div>
+          <h2 class="module-title">Overview &amp; Classification of NoSQL Databases</h2>
+          <p class="module-subtitle">Explore what NoSQL ("Not Only SQL", Non-SQL, Neo SQL) means and compare the 4 major data models: Key-Value, Document, Columnar, and Graph.</p>
+        </div>
+        <span class="tag tag-teal">Not Only SQL</span>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">2.1 Definition &amp; Philosophical Goals</h3>
+          <span class="tag tag-indigo">Generalizability &amp; Availability</span>
+        </div>
+        <div class="grid-2">
+          <div class="concept-box">
+            <h4>What Does "NoSQL" Stand For?</h4>
+            <p><strong>Not Only SQL</strong> (also referred to as <em>Non-SQL</em>, <em>Neo SQL</em>, or <em>No SQL</em>). It complements relational databases rather than replacing them universally.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>Primary Philosophical Objective</h4>
+            <p>Simplify data models to improve generalizability and efficiently handle diverse unstructured/semi-structured data formats, high availability, and geo-distributed nodes.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.2 Four Major Categories Explorer -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">2.2 The 4 Major Categories of NoSQL Databases</h3>
+          <span class="tag tag-amber">Click Category to Inspect</span>
+        </div>
+
+        <div class="pill-bar" id="nosqlCatBtns">
+          <button class="pill-btn active" data-ncat="0">1. Key-Value Databases</button>
+          <button class="pill-btn" data-ncat="1">2. Document Databases</button>
+          <button class="pill-btn" data-ncat="2">3. Columnar (Wide-Column)</button>
+          <button class="pill-btn" data-ncat="3">4. Graph Databases</button>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 820 215" width="820" height="215" id="nosqlCategorySvg"></svg>
+        </div>
+        <div class="inspector-panel" id="nosqlCategoryInspector"></div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(1)">&larr; Previous: Motivation &amp; Scalability</button>
+        <button class="btn-primary" onclick="goToModule(3)">Next: Key-Value &amp; Redis CLI Lab &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 3 ==================== -->
+    <section class="module-section" id="module-3">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Topic 3 // O(1) Distributed Hash Table</div>
+          <h2 class="module-title">Key-Value Database Model &amp; Redis Interactive CLI</h2>
+          <p class="module-subtitle">Understand $O(1)$ primary-key lookup, why complex filtering/joins happen outside the DB in application code (e.g. Python), and run the exact Redis CLI trace commands.</p>
+        </div>
+        <span class="tag tag-teal">In-Memory RAM + Disk Snapshot</span>
+      </div>
+
+      <!-- 3.1 & 3.2 Fundamentals & Redis Spotlight -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">3.1 &amp; 3.2 Key-Value Fundamentals &amp; Redis Spotlight</h3>
+          <span class="tag tag-indigo">C++ In-Memory Engine</span>
+        </div>
+        <div class="grid-3">
+          <div class="concept-box">
+            <h4>O(1) Hash Table Access</h4>
+            <p>Flat hash table mapping unique keys to values via <code>GET</code>, <code>PUT</code>/<code>SET</code>, and <code>DEL</code>. No native SQL joins or <code>WHERE</code> filters—joins must be written in application code (e.g., Python).</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>In-Memory Speed + Persistence</h4>
+            <p>Redis (Remote Dictionary Server, open-source C++) keeps datasets in <strong>RAM</strong> for ultra-low latency while periodically saving snapshots or logs to persistent <strong>disk</strong>.</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>Rich Native Data Structures</h4>
+            <p>Supports <strong>Strings, Hashes, Lists, Sets, Sorted Sets, and Bitmaps</strong> with broad language bindings (Python, Java, C/C++, C#, R, MATLAB, PHP, etc.).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3.3 Interactive Redis CLI & Hash Table Simulator -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">3.3 Interactive Redis CLI &amp; In-Memory Hash Table Trace</h3>
+          <span class="tag tag-amber">Click Lecture Commands or Type Custom</span>
+        </div>
+
+        <div class="pill-bar">
+          <button class="pill-btn" style="margin:0;" onclick="execRedisCmd('SET key2003 &quot;DBSys&quot;')">1. SET key2003 "DBSys"</button>
+          <button class="pill-btn" style="margin:0;" onclick="execRedisCmd('GET key2003')">2. GET key2003</button>
+          <button class="pill-btn" style="margin:0;" onclick="execRedisCmd('DEL key2003 key1234')">3. DEL key2003 key1234</button>
+          <button class="pill-btn" style="margin:0;" onclick="execRedisCmd('GET key2003')">4. GET key2003 &rarr; (nil)</button>
+          <button class="pill-btn" style="margin:0;" onclick="resetRedisSim()">Reset Store</button>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:0.85rem;">
+          <input type="text" id="redisCustomInput" class="form-input" style="flex:1;min-width:240px;" placeholder='Type command e.g. SET module "INF2003" or GET module'>
+          <button class="btn-primary" style="padding:0.5rem 1rem;" id="runRedisCustomBtn">Execute</button>
+        </div>
+
+        <div class="grid-2" style="align-items:start;">
+          <div class="terminal-box" id="redisCliOutput" style="min-height:175px;"></div>
+          <div class="data-table-wrap" id="redisHashTableView"></div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(2)">&larr; Previous: 4 NoSQL Categories</button>
+        <button class="btn-primary" onclick="goToModule(4)">Next: Document DB &amp; MongoDB &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 4 ==================== -->
+    <section class="module-section" id="module-4">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Topic 4 // Schema-Less BSON &amp; Horizontal Sharding</div>
+          <h2 class="module-title">Document Database Model &amp; MongoDB Deep-Dive</h2>
+          <p class="module-subtitle">Compare sparse RDBMS NULL tables against dynamic BSON documents (<code>Lanting Xu</code> vs. <code>Jetson Nano</code>), master SQL-to-MongoDB terminology, and execute live <code>db.ppl</code> CRUD commands.</p>
+        </div>
+        <span class="tag tag-indigo">JSON / BSON / XML</span>
+      </div>
+
+      <!-- 4.1 Heterogeneous Data Comparison -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">4.1 Heterogeneous Data: Why RDBMS Creates Sparse NULLs vs. Document Flexibility</h3>
+          <div class="pill-bar" style="margin-bottom:0;" id="docVsSqlBtns">
+            <button class="pill-btn active" data-dvmode="doc">MongoDB Schema-Less Documents (Clean)</button>
+            <button class="pill-btn" data-dvmode="sql">Relational Table Equivalent (Sparse NULLs)</button>
+          </div>
+        </div>
+
+        <div id="docVsSqlDisplay"></div>
+        <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.8rem;">
+          <strong>Key Benefits:</strong> Eliminates object-relational impedance mismatch (less translation/assembly overhead) and allows dynamic schema evolution without <code>ALTER TABLE</code> migrations.
+        </p>
+      </div>
+
+      <!-- 4.2 SQL vs MongoDB Terminology Mapping -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">4.2 SQL vs. MongoDB Terminology Mapping</h3>
+          <span class="tag tag-teal">8 Essential Mappings</span>
+        </div>
+        <div class="data-table-wrap">
+          <table>
+            <thead>
+              <tr><th>Relational DBMS Term</th><th>MongoDB Equivalent</th><th>Concept / Explanation</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Database</strong></td><td><span class="tag tag-indigo">Database</span></td><td>Top-level storage container</td></tr>
+              <tr><td><strong>Table / View</strong></td><td><span class="tag tag-indigo">Collection</span></td><td>Group of stored records/documents</td></tr>
+              <tr><td><strong>Row</strong></td><td><span class="tag tag-teal">Document (BSON)</span></td><td>Single record containing key-value pairs</td></tr>
+              <tr><td><strong>Column</strong></td><td><span class="tag tag-teal">Field</span></td><td>Individual attribute inside a document</td></tr>
+              <tr><td><strong>Index</strong></td><td><span class="tag tag-indigo">Index</span></td><td>B-tree / secondary search optimization</td></tr>
+              <tr><td><strong>Join</strong></td><td><span class="tag tag-amber">Embedded Document</span></td><td>Nesting related data inside a single document</td></tr>
+              <tr><td><strong>Foreign Key</strong></td><td><span class="tag tag-amber">Reference</span></td><td>Storing document <code>_id</code> pointers across collections</td></tr>
+              <tr><td><strong>Partition</strong></td><td><span class="tag tag-rose">Shard</span></td><td>Automated horizontal data distribution across nodes</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 4.3 & 4.4 MongoDB db.ppl Interactive CRUD Sandbox -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">4.3 &amp; 4.4 Interactive MongoDB <code>db.ppl</code> CRUD Sandbox</h3>
+          <span class="tag tag-amber">Auto _id &amp; Duplicate Insertions</span>
+        </div>
+
+        <div class="pill-bar">
+          <button class="pill-btn" style="margin:0;" onclick="runMongoPreset('ins1')">1. insert({_id:11, Spider Man})</button>
+          <button class="pill-btn" style="margin:0;" onclick="runMongoPreset('ins2')">2. insert({Optimus Prime}) [Auto _id]</button>
+          <button class="pill-btn" style="margin:0;" onclick="runMongoPreset('dup')">3. Insert Duplicate Payload</button>
+          <button class="pill-btn" style="margin:0;" onclick="runMongoPreset('findIn')">4. find({type: {$in: [...]}})</button>
+          <button class="pill-btn" style="margin:0;" onclick="runMongoPreset('upd')">5. update(Avengers &rarr; The Avengers)</button>
+          <button class="pill-btn" style="margin:0;" onclick="runMongoPreset('remRegex')">6. remove({type: /^s/})</button>
+          <button class="pill-btn" style="margin:0;" onclick="resetMongoStore()">Reset Collection</button>
+        </div>
+
+        <div class="terminal-box" style="margin-bottom:0.85rem;" id="mongoCmdLog">Click any MongoDB CRUD operation above to inspect live BSON documents in <code>db.ppl</code>!</div>
+        <div class="data-table-wrap" id="mongoCollectionView"></div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(3)">&larr; Previous: Key-Value &amp; Redis CLI</button>
+        <button class="btn-primary" onclick="goToModule(5)">Next: Columnar DB &amp; Cassandra &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 5 ==================== -->
+    <section class="module-section" id="module-5">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Topic 5 // Wide-Column Storage &amp; Analytical Performance</div>
+          <h2 class="module-title">Columnar Database Model &amp; Facebook Cassandra Case Study</h2>
+          <p class="module-subtitle">Visualize row-wise (MySQL) vs. column-wise (Cassandra) disk storage blocks, inspect the 3-part key <code>(Row Key, Column Key, Timestamp)</code>, and compare Facebook's 50GB message search latency gains.</p>
+        </div>
+        <span class="tag tag-teal">300ms &rarr; 0.12ms Write</span>
+      </div>
+
+      <!-- 5.1 & 5.2 Row-Wise vs Column-Wise Disk Layout -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">5.1 &amp; 5.2 Row-Wise (MySQL) vs. Column-Wise (Cassandra) Disk Storage</h3>
+          <div class="pill-bar" style="margin-bottom:0;" id="colHighlightBtns">
+            <button class="pill-btn active" data-chl="none">Show All Disk Blocks</button>
+            <button class="pill-btn" data-chl="age">Analytical Query: AVG(age)</button>
+            <button class="pill-btn" data-chl="name">Analytical Query: SELECT name</button>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:1rem;">
+          <div class="concept-box rose">
+            <h4>Relational Row-Wise Disk Layout (e.g., MySQL)</h4>
+            <p style="margin-bottom:0.5rem;">Stores full records contiguously; reading 1 column forces reading entire rows:</p>
+            <div id="rowWiseBlocks"></div>
+          </div>
+          <div class="concept-box teal">
+            <h4>Columnar Disk Layout (e.g., Cassandra)</h4>
+            <p style="margin-bottom:0.5rem;">Stores all values of each column contiguously (high compression + fast column scans):</p>
+            <div id="colWiseBlocks"></div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="concept-box">
+            <h4>3-Part Key Structure: <code>(Row Key, Column Key, Timestamp)</code></h4>
+            <p>Every cell is addressed by Row Key, Column Key, and a <strong>Timestamp</strong> used for data versioning, conflict resolution, and history tracking across distributed nodes.</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>Strengths vs. Write Trade-Off</h4>
+            <p><strong>Strengths:</strong> High compression (identical types stored together), self-indexing, fast analytical reads.<br><strong>Weakness:</strong> Inserting a full multi-column row is slower because values are split across multiple column blocks on disk.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5.3 Facebook 50GB Message Search Case Study -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">5.3 Real-World Case Study: Facebook 50GB Message Search (MySQL &rarr; Cassandra)</h3>
+          <span class="tag tag-indigo">2,500x Faster Writes</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="concept-box">
+            <h4>Write Latency Reduction (300 ms &rarr; 0.12 ms)</h4>
+            <div class="bar-row" style="margin-top:0.6rem;">
+              <div class="bar-meta"><span>MySQL (Before)</span><span style="color:var(--accent-rose);">300 ms</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--accent-rose);"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-meta"><span>Cassandra (After)</span><span style="color:var(--accent-teal);">0.12 ms</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:2%;background:var(--accent-teal);"></div></div>
+            </div>
+          </div>
+
+          <div class="concept-box teal">
+            <h4>Read Latency Reduction (350 ms &rarr; 15 ms)</h4>
+            <div class="bar-row" style="margin-top:0.6rem;">
+              <div class="bar-meta"><span>MySQL (Before)</span><span style="color:var(--accent-rose);">350 ms</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--accent-rose);"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-meta"><span>Cassandra (After)</span><span style="color:var(--accent-teal);">15 ms (23x faster)</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:6%;background:var(--accent-teal);"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(4)">&larr; Previous: Document DB &amp; MongoDB</button>
+        <button class="btn-primary" onclick="goToModule(6)">Next: Graph DB &amp; Neo4j Explorer &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 6 ==================== -->
+    <section class="module-section" id="module-6">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Topic 6 // Index-Free Adjacency &amp; Connected Data</div>
+          <h2 class="module-title">Graph Database Model &amp; Neo4j Property Graph Explorer</h2>
+          <p class="module-subtitle">Explore explicit graph storage using <strong>index-free adjacency</strong>, click nodes to inspect local traversal pointers, and compare RDBMS vs. Graph terminology.</p>
+        </div>
+        <span class="tag tag-indigo">Neo4j Property Graph</span>
+      </div>
+
+      <!-- 6.1 & 6.2 Interactive Neo4j Property Graph -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">6.1 &amp; 6.2 Interactive Property Graph &amp; Index-Free Adjacency</h3>
+          <span class="tag tag-teal">Click Any Node to Traverse Neighbors</span>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 820 245" width="820" height="245" id="neo4jGraphSvg"></svg>
+        </div>
+        <div class="inspector-panel" id="neo4jNodeInspector"></div>
+
+        <div class="grid-4" style="margin-top:1rem;">
+          <div class="concept-box">
+            <h4>1. Node</h4>
+            <p>Represents entities (e.g., Alice, Tom Hanks, Dept). Stores properties and direct pointers to adjacent edges.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>2. Label</h4>
+            <p>Classifies or groups nodes into types (e.g., <code>:Person</code>, <code>:Department</code>, <code>:Movie</code>).</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>3. Relationship</h4>
+            <p>Directed link connecting two nodes with a specific Type (e.g., <code>:BELONGS_TO</code>, <code>:ACTED_IN</code>, <code>:DIRECTED</code>) and properties.</p>
+          </div>
+          <div class="concept-box rose">
+            <h4>4. Property</h4>
+            <p>Named key-value pairs on nodes or relationships (e.g., <code>name: 'Tom Hanks'</code>, <code>roles: ['Forrest']</code>).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6.3 RDBMS vs Graph Mapping Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">6.3 RDBMS vs. Graph Database Concept Mapping</h3>
+          <span class="tag tag-amber">O(1) Pointer Hopping vs. SQL Joins</span>
+        </div>
+        <div class="data-table-wrap">
+          <table>
+            <thead>
+              <tr><th>RDBMS Concept</th><th>Graph Database Equivalent</th><th>Architectural Difference</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Tables</strong></td><td><span class="tag tag-indigo">Graphs</span></td><td>Top-level connected network topology</td></tr>
+              <tr><td><strong>Rows</strong></td><td><span class="tag tag-teal">Nodes</span></td><td>Individual entity records with direct neighbor pointers</td></tr>
+              <tr><td><strong>Columns &amp; Data</strong></td><td><span class="tag tag-teal">Properties &amp; Values</span></td><td>Key-value attributes attached to nodes and edges</td></tr>
+              <tr><td><strong>Constraints</strong></td><td><span class="tag tag-amber">Relationships</span></td><td>Explicit typed, directed edges between entities</td></tr>
+              <tr><td><strong>Joins</strong></td><td><span class="tag tag-rose">Traversal</span></td><td>Local pointer hops—speed depends only on local community size, not total DB size!</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(5)">&larr; Previous: Columnar DB &amp; Cassandra</button>
+        <button class="btn-primary" onclick="goToModule(7)">Next: Migration &amp; Decision Guide &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 7 ==================== -->
+    <section class="module-section" id="module-7">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Topics 7 &amp; 8 // Transitioning &amp; Architectural Selection</div>
+          <h2 class="module-title">SQL-to-NoSQL Migration Schemes &amp; Decision Framework</h2>
+          <p class="module-subtitle">Compare the 3 primary SQL-to-NoSQL migration strategies and use the interactive workload checklist to decide when to adopt NoSQL versus staying on Relational SQL.</p>
+        </div>
+        <span class="tag tag-teal">Architecture Advisor</span>
+      </div>
+
+      <!-- Topic 7: 3 Migration Schemes -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Topic 7: Three SQL-to-NoSQL Migration Strategies</h3>
+          <span class="tag tag-indigo">Effort vs. Performance</span>
+        </div>
+        <div class="grid-3">
+          <div class="concept-box teal">
+            <h4>Scheme 1: 1-to-1 Mapping (Most Popular)</h4>
+            <p><strong>Method:</strong> Map 1 SQL table directly to 1 NoSQL collection (e.g., MongoDB).<br><strong>Tools:</strong> AWS DMS, Python scripts, SQL Server Export.<br><strong>Result:</strong> Easiest implementation with minimal architectural redesign.</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>Scheme 2: Denormalization</h4>
+            <p><strong>Method:</strong> Reverse normalization by combining small relational tables back into consolidated, nested documents.<br><strong>Result:</strong> Moderate refactoring effort with moderate read performance improvements.</p>
+          </div>
+          <div class="concept-box">
+            <h4>Scheme 3: Design from Scratch</h4>
+            <p><strong>Method:</strong> Discard legacy relational schemas and completely re-architect the data model around NoSQL query patterns.<br><strong>Result:</strong> High initial effort, but yields optimal long-term performance and scalability.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Topic 8: Interactive SQL vs NoSQL Decision Advisor -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Topic 8: Interactive SQL vs. NoSQL Decision Advisor</h3>
+          <span class="tag tag-amber">Check Your Workload Requirements</span>
+        </div>
+
+        <div class="grid-2" style="align-items:start;">
+          <div id="decisionChecklist">
+            <label class="check-item"><input type="checkbox" data-req="nosql"> <span>Relational schemas are too restrictive/rigid for rapidly evolving data formats.</span></label>
+            <label class="check-item"><input type="checkbox" data-req="nosql"> <span>Data volume is too massive for a single centralized server disk (requires horizontal scaling).</span></label>
+            <label class="check-item"><input type="checkbox" data-req="nosql"> <span>Handling highly diverse, unstructured, or semi-structured multi-source data.</span></label>
+            <label class="check-item"><input type="checkbox" data-req="nosql"> <span>Application can tolerate relaxed consistency instead of strict ACID transactions.</span></label>
+            <label class="check-item"><input type="checkbox" data-req="sql"> <span>Requires strict financial/banking ACID integrity &amp; complex multi-table transactional invariants.</span></label>
+          </div>
+
+          <div class="concept-box teal" id="decisionRecommendation">
+            <h4>Recommendation: Balanced / Hybrid Evaluation</h4>
+            <p>Select one or more workload requirements on the left to evaluate whether your system should adopt <strong>NoSQL</strong> or remain on a <strong>Relational DBMS (SQL)</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(6)">&larr; Previous: Graph DB &amp; Neo4j Explorer</button>
+        <button class="btn-primary" onclick="goToModule(8)">Next: Exam Readiness Quiz &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 8 ==================== -->
+    <section class="module-section" id="module-8">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Active Recall // Self-Assessment</div>
+          <h2 class="module-title">Chapter 8 Exam Readiness Quiz</h2>
+          <p class="module-subtitle">Test your mastery of Vertical vs. Horizontal scaling, the 4 NoSQL categories, Redis CLI behavior, MongoDB CRUD &amp; SQL mapping, Columnar disk layouts &amp; Facebook's Cassandra study, Neo4j index-free adjacency, and Migration/Decision frameworks.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="tag tag-teal" id="quizScoreBadge">Score: 0 / 10</span>
+          <button class="btn-secondary" style="padding:6px 12px;font-size:0.8rem;" id="resetQuizBtn">Reset Quiz</button>
+        </div>
+      </div>
+
+      <div id="quizContainer"></div>
+
+      <div class="card" id="quizSummaryCard" style="display:none;border-color:var(--accent-teal);text-align:center;">
+        <h3 style="font-size:1.3rem;margin-bottom:0.4rem;" id="quizFinalTitle">Assessment Complete!</h3>
+        <p style="color:var(--text-secondary);margin-bottom:1rem;" id="quizFinalMsg"></p>
+        <button class="btn-primary" onclick="resetQuiz()">Retake Quiz</button>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(7)">&larr; Previous: Migration &amp; Decision Guide</button>
+        <button class="btn-primary" onclick="goToModule(1)">Return to Module 01 &#8634;</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toastNotification">Chapter 8 HTML Study Guide downloaded!</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const state = {
+    currentModule: 1,
+    visitedModules: new Set([1]),
+    theme: 'light',
+    workloadLevel: 2,
+    nosqlCat: 0,
+    redisStore: {},
+    redisHistory: ['redis> Ready. Click a lecture command above or enter SET / GET / DEL.'],
+    docViewMode: 'doc',
+    mongoDocs: [
+      { _id: 11, type: 'Avengers', name: 'Spider Man' },
+      { _id: 'ObjectId("673a91f0c1")', type: 'Transformers', cat: 'Autobot', name: 'Optimus Prime' }
+    ],
+    colHighlight: 'none',
+    selectedGraphNode: 'tom',
+    quizAnswers: {}
+  };
+
+  // ==================== THEME & NAVIGATION ====================
+  document.getElementById('themeToggleBtn').addEventListener('click', () => {
+    state.theme = state.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', state.theme);
+  });
+
+  window.goToModule = function(modNum) {
+    state.currentModule = modNum;
+    state.visitedModules.add(modNum);
+
+    document.querySelectorAll('.module-section').forEach(s => s.classList.remove('active'));
+    document.getElementById(`module-${modNum}`).classList.add('active');
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      const m = Number(btn.dataset.module);
+      btn.classList.toggle('active', m === modNum);
+      btn.classList.toggle('visited', state.visitedModules.has(m) && m !== modNum);
+    });
+
+    const pct = Math.round((state.visitedModules.size / 8) * 100);
+    document.getElementById('progressPercent').textContent = `${pct}%`;
+    document.getElementById('mobileProgressTag').textContent = `${pct}%`;
+    document.getElementById('progressFill').style.width = `${pct}%`;
+
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => goToModule(Number(btn.dataset.module)));
+  });
+
+  document.getElementById('menuToggle').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarBackdrop').classList.toggle('open');
+  });
+
+  document.getElementById('sidebarBackdrop').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+  });
+
+  // ==================== MODULE 1: SCALABILITY SIMULATOR ====================
+  const scaleSlider = document.getElementById('scaleWorkloadSlider');
+  function updateScalabilitySim() {
+    const lvl = Number(scaleSlider.value);
+    state.workloadLevel = lvl;
+    const pct = lvl * 20;
+    const labels = ['Low (20%)', 'Moderate (40%)', 'High (60%)', 'Big Data Spike (80%)', 'Global Geo-Scale (100%)'];
+    document.getElementById('trafficLoadBadge').textContent = `Traffic Load: ${labels[lvl - 1]}`;
+
+    const overCeiling = lvl >= 4;
+    const boxSize = 75 + lvl * 18;
+    const boxX = 180 - boxSize / 2;
+    const boxY = 125 - boxSize / 2;
+
+    let clusterNodes = '';
+    for (let i = 0; i < lvl; i++) {
+      const col = i % 3;
+      const row = Math.floor(i / 3);
+      const nx = 460 + col * 110;
+      const ny = 48 + row * 82;
+      clusterNodes += `
+        <rect x="${nx}" y="${ny}" width="92" height="62" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.2"/>
+        <text x="${nx + 46}" y="${ny + 28}" fill="#5eead4" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">Node #${i + 1}</text>
+        <text x="${nx + 46}" y="${ny + 46}" fill="#cbd5e1" font-family="monospace" font-size="9.5" text-anchor="middle">Commodity</text>
+      `;
+    }
+
+    document.getElementById('scalabilitySvg').innerHTML = `
+      <!-- Left: Vertical Scale Up -->
+      <text x="180" y="24" fill="#a5b4fc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Vertical Scalability (Scale Up - SQL)</text>
+      <rect x="75" y="36" width="210" height="175" rx="10" fill="none" stroke="#f43f5e" stroke-width="1.8" stroke-dasharray="5,4"/>
+      <text x="180" y="204" fill="#fda4af" font-family="monospace" font-size="9.5" text-anchor="middle">Hardware Ceiling &amp; Single Point of Failure</text>
+      <rect x="${boxX}" y="${boxY}" width="${boxSize}" height="${boxSize}" rx="10" fill="${overCeiling ? '#4c0519' : '#1e293b'}" stroke="${overCeiling ? '#f43f5e' : '#6366f1'}" stroke-width="2.6"/>
+      <text x="180" y="122" fill="#f8fafc" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">${overCeiling ? 'CPU/RAM LIMIT!' : '1 Big Server'}</text>
+
+      <!-- Divider -->
+      <line x1="395" y1="20" x2="395" y2="210" stroke="#334155" stroke-width="1.5"/>
+
+      <!-- Right: Horizontal Scale Out -->
+      <text x="610" y="24" fill="#5eead4" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Horizontal Scalability (Scale Out - NoSQL)</text>
+      ${clusterNodes}
+    `;
+
+    document.getElementById('scalabilityInspector').innerHTML = overCeiling
+      ? `<h4 style="color:var(--accent-rose);margin-bottom:4px;">Hardware Ceiling Hit at ${pct}% Load!</h4>
+         <p style="font-size:0.84rem;">Upgrading a single centralized server (Scale Up) hits severe physical CPU/RAM/disk cost ceilings and remains a single point of failure. Meanwhile, NoSQL Scale Out adds commodity servers (${lvl} nodes active) seamlessly across geographic regions.</p>`
+      : `<h4 style="color:var(--accent-teal);margin-bottom:4px;">Comparing Scale Up vs. Scale Out at ${pct}% Load</h4>
+         <p style="font-size:0.84rem;">At moderate loads, a centralized RDBMS handles local joins smoothly. Drag the slider to 80–100% to see why big data and multi-region traffic require horizontal scale-out clusters.</p>`;
+  }
+  scaleSlider.addEventListener('input', updateScalabilitySim);
+  updateScalabilitySim();
+
+  // ==================== MODULE 2: 4 NOSQL CATEGORIES ====================
+  const nosqlCategories = [
+    {
+      name: '1. Key-Value Databases',
+      examples: 'Redis, Memcached, Amazon SimpleDB',
+      concept: 'Simplest NoSQL model; acts as a distributed hash table accessed strictly via unique primary keys in O(1) time.',
+      svg: `
+        <rect x="130" y="45" width="220" height="125" rx="10" fill="#1e293b" stroke="#6366f1" stroke-width="2.4"/>
+        <text x="240" y="75" fill="#a5b4fc" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">Unique Key</text>
+        <text x="240" y="108" fill="#f8fafc" font-family="monospace" font-size="13" text-anchor="middle">"key2003"</text>
+        <text x="240" y="135" fill="#f8fafc" font-family="monospace" font-size="13" text-anchor="middle">"user:901"</text>
+        <line x1="350" y1="107" x2="460" y2="107" stroke="#14b8a6" stroke-width="3"/>
+        <text x="405" y="95" fill="#5eead4" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">O(1) Hash</text>
+        <rect x="460" y="45" width="240" height="125" rx="10" fill="#064e3b" stroke="#14b8a6" stroke-width="2.4"/>
+        <text x="580" y="75" fill="#5eead4" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">Opaque Value</text>
+        <text x="580" y="108" fill="#f8fafc" font-family="monospace" font-size="13" text-anchor="middle">"DBSys"</text>
+        <text x="580" y="135" fill="#f8fafc" font-family="monospace" font-size="13" text-anchor="middle">[List / Set / Hash]</text>
+      `
+    },
+    {
+      name: '2. Document Databases',
+      examples: 'MongoDB, CouchDB, OrientDB',
+      concept: 'Stores semi-structured, schema-less documents (JSON, BSON, XML) supporting nested sub-documents and secondary indexes.',
+      svg: `
+        <rect x="150" y="30" width="520" height="155" rx="10" fill="#162033" stroke="#14b8a6" stroke-width="2.4"/>
+        <text x="410" y="58" fill="#5eead4" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">BSON Document (Self-Describing Nested Fields)</text>
+        <text x="180" y="88" fill="#f8fafc" font-family="monospace" font-size="12">{ _id: 11, type: "Avengers", name: "Spider Man",</text>
+        <text x="195" y="112" fill="#fcd34d" font-family="monospace" font-size="12">gear: { suit: "Iron Spider", web: true } }</text>
+        <text x="180" y="148" fill="#a5b4fc" font-family="monospace" font-size="11.5">Flexible schema: different documents in same collection need not share fields!</text>
+      `
+    },
+    {
+      name: '3. Columnar Databases (Column-Family / Wide-Column)',
+      examples: 'Cassandra, HBase, Hypertable, Google Bigtable, Amazon SimpleDB',
+      concept: 'Stores data contiguous column-by-column rather than row-by-row, addressed by (Row Key, Column Key, Timestamp).',
+      svg: `
+        <rect x="90" y="38" width="190" height="140" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="2.2"/>
+        <text x="185" y="65" fill="#a5b4fc" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">Column Block: ID</text>
+        <text x="185" y="108" fill="#f8fafc" font-family="monospace" font-size="13" text-anchor="middle">22 | 31 | 58 | 74</text>
+
+        <rect x="315" y="38" width="190" height="140" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.2"/>
+        <text x="410" y="65" fill="#5eead4" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">Column Block: Name</text>
+        <text x="410" y="108" fill="#f8fafc" font-family="monospace" font-size="12" text-anchor="middle">Dustin | Lubber | Rusty</text>
+
+        <rect x="540" y="38" width="190" height="140" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="2.2"/>
+        <text x="635" y="65" fill="#fcd34d" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">Column Block: Age</text>
+        <text x="635" y="108" fill="#f8fafc" font-family="monospace" font-size="13" text-anchor="middle">45 | 55 | 35 | 35</text>
+      `
+    },
+    {
+      name: '4. Graph Databases',
+      examples: 'Neo4j',
+      concept: 'Stores entities as Nodes and explicit relationships as directed edges using index-free adjacency for O(1) local traversals.',
+      svg: `
+        <circle cx="230" cy="108" r="46" fill="#1e293b" stroke="#6366f1" stroke-width="2.6"/>
+        <text x="230" y="104" fill="#a5b4fc" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">:Person</text>
+        <text x="230" y="122" fill="#f8fafc" font-family="sans-serif" font-size="12" text-anchor="middle">Tom Hanks</text>
+
+        <line x1="276" y1="108" x2="534" y2="108" stroke="#14b8a6" stroke-width="3"/>
+        <text x="405" y="96" fill="#5eead4" font-family="monospace" font-size="11.5" font-weight="bold" text-anchor="middle">[:ACTED_IN {roles:['Forrest']}] &rarr;</text>
+
+        <circle cx="580" cy="108" r="46" fill="#064e3b" stroke="#14b8a6" stroke-width="2.6"/>
+        <text x="580" y="104" fill="#5eead4" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">:Movie</text>
+        <text x="580" y="122" fill="#f8fafc" font-family="sans-serif" font-size="12" text-anchor="middle">Forrest Gump</text>
+      `
+    }
+  ];
+
+  function renderNosqlCat(idx) {
+    state.nosqlCat = idx;
+    document.querySelectorAll('#nosqlCatBtns .pill-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.ncat) === idx));
+    const c = nosqlCategories[idx];
+    document.getElementById('nosqlCategorySvg').innerHTML = c.svg;
+    document.getElementById('nosqlCategoryInspector').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px;">
+        <h4 style="color:var(--accent-indigo);font-size:0.96rem;">${c.name}</h4>
+        <span class="tag tag-teal">Systems: ${c.examples}</span>
+      </div>
+      <p style="font-size:0.84rem;">${c.concept}</p>
+    `;
+  }
+
+  document.querySelectorAll('#nosqlCatBtns .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => renderNosqlCat(Number(btn.dataset.ncat)));
+  });
+  renderNosqlCat(0);
+
+  // ==================== MODULE 3: REDIS CLI SIMULATOR ====================
+  function renderRedisView() {
+    document.getElementById('redisCliOutput').innerHTML = state.redisHistory.slice(-7).map(line => `<div>${line}</div>`).join('');
+    const entries = Object.entries(state.redisStore);
+    document.getElementById('redisHashTableView').innerHTML = `
+      <table>
+        <thead><tr><th>Hash Key (Primary)</th><th>In-Memory RAM Value</th><th>Lookup</th></tr></thead>
+        <tbody>
+          ${entries.length === 0
+            ? `<tr><td colspan="3" style="text-align:center;color:var(--text-muted);">Hash table is currently empty. Run SET key2003 "DBSys".</td></tr>`
+            : entries.map(([k, v]) => `<tr><td><code>${k}</code></td><td><strong style="color:var(--accent-teal);">"${v}"</strong></td><td><span class="tag tag-teal">O(1)</span></td></tr>`).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  window.execRedisCmd = function(raw) {
+    const cmd = raw.trim();
+    if (!cmd) return;
+    state.redisHistory.push(`<span style="color:#38bdf8;">redis&gt; ${cmd}</span>`);
+    const parts = cmd.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
+    const op = (parts[0] || '').toUpperCase();
+
+    if (op === 'SET' && parts.length >= 3) {
+      const k = parts[1];
+      const v = parts.slice(2).join(' ').replace(/^"|"$/g, '');
+      state.redisStore[k] = v;
+      state.redisHistory.push(`<span style="color:#5eead4;">OK</span>`);
+    } else if (op === 'GET' && parts.length >= 2) {
+      const k = parts[1];
+      if (Object.prototype.hasOwnProperty.call(state.redisStore, k)) {
+        state.redisHistory.push(`<span style="color:#fcd34d;">"${state.redisStore[k]}"</span>`);
+      } else {
+        state.redisHistory.push(`<span style="color:#fda4af;">(nil)</span>`);
+      }
+    } else if (op === 'DEL' && parts.length >= 2) {
+      let deletedCount = 0;
+      parts.slice(1).forEach(k => {
+        if (Object.prototype.hasOwnProperty.call(state.redisStore, k)) {
+          delete state.redisStore[k];
+          deletedCount++;
+        }
+      });
+      state.redisHistory.push(`<span style="color:#fcd34d;">(integer) ${deletedCount}</span>`);
+    } else {
+      state.redisHistory.push(`<span style="color:#fda4af;">(error) Supported commands: SET key "val", GET key, DEL key1 [key2]</span>`);
+    }
+    renderRedisView();
+  };
+
+  window.resetRedisSim = function() {
+    state.redisStore = {};
+    state.redisHistory = ['redis> Store cleared.'];
+    renderRedisView();
+  };
+
+  document.getElementById('runRedisCustomBtn').addEventListener('click', () => {
+    const inp = document.getElementById('redisCustomInput');
+    execRedisCmd(inp.value);
+    inp.value = '';
+  });
+  renderRedisView();
+
+  // ==================== MODULE 4: DOCUMENT DB & MONGODB CRUD ====================
+  function renderDocVsSql(mode) {
+    state.docViewMode = mode;
+    document.querySelectorAll('#docVsSqlBtns .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.dvmode === mode));
+    const el = document.getElementById('docVsSqlDisplay');
+
+    if (mode === 'doc') {
+      el.innerHTML = `
+        <div class="grid-2">
+          <div class="terminal-box">
+            <div style="color:#5eead4;font-weight:bold;">// Document 1: Calligraphy Record (No wasted fields!)</div>
+            <div>{ Calligraphy: "Lanting Xu", Calligrapher: "Wang Xizhi", Year: "353CE", Chinese: "兰亭集序" }</div>
+          </div>
+          <div class="terminal-box">
+            <div style="color:#38bdf8;font-weight:bold;">// Document 2: Hardware Record (Different fields!)</div>
+            <div>{ Name: "Jetson Nano", Brand: "Nvidia", Year: "2020", Memory: "SDRAM" }</div>
+          </div>
+        </div>
+      `;
+    } else {
+      el.innerHTML = `
+        <div class="data-table-wrap">
+          <table>
+            <thead><tr><th>Calligraphy</th><th>Calligrapher</th><th>Chinese</th><th>Name</th><th>Brand</th><th>Memory</th><th>Year</th></tr></thead>
+            <tbody>
+              <tr><td>Lanting Xu</td><td>Wang Xizhi</td><td>兰亭集序</td><td><span class="tag tag-rose">NULL</span></td><td><span class="tag tag-rose">NULL</span></td><td><span class="tag tag-rose">NULL</span></td><td>353CE</td></tr>
+              <tr><td><span class="tag tag-rose">NULL</span></td><td><span class="tag tag-rose">NULL</span></td><td><span class="tag tag-rose">NULL</span></td><td>Jetson Nano</td><td>Nvidia</td><td>SDRAM</td><td>2020</td></tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+  }
+
+  document.querySelectorAll('#docVsSqlBtns .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => renderDocVsSql(btn.dataset.dvmode));
+  });
+  renderDocVsSql('doc');
+
+  // MongoDB db.ppl CRUD Sandbox
+  function renderMongoCollection(list = state.mongoDocs) {
+    document.getElementById('mongoCollectionView').innerHTML = `
+      <table>
+        <thead><tr><th>_id (Unique Key)</th><th>BSON Document Payload</th></tr></thead>
+        <tbody>
+          ${list.length === 0
+            ? `<tr><td colspan="2" style="text-align:center;color:var(--text-muted);">Collection db.ppl is empty.</td></tr>`
+            : list.map(doc => `<tr><td><code>${doc._id}</code></td><td><code>${JSON.stringify(doc)}</code></td></tr>`).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  window.runMongoPreset = function(action) {
+    const log = document.getElementById('mongoCmdLog');
+    if (action === 'ins1') {
+      const exists = state.mongoDocs.some(d => d._id === 11);
+      if (!exists) state.mongoDocs.push({ _id: 11, type: 'Avengers', name: 'Spider Man' });
+      log.innerHTML = `<span style="color:#5eead4;">db.ppl.insert({ _id: 11, type: "Avengers", name: "Spider Man" })</span><br>Inserted with explicit <code>_id: 11</code>.`;
+      renderMongoCollection();
+    } else if (action === 'ins2') {
+      const oid = `ObjectId("${Math.random().toString(16).slice(2, 12)}")`;
+      state.mongoDocs.push({ _id: oid, type: 'Transformers', cat: 'Autobot', name: 'Optimus Prime' });
+      log.innerHTML = `<span style="color:#5eead4;">db.ppl.insert({ type: "Transformers", cat: "Autobot", name: "Optimus Prime" })</span><br>_id omitted &rarr; MongoDB auto-generated unique <code>${oid}</code>.`;
+      renderMongoCollection();
+    } else if (action === 'dup') {
+      const oid = `ObjectId("${Math.random().toString(16).slice(2, 12)}")`;
+      state.mongoDocs.push({ _id: oid, type: 'Transformers', cat: 'Autobot', name: 'Optimus Prime' });
+      log.innerHTML = `<span style="color:#fcd34d;">Duplicate payload inserted!</span> Succeeds because MongoDB generates a distinct system <code>${oid}</code> for each insertion.`;
+      renderMongoCollection();
+    } else if (action === 'findIn') {
+      const filtered = state.mongoDocs.filter(d => d.type === 'Avengers' || d.type === 'Transformers');
+      log.innerHTML = `<span style="color:#38bdf8;">db.ppl.find({ type: { $in: ["Avengers", "Transformers"] } })</span> &rarr; Matched <strong>${filtered.length}</strong> document(s).`;
+      renderMongoCollection(filtered);
+    } else if (action === 'upd') {
+      state.mongoDocs.forEach(d => { if (d.type === 'Avengers') d.type = 'The Avengers'; });
+      log.innerHTML = `<span style="color:#5eead4;">db.ppl.update({ type: "Avengers" }, { $set: { type: "The Avengers" } })</span> &rarr; Updated matching documents.`;
+      renderMongoCollection();
+    } else if (action === 'remRegex') {
+      const before = state.mongoDocs.length;
+      state.mongoDocs = state.mongoDocs.filter(d => !/^s/i.test(d.type || ''));
+      log.innerHTML = `<span style="color:#fda4af;">db.ppl.remove({ type: /^s/ })</span> &rarr; Removed ${before - state.mongoDocs.length} document(s) whose type started with 's'.`;
+      renderMongoCollection();
+    }
+  };
+
+  window.resetMongoStore = function() {
+    state.mongoDocs = [
+      { _id: 11, type: 'Avengers', name: 'Spider Man' },
+      { _id: 'ObjectId("673a91f0c1")', type: 'Transformers', cat: 'Autobot', name: 'Optimus Prime' }
+    ];
+    document.getElementById('mongoCmdLog').innerHTML = 'Collection <code>db.ppl</code> reset to initial 2 lecture documents.';
+    renderMongoCollection();
+  };
+  renderMongoCollection();
+
+  // ==================== MODULE 5: COLUMNAR VS ROW-WISE DISK BLOCKS ====================
+  const sailorsData = [
+    { id: '22', name: 'Dustin', rating: '1000', age: '45' },
+    { id: '31', name: 'Lubber', rating: '1001', age: '55' },
+    { id: '58', name: 'Rusty', rating: '1001', age: '35' },
+    { id: '74', name: 'Rusty', rating: '1000', age: '35' }
+  ];
+
+  function renderDiskLayouts(hlCol) {
+    state.colHighlight = hlCol;
+    document.querySelectorAll('#colHighlightBtns .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.chl === hlCol));
+
+    // Row-wise
+    const rowHtml = sailorsData.map(r =>
+      (['id', 'name', 'rating', 'age']).map(k => `<span class="disk-block ${hlCol === k ? 'hl' : ''}">${r[k]}</span>`).join('')
+    ).join(' ');
+    document.getElementById('rowWiseBlocks').innerHTML = rowHtml;
+
+    // Column-wise
+    const cols = ['id', 'name', 'rating', 'age'];
+    const colHtml = cols.map(c =>
+      `<div style="margin-bottom:4px;">${sailorsData.map(r => `<span class="disk-block ${hlCol === c ? 'hl' : ''}">${r[c]}</span>`).join('')}</div>`
+    ).join('');
+    document.getElementById('colWiseBlocks').innerHTML = colHtml;
+  }
+
+  document.querySelectorAll('#colHighlightBtns .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => renderDiskLayouts(btn.dataset.chl));
+  });
+  renderDiskLayouts('none');
+
+  // ==================== MODULE 6: NEO4J PROPERTY GRAPH EXPLORER ====================
+  const graphNodes = {
+    alice: { x: 165, y: 70, label: ':Person', title: 'Alice', props: '{ name: "Alice", role: "Engineer" }', neighbors: ['dept (:BELONGS_TO)'] },
+    dept: { x: 430, y: 70, label: ':Department', title: 'R&D Dept', props: '{ dept_id: "D01", name: "R&D" }', neighbors: ['alice (incoming :BELONGS_TO)'] },
+    tom: { x: 165, y: 185, label: ':Person', title: 'Tom Hanks', props: '{ name: "Tom Hanks", born: 1956 }', neighbors: ['forrest (:ACTED_IN {roles:["Forrest"]})'] },
+    bob: { x: 665, y: 185, label: ':Person', title: 'Robert Zemeckis', props: '{ name: "Robert Zemeckis" }', neighbors: ['forrest (:DIRECTED)'] },
+    forrest: { x: 430, y: 185, label: ':Movie', title: 'Forrest Gump', props: '{ title: "Forrest Gump", released: 1994 }', neighbors: ['tom (incoming :ACTED_IN)', 'bob (incoming :DIRECTED)'] }
+  };
+
+  function renderNeo4jGraph(selectedKey) {
+    state.selectedGraphNode = selectedKey;
+    const svg = document.getElementById('neo4jGraphSvg');
+
+    const edges = `
+      <line x1="210" y1="70" x2="385" y2="70" stroke="#38bdf8" stroke-width="2.4"/>
+      <text x="297" y="60" fill="#7dd3fc" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">:BELONGS_TO &rarr;</text>
+
+      <line x1="210" y1="185" x2="385" y2="185" stroke="#14b8a6" stroke-width="2.6"/>
+      <text x="297" y="173" fill="#5eead4" font-family="monospace" font-size="9.5" font-weight="bold" text-anchor="middle">:ACTED_IN {roles:['Forrest']} &rarr;</text>
+
+      <line x1="620" y1="185" x2="475" y2="185" stroke="#f59e0b" stroke-width="2.4"/>
+      <text x="548" y="173" fill="#fcd34d" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">&larr; :DIRECTED</text>
+    `;
+
+    const nodesSvg = Object.entries(graphNodes).map(([k, n]) => {
+      const sel = k === selectedKey;
+      const stroke = n.label === ':Person' ? '#6366f1' : n.label === ':Movie' ? '#14b8a6' : '#f59e0b';
+      return `
+        <g style="cursor:pointer;" onclick="selectNeo4jNode('${k}')">
+          <circle cx="${n.x}" cy="${n.y}" r="${sel ? 42 : 37}" fill="${sel ? '#1e293b' : '#111827'}" stroke="${sel ? '#ffffff' : stroke}" stroke-width="${sel ? 3.2 : 2.2}"/>
+          <text x="${n.x}" y="${n.y - 5}" fill="${stroke}" font-family="monospace" font-size="9.5" font-weight="bold" text-anchor="middle">${n.label}</text>
+          <text x="${n.x}" y="${n.y + 11}" fill="#f8fafc" font-family="sans-serif" font-size="10.5" font-weight="bold" text-anchor="middle">${n.title}</text>
+        </g>
+      `;
+    }).join('');
+
+    svg.innerHTML = edges + nodesSvg;
+
+    const cur = graphNodes[selectedKey];
+    document.getElementById('neo4jNodeInspector').innerHTML = `
+      <h4 style="color:var(--accent-teal);margin-bottom:4px;">Selected Node: ${cur.title} (${cur.label})</h4>
+      <p style="font-size:0.84rem;"><strong>Properties:</strong> <code>${cur.props}</code> &nbsp;|&nbsp; <strong>Index-Free Adjacency Direct Pointers:</strong> <code>${cur.neighbors.join(', ')}</code></p>
+    `;
+  }
+  window.selectNeo4jNode = renderNeo4jGraph;
+  renderNeo4jGraph('tom');
+
+  // ==================== TOPIC 8: DECISION ADVISOR ====================
+  document.querySelectorAll('#decisionChecklist input').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const checked = Array.from(document.querySelectorAll('#decisionChecklist input:checked')).map(c => c.dataset.req);
+      const nosqlCount = checked.filter(r => r === 'nosql').length;
+      const sqlCount = checked.filter(r => r === 'sql').length;
+      const box = document.getElementById('decisionRecommendation');
+
+      if (sqlCount > 0 && nosqlCount === 0) {
+        box.className = 'concept-box';
+        box.innerHTML = `<h4>Recommendation: Stay with Relational DBMS (SQL)</h4><p>NoSQL is not universally superior. Applications requiring strict financial integrity, complex multi-table invariants, and ACID transactions belong on Relational SQL.</p>`;
+      } else if (nosqlCount > 0 && sqlCount === 0) {
+        box.className = 'concept-box teal';
+        box.innerHTML = `<h4>Recommendation: Adopt NoSQL Architecture (${nosqlCount} criteria matched)</h4><p>Your workload requires flexible schemas, horizontal scale-out across commodity nodes, or massive multi-source data handling where NoSQL excels.</p>`;
+      } else if (nosqlCount > 0 && sqlCount > 0) {
+        box.className = 'concept-box amber';
+        box.innerHTML = `<h4>Recommendation: Polyglot Persistence (Hybrid SQL + NoSQL)</h4><p>Keep strict financial/ledger invariants on Relational SQL while offloading massive semi-structured catalogs or high-throughput sessions to NoSQL.</p>`;
+      } else {
+        box.className = 'concept-box teal';
+        box.innerHTML = `<h4>Recommendation: Balanced / Hybrid Evaluation</h4><p>Select one or more workload requirements on the left to evaluate whether your system should adopt NoSQL or remain on Relational SQL.</p>`;
+      }
+    });
+  });
+
+  // ==================== GLOBAL SEARCH ====================
+  const searchIndex = [
+    { title: 'Relational DB Strengths & Centralized Architecture Pros/Cons', mod: 1, sub: 'Topic 1: Motivation' },
+    { title: 'Vertical Scalability (Scale Up) vs. Horizontal Scalability (Scale Out)', mod: 1, sub: 'Topic 1: Scalability' },
+    { title: 'NoSQL Definitions (Not Only SQL, Non-SQL, Neo SQL) & Goals', mod: 2, sub: 'Topic 2: Overview' },
+    { title: '4 Major Categories: Key-Value, Document, Columnar, Graph', mod: 2, sub: 'Topic 2: Classification' },
+    { title: 'Key-Value Model & Redis CLI Simulator (SET, GET, DEL, nil)', mod: 3, sub: 'Topic 3: Redis Lab' },
+    { title: 'Document Model: Lanting Xu vs. Jetson Nano & Sparse NULLs', mod: 4, sub: 'Topic 4: Document DB' },
+    { title: 'SQL vs. MongoDB Terminology Mapping (Collection, BSON, Shard)', mod: 4, sub: 'Topic 4: Mapping' },
+    { title: 'MongoDB db.ppl CRUD Operations & Auto-Generated _id', mod: 4, sub: 'Topic 4: MongoDB CRUD' },
+    { title: 'Columnar Storage (Row-Wise vs. Column-Wise) & 3-Part Key Timestamp', mod: 5, sub: 'Topic 5: Columnar' },
+    { title: 'Facebook 50GB Message Search Case Study (300ms -> 0.12ms)', mod: 5, sub: 'Topic 5: Cassandra' },
+    { title: 'Graph DB & Neo4j Property Graph (Index-Free Adjacency)', mod: 6, sub: 'Topic 6: Graph DB' },
+    { title: 'SQL-to-NoSQL Migration Schemes (1-to-1, Denormalization, Scratch)', mod: 7, sub: 'Topic 7: Migration' },
+    { title: 'Decision Framework: When to Use NoSQL vs. Relational SQL', mod: 7, sub: 'Topic 8: Decision Guide' },
+    { title: 'Chapter 8 Exam Readiness Quiz (10 Active Recall Questions)', mod: 8, sub: 'Module 8: Self-Assessment' }
+  ];
+
+  const searchInput = document.getElementById('globalSearchInput');
+  const searchDropdown = document.getElementById('searchResultsDropdown');
+
+  searchInput.addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) { searchDropdown.classList.remove('open'); return; }
+    const hits = searchIndex.filter(item => item.title.toLowerCase().includes(q) || item.sub.toLowerCase().includes(q)).slice(0, 8);
+    if (!hits.length) {
+      searchDropdown.innerHTML = `<div class="search-hit" style="color:var(--text-muted);">No matching topics found.</div>`;
+    } else {
+      searchDropdown.innerHTML = hits.map((h, i) => `
+        <div class="search-hit" data-hitidx="${i}">
+          <div style="font-weight:700;color:var(--text-primary);">${h.title}</div>
+          <div style="font-size:0.72rem;color:var(--accent-teal);">${h.sub}</div>
+        </div>
+      `).join('');
+      searchDropdown.querySelectorAll('.search-hit').forEach((el, idx) => {
+        el.addEventListener('click', () => {
+          goToModule(hits[idx].mod);
+          searchDropdown.classList.remove('open');
+          searchInput.value = '';
+        });
+      });
+    }
+    searchDropdown.classList.add('open');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.sidebar-search')) searchDropdown.classList.remove('open');
+  });
+
+  // ==================== MODULE 8: EXAM READINESS QUIZ ====================
+  const quizQuestions = [
+    {
+      q: '1. What is the key architectural difference between Vertical Scalability (Scale Up) and Horizontal Scalability (Scale Out)?',
+      options: [
+        'Scale Up adds commodity nodes to a cluster; Scale Out upgrades a single server.',
+        'Scale Up upgrades a single server with more CPU/RAM/disk (hitting physical limits), whereas Scale Out adds more commodity servers into a distributed cluster.',
+        'Scale Out only works with relational SQL tables.',
+        'Scale Up eliminates single points of failure.'
+      ],
+      correct: 1,
+      exp: 'Traditional centralized RDBMSs typically scale up vertically on one machine, whereas NoSQL systems scale out horizontally across distributed commodity nodes.'
+    },
+    {
+      q: '2. Which of the following lists the 4 major categories of NoSQL databases covered in Chapter 8?',
+      options: [
+        'Hierarchical, Network, Object-Oriented, Relational',
+        'Key-Value, Document, Columnar (Wide-Column), Graph',
+        'B+ Tree, Hash, Heap, Sorted',
+        'In-Memory, Magnetic Tape, Cloud, Edge'
+      ],
+      correct: 1,
+      exp: 'The 4 major categories of NoSQL databases are Key-Value (Redis), Document (MongoDB), Columnar/Wide-Column (Cassandra), and Graph (Neo4j).'
+    },
+    {
+      q: '3. In Redis, after executing "SET key2003 \"DBSys\"" followed by "DEL key2003 key1234" (where key1234 did not exist), what does Redis return for DEL and a subsequent "GET key2003"?',
+      options: [
+        '(integer) 2 and "DBSys"',
+        '(integer) 1 and (nil)',
+        'OK and NULL',
+        '(error) and 0'
+      ],
+      correct: 1,
+      exp: 'DEL returns (integer) 1 because only 1 existing key (key2003) was deleted, and GET key2003 then returns (nil).'
+    },
+    {
+      q: '4. Where must complex joins across multiple keys be implemented when using a Key-Value database like Redis?',
+      options: [
+        'Inside the Redis SQL query optimizer.',
+        'Outside the database in application code (e.g., Python).',
+        'Using foreign key triggers.',
+        'Inside B+ Tree leaf sibling pointers.'
+      ],
+      correct: 1,
+      exp: 'Key-Value stores access data strictly by primary key in O(1) time without native SQL joins; joins must be written outside the database in application scripts.'
+    },
+    {
+      q: '5. What happens in MongoDB when you insert the exact same document payload twice without specifying an "_id" field?',
+      options: [
+        'The second insert fails with a Duplicate Primary Key error.',
+        'Both insertions succeed because MongoDB automatically generates a distinct unique "_id" identifier for each document.',
+        'The second document overwrites the first document.',
+        'MongoDB converts the collection into a relational table.'
+      ],
+      correct: 1,
+      exp: 'Every MongoDB document requires a unique _id; when omitted, MongoDB auto-generates a distinct reserved Object ID for every insertion.'
+    },
+    {
+      q: '6. In the SQL vs. MongoDB terminology mapping, what are the MongoDB equivalents of a SQL Table, Row, and Partition?',
+      options: [
+        'Schema, Tuple, Bucket',
+        'Collection, Document (BSON), Shard',
+        'Graph, Node, Edge',
+        'Column Family, Timestamp, Replica'
+      ],
+      correct: 1,
+      exp: 'In MongoDB: Table -> Collection, Row -> Document (BSON), Column -> Field, Join -> Embedded Document, Foreign Key -> Reference, Partition -> Shard.'
+    },
+    {
+      q: '7. What is the 3-part key structure used to address cells in Columnar databases like Cassandra and Bigtable, and what is the Timestamp used for?',
+      options: [
+        '(Database, Table, Row) — used for primary key hashing.',
+        '(Row Key, Column Key, Timestamp) — Timestamp tracks data versioning, conflict resolution, and history in distributed environments.',
+        '(Node, Label, Property) — used for graph traversal.',
+        '(Shard, Replica, Index) — used for SQL joins.'
+      ],
+      correct: 1,
+      exp: 'Columnar stores use (Row Key, Column Key, Timestamp), where Timestamp tracks versioning and resolves conflicts across distributed nodes.'
+    },
+    {
+      q: '8. Why are Columnar databases fast for analytical column reads and high compression, yet slower when inserting a full multi-column row?',
+      options: [
+        'Because they store identical data types contiguously column-by-column (great compression and single-column reads), but writing a full row splits values across multiple disparate column blocks on disk.',
+        'Because they lack timestamps.',
+        'Because they only store data on magnetic tape.',
+        'Because they require SQL JOINs on every write.'
+      ],
+      correct: 0,
+      exp: 'Storing all values of a single column contiguously yields high compression and fast column scans, while full-row inserts must write to multiple column blocks.'
+    },
+    {
+      q: '9. How does "index-free adjacency" enable fast queries in a Graph Database like Neo4j?',
+      options: [
+        'Every node stores direct pointers to its neighboring adjacent nodes, so local traversal speed depends only on local community size rather than total global graph size.',
+        'It hashes all nodes into a single flat Redis bucket.',
+        'It eliminates relationships and properties.',
+        'It forces full table scans.'
+      ],
+      correct: 0,
+      exp: 'With index-free adjacency, traversing edges follows direct memory/disk pointers between adjacent nodes without global index lookups.'
+    },
+    {
+      q: '10. Which SQL-to-NoSQL migration scheme maps 1 SQL table directly to 1 NoSQL collection using tools like AWS DMS or Python scripts, and when should an organization still choose Relational SQL over NoSQL?',
+      options: [
+        'Scheme 3 (Design from Scratch); choose SQL for unstructured logs.',
+        'Scheme 1 (1-to-1 Mapping, most popular); choose Relational SQL when strict financial/banking ACID transactions and complex multi-table invariants are required.',
+        'Scheme 2 (Denormalization); choose SQL for big data geo-distribution.',
+        'Scheme 1 (1-to-1 Mapping); NoSQL is always superior for banking ledgers.'
+      ],
+      correct: 1,
+      exp: 'Scheme 1 (1-to-1 Mapping) is the easiest and most popular migration approach; meanwhile, banking and strict transactional invariants belong on Relational SQL.'
+    }
+  ];
+
+  function renderQuiz() {
+    const container = document.getElementById('quizContainer');
+    container.innerHTML = quizQuestions.map((item, qIdx) => {
+      const answered = state.quizAnswers[qIdx] !== undefined;
+      const chosen = state.quizAnswers[qIdx];
+      return `
+        <div class="quiz-card">
+          <div class="quiz-q">${item.q}</div>
+          <div class="quiz-opts">
+            ${item.options.map((opt, oIdx) => {
+              let cls = 'quiz-opt';
+              if (answered) {
+                if (oIdx === item.correct) cls += ' correct';
+                else if (oIdx === chosen) cls += ' incorrect';
+              }
+              return `
+                <button class="${cls}" ${answered ? 'disabled' : ''} onclick="answerQuiz(${qIdx}, ${oIdx})">
+                  <span style="font-family:var(--font-mono);font-weight:700;color:var(--accent-teal);">${String.fromCharCode(65 + oIdx)}.</span>
+                  <span>${opt}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+          <div class="quiz-exp ${answered ? 'show' : ''}" style="background:${chosen === item.correct ? 'rgba(20,184,166,0.14)' : 'rgba(244,63,94,0.14)'};border:1px solid ${chosen === item.correct ? 'rgba(20,184,166,0.38)' : 'rgba(244,63,94,0.38)'};">
+            <strong>${chosen === item.correct ? '&#10003; Correct:' : '&#10007; Incorrect:'}</strong> ${item.exp}
+          </div>
+        </div>
+      `;
+    }).join('');
+    updateQuizScore();
+  }
+
+  window.answerQuiz = function(qIdx, oIdx) {
+    if (state.quizAnswers[qIdx] !== undefined) return;
+    state.quizAnswers[qIdx] = oIdx;
+    renderQuiz();
+  };
+
+  function updateQuizScore() {
+    const answeredCount = Object.keys(state.quizAnswers).length;
+    let score = 0;
+    Object.entries(state.quizAnswers).forEach(([q, o]) => {
+      if (quizQuestions[Number(q)].correct === o) score++;
+    });
+
+    document.getElementById('quizScoreBadge').textContent = `Score: ${score} / ${quizQuestions.length}`;
+    const summary = document.getElementById('quizSummaryCard');
+    if (answeredCount === quizQuestions.length) {
+      summary.style.display = 'block';
+      document.getElementById('quizFinalTitle').textContent = `Final Score: ${score} / ${quizQuestions.length} (${Math.round((score / quizQuestions.length) * 100)}%)`;
+      document.getElementById('quizFinalMsg').textContent = score >= 8
+        ? 'Outstanding mastery! You are thoroughly prepared for Chapter 8 NoSQL Database Systems exam questions.'
+        : 'Review the explanations highlighted above and retake the quiz to hit 80%+ mastery.';
+    } else {
+      summary.style.display = 'none';
+    }
+  }
+
+  window.resetQuiz = function() {
+    state.quizAnswers = {};
+    renderQuiz();
+  };
+
+  document.getElementById('resetQuizBtn').addEventListener('click', window.resetQuiz);
+  renderQuiz();
+
+  // ==================== DOWNLOAD SELF-CONTAINED HTML ====================
+  document.getElementById('downloadHtmlBtn').addEventListener('click', () => {
+    const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'chapter-8-nosql-revision-guide.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    const toast = document.getElementById('toastNotification');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  });
+})();
+</script>
+</body>
+</html>

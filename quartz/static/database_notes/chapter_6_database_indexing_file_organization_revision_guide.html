@@ -1,0 +1,2060 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 6 Revision Studio: Database Indexing &amp; File Organization</title>
+<style>
+  :root {
+    --bg-primary: #090d16;
+    --bg-secondary: #111827;
+    --bg-card: #162033;
+    --bg-card-alt: #1d2942;
+    --bg-stage: #070b12;
+    --border-color: #26344e;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-indigo: #6366f1;
+    --accent-indigo-glow: rgba(99, 102, 241, 0.25);
+    --accent-teal: #14b8a6;
+    --accent-teal-glow: rgba(20, 184, 166, 0.22);
+    --accent-sky: #38bdf8;
+    --accent-amber: #f59e0b;
+    --accent-amber-glow: rgba(245, 158, 11, 0.2);
+    --accent-rose: #f43f5e;
+    --accent-rose-glow: rgba(244, 63, 94, 0.2);
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.28);
+  }
+
+  [data-theme="light"] {
+    --bg-primary: #f1f5f9;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-alt: #f8fafc;
+    --bg-stage: #f8fafc;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --accent-indigo: #4f46e5;
+    --accent-indigo-glow: rgba(79, 70, 229, 0.14);
+    --accent-teal: #0d9488;
+    --accent-teal-glow: rgba(13, 148, 136, 0.14);
+    --accent-sky: #0284c7;
+    --accent-amber: #d97706;
+    --accent-amber-glow: rgba(217, 119, 6, 0.14);
+    --accent-rose: #e11d48;
+    --accent-rose-glow: rgba(225, 29, 72, 0.14);
+    --shadow-card: 0 4px 16px rgba(15, 23, 42, 0.06);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 305px;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    transition: transform 0.3s ease, background-color 0.25s ease;
+  }
+
+  .sidebar-header {
+    padding: 1.2rem 1.35rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .course-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.71rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--accent-teal);
+    background: var(--accent-teal-glow);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(20, 184, 166, 0.35);
+  }
+
+  .theme-toggle-btn {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 4px 9px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+  }
+  .theme-toggle-btn:hover { border-color: var(--accent-indigo); }
+
+  .sidebar-title {
+    font-size: 1.04rem;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+
+  .sidebar-sub {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.18rem;
+  }
+
+  /* Global Search */
+  .sidebar-search {
+    padding: 0.7rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 0.52rem 0.85rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+  .search-input:focus { border-color: var(--accent-indigo); }
+
+  .search-results-dropdown {
+    position: absolute;
+    left: 1.25rem;
+    right: 1.25rem;
+    top: calc(100% - 4px);
+    background: var(--bg-card);
+    border: 1px solid var(--accent-indigo);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 60;
+    display: none;
+  }
+  .search-results-dropdown.open { display: block; }
+
+  .search-hit {
+    padding: 0.58rem 0.82rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    font-size: 0.79rem;
+  }
+  .search-hit:last-child { border-bottom: none; }
+  .search-hit:hover { background: var(--accent-indigo-glow); }
+
+  /* Progress */
+  .progress-box {
+    padding: 0.8rem 1.35rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+  }
+
+  .progress-track {
+    height: 7px;
+    background: var(--bg-primary);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 20%;
+    background: linear-gradient(90deg, var(--accent-indigo), var(--accent-teal));
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+
+  .nav-list {
+    list-style: none;
+    padding: 0.65rem;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .nav-btn {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.72rem;
+    padding: 0.72rem 0.82rem;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+
+  .nav-btn:hover {
+    background: var(--bg-card-alt);
+    color: var(--text-primary);
+  }
+
+  .nav-btn.active {
+    background: linear-gradient(135deg, var(--accent-indigo-glow), var(--accent-teal-glow));
+    border-color: rgba(99, 102, 241, 0.45);
+    color: var(--text-primary);
+  }
+
+  .nav-num {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-top: 1px;
+  }
+
+  .nav-btn.active .nav-num {
+    background: var(--accent-indigo);
+    border-color: var(--accent-indigo);
+    color: #fff;
+  }
+
+  .nav-btn.visited .nav-num {
+    background: var(--accent-teal);
+    border-color: var(--accent-teal);
+    color: #042f2e;
+  }
+
+  .nav-title {
+    display: block;
+    font-size: 0.83rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .nav-desc {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .sidebar-footer {
+    padding: 0.85rem 1.25rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .download-btn {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(20, 184, 166, 0.45);
+    background: var(--accent-teal-glow);
+    color: var(--accent-teal);
+    font-family: var(--font-sans);
+    font-size: 0.81rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .download-btn:hover {
+    background: var(--accent-teal);
+    color: #ffffff;
+    box-shadow: 0 0 18px var(--accent-teal-glow);
+  }
+
+  /* Mobile Topbar */
+  .mobile-topbar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 58px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 1rem;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 45;
+  }
+
+  .hamburger-btn {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 11px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 48;
+  }
+
+  /* Main Area */
+  .main-content {
+    margin-left: 305px;
+    flex: 1;
+    padding: 2.2rem 2.75rem 4rem;
+    max-width: 1280px;
+  }
+
+  .module-section {
+    display: none;
+    animation: fadeSlide 0.28s ease-out;
+  }
+  .module-section.active { display: block; }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .module-header {
+    margin-bottom: 1.8rem;
+    padding-bottom: 1.15rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+
+  .module-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-teal);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.3rem;
+  }
+
+  .module-title {
+    font-size: 1.76rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .module-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    max-width: 820px;
+    margin-top: 0.4rem;
+  }
+
+  /* Cards & Grids */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 1.75rem;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .card-title {
+    font-size: 1.12rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.71rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 6px;
+    text-transform: uppercase;
+  }
+
+  .tag-indigo { background: var(--accent-indigo-glow); color: var(--accent-indigo); border: 1px solid rgba(99, 102, 241, 0.38); }
+  .tag-teal { background: var(--accent-teal-glow); color: var(--accent-teal); border: 1px solid rgba(20, 184, 166, 0.38); }
+  .tag-amber { background: var(--accent-amber-glow); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.38); }
+  .tag-rose { background: var(--accent-rose-glow); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.38); }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.15rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.9rem; }
+
+  .concept-box {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent-indigo);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.15rem;
+  }
+  .concept-box.teal { border-left-color: var(--accent-teal); }
+  .concept-box.amber { border-left-color: var(--accent-amber); }
+  .concept-box.rose { border-left-color: var(--accent-rose); }
+
+  .concept-box h4 {
+    font-size: 0.93rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+    color: var(--text-primary);
+  }
+  .concept-box p, .concept-box li {
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+  }
+
+  /* Pill Tabs */
+  .pill-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .pill-btn {
+    padding: 0.5rem 0.92rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .pill-btn:hover { border-color: var(--accent-indigo); color: var(--text-primary); }
+  .pill-btn.active { background: var(--accent-indigo); border-color: var(--accent-indigo); color: #fff; }
+
+  /* Diagram Stage */
+  .diagram-stage {
+    background: #070b12;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    position: relative;
+    overflow-x: auto;
+  }
+
+  .diagram-stage svg {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .inspector-panel {
+    margin-top: 1rem;
+    background: var(--bg-card-alt);
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    border-radius: var(--radius-md);
+    padding: 1.1rem 1.25rem;
+  }
+
+  /* Terminal / SQL Box */
+  .terminal-box {
+    background: #070b12;
+    border: 1px solid #26344e;
+    border-radius: var(--radius-md);
+    padding: 0.95rem 1.15rem;
+    font-family: var(--font-mono);
+    font-size: 0.81rem;
+    color: #e2e8f0;
+    line-height: 1.6;
+  }
+
+  /* Tables */
+  .data-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.83rem;
+    text-align: left;
+  }
+
+  th {
+    background: var(--bg-card-alt);
+    color: var(--accent-teal);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    padding: 0.8rem 0.95rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  td {
+    padding: 0.78rem 0.95rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  /* Disk Page Simulator */
+  .disk-pages-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+  }
+
+  .disk-page-box {
+    background: var(--bg-card-alt);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.7rem;
+    transition: all 0.25s ease;
+  }
+  .disk-page-box.scanning {
+    border-color: var(--accent-amber);
+    background: var(--accent-amber-glow);
+  }
+  .disk-page-box.matched {
+    border-color: var(--accent-teal);
+    background: var(--accent-teal-glow);
+    box-shadow: 0 0 14px var(--accent-teal-glow);
+  }
+  .disk-page-box.skipped {
+    opacity: 0.45;
+  }
+
+  /* Hash Bucket Cards */
+  .bucket-card {
+    background: var(--bg-card-alt);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    transition: all 0.25s ease;
+  }
+  .bucket-card.highlight {
+    border-color: var(--accent-teal);
+    box-shadow: 0 0 18px var(--accent-teal-glow);
+  }
+
+  .entry-pill {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0.7rem;
+    margin-top: 0.45rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    font-size: 0.8rem;
+  }
+  .entry-pill.overflow {
+    border-style: dashed;
+    border-color: var(--accent-amber);
+  }
+
+  /* Inputs */
+  .form-input {
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.83rem;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--accent-indigo); }
+
+  /* Slider */
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent-indigo);
+    cursor: pointer;
+  }
+
+  /* Quiz */
+  .quiz-card {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .quiz-q {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .quiz-opts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .quiz-opt {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.86rem;
+    cursor: pointer;
+    display: flex;
+    gap: 0.65rem;
+    transition: all 0.18s ease;
+  }
+
+  .quiz-opt:hover:not(:disabled) {
+    border-color: var(--accent-indigo);
+    background: var(--accent-indigo-glow);
+  }
+
+  .quiz-opt.correct {
+    border-color: var(--accent-teal);
+    background: rgba(20, 184, 166, 0.2);
+  }
+
+  .quiz-opt.incorrect {
+    border-color: var(--accent-rose);
+    background: rgba(244, 63, 94, 0.2);
+  }
+
+  .quiz-exp {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.83rem;
+    display: none;
+  }
+  .quiz-exp.show { display: block; }
+
+  /* Footer Nav */
+  .module-footer-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-color);
+    gap: 1rem;
+  }
+
+  .btn-primary, .btn-secondary {
+    padding: 0.68rem 1.2rem;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--accent-indigo);
+    color: #fff;
+    border: 1px solid var(--accent-indigo);
+  }
+  .btn-primary:hover {
+    opacity: 0.92;
+    box-shadow: 0 0 18px var(--accent-indigo-glow);
+  }
+
+  .btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+  .btn-secondary:hover { border-color: var(--accent-teal); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--accent-teal);
+    color: var(--text-primary);
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    font-size: 0.84rem;
+    font-weight: 600;
+    z-index: 100;
+    transform: translateY(130%);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 980px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-backdrop.open { display: block; }
+    .mobile-topbar { display: flex; }
+    .main-content { margin-left: 0; padding: 5rem 1.2rem 3rem; }
+    .grid-2, .grid-3, .grid-4, .disk-pages-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Mobile Topbar -->
+  <header class="mobile-topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="hamburger-btn" id="menuToggle" aria-label="Toggle Menu">&#9776;</button>
+      <span style="font-weight:700;font-size:0.92rem;">Ch. 6: Database Indexing</span>
+    </div>
+    <span class="tag tag-teal" id="mobileProgressTag">20%</span>
+  </header>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="header-top-row">
+        <span class="course-badge">&#9679; DB // CHAPTER 6</span>
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode">&#9788; Theme</button>
+      </div>
+      <h1 class="sidebar-title">Database Indexing &amp; File Organization</h1>
+      <p class="sidebar-sub">Centralized Indexing Interactive Studio</p>
+    </div>
+
+    <div class="sidebar-search">
+      <input type="text" class="search-input" id="globalSearchInput" placeholder="Search Heap, Hash, Stark, B+ Tree, Split, Merge...">
+      <div class="search-results-dropdown" id="searchResultsDropdown"></div>
+    </div>
+
+    <div class="progress-box">
+      <div class="progress-meta">
+        <span>Revision Coverage</span>
+        <span id="progressPercent">20%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <ul class="nav-list" id="navList">
+      <li>
+        <button class="nav-btn active" data-module="1">
+          <span class="nav-num">01</span>
+          <div>
+            <span class="nav-title">Files &amp; File Organization</span>
+            <span class="nav-desc">Storage Hierarchy, Heap/Sorted, SQL Lab</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="2">
+          <span class="nav-num">02</span>
+          <div>
+            <span class="nav-title">Hash Indexing &amp; GoT Lab</span>
+            <span class="nav-desc">Buckets, h(r)=Surname, O(1) Equality</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="3">
+          <span class="nav-num">03</span>
+          <div>
+            <span class="nav-title">Tree Indexing &amp; B+ Trees</span>
+            <span class="nav-desc">Hash vs. Tree &amp; 6 Core B+ Tree Rules</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="4">
+          <span class="nav-num">04</span>
+          <div>
+            <span class="nav-title">B+ Tree Operations Tracer</span>
+            <span class="nav-desc">Search, Insert Split, Delete Borrow/Merge</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="5">
+          <span class="nav-num">05</span>
+          <div>
+            <span class="nav-title">Exam Readiness Quiz</span>
+            <span class="nav-desc">10 Active Recall Questions</span>
+          </div>
+        </button>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <button class="download-btn" id="downloadHtmlBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Self-Contained HTML
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- ==================== MODULE 1 ==================== -->
+    <section class="module-section active" id="module-1">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Section 1 // Physical Storage &amp; Access Paths</div>
+          <h2 class="module-title">Files, File Organization &amp; Query Acceleration</h2>
+          <p class="module-subtitle">Explore the physical database storage hierarchy, simulate disk page scans across Heap, Sorted, and Indexed files, and analyze SQL query acceleration and index write trade-offs.</p>
+        </div>
+        <span class="tag tag-indigo">Storage &amp; SQL Lab</span>
+      </div>
+
+      <!-- 1.1 Data Storage Hierarchy -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.1 Physical Data Storage Hierarchy &amp; DBMS Role</h3>
+          <span class="tag tag-teal">Click Any Tier</span>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 820 215" width="820" height="215" id="hierarchySvg"></svg>
+        </div>
+        <div class="inspector-panel" id="hierarchyInspector"></div>
+      </div>
+
+      <!-- 1.2 & 1.3 File Organization Disk Scan Simulator -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.2 &amp; 1.3 File Organization Comparison Simulator</h3>
+          <span class="tag tag-amber">Watch Disk Page I/O</span>
+        </div>
+
+        <div class="grid-3" style="margin-bottom:1rem;">
+          <div class="concept-box rose">
+            <h4>Heap Files (Random Order)</h4>
+            <p>Records are placed without any specific ordering. Finding a record requires scanning all pages (<strong>full table scan</strong>).</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>Sorted Files</h4>
+            <p>Records are maintained in sorted order by a search key. Ideal for order-sensitive retrieval, binary search, and range scans.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>Indexes</h4>
+            <p>Auxiliary data structures built alongside data files containing search keys and page pointers to jump directly to target data pages.</p>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:0.75rem;">
+          <span style="font-size:0.84rem;font-weight:700;">Simulate Lookup for <code>sid = 2001234</code>:</span>
+          <button class="btn-secondary" style="padding:6px 12px;font-size:0.8rem;" onclick="runDiskScanSim('heap')">Run on Heap File (4 Pages)</button>
+          <button class="btn-secondary" style="padding:6px 12px;font-size:0.8rem;" onclick="runDiskScanSim('sorted')">Run on Sorted File (Binary Search)</button>
+          <button class="btn-primary" style="padding:6px 12px;font-size:0.8rem;" onclick="runDiskScanSim('index')">Run with Index Lookup (1 Page Jump)</button>
+        </div>
+
+        <div class="disk-pages-grid" id="diskPagesGrid"></div>
+        <div class="terminal-box" style="margin-top:0.85rem;" id="diskScanLog">Click a file organization button above to animate disk page reads for <code>sid = 2001234</code>.</div>
+      </div>
+
+      <!-- 1.4 Students Table SQL Acceleration Lab -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.4 Lecture Example: Query Acceleration on <code>Students</code> Table</h3>
+          <span class="tag tag-indigo">Interactive SQL Analyzer</span>
+        </div>
+
+        <div class="pill-bar" id="sqlQueryTabs">
+          <button class="pill-btn active" data-sql="A">Statement A: SELECT * FROM Students;</button>
+          <button class="pill-btn" data-sql="B">Statement B: WHERE sid = 2001234</button>
+          <button class="pill-btn" data-sql="C">Statement C: WHERE year &gt;= 2013 AND year &lt;= 2015</button>
+        </div>
+
+        <div id="sqlQueryDetail"></div>
+      </div>
+
+      <!-- 1.5 SQL CREATE INDEX & Trade-Offs -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.5 SQL <code>CREATE INDEX</code> Syntax &amp; Read vs. Write Trade-Off</h3>
+          <span class="tag tag-rose">Storage &amp; DML Overhead</span>
+        </div>
+
+        <div class="grid-2" style="align-items:center;">
+          <div>
+            <div class="terminal-box" style="margin-bottom:0.85rem;">
+              <div style="color:#5eead4;font-weight:bold;">-- Standard SQL Index Creation Syntax</div>
+              <div><span style="color:#c084fc;">CREATE INDEX</span> index_name <span style="color:#c084fc;">ON</span> table_name (col_name);</div>
+              <div style="color:#94a3b8;margin-top:6px;">-- Example on Students table:</div>
+              <div><span style="color:#c084fc;">CREATE INDEX</span> idx_students_sid <span style="color:#c084fc;">ON</span> Students (sid);</div>
+            </div>
+            <p style="font-size:0.84rem;color:var(--text-secondary);">
+              While indexes dramatically accelerate <code>SELECT</code> queries filtered or ordered by the indexed column, creating <strong>too many indexes</strong> slows down every <code>INSERT</code>, <code>UPDATE</code>, and <code>DELETE</code> because the DBMS must update both the table and every associated index structure.
+            </p>
+          </div>
+
+          <div style="background:var(--bg-card-alt);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1.1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+              <strong style="font-size:0.88rem;">Number of Indexes on Table:</strong>
+              <span class="tag tag-indigo" id="idxCountLabel">2 Indexes</span>
+            </div>
+            <input type="range" min="0" max="8" value="2" id="idxTradeoffSlider">
+            <div style="margin-top:0.85rem;display:flex;flex-direction:column;gap:0.45rem;font-size:0.82rem;" id="idxTradeoffStats"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <span style="font-size:0.8rem;color:var(--text-muted);">Module 1 of 5</span>
+        <button class="btn-primary" onclick="goToModule(2)">Next: Hash Indexing &amp; GoT Lab &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 2 ==================== -->
+    <section class="module-section" id="module-2">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Section 2 // O(1) Equality Lookup</div>
+          <h2 class="module-title">Hash Indexing &amp; Game of Thrones Bucket Simulator</h2>
+          <p class="module-subtitle">Understand deterministic hash functions h(r), primary and overflow pages inside buckets, and test equality vs. range queries on the Game of Thrones character table.</p>
+        </div>
+        <span class="tag tag-teal">h(r) = Surname</span>
+      </div>
+
+      <!-- 2.1 Core Concepts -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">2.1 Core Concepts: Buckets &amp; Hash Function <code>h(r)</code></h3>
+          <span class="tag tag-indigo">Primary + Overflow Pages</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="concept-box">
+            <h4>Buckets (Primary Page + Overflow Pages)</h4>
+            <p>A hash index consists of a collection of <strong>buckets</strong>. Each bucket is composed of one <strong>primary page</strong> plus zero or more linked <strong>overflow pages</strong> storing data entries when a bucket fills up.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>Deterministic Hash Function <code>h(r)</code></h4>
+            <p>A fixed mathematical function applied to the search key fields of record <code>r</code> that computes the exact target bucket ID (<code>h(r) = bucket</code>). The exact same hash function is used for all records.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.2 Game of Thrones Interactive Hash Index Lab -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">2.2 Interactive Game of Thrones Hash Index (<code>h(r) = Surname</code>)</h3>
+          <span class="tag tag-amber">Primary Capacity: 2 Records / Page</span>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:1rem;background:var(--bg-card-alt);padding:0.85rem;border-radius:var(--radius-md);border:1px solid var(--border-color);">
+          <strong style="font-size:0.82rem;">Search Equality:</strong>
+          <button class="pill-btn" style="margin:0;padding:4px 11px;" onclick="searchGotBucket('Stark')">WHERE Surname = 'Stark'</button>
+          <button class="pill-btn" style="margin:0;padding:4px 11px;" onclick="searchGotBucket('Lannister')">WHERE Surname = 'Lannister'</button>
+          <button class="pill-btn" style="margin:0;padding:4px 11px;" onclick="searchGotBucket('Targaryen')">WHERE Surname = 'Targaryen'</button>
+          <button class="pill-btn" style="margin:0;padding:4px 11px;" onclick="searchGotBucket('')">Clear Highlight</button>
+        </div>
+
+        <!-- Add Custom Character -->
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:1rem;">
+          <input type="text" id="gotFirst" class="form-input" placeholder="First Name (e.g., Jon)" style="width:165px;">
+          <select id="gotSurname" class="form-input">
+            <option value="Stark">Surname: Stark</option>
+            <option value="Lannister">Surname: Lannister</option>
+            <option value="Targaryen">Surname: Targaryen</option>
+          </select>
+          <input type="text" id="gotOrigin" class="form-input" placeholder="Origin (e.g., Winterfell)" style="width:185px;">
+          <button class="btn-primary" style="padding:0.52rem 1rem;" id="addGotBtn">+ Insert Record via h(r)</button>
+          <button class="btn-secondary" style="padding:0.52rem 0.9rem;" id="resetGotBtn">Reset Table</button>
+        </div>
+
+        <div class="grid-3" id="gotBucketsContainer"></div>
+        <div class="terminal-box" style="margin-top:1rem;" id="gotHashLog">
+          Hash function <code>h(r) = Surname</code> routed 7 initial characters into 3 House buckets. Notice how the <strong>Stark</strong> bucket overflows into an Overflow Page because 4 records exceed the 2-record primary page capacity!
+        </div>
+      </div>
+
+      <!-- 2.3 Key Revision Questions -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">2.3 Key Revision Questions &amp; Hash Properties</h3>
+          <span class="tag tag-rose">Exam Essentials</span>
+        </div>
+
+        <div class="grid-3">
+          <div class="concept-box teal">
+            <h4>Q1: Can two records be in the same bucket?</h4>
+            <p><strong>YES.</strong> Records with identical search key values (e.g., all 4 <code>Stark</code> records) or distinct keys that hash to the same bucket ID (<strong>hash collision</strong>) share the same bucket.</p>
+          </div>
+          <div class="concept-box rose">
+            <h4>Q2: Can one record be in different buckets?</h4>
+            <p><strong>NO.</strong> The hash function <code>h(r)</code> is strictly deterministic and maps a given search key to one and only one bucket.</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>Q3: Equality Search vs. Range Search?</h4>
+            <p><strong>Equality Search ONLY ($O(1)$).</strong> Hash indexes are <strong>not suitable for range search</strong> because hash functions scatter adjacent keys randomly across uncorrelated buckets without preserving sort order.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(1)">&larr; Previous: Files &amp; File Organization</button>
+        <button class="btn-primary" onclick="goToModule(3)">Next: Tree Indexing &amp; B+ Trees &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 3 ==================== -->
+    <section class="module-section" id="module-3">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Section 3 // Balanced Hierarchical Indexing</div>
+          <h2 class="module-title">Tree Indexing &amp; B+ Tree Architecture</h2>
+          <p class="module-subtitle">Compare Hash Indexing against B+ Tree Indexing and inspect every structural element and rule of a dynamic, balanced B+ Tree.</p>
+        </div>
+        <span class="tag tag-indigo">B+ Tree Rules</span>
+      </div>
+
+      <!-- 3.1 Hash vs Tree Comparison -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">3.1 Comparison: Hash Indexing vs. Tree Indexing (B+ Tree)</h3>
+          <span class="tag tag-teal">RDBMS Standard</span>
+        </div>
+
+        <div class="data-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Hash Indexing</th>
+                <th>Tree Indexing (B+ Tree)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Structure</strong></td>
+                <td>Flat structure (collection of buckets)</td>
+                <td>Hierarchical balanced tree structure</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Equality Search</strong></td>
+                <td><span class="tag tag-teal">Highly Efficient O(1)</span></td>
+                <td>Supported in <code>O(log n)</code> time</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Range Search</strong></td>
+                <td><span class="tag tag-rose">Not Suitable</span> (no key ordering)</td>
+                <td><span class="tag tag-teal">Highly Efficient</span> (via linked leaf nodes)</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">DBMS Support</strong></td>
+                <td>Specific key-value workloads</td>
+                <td>Most popular &amp; widely supported in RDBMS</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 3.2 Interactive B+ Tree Anatomy & 6 Core Rules -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">3.2 Interactive B+ Tree Anatomy &amp; Six Core Rules</h3>
+          <span class="tag tag-amber">Click a Rule to Highlight</span>
+        </div>
+
+        <div class="pill-bar" id="bplusRuleBtns">
+          <button class="pill-btn active" data-brule="0">1. Data in Leaves Only</button>
+          <button class="pill-btn" data-brule="1">2. Balanced Height</button>
+          <button class="pill-btn" data-brule="2">3. High Fanout (&ge;100)</button>
+          <button class="pill-btn" data-brule="3">4. Linked Sibling Leaves</button>
+          <button class="pill-btn" data-brule="4">5. k Keys &amp; k+1 Pointers</button>
+          <button class="pill-btn" data-brule="5">6. Min 50% Occupancy</button>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 820 265" width="820" height="265" id="bplusAnatomySvg"></svg>
+        </div>
+
+        <div class="inspector-panel" id="bplusRuleInspector"></div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(2)">&larr; Previous: Hash Indexing &amp; GoT Lab</button>
+        <button class="btn-primary" onclick="goToModule(4)">Next: B+ Tree Operations Tracer &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 4 ==================== -->
+    <section class="module-section" id="module-4">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Section 4 // Step-by-Step Algorithm Traces</div>
+          <h2 class="module-title">B+ Tree Operations: Search, Insert &amp; Delete Tracers</h2>
+          <p class="module-subtitle">Step through the exact lecture examples for Equality Search (<code>8</code>), Range Search (<code>[8, 24]</code>), Insert Key <code>8</code> (Split + Copy Up + Push Up), and Delete Keys <code>8</code>, <code>29</code> (Borrow), and <code>7</code> (Merge &amp; Height Reduction).</p>
+        </div>
+        <span class="tag tag-teal">5 Interactive Traces</span>
+      </div>
+
+      <!-- 4.1 Search Operation Tracer -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">4.1 Search Operation Tracer: Equality <code>8</code> vs. Range <code>[8, 24]</code></h3>
+          <div class="pill-bar" style="margin-bottom:0;" id="searchTraceModeBtns">
+            <button class="pill-btn active" data-smode="eq">Equality Search: Key 8</button>
+            <button class="pill-btn" data-smode="rng">Range Search: [8, 24]</button>
+          </div>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 820 250" width="820" height="250" id="bplusSearchSvg"></svg>
+        </div>
+        <div class="inspector-panel" id="bplusSearchInspector"></div>
+      </div>
+
+      <!-- 4.2 Insert Operation Tracer (Insert Key 8) -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">4.2 Insert Operation Trace: Insert Key <code>8</code> (Overflow &amp; Tree Growth)</h3>
+          <div class="pill-bar" style="margin-bottom:0;" id="insertTraceBtns">
+            <button class="pill-btn active" data-istep="0">Initial State</button>
+            <button class="pill-btn" data-istep="1">Step 1: Leaf Split &amp; Copy Up 5</button>
+            <button class="pill-btn" data-istep="2">Step 2: Parent Split &amp; Push Up 20 (New Root)</button>
+          </div>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 820 265" width="820" height="265" id="bplusInsertSvg"></svg>
+        </div>
+        <div class="inspector-panel" id="bplusInsertInspector"></div>
+      </div>
+
+      <!-- 4.3 Delete Operation Tracer (Keys 8, 29, 7) -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">4.3 Delete Operation Traces: Keys <code>8</code>, <code>29</code> (Borrow), and <code>7</code> (Merge)</h3>
+          <div class="pill-bar" style="margin-bottom:0;" id="deleteTraceBtns">
+            <button class="pill-btn active" data-dcase="ex1">Ex 1: Delete 8 (&ge;50% OK)</button>
+            <button class="pill-btn" data-dcase="ex2">Ex 2: Delete 29 (Borrow 34)</button>
+            <button class="pill-btn" data-dcase="ex3">Ex 3: Delete 7 (Merge &amp; Shrink)</button>
+          </div>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 820 250" width="820" height="250" id="bplusDeleteSvg"></svg>
+        </div>
+        <div class="inspector-panel" id="bplusDeleteInspector"></div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(3)">&larr; Previous: Tree Indexing &amp; Rules</button>
+        <button class="btn-primary" onclick="goToModule(5)">Next: Exam Readiness Quiz &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 5 ==================== -->
+    <section class="module-section" id="module-5">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Active Recall // Self-Assessment</div>
+          <h2 class="module-title">Chapter 6 Exam Readiness Quiz</h2>
+          <p class="module-subtitle">Test your understanding of Heap/Sorted files, SQL query indexing, Hash buckets, B+ Tree occupancy rules, Copy Up vs. Push Up splits, and Borrow vs. Merge deletions.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="tag tag-teal" id="quizScoreBadge">Score: 0 / 10</span>
+          <button class="btn-secondary" style="padding:6px 12px;font-size:0.8rem;" id="resetQuizBtn">Reset Quiz</button>
+        </div>
+      </div>
+
+      <div id="quizContainer"></div>
+
+      <div class="card" id="quizSummaryCard" style="display:none;border-color:var(--accent-teal);text-align:center;">
+        <h3 style="font-size:1.3rem;margin-bottom:0.4rem;" id="quizFinalTitle">Assessment Complete!</h3>
+        <p style="color:var(--text-secondary);margin-bottom:1rem;" id="quizFinalMsg"></p>
+        <button class="btn-primary" onclick="resetQuiz()">Retake Quiz</button>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(4)">&larr; Previous: B+ Tree Operations Tracer</button>
+        <button class="btn-primary" onclick="goToModule(1)">Return to Module 01 &#8634;</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toastNotification">Chapter 6 HTML Study Guide downloaded!</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const state = {
+    currentModule: 1,
+    visitedModules: new Set([1]),
+    theme: 'dark',
+    hierarchyTier: 0,
+    sqlQuery: 'A',
+    gotRecords: [
+      { first: 'Arya', surname: 'Stark', origin: 'Winterfell' },
+      { first: 'Sansa', surname: 'Stark', origin: 'Winterfell' },
+      { first: 'Jaime', surname: 'Lannister', origin: 'Casterly Rock' },
+      { first: 'Tyrion', surname: 'Lannister', origin: 'Casterly Rock' },
+      { first: 'Robb', surname: 'Stark', origin: 'Winterfell' },
+      { first: 'Bran', surname: 'Stark', origin: 'Winterfell' },
+      { first: 'Aegon', surname: 'Targaryen', origin: 'Tower of Joy' }
+    ],
+    gotHighlight: '',
+    bplusRule: 0,
+    searchMode: 'eq',
+    insertStep: 0,
+    deleteCase: 'ex1',
+    quizAnswers: {}
+  };
+
+  // ==================== THEME & NAVIGATION ====================
+  document.getElementById('themeToggleBtn').addEventListener('click', () => {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', state.theme);
+  });
+
+  window.goToModule = function(modNum) {
+    state.currentModule = modNum;
+    state.visitedModules.add(modNum);
+
+    document.querySelectorAll('.module-section').forEach(s => s.classList.remove('active'));
+    document.getElementById(`module-${modNum}`).classList.add('active');
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      const m = Number(btn.dataset.module);
+      btn.classList.toggle('active', m === modNum);
+      btn.classList.toggle('visited', state.visitedModules.has(m) && m !== modNum);
+    });
+
+    const pct = Math.round((state.visitedModules.size / 5) * 100);
+    document.getElementById('progressPercent').textContent = `${pct}%`;
+    document.getElementById('mobileProgressTag').textContent = `${pct}%`;
+    document.getElementById('progressFill').style.width = `${pct}%`;
+
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => goToModule(Number(btn.dataset.module)));
+  });
+
+  document.getElementById('menuToggle').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarBackdrop').classList.toggle('open');
+  });
+
+  document.getElementById('sidebarBackdrop').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+  });
+
+  // ==================== MODULE 1: HIERARCHY, DISK SIM & SQL LAB ====================
+  const hierarchyTiers = [
+    { name: '1 Database', sub: '1 or more Tables', x: 35, col: '#6366f1', desc: 'Top-level logical container holding one or more relational tables, catalog metadata, and associated index files.' },
+    { name: '1 Table', sub: '1 or more Tuples', x: 230, col: '#14b8a6', desc: 'A logical relation (e.g., Students) composed of tuples (records) physically persisted inside underlying data files.' },
+    { name: '1 Data File', sub: '1 or more Data Pages', x: 425, col: '#38bdf8', desc: 'An OS/DBMS physical storage file partitioned into fixed-size blocks called Data Pages.' },
+    { name: '1 Data Page', sub: 'Fixed Block of Tuples', x: 620, col: '#f59e0b', desc: 'The fundamental unit of disk I/O transfer between disk and main memory buffer pool. The DBMS uses indexes to pinpoint target data pages directly.' }
+  ];
+
+  function renderHierarchy(idx) {
+    state.hierarchyTier = idx;
+    const svg = document.getElementById('hierarchySvg');
+    svg.innerHTML = hierarchyTiers.map((t, i) => `
+      <g style="cursor:pointer;" onclick="selectHierarchyTier(${i})">
+        <rect x="${t.x}" y="45" width="160" height="86" rx="10" fill="${i === idx ? '#1e293b' : '#111827'}" stroke="${t.col}" stroke-width="${i === idx ? 3.2 : 1.8}"/>
+        <text x="${t.x + 80}" y="82" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">${t.name}</text>
+        <text x="${t.x + 80}" y="104" fill="${t.col}" font-family="monospace" font-size="10.5" text-anchor="middle">${t.sub}</text>
+        ${i < 3 ? `<line x1="${t.x + 160}" y1="88" x2="${t.x + 195}" y2="88" stroke="#64748b" stroke-width="2.4"/><polygon points="${t.x+195},88 ${t.x+187},83 ${t.x+187},93" fill="#64748b"/>` : ''}
+      </g>
+    `).join('') + `
+      <rect x="35" y="155" width="745" height="38" rx="8" fill="#162033" stroke="#14b8a6" stroke-width="1.5"/>
+      <text x="407" y="179" fill="#5eead4" font-family="monospace" font-size="11.5" font-weight="bold" text-anchor="middle">DBMS Role: Given a query, determine how to access ONLY the target Data Pages containing requested tuples.</text>
+    `;
+
+    const cur = hierarchyTiers[idx];
+    document.getElementById('hierarchyInspector').innerHTML = `
+      <h4 style="color:${cur.col};font-size:0.95rem;margin-bottom:0.25rem;">${cur.name} (${cur.sub})</h4>
+      <p style="font-size:0.85rem;color:var(--text-primary);">${cur.desc}</p>
+    `;
+  }
+  window.selectHierarchyTier = renderHierarchy;
+  renderHierarchy(0);
+
+  // Disk Page Scan Simulator
+  const samplePages = [
+    { id: 'Page 1', heap: 'sid: 2005510, 2001020', sorted: 'sid: 2001010, 2001020' },
+    { id: 'Page 2', heap: 'sid: 2008901, 2003344', sorted: 'sid: 2001234, 2002100' },
+    { id: 'Page 3', heap: 'sid: 2001234, 2007712', sorted: 'sid: 2003344, 2005510' },
+    { id: 'Page 4', heap: 'sid: 2001010, 2002100', sorted: 'sid: 2007712, 2008901' }
+  ];
+
+  function initDiskGrid(mode = 'heap') {
+    const grid = document.getElementById('diskPagesGrid');
+    grid.innerHTML = samplePages.map((p, idx) => `
+      <div class="disk-page-box" id="dpage-${idx}">
+        <div style="font-family:var(--font-mono);font-size:0.76rem;font-weight:700;color:var(--accent-teal);margin-bottom:4px;">${p.id}</div>
+        <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-secondary);">${mode === 'heap' ? p.heap : p.sorted}</div>
+      </div>
+    `).join('');
+  }
+  initDiskGrid('heap');
+
+  window.runDiskScanSim = function(mode) {
+    initDiskGrid(mode === 'heap' ? 'heap' : 'sorted');
+    const log = document.getElementById('diskScanLog');
+    if (mode === 'heap') {
+      [0, 1, 2, 3].forEach((pIdx, step) => {
+        setTimeout(() => {
+          const el = document.getElementById(`dpage-${pIdx}`);
+          if (pIdx === 2) el.classList.add('matched');
+          else el.classList.add('scanning');
+        }, step * 240);
+      });
+      log.innerHTML = `<span style="color:#fda4af;">[Heap File Scan]</span> Records are unordered. Must scan Page 1 &rarr; Page 2 &rarr; Page 3 (Match!) &rarr; Page 4 (to ensure no duplicates if non-unique). Cost: <strong>O(N) Full Table Scan (4 Page I/Os)</strong>.`;
+    } else if (mode === 'sorted') {
+      document.getElementById('dpage-0').classList.add('skipped');
+      document.getElementById('dpage-3').classList.add('skipped');
+      setTimeout(() => document.getElementById('dpage-2').classList.add('scanning'), 150);
+      setTimeout(() => document.getElementById('dpage-1').classList.add('matched'), 420);
+      log.innerHTML = `<span style="color:#fcd34d;">[Sorted File Binary Search]</span> Checks midpoint Page 3 (2003344 &gt; 2001234), halves search space to Page 2 (Match!). Cost: <strong>O(log2 N) = 2 Page I/Os</strong>.`;
+    } else {
+      [0, 2, 3].forEach(i => document.getElementById(`dpage-${i}`).classList.add('skipped'));
+      setTimeout(() => document.getElementById('dpage-1').classList.add('matched'), 180);
+      log.innerHTML = `<span style="color:#5eead4;">[Index Direct Lookup]</span> Index maps <code>sid = 2001234</code> directly to pointer <strong>Page 2</strong>! Pages 1, 3, and 4 are never read from disk. Cost: <strong>1 Data Page I/O</strong>.`;
+    }
+  };
+
+  // SQL Query Lab
+  const sqlQueryInfo = {
+    A: {
+      sql: 'SELECT * FROM Students;',
+      faster: 'NO — Not Faster with Indexing',
+      badge: 'tag-rose',
+      exp: 'This query retrieves all rows from the Students table without any WHERE filtering condition. Because every tuple must be returned, the DBMS performs a sequential full table scan across all data pages, rendering an index useless.'
+    },
+    B: {
+      sql: 'SELECT * FROM Students WHERE sid = 2001234;',
+      faster: 'YES — Faster with Indexing (Equality Search)',
+      badge: 'tag-teal',
+      exp: 'This is an equality search on sid. An index on sid (either Hash Index in O(1) or B+ Tree Index in O(log n)) lets the DBMS look up the exact pointer to the data page containing sid = 2001234 without scanning the rest of the table.'
+    },
+    C: {
+      sql: 'SELECT * FROM Students WHERE year >= 2013 AND year <= 2015;',
+      faster: 'YES — Faster with Range-Friendly Indexing (B+ Tree)',
+      badge: 'tag-teal',
+      exp: 'This is a range search on year. A range-friendly index (such as a B+ Tree index on year) locates the starting key (year = 2013) and traverses linked leaf sibling pointers sequentially through year = 2015.'
+    }
+  };
+
+  function renderSqlQuery(key) {
+    state.sqlQuery = key;
+    document.querySelectorAll('#sqlQueryTabs .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.sql === key));
+    const d = sqlQueryInfo[key];
+    document.getElementById('sqlQueryDetail').innerHTML = `
+      <div class="terminal-box" style="margin-bottom:0.85rem;">${d.sql}</div>
+      <div class="concept-box ${key === 'A' ? 'rose' : 'teal'}">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:0.35rem;">
+          <h4>Faster with Indexing?</h4>
+          <span class="tag ${d.badge}">${d.faster}</span>
+        </div>
+        <p>${d.exp}</p>
+      </div>
+    `;
+  }
+
+  document.querySelectorAll('#sqlQueryTabs .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => renderSqlQuery(btn.dataset.sql));
+  });
+  renderSqlQuery('A');
+
+  // Index Trade-off Slider
+  const idxSlider = document.getElementById('idxTradeoffSlider');
+  function updateIdxTradeoff() {
+    const n = Number(idxSlider.value);
+    document.getElementById('idxCountLabel').textContent = `${n} Index${n === 1 ? '' : 'es'}`;
+    const readSpeed = n === 0 ? 'Slow (Full Table Scans)' : n <= 3 ? 'Fast (Targeted Key Lookups)' : 'Very Fast (Covers Most Queries)';
+    const writePenalty = n === 0 ? '1x (Base Table Only)' : `${1 + n}x (Table + ${n} Index Updates per INSERT/UPDATE/DELETE)`;
+    document.getElementById('idxTradeoffStats').innerHTML = `
+      <div><strong>SELECT Search Speed:</strong> <span style="color:var(--accent-teal);">${readSpeed}</span></div>
+      <div><strong>INSERT / UPDATE / DELETE Cost:</strong> <span style="color:var(--accent-rose);">${writePenalty}</span></div>
+      <div><strong>Extra Disk Storage:</strong> <span style="color:var(--accent-amber);">+${n * 15}% auxiliary index pages</span></div>
+    `;
+  }
+  idxSlider.addEventListener('input', updateIdxTradeoff);
+  updateIdxTradeoff();
+
+  // ==================== MODULE 2: HASH INDEXING & GOT SIMULATOR ====================
+  function renderGotBuckets() {
+    const houses = ['Stark', 'Lannister', 'Targaryen'];
+    const container = document.getElementById('gotBucketsContainer');
+
+    container.innerHTML = houses.map(house => {
+      const recs = state.gotRecords.filter(r => r.surname === house);
+      const isHighlight = state.gotHighlight === house;
+      return `
+        <div class="bucket-card ${isHighlight ? 'highlight' : ''}">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+            <strong style="font-size:0.95rem;">Bucket: ${house}</strong>
+            <span class="tag ${recs.length > 2 ? 'tag-amber' : 'tag-teal'}">${recs.length} Record${recs.length===1?'':'s'}</span>
+          </div>
+          <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--accent-indigo);margin-bottom:0.35rem;">Primary Page (Max 2):</div>
+          ${recs.slice(0, 2).map(r => `
+            <div class="entry-pill">
+              <span><strong>${r.first} ${r.surname}</strong></span>
+              <span style="color:var(--text-muted);font-size:0.74rem;">${r.origin}</span>
+            </div>
+          `).join('')}
+          ${recs.length > 2 ? `
+            <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--accent-amber);margin-top:0.65rem;margin-bottom:0.25rem;">&darr; Overflow Page Linked:</div>
+            ${recs.slice(2).map(r => `
+              <div class="entry-pill overflow">
+                <span><strong>${r.first} ${r.surname}</strong></span>
+                <span style="color:var(--text-muted);font-size:0.74rem;">${r.origin}</span>
+              </div>
+            `).join('')}
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.searchGotBucket = function(house) {
+    state.gotHighlight = house;
+    renderGotBuckets();
+    const log = document.getElementById('gotHashLog');
+    if (!house) {
+      log.innerHTML = 'Bucket highlight cleared. All records remain deterministically mapped by <code>h(r) = Surname</code>.';
+    } else {
+      const count = state.gotRecords.filter(r => r.surname === house).length;
+      log.innerHTML = `<span style="color:#5eead4;">[O(1) Equality Lookup]</span> Query <code>WHERE Surname = '${house}'</code> computes <code>h('${house}') &rarr; ${house} Bucket</code> directly, retrieving all <strong>${count}</strong> matching record(s) without scanning other buckets!`;
+    }
+  };
+
+  document.getElementById('addGotBtn').addEventListener('click', () => {
+    const first = document.getElementById('gotFirst').value.trim() || 'Jon';
+    const surname = document.getElementById('gotSurname').value;
+    const origin = document.getElementById('gotOrigin').value.trim() || 'Winterfell';
+    state.gotRecords.push({ first, surname, origin });
+    state.gotHighlight = surname;
+    document.getElementById('gotFirst').value = '';
+    document.getElementById('gotOrigin').value = '';
+    renderGotBuckets();
+    document.getElementById('gotHashLog').innerHTML = `<span style="color:#5eead4;">[Inserted]</span> <code>h(${first} ${surname}) = ${surname} Bucket</code>. Deterministic hash routed record directly to ${surname} bucket!`;
+  });
+
+  document.getElementById('resetGotBtn').addEventListener('click', () => {
+    state.gotRecords = [
+      { first: 'Arya', surname: 'Stark', origin: 'Winterfell' },
+      { first: 'Sansa', surname: 'Stark', origin: 'Winterfell' },
+      { first: 'Jaime', surname: 'Lannister', origin: 'Casterly Rock' },
+      { first: 'Tyrion', surname: 'Lannister', origin: 'Casterly Rock' },
+      { first: 'Robb', surname: 'Stark', origin: 'Winterfell' },
+      { first: 'Bran', surname: 'Stark', origin: 'Winterfell' },
+      { first: 'Aegon', surname: 'Targaryen', origin: 'Tower of Joy' }
+    ];
+    state.gotHighlight = '';
+    renderGotBuckets();
+  });
+
+  renderGotBuckets();
+
+  // ==================== MODULE 3: B+ TREE ANATOMY & 6 RULES ====================
+  const bplusRulesData = [
+    { title: 'Rule 1: All Data Resides Strictly in Leaf Nodes', desc: 'Search keys and actual data records (or data pointers) reside strictly in the bottom Leaf Nodes. Internal nodes contain only routing keys and child pointers.' },
+    { title: 'Rule 2: Balanced Tree Height', desc: 'Every leaf node is located at the exact same depth (level) from the Root Node, guaranteeing predictable O(log n) search time.' },
+    { title: 'Rule 3: High Fanout (>= 100 Child Pointers)', desc: 'Internal nodes typically hold >= 100 child pointers per node. High fanout keeps the tree height very shallow (usually 2–4 levels), minimizing expensive disk page I/O.' },
+    { title: 'Rule 4: Linked Leaf Nodes via Sibling Pointers', desc: 'Leaf nodes are linked horizontally via sibling pointers, enabling fast sequential range scans without re-traversing upper internal nodes.' },
+    { title: 'Rule 5: Keys & Pointers Ratio (k Keys -> k + 1 Pointers)', desc: 'An internal node holding k search keys always contains k + 1 child pointers routing search intervals (< k1, between k1 and k2, ..., >= kk).' },
+    { title: 'Rule 6: Minimum 50% Occupancy Rule', desc: 'Every node (except the Root Node) must maintain at least 50% occupancy. Violations trigger Splits on insert or Borrow/Merge on delete.' }
+  ];
+
+  function renderBplusAnatomy(ruleIdx) {
+    state.bplusRule = ruleIdx;
+    document.querySelectorAll('#bplusRuleBtns .pill-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.brule) === ruleIdx));
+
+    const hlLeaves = ruleIdx === 0 || ruleIdx === 1 || ruleIdx === 3;
+    const hlInternal = ruleIdx === 2 || ruleIdx === 4 || ruleIdx === 5;
+    const hlSibling = ruleIdx === 3;
+
+    document.getElementById('bplusAnatomySvg').innerHTML = `
+      <!-- Root -->
+      <rect x="335" y="20" width="150" height="44" rx="8" fill="#1e293b" stroke="${hlInternal?'#6366f1':'#334155'}" stroke-width="2.5"/>
+      <text x="410" y="47" fill="#f8fafc" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">Root: [ 20 ]</text>
+
+      <!-- Root Pointers -->
+      <line x1="365" y1="64" x2="220" y2="105" stroke="${ruleIdx===4?'#f59e0b':'#64748b'}" stroke-width="2.2"/>
+      <line x1="455" y1="64" x2="600" y2="105" stroke="${ruleIdx===4?'#f59e0b':'#64748b'}" stroke-width="2.2"/>
+
+      <!-- Internal Nodes -->
+      <rect x="130" y="105" width="180" height="44" rx="8" fill="#162033" stroke="${hlInternal?'#38bdf8':'#334155'}" stroke-width="2.3"/>
+      <text x="220" y="132" fill="#7dd3fc" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">Internal: [ 5 | 14 ]</text>
+
+      <rect x="510" y="105" width="180" height="44" rx="8" fill="#162033" stroke="${hlInternal?'#38bdf8':'#334155'}" stroke-width="2.3"/>
+      <text x="600" y="132" fill="#7dd3fc" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">Internal: [ 27 | 33 ]</text>
+
+      <!-- Internal to Leaf Pointers -->
+      <line x1="160" y1="149" x2="90" y2="195" stroke="#64748b" stroke-width="2"/>
+      <line x1="220" y1="149" x2="255" y2="195" stroke="#64748b" stroke-width="2"/>
+      <line x1="280" y1="149" x2="410" y2="195" stroke="#64748b" stroke-width="2"/>
+      <line x1="550" y1="149" x2="565" y2="195" stroke="#64748b" stroke-width="2"/>
+      <line x1="650" y1="149" x2="725" y2="195" stroke="#64748b" stroke-width="2"/>
+
+      <!-- Leaf Nodes -->
+      <rect x="20" y="195" width="130" height="46" rx="8" fill="#0f172a" stroke="${hlLeaves?'#14b8a6':'#334155'}" stroke-width="2.4"/>
+      <text x="85" y="223" fill="#5eead4" font-family="monospace" font-size="12.5" font-weight="bold" text-anchor="middle">[ 2 | 3 ]</text>
+
+      <rect x="180" y="195" width="135" height="46" rx="8" fill="#0f172a" stroke="${hlLeaves?'#14b8a6':'#334155'}" stroke-width="2.4"/>
+      <text x="247" y="223" fill="#5eead4" font-family="monospace" font-size="12.5" font-weight="bold" text-anchor="middle">[ 6 | 7 | 8 ]</text>
+
+      <rect x="345" y="195" width="130" height="46" rx="8" fill="#0f172a" stroke="${hlLeaves?'#14b8a6':'#334155'}" stroke-width="2.4"/>
+      <text x="410" y="223" fill="#5eead4" font-family="monospace" font-size="12.5" font-weight="bold" text-anchor="middle">[ 14 | 17 ]</text>
+
+      <rect x="505" y="195" width="130" height="46" rx="8" fill="#0f172a" stroke="${hlLeaves?'#14b8a6':'#334155'}" stroke-width="2.4"/>
+      <text x="570" y="223" fill="#5eead4" font-family="monospace" font-size="12.5" font-weight="bold" text-anchor="middle">[ 20 | 24 ]</text>
+
+      <rect x="665" y="195" width="135" height="46" rx="8" fill="#0f172a" stroke="${hlLeaves?'#14b8a6':'#334155'}" stroke-width="2.4"/>
+      <text x="732" y="223" fill="#5eead4" font-family="monospace" font-size="12.5" font-weight="bold" text-anchor="middle">[ 27 | 33 ]</text>
+
+      <!-- Sibling Pointers -->
+      <line x1="150" y1="218" x2="180" y2="218" stroke="${hlSibling?'#f59e0b':'#14b8a6'}" stroke-width="${hlSibling?3.2:2}"/>
+      <line x1="315" y1="218" x2="345" y2="218" stroke="${hlSibling?'#f59e0b':'#14b8a6'}" stroke-width="${hlSibling?3.2:2}"/>
+      <line x1="475" y1="218" x2="505" y2="218" stroke="${hlSibling?'#f59e0b':'#14b8a6'}" stroke-width="${hlSibling?3.2:2}"/>
+      <line x1="635" y1="218" x2="665" y2="218" stroke="${hlSibling?'#f59e0b':'#14b8a6'}" stroke-width="${hlSibling?3.2:2}"/>
+    `;
+
+    const r = bplusRulesData[ruleIdx];
+    document.getElementById('bplusRuleInspector').innerHTML = `
+      <h4 style="color:var(--accent-teal);font-size:0.95rem;margin-bottom:0.3rem;">${r.title}</h4>
+      <p style="font-size:0.85rem;color:var(--text-primary);">${r.desc}</p>
+    `;
+  }
+
+  document.querySelectorAll('#bplusRuleBtns .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => renderBplusAnatomy(Number(btn.dataset.brule)));
+  });
+  renderBplusAnatomy(0);
+
+  // ==================== MODULE 4: B+ TREE OPERATIONS TRACERS ====================
+  // 4.1 Search Tracer
+  function renderSearchTrace(mode) {
+    state.searchMode = mode;
+    document.querySelectorAll('#searchTraceModeBtns .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.smode === mode));
+
+    const isRange = mode === 'rng';
+    document.getElementById('bplusSearchSvg').innerHTML = `
+      <!-- Root [20] -->
+      <rect x="335" y="18" width="150" height="42" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="2.6"/>
+      <text x="410" y="44" fill="#fcd34d" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">Root: [ 20 ]</text>
+
+      <!-- Path to [5 | 14] -->
+      <line x1="365" y1="60" x2="230" y2="100" stroke="#f59e0b" stroke-width="3"/>
+      <text x="275" y="76" fill="#fcd34d" font-family="monospace" font-size="10.5" font-weight="bold">8 &lt; 20</text>
+
+      <!-- Level 1 [5 | 14] -->
+      <rect x="140" y="100" width="180" height="42" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="2.6"/>
+      <text x="230" y="126" fill="#fcd34d" font-family="monospace" font-size="13.5" font-weight="bold" text-anchor="middle">[ 5 | 14 ]</text>
+
+      <!-- Path to leaf [6 | 7 | 8] -->
+      <line x1="230" y1="142" x2="180" y2="185" stroke="#f59e0b" stroke-width="3"/>
+      <text x="150" y="168" fill="#fcd34d" font-family="monospace" font-size="10" font-weight="bold">5 &le; 8 &lt; 14</text>
+
+      <!-- Leaf Nodes -->
+      <rect x="105" y="185" width="145" height="46" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.8"/>
+      <text x="177" y="213" fill="#5eead4" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">[ 6 | 7 | 8 ]</text>
+
+      <rect x="285" y="185" width="140" height="46" rx="8" fill="${isRange?'#064e3b':'#111827'}" stroke="${isRange?'#14b8a6':'#334155'}" stroke-width="2.5"/>
+      <text x="355" y="213" fill="${isRange?'#5eead4':'#94a3b8'}" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">[ 9 | 12 ]</text>
+
+      <rect x="460" y="185" width="165" height="46" rx="8" fill="${isRange?'#064e3b':'#111827'}" stroke="${isRange?'#14b8a6':'#334155'}" stroke-width="2.5"/>
+      <text x="542" y="213" fill="${isRange?'#5eead4':'#94a3b8'}" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">[ 17 | 20 | 21 ]</text>
+
+      <rect x="660" y="185" width="130" height="46" rx="8" fill="${isRange?'#064e3b':'#111827'}" stroke="${isRange?'#14b8a6':'#334155'}" stroke-width="2.5"/>
+      <text x="725" y="213" fill="${isRange?'#5eead4':'#94a3b8'}" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">[ 24 | 29 ]</text>
+
+      <!-- Sibling arrows -->
+      <line x1="250" y1="208" x2="285" y2="208" stroke="${isRange?'#14b8a6':'#475569'}" stroke-width="3"/>
+      <line x1="425" y1="208" x2="460" y2="208" stroke="${isRange?'#14b8a6':'#475569'}" stroke-width="3"/>
+      <line x1="625" y1="208" x2="660" y2="208" stroke="${isRange?'#14b8a6':'#475569'}" stroke-width="3"/>
+    `;
+
+    document.getElementById('bplusSearchInspector').innerHTML = isRange
+      ? `<h4 style="color:var(--accent-teal);margin-bottom:4px;">Range Search [8, 24] Trace</h4>
+         <p style="font-size:0.85rem;">1. Traverse Root <code>[20]</code> &rarr; Level 1 <code>[5 | 14]</code> &rarr; Leaf <code>[6 | 7 | 8]</code> to locate lower bound <code>8</code>.<br>
+         2. Follow <strong>sibling pointers</strong> horizontally across adjacent leaves (<code>8</code> &rarr; <code>9 12</code> &rarr; <code>17 20 21</code> &rarr; <code>24</code>) without ever re-visiting internal nodes!</p>`
+      : `<h4 style="color:var(--accent-teal);margin-bottom:4px;">Equality Search for Key 8 Trace</h4>
+         <p style="font-size:0.85rem;">1. Start at Root <code>[20]</code>: since <code>8 &lt; 20</code>, follow left pointer.<br>
+         2. At Level 1 <code>[5 | 14]</code>: since <code>5 &le; 8 &lt; 14</code>, follow middle pointer.<br>
+         3. Reach Leaf <code>[6 | 7 | 8]</code>, locate key <code>8</code> in <code>O(log n)</code>, and follow its data pointer.</p>`;
+  }
+
+  document.querySelectorAll('#searchTraceModeBtns .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => renderSearchTrace(btn.dataset.smode));
+  });
+  renderSearchTrace('eq');
+
+  // 4.2 Insert Key 8 Tracer
+  function renderInsertTrace(step) {
+    state.insertStep = step;
+    document.querySelectorAll('#insertTraceBtns .pill-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.istep) === step));
+
+    const svg = document.getElementById('bplusInsertSvg');
+    const ins = document.getElementById('bplusInsertInspector');
+
+    if (step === 0) {
+      svg.innerHTML = `
+        <rect x="275" y="30" width="270" height="46" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="2.4"/>
+        <text x="410" y="58" fill="#a5b4fc" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">Root: [ 14 | 20 | 27 | 33 ] (FULL)</text>
+        <line x1="305" y1="76" x2="180" y2="145" stroke="#64748b" stroke-width="2.2"/>
+        <rect x="75" y="145" width="210" height="50" rx="8" fill="#4c0519" stroke="#f43f5e" stroke-width="2.6"/>
+        <text x="180" y="175" fill="#fda4af" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">Leaf: [ 2 | 3 | 5 | 7 ] (FULL)</text>
+        <text x="180" y="218" fill="#fcd34d" font-family="monospace" font-size="11.5" font-weight="bold" text-anchor="middle">&uarr; Insert Key 8 causes Leaf Overflow!</text>
+      `;
+      ins.innerHTML = `<h4 style="color:var(--accent-amber);margin-bottom:4px;">Initial State: Inserting Key 8 into Full Leaf</h4>
+        <p style="font-size:0.85rem;">Target leaf node <code>[2 | 3 | 5 | 7]</code> is already at maximum capacity (4 keys), and its parent Root <code>[14 | 20 | 27 | 33]</code> is also full.</p>`;
+    } else if (step === 1) {
+      svg.innerHTML = `
+        <rect x="245" y="30" width="330" height="46" rx="8" fill="#4c0519" stroke="#f43f5e" stroke-width="2.6"/>
+        <text x="410" y="58" fill="#fda4af" font-family="monospace" font-size="13.5" font-weight="bold" text-anchor="middle">Root Overflows: [ 5 | 14 | 20 | 27 | 33 ]</text>
+        <line x1="280" y1="76" x2="135" y2="155" stroke="#14b8a6" stroke-width="2.2"/>
+        <line x1="330" y1="76" x2="335" y2="155" stroke="#14b8a6" stroke-width="2.2"/>
+        <rect x="55" y="155" width="150" height="48" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.4"/>
+        <text x="130" y="184" fill="#5eead4" font-family="monospace" font-size="13.5" font-weight="bold" text-anchor="middle">[ 2 | 3 ]</text>
+        <rect x="245" y="155" width="180" height="48" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.4"/>
+        <text x="335" y="184" fill="#5eead4" font-family="monospace" font-size="13.5" font-weight="bold" text-anchor="middle">[ 5 | 7 | 8 ]</text>
+        <text x="335" y="132" fill="#fcd34d" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">&uarr; COPY UP 5</text>
+      `;
+      ins.innerHTML = `<h4 style="color:var(--accent-teal);margin-bottom:4px;">Step 1: Leaf Split &amp; Copy Up Key 5</h4>
+        <p style="font-size:0.85rem;">The overflowing leaf splits into Left Leaf <code>[2 | 3]</code> and Right Leaf <code>[5 | 7 | 8]</code>. The minimum key of the right leaf (<code>5</code>) is <strong>copied up</strong> to the parent node, causing the parent to overflow with 5 keys!</p>`;
+    } else {
+      svg.innerHTML = `
+        <rect x="335" y="18" width="150" height="44" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.8"/>
+        <text x="410" y="45" fill="#5eead4" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">New Root: [ 20 ]</text>
+        <text x="560" y="45" fill="#fcd34d" font-family="monospace" font-size="11" font-weight="bold">&larr; PUSH UP 20 (Height +1)</text>
+
+        <line x1="365" y1="62" x2="230" y2="105" stroke="#14b8a6" stroke-width="2.4"/>
+        <line x1="455" y1="62" x2="590" y2="105" stroke="#14b8a6" stroke-width="2.4"/>
+
+        <rect x="140" y="105" width="180" height="44" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="2.4"/>
+        <text x="230" y="132" fill="#a5b4fc" font-family="monospace" font-size="13.5" font-weight="bold" text-anchor="middle">[ 5 | 14 ]</text>
+
+        <rect x="500" y="105" width="180" height="44" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="2.4"/>
+        <text x="590" y="132" fill="#a5b4fc" font-family="monospace" font-size="13.5" font-weight="bold" text-anchor="middle">[ 27 | 33 ]</text>
+
+        <line x1="185" y1="149" x2="120" y2="195" stroke="#64748b" stroke-width="2"/>
+        <line x1="230" y1="149" x2="295" y2="195" stroke="#64748b" stroke-width="2"/>
+
+        <rect x="45" y="195" width="145" height="46" rx="8" fill="#162033" stroke="#14b8a6" stroke-width="2.2"/>
+        <text x="117" y="223" fill="#5eead4" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">[ 2 | 3 ]</text>
+
+        <rect x="215" y="195" width="165" height="46" rx="8" fill="#162033" stroke="#14b8a6" stroke-width="2.2"/>
+        <text x="297" y="223" fill="#5eead4" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">[ 5 | 7 | 8 ]</text>
+      `;
+      ins.innerHTML = `<h4 style="color:var(--accent-teal);margin-bottom:4px;">Step 2: Internal Parent Split &amp; Push Up Key 20 (New Root Created)</h4>
+        <p style="font-size:0.85rem;">The overflowing parent splits into Left Internal Node <code>[5 | 14]</code> and Right Internal Node <code>[27 | 33]</code>. Middle key <code>20</code> is <strong>pushed up</strong> (not duplicated in internal nodes) to form a <strong>New Root [20]</strong>. Tree height increases by 1!</p>`;
+    }
+  }
+
+  document.querySelectorAll('#insertTraceBtns .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => renderInsertTrace(Number(btn.dataset.istep)));
+  });
+  renderInsertTrace(0);
+
+  // 4.3 Delete Tracer
+  function renderDeleteTrace(dcase) {
+    state.deleteCase = dcase;
+    document.querySelectorAll('#deleteTraceBtns .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.dcase === dcase));
+
+    const svg = document.getElementById('bplusDeleteSvg');
+    const ins = document.getElementById('bplusDeleteInspector');
+
+    if (dcase === 'ex1') {
+      svg.innerHTML = `
+        <rect x="130" y="65" width="220" height="55" rx="8" fill="#162033" stroke="#64748b" stroke-width="2"/>
+        <text x="240" y="98" fill="#94a3b8" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">Before: [ 5 | 7 | 8 ]</text>
+        <text x="410" y="98" fill="#5eead4" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">&rarr; Delete 8 &rarr;</text>
+        <rect x="470" y="65" width="220" height="55" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.6"/>
+        <text x="580" y="98" fill="#5eead4" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">After: [ 5 | 7 ] (&ge;50%)</text>
+      `;
+      ins.innerHTML = `<h4 style="color:var(--accent-teal);margin-bottom:4px;">Example 1: Delete Key 8 (Satisfies Minimum Occupancy)</h4>
+        <p style="font-size:0.85rem;">Removing key <code>8</code> from leaf <code>[5 | 7 | 8]</code> leaves <code>[5 | 7]</code> (2 keys = 50% of 4-key capacity). Because occupancy &ge; 50%, deletion finishes immediately with no structural changes.</p>`;
+    } else if (dcase === 'ex2') {
+      svg.innerHTML = `
+        <rect x="315" y="20" width="190" height="44" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="2.5"/>
+        <text x="410" y="47" fill="#fcd34d" font-family="monospace" font-size="13.5" font-weight="bold" text-anchor="middle">Parent Key: 33 &rarr; 34</text>
+
+        <line x1="365" y1="64" x2="235" y2="125" stroke="#14b8a6" stroke-width="2.2"/>
+        <line x1="455" y1="64" x2="585" y2="125" stroke="#14b8a6" stroke-width="2.2"/>
+
+        <rect x="135" y="125" width="200" height="52" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.5"/>
+        <text x="235" y="156" fill="#5eead4" font-family="monospace" font-size="13.5" font-weight="bold" text-anchor="middle">Left: [ 27 | 33 ]</text>
+
+        <rect x="475" y="125" width="220" height="52" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.5"/>
+        <text x="585" y="156" fill="#5eead4" font-family="monospace" font-size="13.5" font-weight="bold" text-anchor="middle">Right: [ 34 | 38 | 39 ]</text>
+
+        <text x="405" y="148" fill="#fcd34d" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">&larr; Borrow 33</text>
+      `;
+      ins.innerHTML = `<h4 style="color:var(--accent-amber);margin-bottom:4px;">Example 2: Delete Key 29 (Underflow &rarr; Borrow / Redistribution)</h4>
+        <p style="font-size:0.85rem;">Deleting <code>29</code> from <code>[27 | 29]</code> leaves <code>[27]</code> (underflow &lt; 50%). Adjacent right sibling <code>[33 | 34 | 38 | 39]</code> has extra keys, so <code>33</code> is borrowed into the left leaf (<code>[27 | 33]</code>), the right leaf becomes <code>[34 | 38 | 39]</code>, and the parent routing key updates to <code>34</code>!</p>`;
+    } else {
+      svg.innerHTML = `
+        <rect x="275" y="25" width="270" height="46" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.8"/>
+        <text x="410" y="53" fill="#5eead4" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">New Root: [ 14 | 20 | 27 | 34 ]</text>
+        <text x="410" y="92" fill="#fda4af" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">(Old Root [20] Eliminated &mdash; Tree Height Decreases by 1)</text>
+
+        <line x1="305" y1="71" x2="185" y2="145" stroke="#14b8a6" stroke-width="2.4"/>
+        <rect x="85" y="145" width="200" height="50" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="2.5"/>
+        <text x="185" y="175" fill="#a5b4fc" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">Merged Leaf: [ 2 | 3 | 5 ]</text>
+      `;
+      ins.innerHTML = `<h4 style="color:var(--accent-rose);margin-bottom:4px;">Example 3: Delete Key 7 (Merge &amp; Tree Height Reduction)</h4>
+        <p style="font-size:0.85rem;">Deleting <code>7</code> from <code>[5 | 7]</code> causes underflow <code>[5]</code>, and sibling <code>[2 | 3]</code> is at minimum occupancy and cannot lend keys. They <strong>merge</strong> into <code>[2 | 3 | 5]</code>. Removing the parent pointer causes recursive internal underflow, eliminating old Root <code>[20]</code> so its child becomes the new Root <code>[14 | 20 | 27 | 34]</code>. Tree height shrinks by 1!</p>`;
+    }
+  }
+
+  document.querySelectorAll('#deleteTraceBtns .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => renderDeleteTrace(btn.dataset.dcase));
+  });
+  renderDeleteTrace('ex1');
+
+  // ==================== GLOBAL SEARCH ====================
+  const searchIndex = [
+    { title: 'Data Storage Hierarchy (Database -> Table -> Data File -> Data Page)', mod: 1, sub: 'Module 1: Physical Storage' },
+    { title: 'Heap Files vs. Sorted Files vs. Indexes', mod: 1, sub: 'Module 1: File Organization' },
+    { title: 'Students Table SQL Query Acceleration (Statements A, B, C)', mod: 1, sub: 'Module 1: SQL Lab' },
+    { title: 'SQL CREATE INDEX Syntax & Read vs. Write Trade-Offs', mod: 1, sub: 'Module 1: Index Overhead' },
+    { title: 'Hash Indexing: Buckets, Primary Pages, Overflow Pages & h(r)', mod: 2, sub: 'Module 2: Hash Indexing' },
+    { title: 'Game of Thrones Character Hash Index (h(r) = Surname)', mod: 2, sub: 'Module 2: GoT Simulator' },
+    { title: 'Hash Indexing Revision Questions (Collisions, Equality vs. Range)', mod: 2, sub: 'Module 2: Exam Q&A' },
+    { title: 'Hash Indexing vs. Tree Indexing (B+ Tree) Comparison', mod: 3, sub: 'Module 3: Comparison' },
+    { title: 'B+ Tree 6 Core Rules (Leaf Data, Balance, Fanout >=100, Linked Leaves, 50% Min)', mod: 3, sub: 'Module 3: B+ Tree Rules' },
+    { title: 'B+ Tree Search Operations: Equality Key 8 & Range [8, 24]', mod: 4, sub: 'Module 4: Search Tracer' },
+    { title: 'B+ Tree Insert Key 8 (Leaf Split, Copy Up 5, Parent Split, Push Up 20)', mod: 4, sub: 'Module 4: Insert Tracer' },
+    { title: 'B+ Tree Delete Keys 8, 29 (Borrow/Redistribute), and 7 (Merge & Height Shrink)', mod: 4, sub: 'Module 4: Delete Tracer' },
+    { title: 'Chapter 6 Exam Readiness Quiz (10 Active Recall Questions)', mod: 5, sub: 'Module 5: Self-Assessment' }
+  ];
+
+  const searchInput = document.getElementById('globalSearchInput');
+  const searchDropdown = document.getElementById('searchResultsDropdown');
+
+  searchInput.addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) {
+      searchDropdown.classList.remove('open');
+      return;
+    }
+    const hits = searchIndex.filter(item => item.title.toLowerCase().includes(q) || item.sub.toLowerCase().includes(q)).slice(0, 8);
+    if (!hits.length) {
+      searchDropdown.innerHTML = `<div class="search-hit" style="color:var(--text-muted);">No matching topics found.</div>`;
+    } else {
+      searchDropdown.innerHTML = hits.map((h, i) => `
+        <div class="search-hit" data-hitidx="${i}">
+          <div style="font-weight:700;color:var(--text-primary);">${h.title}</div>
+          <div style="font-size:0.72rem;color:var(--accent-teal);">${h.sub}</div>
+        </div>
+      `).join('');
+      searchDropdown.querySelectorAll('.search-hit').forEach((el, idx) => {
+        el.addEventListener('click', () => {
+          goToModule(hits[idx].mod);
+          searchDropdown.classList.remove('open');
+          searchInput.value = '';
+        });
+      });
+    }
+    searchDropdown.classList.add('open');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.sidebar-search')) searchDropdown.classList.remove('open');
+  });
+
+  // ==================== MODULE 5: EXAM READINESS QUIZ ====================
+  const quizQuestions = [
+    {
+      q: '1. Why does creating an index on the Students table NOT speed up the query "SELECT * FROM Students;"?',
+      options: [
+        'Because SELECT * queries cannot use B+ Trees.',
+        'Because there is no WHERE filtering condition, forcing the DBMS to perform a sequential full table scan of every data page.',
+        'Because indexes only work on text columns.',
+        'Because Heap files prohibit indexing.'
+      ],
+      correct: 1,
+      exp: 'When a query retrieves all rows without a filtering condition, every data page must be read sequentially anyway, so an index provides no benefit.'
+    },
+    {
+      q: '2. What is the main performance penalty of creating too many indexes on a single database table?',
+      options: [
+        'SELECT queries become slower.',
+        'Every INSERT, UPDATE, and DELETE must update both the table and all associated indexes, increasing write overhead and disk storage.',
+        'Primary keys stop working.',
+        'Hash collisions become impossible.'
+      ],
+      correct: 1,
+      exp: 'While indexes speed up SELECT searches, every data modification (INSERT/UPDATE/DELETE) must maintain all associated index structures.'
+    },
+    {
+      q: '3. In Hash Indexing, is it possible for two records to be placed in the same bucket, and can one record be placed in two different buckets?',
+      options: [
+        'Yes to both.',
+        'No to both.',
+        'Yes, two records can share a bucket (identical keys or hash collisions), but NO, one record cannot be in different buckets because h(r) is deterministic.',
+        'Only if overflow pages are disabled.'
+      ],
+      correct: 2,
+      exp: 'Multiple records can map to the same bucket (e.g., all 4 Stark records), but a deterministic hash function h(r) maps a search key to one and only one bucket.'
+    },
+    {
+      q: '4. Why is Hash Indexing NOT suitable for range queries such as "WHERE year >= 2013 AND year <= 2015"?',
+      options: [
+        'Because hash functions distribute adjacent search keys randomly across uncorrelated buckets without maintaining sort order.',
+        'Because hash buckets only hold 1 record.',
+        'Because SQL does not allow >= operators with hash indexes.',
+        'Because hash indexes take O(n^2) time.'
+      ],
+      correct: 0,
+      exp: 'Hash indexes excel at O(1) equality searches, whereas B+ Trees preserve sorted order via linked leaf sibling pointers for range scans.'
+    },
+    {
+      q: '5. In a B+ Tree, where do actual data records or data pointers reside?',
+      options: [
+        'In the Root Node only.',
+        'In both Internal Nodes and Leaf Nodes equally.',
+        'Strictly in the Leaf Nodes (Internal Nodes hold only routing keys and child pointers).',
+        'In external overflow hash buckets.'
+      ],
+      correct: 2,
+      exp: 'Rule 1 of B+ Trees: Search keys and actual data/data pointers reside strictly in the Leaf Nodes.'
+    },
+    {
+      q: '6. If an internal B+ Tree node holds k search keys, how many child pointers does it contain?',
+      options: [
+        'k - 1 pointers',
+        'k pointers',
+        'k + 1 pointers',
+        '2k pointers'
+      ],
+      correct: 2,
+      exp: 'An internal node with k search keys always contains k + 1 child pointers routing intervals between those keys.'
+    },
+    {
+      q: '7. Why do B+ Tree internal nodes use high fanout (typically >= 100 child pointers per node)?',
+      options: [
+        'To increase tree height.',
+        'To keep the tree height low (shallow), minimizing the number of disk page I/Os needed to reach a leaf.',
+        'To eliminate the need for sibling pointers.',
+        'To avoid the 50% occupancy rule.'
+      ],
+      correct: 1,
+      exp: 'High fanout (>= 100) keeps the tree very shallow (typically 2–4 levels), dramatically minimizing disk page reads.'
+    },
+    {
+      q: '8. When inserting key 8 causes a B+ Tree leaf node (2 3 5 7) to split into (2 3) and (5 7 8), what happens to key 5?',
+      options: [
+        'Key 5 is deleted from the leaf and pushed up to the parent.',
+        'Key 5 (the minimum key of the new right leaf) is COPIED UP to the parent node while remaining in the leaf.',
+        'Key 5 becomes the new sibling pointer.',
+        'Key 5 is moved to an overflow page.'
+      ],
+      correct: 1,
+      exp: 'On a leaf split, the minimum key of the right leaf (5) is COPIED UP to the parent so all data keys remain present in the leaf level. (Internal splits PUSH UP the middle key.)'
+    },
+    {
+      q: '9. In B+ Tree deletion (Example 2), deleting key 29 leaves (27) underflowing (<50%). Its right sibling (33 34 38 39) has extra keys. How is underflow resolved?',
+      options: [
+        'By merging both leaves into a single node.',
+        'By borrowing/redistributing key 33 from the right sibling (forming [27 33] and [34 38 39]) and updating the parent routing key to 34.',
+        'By creating a new root node.',
+        'By leaving (27) below 50% occupancy.'
+      ],
+      correct: 1,
+      exp: 'When an adjacent sibling has >50% occupancy, B+ Tree deletion borrows a key and updates the parent separator key without merging.'
+    },
+    {
+      q: '10. In B+ Tree deletion (Example 3), deleting key 7 causes leaf underflow that cannot be resolved by borrowing, triggering a merge that propagates up to eliminate the old root (20). What happens to the tree height?',
+      options: [
+        'Tree height increases by 1.',
+        'Tree height stays unchanged.',
+        'Tree height decreases by 1 as the merged child becomes the new Root (14 20 27 34).',
+        'The B+ Tree converts into a Hash Index.'
+      ],
+      correct: 2,
+      exp: 'When merging propagates up and empties the old root, its remaining child becomes the new Root and the B+ Tree height decreases by 1.'
+    }
+  ];
+
+  function renderQuiz() {
+    const container = document.getElementById('quizContainer');
+    container.innerHTML = quizQuestions.map((item, qIdx) => {
+      const answered = state.quizAnswers[qIdx] !== undefined;
+      const chosen = state.quizAnswers[qIdx];
+      return `
+        <div class="quiz-card">
+          <div class="quiz-q">${item.q}</div>
+          <div class="quiz-opts">
+            ${item.options.map((opt, oIdx) => {
+              let cls = 'quiz-opt';
+              if (answered) {
+                if (oIdx === item.correct) cls += ' correct';
+                else if (oIdx === chosen) cls += ' incorrect';
+              }
+              return `
+                <button class="${cls}" ${answered ? 'disabled' : ''} onclick="answerQuiz(${qIdx}, ${oIdx})">
+                  <span style="font-family:var(--font-mono);font-weight:700;color:var(--accent-teal);">${String.fromCharCode(65 + oIdx)}.</span>
+                  <span>${opt}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+          <div class="quiz-exp ${answered ? 'show' : ''}" style="background:${chosen === item.correct ? 'rgba(20,184,166,0.14)' : 'rgba(244,63,94,0.14)'};border:1px solid ${chosen === item.correct ? 'rgba(20,184,166,0.38)' : 'rgba(244,63,94,0.38)'};">
+            <strong>${chosen === item.correct ? '&#10003; Correct:' : '&#10007; Incorrect:'}</strong> ${item.exp}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    updateQuizScore();
+  }
+
+  window.answerQuiz = function(qIdx, oIdx) {
+    if (state.quizAnswers[qIdx] !== undefined) return;
+    state.quizAnswers[qIdx] = oIdx;
+    renderQuiz();
+  };
+
+  function updateQuizScore() {
+    const answeredCount = Object.keys(state.quizAnswers).length;
+    let score = 0;
+    Object.entries(state.quizAnswers).forEach(([q, o]) => {
+      if (quizQuestions[Number(q)].correct === o) score++;
+    });
+
+    document.getElementById('quizScoreBadge').textContent = `Score: ${score} / ${quizQuestions.length}`;
+    const summary = document.getElementById('quizSummaryCard');
+    if (answeredCount === quizQuestions.length) {
+      summary.style.display = 'block';
+      document.getElementById('quizFinalTitle').textContent = `Final Score: ${score} / ${quizQuestions.length} (${Math.round((score / quizQuestions.length) * 100)}%)`;
+      document.getElementById('quizFinalMsg').textContent = score >= 8
+        ? 'Outstanding mastery! You are thoroughly prepared for Chapter 6 Database Indexing & File Organization exam questions.'
+        : 'Review the explanations highlighted above and retake the quiz to reach 80%+ mastery.';
+    } else {
+      summary.style.display = 'none';
+    }
+  }
+
+  window.resetQuiz = function() {
+    state.quizAnswers = {};
+    renderQuiz();
+  };
+
+  document.getElementById('resetQuizBtn').addEventListener('click', window.resetQuiz);
+  renderQuiz();
+
+  // ==================== DOWNLOAD SELF-CONTAINED HTML ====================
+  document.getElementById('downloadHtmlBtn').addEventListener('click', () => {
+    const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'chapter-6-database-indexing-revision-guide.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    const toast = document.getElementById('toastNotification');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  });
+})();
+</script>
+</body>
+</html>

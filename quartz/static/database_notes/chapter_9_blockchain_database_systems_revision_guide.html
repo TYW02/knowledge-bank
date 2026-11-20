@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 9 Revision Studio: Blockchain Database Systems</title>
+<style>
+  :root {
+    --bg-primary: #f1f5f9;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-alt: #f8fafc;
+    --bg-stage: #0f172a;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --accent-indigo: #4f46e5;
+    --accent-indigo-glow: rgba(79, 70, 229, 0.14);
+    --accent-teal: #0d9488;
+    --accent-teal-glow: rgba(13, 148, 136, 0.14);
+    --accent-sky: #0284c7;
+    --accent-amber: #d97706;
+    --accent-amber-glow: rgba(217, 119, 6, 0.14);
+    --accent-rose: #e11d48;
+    --accent-rose-glow: rgba(225, 29, 72, 0.14);
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow-card: 0 4px 16px rgba(15, 23, 42, 0.06);
+  }
+
+  [data-theme="dark"] {
+    --bg-primary: #090d16;
+    --bg-secondary: #111827;
+    --bg-card: #162033;
+    --bg-card-alt: #1d2942;
+    --bg-stage: #070b12;
+    --border-color: #26344e;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-indigo: #6366f1;
+    --accent-indigo-glow: rgba(99, 102, 241, 0.25);
+    --accent-teal: #14b8a6;
+    --accent-teal-glow: rgba(20, 184, 166, 0.22);
+    --accent-sky: #38bdf8;
+    --accent-amber: #f59e0b;
+    --accent-amber-glow: rgba(245, 158, 11, 0.2);
+    --accent-rose: #f43f5e;
+    --accent-rose-glow: rgba(244, 63, 94, 0.2);
+    --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.28);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 305px;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    transition: transform 0.3s ease, background-color 0.25s ease;
+  }
+
+  .sidebar-header {
+    padding: 1.15rem 1.35rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.45rem;
+  }
+
+  .course-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--accent-teal);
+    background: var(--accent-teal-glow);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(20, 184, 166, 0.35);
+  }
+
+  .theme-toggle-btn {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 4px 9px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.76rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+  }
+  .theme-toggle-btn:hover { border-color: var(--accent-indigo); }
+
+  .sidebar-title { font-size: 1.02rem; font-weight: 800; line-height: 1.28; }
+  .sidebar-sub { font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.15rem; }
+
+  .sidebar-search {
+    padding: 0.68rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 0.5rem 0.82rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    outline: none;
+  }
+  .search-input:focus { border-color: var(--accent-indigo); }
+
+  .search-results-dropdown {
+    position: absolute;
+    left: 1.25rem;
+    right: 1.25rem;
+    top: calc(100% - 4px);
+    background: var(--bg-card);
+    border: 1px solid var(--accent-indigo);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 60;
+    display: none;
+  }
+  .search-results-dropdown.open { display: block; }
+
+  .search-hit {
+    padding: 0.55rem 0.8rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    font-size: 0.78rem;
+  }
+  .search-hit:last-child { border-bottom: none; }
+  .search-hit:hover { background: var(--accent-indigo-glow); }
+
+  .progress-box {
+    padding: 0.72rem 1.35rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.73rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.32rem;
+  }
+
+  .progress-track {
+    height: 7px;
+    background: var(--bg-primary);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 14.3%;
+    background: linear-gradient(90deg, var(--accent-indigo), var(--accent-teal));
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+
+  .nav-list {
+    list-style: none;
+    padding: 0.55rem;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.24rem;
+  }
+
+  .nav-btn {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.68rem;
+    padding: 0.62rem 0.75rem;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+
+  .nav-btn:hover { background: var(--bg-card-alt); color: var(--text-primary); }
+
+  .nav-btn.active {
+    background: linear-gradient(135deg, var(--accent-indigo-glow), var(--accent-teal-glow));
+    border-color: rgba(99, 102, 241, 0.45);
+    color: var(--text-primary);
+  }
+
+  .nav-num {
+    flex-shrink: 0;
+    width: 23px;
+    height: 23px;
+    border-radius: 6px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-top: 1px;
+  }
+
+  .nav-btn.active .nav-num { background: var(--accent-indigo); border-color: var(--accent-indigo); color: #fff; }
+  .nav-btn.visited .nav-num { background: var(--accent-teal); border-color: var(--accent-teal); color: #fff; }
+
+  .nav-title { display: block; font-size: 0.81rem; font-weight: 700; line-height: 1.24; }
+  .nav-desc { display: block; font-size: 0.69rem; color: var(--text-muted); margin-top: 2px; }
+
+  .sidebar-footer { padding: 0.8rem 1.25rem; border-top: 1px solid var(--border-color); }
+
+  .download-btn {
+    width: 100%;
+    padding: 0.62rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(20, 184, 166, 0.45);
+    background: var(--accent-teal-glow);
+    color: var(--accent-teal);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+  .download-btn:hover { background: var(--accent-teal); color: #ffffff; }
+
+  /* Mobile Topbar */
+  .mobile-topbar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 58px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 1rem;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 45;
+  }
+
+  .hamburger-btn {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 11px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 48;
+  }
+
+  /* Main Area */
+  .main-content {
+    margin-left: 305px;
+    flex: 1;
+    padding: 2.1rem 2.6rem 4rem;
+    max-width: 1280px;
+  }
+
+  .module-section { display: none; animation: fadeSlide 0.28s ease-out; }
+  .module-section.active { display: block; }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .module-header {
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+
+  .module-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--accent-teal);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.28rem;
+  }
+
+  .module-title { font-size: 1.72rem; font-weight: 800; letter-spacing: -0.02em; }
+  .module-subtitle { color: var(--text-secondary); font-size: 0.91rem; max-width: 820px; margin-top: 0.35rem; }
+
+  /* Cards & Grids */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.45rem;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 1.65rem;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .card-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.55rem; }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 6px;
+    text-transform: uppercase;
+  }
+
+  .tag-indigo { background: var(--accent-indigo-glow); color: var(--accent-indigo); border: 1px solid rgba(99, 102, 241, 0.38); }
+  .tag-teal { background: var(--accent-teal-glow); color: var(--accent-teal); border: 1px solid rgba(20, 184, 166, 0.38); }
+  .tag-amber { background: var(--accent-amber-glow); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.38); }
+  .tag-rose { background: var(--accent-rose-glow); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.38); }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.95rem; }
+
+  .concept-box {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent-indigo);
+    border-radius: var(--radius-md);
+    padding: 0.95rem 1.1rem;
+  }
+  .concept-box.teal { border-left-color: var(--accent-teal); }
+  .concept-box.amber { border-left-color: var(--accent-amber); }
+  .concept-box.rose { border-left-color: var(--accent-rose); }
+
+  .concept-box h4 { font-size: 0.92rem; font-weight: 700; margin-bottom: 0.32rem; color: var(--text-primary); }
+  .concept-box p, .concept-box li { font-size: 0.83rem; color: var(--text-secondary); }
+
+  /* Pill Tabs */
+  .pill-bar { display: flex; flex-wrap: wrap; gap: 0.48rem; margin-bottom: 1.1rem; }
+
+  .pill-btn {
+    padding: 0.48rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 0.79rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .pill-btn:hover { border-color: var(--accent-indigo); color: var(--text-primary); }
+  .pill-btn.active { background: var(--accent-indigo); border-color: var(--accent-indigo); color: #fff; }
+
+  /* Diagram Stage */
+  .diagram-stage {
+    background: #090e1a;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    position: relative;
+    overflow-x: auto;
+  }
+
+  .diagram-stage svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+
+  .inspector-panel {
+    margin-top: 0.95rem;
+    background: var(--bg-card-alt);
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    border-radius: var(--radius-md);
+    padding: 1.05rem 1.2rem;
+  }
+
+  .terminal-box {
+    background: #090e1a;
+    border: 1px solid #26344e;
+    border-radius: var(--radius-md);
+    padding: 0.92rem 1.15rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: #e2e8f0;
+    line-height: 1.62;
+    word-break: break-all;
+  }
+
+  /* Tables */
+  .data-table-wrap { overflow-x: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left; }
+  th {
+    background: var(--bg-card-alt);
+    color: var(--accent-teal);
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    text-transform: uppercase;
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  td { padding: 0.72rem 0.9rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+
+  .form-input {
+    padding: 0.52rem 0.82rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--accent-indigo); }
+
+  input[type="range"] { width: 100%; accent-color: var(--accent-indigo); cursor: pointer; }
+
+  /* Hash Chain Blocks */
+  .chain-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .block-card {
+    background: var(--bg-card-alt);
+    border: 2px solid var(--accent-teal);
+    border-radius: var(--radius-md);
+    padding: 0.95rem;
+    transition: all 0.25s ease;
+  }
+  .block-card.tampered {
+    border-color: var(--accent-rose);
+    background: var(--accent-rose-glow);
+    box-shadow: 0 0 18px var(--accent-rose-glow);
+  }
+  .block-card.broken-link {
+    border-color: var(--accent-amber);
+    background: var(--accent-amber-glow);
+  }
+
+  /* Bar Chart */
+  .bar-row { margin-bottom: 0.8rem; }
+  .bar-meta { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; }
+  .bar-track { height: 16px; background: var(--bg-primary); border-radius: 999px; overflow: hidden; border: 1px solid var(--border-color); }
+  .bar-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+
+  /* Quiz */
+  .quiz-card {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.2rem;
+    margin-bottom: 1.1rem;
+  }
+  .quiz-q { font-weight: 700; font-size: 0.94rem; margin-bottom: 0.8rem; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 0.48rem; }
+  .quiz-opt {
+    padding: 0.72rem 0.95rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    gap: 0.65rem;
+    transition: all 0.18s ease;
+  }
+  .quiz-opt:hover:not(:disabled) { border-color: var(--accent-indigo); background: var(--accent-indigo-glow); }
+  .quiz-opt.correct { border-color: var(--accent-teal); background: rgba(20, 184, 166, 0.2); }
+  .quiz-opt.incorrect { border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.2); }
+  .quiz-exp { margin-top: 0.72rem; padding: 0.72rem 0.95rem; border-radius: var(--radius-sm); font-size: 0.82rem; display: none; }
+  .quiz-exp.show { display: block; }
+
+  /* Footer Nav */
+  .module-footer-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--border-color);
+    gap: 1rem;
+  }
+
+  .btn-primary, .btn-secondary {
+    padding: 0.66rem 1.18rem;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: 0.83rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .btn-primary { background: var(--accent-indigo); color: #fff; border: 1px solid var(--accent-indigo); }
+  .btn-primary:hover { opacity: 0.92; }
+  .btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+  .btn-secondary:hover { border-color: var(--accent-teal); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--accent-teal);
+    color: var(--text-primary);
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    font-size: 0.84rem;
+    font-weight: 600;
+    z-index: 100;
+    transform: translateY(130%);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 980px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-backdrop.open { display: block; }
+    .mobile-topbar { display: flex; }
+    .main-content { margin-left: 0; padding: 5rem 1.2rem 3rem; }
+    .grid-2, .grid-3, .grid-4, .chain-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Mobile Topbar -->
+  <header class="mobile-topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="hamburger-btn" id="menuToggle" aria-label="Toggle Menu">&#9776;</button>
+      <span style="font-weight:700;font-size:0.92rem;">Ch. 9: Blockchain Database Systems</span>
+    </div>
+    <span class="tag tag-teal" id="mobileProgressTag">14%</span>
+  </header>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="header-top-row">
+        <span class="course-badge">&#9679; DB // CHAPTER 09</span>
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Light/Dark Mode">&#9788; Theme</button>
+      </div>
+      <h1 class="sidebar-title">Blockchain Database Systems</h1>
+      <p class="sidebar-sub">Distributed Ledgers &amp; Consensus Studio</p>
+    </div>
+
+    <div class="sidebar-search">
+      <input type="text" class="search-input" id="globalSearchInput" placeholder="Search OCBC, SHA-256, Genesis, Nonce, Halving, Fork, Visa...">
+      <div class="search-results-dropdown" id="searchResultsDropdown"></div>
+    </div>
+
+    <div class="progress-box">
+      <div class="progress-meta">
+        <span>Revision Coverage</span>
+        <span id="progressPercent">14%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <ul class="nav-list" id="navList">
+      <li>
+        <button class="nav-btn active" data-module="1">
+          <span class="nav-num">01</span>
+          <div>
+            <span class="nav-title">Distributed Ledgers &amp; Consensus</span>
+            <span class="nav-desc">Centralized (OCBC) vs. P2P Full Nodes</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="2">
+          <span class="nav-num">02</span>
+          <div>
+            <span class="nav-title">TXN Lifecycle &amp; Block Creation</span>
+            <span class="nav-desc">Digital Signatures, Mempool Fees &amp; Packaging</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="3">
+          <span class="nav-num">03</span>
+          <div>
+            <span class="nav-title">SHA-256 &amp; Hash Chain Tamper Lab</span>
+            <span class="nav-desc">Genesis Block 0..5 &amp; Block 2 Attack Trace</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="4">
+          <span class="nav-num">04</span>
+          <div>
+            <span class="nav-title">Proof of Work &amp; Mining Economics</span>
+            <span class="nav-desc">Live Nonce Miner, 2^56 Math &amp; BTC Halving</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="5">
+          <span class="nav-num">05</span>
+          <div>
+            <span class="nav-title">State Forks &amp; Longest-Chain Rule</span>
+            <span class="nav-desc">Block 4 vs. 4' Branch Resolution</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="6">
+          <span class="nav-num">06</span>
+          <div>
+            <span class="nav-title">Evaluation, Limits &amp; Use Cases</span>
+            <span class="nav-desc">Bitcoin vs. Visa TPS &amp; Physical Bottleneck</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="7">
+          <span class="nav-num">07</span>
+          <div>
+            <span class="nav-title">Exam Readiness Quiz</span>
+            <span class="nav-desc">10 Active Recall Questions</span>
+          </div>
+        </button>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <button class="download-btn" id="downloadHtmlBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Self-Contained HTML
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- ==================== MODULE 1 ==================== -->
+    <section class="module-section active" id="module-1">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Topic 1 // Decentralized Record-Keeping &amp; Governance</div>
+          <h2 class="module-title">Fundamentals of Blockchain &amp; Distributed Ledgers</h2>
+          <p class="module-subtitle">Compare centralized banking ledgers (e.g., OCBC Bank) against decentralized peer-to-peer distributed ledgers where every full node holds an identical chronological chain of encryption-based blocks.</p>
+        </div>
+        <span class="tag tag-indigo">Consensus Governance</span>
+      </div>
+
+      <!-- 1.1 & 1.2 Side-by-Side Architecture Visualizer -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.1 &amp; 1.2 Centralized Ledger (OCBC Bank) vs. Distributed P2P Ledger</h3>
+          <div class="pill-bar" style="margin-bottom:0;" id="ledgerSimBtns">
+            <button class="pill-btn active" data-lmode="normal">Normal Ledger State</button>
+            <button class="pill-btn" data-lmode="discrepancy">Simulate Discrepancy / Dispute</button>
+          </div>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 820 240" width="820" height="240" id="ledgerTopologySvg"></svg>
+        </div>
+        <div class="inspector-panel" id="ledgerTopologyInspector"></div>
+      </div>
+
+      <!-- 1.3 Core Pillars -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.3 Three Core Pillars of Blockchain Systems</h3>
+          <span class="tag tag-teal">Architectural Summary</span>
+        </div>
+        <div class="grid-3">
+          <div class="concept-box">
+            <h4>1. Chronological Encryption Blocks</h4>
+            <p>Transactions are bundled into encryption-based <strong>blocks</strong> and chained chronologically from old to new. Every full node stores an identical copy of the entire ledger history.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>2. Equal Distributed Authority</h4>
+            <p>Unlike centralized institutions (e.g., OCBC Bank) that hold unilateral authority, every participant node in a distributed ledger holds the truth and has an equal say in state validation.</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>3. Consensus Protocols</h4>
+            <p>Network-wide agreement mechanisms replace central authorities with distributed governance, enabling untrusted nodes to agree on the single valid transaction history.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <span style="font-size:0.8rem;color:var(--text-muted);">Module 1 of 7</span>
+        <button class="btn-primary" onclick="goToModule(2)">Next: TXN Lifecycle &amp; Block Creation &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 2 ==================== -->
+    <section class="module-section" id="module-2">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Topic 2 // From Digital Signature to Block Rewards</div>
+          <h2 class="module-title">Transaction Lifecycle &amp; Block Creation Process</h2>
+          <p class="module-subtitle">Trace how a signed transaction is broadcast P2P, packaged into multi-transaction blocks (avoiding impractically long single-TXN chains), prioritized by fee incentives, and mined for rewards.</p>
+        </div>
+        <span class="tag tag-teal">Mempool &amp; Mining</span>
+      </div>
+
+      <!-- 2.1, 2.2, 2.3 Interactive 3-Stage Pipeline & Mempool Fee Selector -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">2.1 &ndash; 2.3 Interactive Mempool Fee Prioritizer &amp; Block Packaging Simulator</h3>
+          <span class="tag tag-amber">Block Capacity: Top 3 Highest-Fee TXNs</span>
+        </div>
+
+        <p style="font-size:0.84rem;color:var(--text-secondary);margin-bottom:0.9rem;">
+          Why package multiple transactions into one block? Creating 1 block per transaction would create an <strong>impractically long chain</strong>. Miners select pending broadcast transactions from the mempool—prioritizing higher <strong>transaction fees</strong> to maximize earnings!
+        </p>
+
+        <div class="grid-2" style="align-items:start;">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+              <strong style="font-size:0.86rem;">Pending P2P Mempool (Signed Broadcast TXNs):</strong>
+              <button class="btn-primary" style="padding:5px 11px;font-size:0.78rem;" id="mineMempoolBtn">Package &amp; Mine Next Block</button>
+            </div>
+            <div class="data-table-wrap" id="mempoolTableWrap"></div>
+          </div>
+
+          <div class="terminal-box" id="mempoolBlockOutput" style="min-height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- 3-Stage Lifecycle Summary -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Three-Stage Transaction &amp; Block Creation Summary</h3>
+          <span class="tag tag-indigo">End-to-End Flow</span>
+        </div>
+        <div class="grid-3">
+          <div class="concept-box">
+            <h4>Stage 1: Initiation &amp; Digital Signature</h4>
+            <p>User encrypts transaction details with a <strong>digital signature</strong> (analogous to signing a physical check) to prove authenticity, then broadcasts it across the P2P network.</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>Stage 2: Packaging &amp; Fee Incentives</h4>
+            <p>Nodes bundle multiple signed transactions into a single block (preventing an impractically long chain), prioritizing transactions offering higher user-attached <strong>fees</strong>.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>Stage 3: Mining Competition &amp; Rewards</h4>
+            <p>Nodes compete simultaneously to append the next single block. The winner earns <strong>block rewards</strong> (newly minted coins) plus all collected <strong>transaction fees</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(1)">&larr; Previous: Distributed Ledgers</button>
+        <button class="btn-primary" onclick="goToModule(3)">Next: SHA-256 &amp; Hash Chain Tamper Lab &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 3 ==================== -->
+    <section class="module-section" id="module-3">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Topic 3 // Immutability &amp; Cryptographic Linking</div>
+          <h2 class="module-title">SHA-256 Hashing &amp; Hash Chain Tamper Simulator</h2>
+          <p class="module-subtitle">Understand why full nodes store compact cryptographic hashes instead of bulky raw files, test SHA-256 properties live, and replicate the exact lecture tamper trace on Block 2 (<code>100 SGD</code> &rarr; <code>-100 SGD</code>).</p>
+        </div>
+        <span class="tag tag-rose">Tamper Detection Lab</span>
+      </div>
+
+      <!-- 3.1 & 3.2 Live SHA-256 Sandbox -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">3.1 &amp; 3.2 Live SHA-256 Hash Sandbox (256-Bit Fingerprint)</h3>
+          <span class="tag tag-teal">Deterministic &middot; Collision Resistant &middot; Fast</span>
+        </div>
+
+        <p style="font-size:0.84rem;color:var(--text-secondary);margin-bottom:0.8rem;">
+          Storing raw bulky files across every full node would require massive data centers and encourage re-centralization. Instead, blocks store compact <strong>256-bit SHA-256 hash values</strong>. Type any input below to watch the avalanche effect:
+        </p>
+
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:0.8rem;">
+          <input type="text" id="shaSandboxInput" class="form-input" style="flex:1;min-width:250px;" value="Transfer 100 SGD from Alice to Bob">
+          <button class="btn-secondary" style="padding:5px 11px;font-size:0.78rem;" onclick="document.getElementById('shaSandboxInput').value='Transfer 100 SGD from Alice to Bob';updateShaSandbox();">Reset Input</button>
+          <button class="btn-secondary" style="padding:5px 11px;font-size:0.78rem;" onclick="document.getElementById('shaSandboxInput').value='Transfer -100 SGD from Alice to Bob';updateShaSandbox();">Tamper 100 &rarr; -100</button>
+        </div>
+
+        <div class="terminal-box" id="shaSandboxOutput"></div>
+      </div>
+
+      <!-- 3.3 & 3.4 Interactive 6-Block Hash Chain Tamper Trace -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">3.3 &amp; 3.4 Interactive 6-Block Hash Chain (Genesis Block 0 &rarr; Block 5)</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn-secondary" style="padding:5px 11px;font-size:0.78rem;border-color:var(--accent-rose);color:var(--accent-rose);" id="tamperBlock2Btn">Simulate Lecture Attack: Edit Block 2 (100 &rarr; -100 SGD)</button>
+            <button class="btn-primary" style="padding:5px 11px;font-size:0.78rem;" id="restoreChainBtn">Restore Original Chain</button>
+          </div>
+        </div>
+
+        <div class="chain-grid" id="hashChainContainer"></div>
+        <div class="inspector-panel" id="hashChainStatusPanel"></div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(2)">&larr; Previous: TXN Lifecycle &amp; Block Creation</button>
+        <button class="btn-primary" onclick="goToModule(4)">Next: Proof of Work &amp; Mining Economics &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 4 ==================== -->
+    <section class="module-section" id="module-4">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Topic 4 // Computational Security &amp; Halving Schedule</div>
+          <h2 class="module-title">Proof of Work (PoW) Consensus &amp; Bitcoin Mining Economics</h2>
+          <p class="module-subtitle">Mine a real nonce against a leading-zero difficulty target, inspect the mathematical expectation behind target &lt; 2<sup>200</sup> (56 leading zeros &rarr; 2<sup>56</sup> trials), and explore Bitcoin's 210,000-block halving schedule.</p>
+        </div>
+        <span class="tag tag-amber">2^56 Expected Trials</span>
+      </div>
+
+      <!-- 4.1 Live Nonce Miner Simulator -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">4.1 Interactive Proof of Work (PoW) Nonce Miner</h3>
+          <span class="tag tag-indigo">Hard to Compute &middot; Instant to Verify</span>
+        </div>
+
+        <div class="grid-2" style="align-items:center;margin-bottom:0.9rem;">
+          <div>
+            <label style="font-size:0.84rem;font-weight:700;display:block;margin-bottom:0.35rem;">Difficulty Target (Required Leading Zero Hex Nibbles / Bits):</label>
+            <div class="pill-bar" style="margin-bottom:0.6rem;" id="powDiffBtns">
+              <button class="pill-btn active" data-zeros="2">2 Leading Hex Zeros (8 bits ~256 trials)</button>
+              <button class="pill-btn" data-zeros="3">3 Leading Hex Zeros (12 bits ~4,096 trials)</button>
+              <button class="pill-btn" data-zeros="4">4 Leading Hex Zeros (16 bits ~65,536 trials)</button>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn-primary" id="startMineBtn">&#9874; Mine Valid Nonce</button>
+              <button class="btn-secondary" id="verifyNonceBtn">&#10003; Verify in 1 Hash (Other Nodes)</button>
+            </div>
+          </div>
+
+          <div class="concept-box amber">
+            <h4>4.2 Lecture Math: Target &lt; 2<sup>200</sup></h4>
+            <p>A SHA-256 output is 256 bits. Requiring <code>hash &lt; 2<sup>200</sup></code> means the first <strong>56 binary digits</strong> (<code>256 - 200 = 56</code>) must all be <code>0</code> (<code>000...0</code>). Since each bit has a 50% chance of being 0, finding a valid nonce requires an expected <strong>2<sup>56</sup> trial attempts</strong>—preventing cheap Raspberry Pi / MCU spam attacks!</p>
+          </div>
+        </div>
+
+        <div class="terminal-box" id="powMinerLog">Click "Mine Valid Nonce" to search pseudo-random nonce values until the block hash meets the difficulty target!</div>
+      </div>
+
+      <!-- 4.3 Bitcoin Halving Schedule & Pizza Milestone -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">4.3 Bitcoin Halving Schedule (Every 210,000 Blocks) &amp; Historical Milestones</h3>
+          <span class="tag tag-teal">Block Reward + TXN Fees</span>
+        </div>
+
+        <div class="grid-3" style="margin-bottom:1rem;">
+          <div class="concept-box">
+            <h4>Feb 2019 Epoch</h4>
+            <p><strong>12.5 BTC</strong> / block<br>Approx. Value: <strong>~SGD 55,000</strong></p>
+          </div>
+          <div class="concept-box teal">
+            <h4>May 2020 Epoch (Halved)</h4>
+            <p><strong>6.25 BTC</strong> / block<br>Approx. Value: <strong>~SGD 400,000</strong></p>
+          </div>
+          <div class="concept-box amber">
+            <h4>2024 Epoch (Halved)</h4>
+            <p><strong>3.125 BTC</strong> / block<br>Approx. Value: <strong>~SGD 381,000</strong></p>
+          </div>
+        </div>
+
+        <div class="concept-box rose">
+          <h4>Historical Valuation Milestone (2010 vs. 2023)</h4>
+          <p>In <strong>2010</strong>, <strong>10,000 BTC</strong> was spent to purchase just <strong>2 pizzas</strong>. By <strong>2023</strong>, those same 10,000 BTC were worth approximately <strong>~$500 Million SGD</strong>!</p>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(3)">&larr; Previous: SHA-256 &amp; Hash Chain</button>
+        <button class="btn-primary" onclick="goToModule(5)">Next: State Forks &amp; Longest-Chain Rule &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 5 ==================== -->
+    <section class="module-section" id="module-5">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Topic 5 // Distributed Branch Resolution</div>
+          <h2 class="module-title">State Forks &amp; The Longest-Chain Rule</h2>
+          <p class="module-subtitle">Simulate what happens when two miners find valid nonces at nearly the same time (creating competing Block 4 and Block 4') and watch how the Longest-Chain Rule resolves the fork.</p>
+        </div>
+        <span class="tag tag-indigo">Longest Valid Chain Wins</span>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">5.1 &amp; 5.2 Interactive State Fork &amp; Longest-Chain Simulator</h3>
+          <div class="pill-bar" style="margin-bottom:0;" id="forkSimBtns">
+            <button class="pill-btn active" data-fstep="0">1. Simultaneous Fork: Block 4 vs. Block 4'</button>
+            <button class="pill-btn" data-fstep="1">2A. Miner Extends Top Branch (Block 5)</button>
+            <button class="pill-btn" data-fstep="2">2B. Miner Extends Bottom Branch (Block 5')</button>
+          </div>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 820 235" width="820" height="235" id="stateForkSvg"></svg>
+        </div>
+        <div class="inspector-panel" id="stateForkInspector"></div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(4)">&larr; Previous: Proof of Work &amp; Economics</button>
+        <button class="btn-primary" onclick="goToModule(6)">Next: Evaluation, Limits &amp; Use Cases &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 6 ==================== -->
+    <section class="module-section" id="module-6">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Topic 6 // Throughput Reality &amp; Appropriate Domains</div>
+          <h2 class="module-title">Strategic Evaluation, Limitations &amp; Real-World Applications</h2>
+          <p class="module-subtitle">Compare Bitcoin's throughput (~400 TXNs/min) against Visa (102,000 TXNs/min), inspect the physical-world traceability bottleneck, and evaluate appropriate use cases.</p>
+        </div>
+        <span class="tag tag-rose">Ledger &ne; General CRUD DB</span>
+      </div>
+
+      <!-- 6.1 Throughput Comparison: Bitcoin vs Visa -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">6.1 Database Evaluation: Bitcoin Throughput vs. Visa Credit Network</h3>
+          <span class="tag tag-amber">255x Throughput Gap</span>
+        </div>
+
+        <div class="grid-2" style="align-items:center;">
+          <div>
+            <div class="bar-row">
+              <div class="bar-meta"><span>Bitcoin Network (1 MB block / 250 B TXN / 10 min)</span><span style="color:var(--accent-amber);">~400 TXNs/min (~7 TPS)</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:2%;background:var(--accent-amber);"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-meta"><span>Visa Credit Network (~1,700 TPS)</span><span style="color:var(--accent-teal);">102,000 TXNs/min</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--accent-teal);"></div></div>
+            </div>
+            <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;">
+              <strong>Conclusion:</strong> Blockchain is a specialized tamper-evident record-keeping ledger—<strong>NOT an efficient database</strong> for general high-throughput CRUD workloads.
+            </p>
+          </div>
+
+          <div class="concept-box rose">
+            <h4>6.2 Physical World Traceability Bottleneck</h4>
+            <p>On-chain digital immutability <strong>cannot guarantee physical-world authenticity</strong>. For example, recording organic food certificates on a blockchain cannot prevent physical packaging tampering or product swapping in physical supply chains.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6.3 Suitable Enterprise & Financial Use Cases -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">6.3 Suitable Enterprise &amp; Financial Use Cases</h3>
+          <span class="tag tag-teal">Where Blockchain Excels</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="concept-box">
+            <h4>1. Universal Borderless Currency</h4>
+            <p>Facilitates direct peer-to-peer international value transfers without traditional bank remittance delays or SWIFT codes (note: also misused in dark/black markets due to pseudonymity).</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>2. Anti-Counterfeiting &amp; Tamper-Proof Document Verification</h4>
+            <p>Ideal for digital authenticity where any unauthorized modification must be detected instantly via hash comparison—such as <strong>patents</strong> and <strong>cross-border COVID-19 medical certifications</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(5)">&larr; Previous: State Forks &amp; Longest-Chain</button>
+        <button class="btn-primary" onclick="goToModule(7)">Next: Exam Readiness Quiz &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 7 ==================== -->
+    <section class="module-section" id="module-7">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Active Recall // Self-Assessment</div>
+          <h2 class="module-title">Chapter 9 Exam Readiness Quiz</h2>
+          <p class="module-subtitle">Test your understanding of Centralized (OCBC) vs. Distributed Ledgers, Mempool fee prioritization, SHA-256 hash chain tampering, 2<sup>200</sup> target &amp; 2<sup>56</sup> expected PoW trials, Bitcoin halving, Longest-Chain fork resolution, Bitcoin vs. Visa throughput, and physical-world limitations.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="tag tag-teal" id="quizScoreBadge">Score: 0 / 10</span>
+          <button class="btn-secondary" style="padding:6px 12px;font-size:0.8rem;" id="resetQuizBtn">Reset Quiz</button>
+        </div>
+      </div>
+
+      <div id="quizContainer"></div>
+
+      <div class="card" id="quizSummaryCard" style="display:none;border-color:var(--accent-teal);text-align:center;">
+        <h3 style="font-size:1.3rem;margin-bottom:0.4rem;" id="quizFinalTitle">Assessment Complete!</h3>
+        <p style="color:var(--text-secondary);margin-bottom:1rem;" id="quizFinalMsg"></p>
+        <button class="btn-primary" onclick="resetQuiz()">Retake Quiz</button>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(6)">&larr; Previous: Evaluation &amp; Use Cases</button>
+        <button class="btn-primary" onclick="goToModule(1)">Return to Module 01 &#8634;</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toastNotification">Chapter 9 HTML Study Guide downloaded!</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const state = {
+    currentModule: 1,
+    visitedModules: new Set([1]),
+    theme: 'light',
+    ledgerMode: 'normal',
+    mempool: [
+      { id: 'TX-101', from: 'Alice', to: 'Bob', amount: '120 SGD', fee: 1.5 },
+      { id: 'TX-102', from: 'Wei', to: 'Wayne', amount: '500 SGD', fee: 8.2 },
+      { id: 'TX-103', from: 'Charlie', to: 'Dana', amount: '45 SGD', fee: 0.4 },
+      { id: 'TX-104', from: 'Evan', to: 'Fiona', amount: '900 SGD', fee: 12.0 },
+      { id: 'TX-105', from: 'Grace', to: 'Henry', amount: '310 SGD', fee: 5.5 }
+    ],
+    chainBlocks: [
+      { idx: 0, title: 'Block 0 (Genesis)', payload: 'Genesis Block: Initial Ledger State', origPayload: 'Genesis Block: Initial Ledger State', prev: '0000000000000000' },
+      { idx: 1, title: 'Block 1', payload: 'TXN: Alice -> Bob (250 SGD)', origPayload: 'TXN: Alice -> Bob (250 SGD)', prev: '' },
+      { idx: 2, title: 'Block 2', payload: 'TXN: Wei -> Wayne (100 SGD)', origPayload: 'TXN: Wei -> Wayne (100 SGD)', prev: '' },
+      { idx: 3, title: 'Block 3', payload: 'TXN: Charlie -> Dana (75 SGD)', origPayload: 'TXN: Charlie -> Dana (75 SGD)', prev: '' },
+      { idx: 4, title: 'Block 4', payload: 'TXN: Evan -> Fiona (420 SGD)', origPayload: 'TXN: Evan -> Fiona (420 SGD)', prev: '' },
+      { idx: 5, title: 'Block 5', payload: 'TXN: Grace -> Henry (190 SGD)', origPayload: 'TXN: Grace -> Henry (190 SGD)', prev: '' }
+    ],
+    powZeros: 2,
+    lastFoundNonce: null,
+    forkStep: 0,
+    quizAnswers: {}
+  };
+
+  // ==================== DETERMINISTIC SHA-256 HELPER ====================
+  // Pure JS synchronous SHA-256 implementation so hashes work offline instantaneously without async race issues
+  function sha256Hex(ascii) {
+    function rightRotate(value, amount) {
+      return (value >>> amount) | (value << (32 - amount));
+    }
+    const mathPow = Math.pow;
+    const maxWord = mathPow(2, 32);
+    let result = '';
+    const words = [];
+    const asciiBitLength = ascii.length * 8;
+    const hash = [];
+    const k = [];
+    let primeCounter = 0;
+    const isComposite = {};
+
+    for (let candidate = 2; primeCounter < 64; candidate++) {
+      if (!isComposite[candidate]) {
+        for (let i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+        hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+        k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+      }
+    }
+
+    ascii += '\x80';
+    while ((ascii.length % 64) - 56) ascii += '\x00';
+    for (let i = 0; i < ascii.length; i++) {
+      const j = ascii.charCodeAt(i);
+      words[i >> 2] |= j << (((3 - i) % 4) * 8);
+    }
+    words[words.length] = (asciiBitLength / maxWord) | 0;
+    words[words.length] = asciiBitLength;
+
+    for (let j = 0; j < words.length; ) {
+      const w = words.slice(j, (j += 16));
+      const oldHash = hash.slice(0);
+      for (let i = 0; i < 64; i++) {
+        const w15 = w[i - 15], w2 = w[i - 2];
+        const a = hash[0], e = hash[4];
+        const temp1 =
+          hash[7] +
+          (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) +
+          ((e & hash[5]) ^ (~e & hash[6])) +
+          k[i] +
+          (w[i] =
+            i < 16
+              ? w[i]
+              : (w[i - 16] +
+                  (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) +
+                  w[i - 7] +
+                  (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) |
+                0);
+        const temp2 =
+          (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) +
+          ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+        hash.unshift((temp1 + temp2) | 0);
+        hash[4] = (hash[4] + temp1) | 0;
+        hash.pop();
+      }
+      for (let i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+    }
+
+    for (let i = 0; i < 8; i++) {
+      for (let j = 3; j + 1; j--) {
+        const b = (hash[i] >> (j * 8)) & 255;
+        result += (b < 16 ? '0' : '') + b.toString(16);
+      }
+    }
+    return result;
+  }
+
+  // ==================== THEME & NAVIGATION ====================
+  document.getElementById('themeToggleBtn').addEventListener('click', () => {
+    state.theme = state.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', state.theme);
+  });
+
+  window.goToModule = function(modNum) {
+    state.currentModule = modNum;
+    state.visitedModules.add(modNum);
+
+    document.querySelectorAll('.module-section').forEach(s => s.classList.remove('active'));
+    document.getElementById(`module-${modNum}`).classList.add('active');
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      const m = Number(btn.dataset.module);
+      btn.classList.toggle('active', m === modNum);
+      btn.classList.toggle('visited', state.visitedModules.has(m) && m !== modNum);
+    });
+
+    const pct = Math.round((state.visitedModules.size / 7) * 100);
+    document.getElementById('progressPercent').textContent = `${pct}%`;
+    document.getElementById('mobileProgressTag').textContent = `${pct}%`;
+    document.getElementById('progressFill').style.width = `${pct}%`;
+
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => goToModule(Number(btn.dataset.module)));
+  });
+
+  document.getElementById('menuToggle').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarBackdrop').classList.toggle('open');
+  });
+
+  document.getElementById('sidebarBackdrop').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+  });
+
+  // ==================== MODULE 1: CENTRALIZED VS DISTRIBUTED LEDGER ====================
+  function renderLedgerTopology(mode) {
+    state.ledgerMode = mode;
+    document.querySelectorAll('#ledgerSimBtns .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.lmode === mode));
+    const disc = mode === 'discrepancy';
+
+    document.getElementById('ledgerTopologySvg').innerHTML = `
+      <!-- Left: Centralized Ledger -->
+      <text x="195" y="24" fill="#a5b4fc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Centralized Ledger (e.g., OCBC Bank)</text>
+      <rect x="115" y="42" width="160" height="58" rx="10" fill="${disc ? '#4c0519' : '#1e293b'}" stroke="${disc ? '#f43f5e' : '#6366f1'}" stroke-width="2.5"/>
+      <text x="195" y="68" fill="#f8fafc" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">OCBC Central Server</text>
+      <text x="195" y="86" fill="#fcd34d" font-family="monospace" font-size="10" text-anchor="middle">Ultimate Authority</text>
+
+      <line x1="150" y1="100" x2="90" y2="155" stroke="${disc ? '#f43f5e' : '#64748b'}" stroke-width="2.2"/>
+      <line x1="195" y1="100" x2="195" y2="155" stroke="#64748b" stroke-width="2.2"/>
+      <line x1="240" y1="100" x2="300" y2="155" stroke="#64748b" stroke-width="2.2"/>
+
+      <rect x="40" y="155" width="95" height="44" rx="8" fill="#162033" stroke="${disc ? '#f43f5e' : '#475569'}" stroke-width="2"/>
+      <text x="87" y="182" fill="#cbd5e1" font-family="monospace" font-size="10.5" text-anchor="middle">${disc ? 'Client Dispute' : 'Client A'}</text>
+
+      <rect x="148" y="155" width="95" height="44" rx="8" fill="#162033" stroke="#475569" stroke-width="2"/>
+      <text x="195" y="182" fill="#cbd5e1" font-family="monospace" font-size="10.5" text-anchor="middle">Client B</text>
+
+      <rect x="255" y="155" width="95" height="44" rx="8" fill="#162033" stroke="#475569" stroke-width="2"/>
+      <text x="302" y="182" fill="#cbd5e1" font-family="monospace" font-size="10.5" text-anchor="middle">Client C</text>
+
+      <!-- Divider -->
+      <line x1="405" y1="20" x2="405" y2="220" stroke="#334155" stroke-width="1.5"/>
+
+      <!-- Right: Distributed Ledger -->
+      <text x="615" y="24" fill="#5eead4" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Distributed P2P Ledger (Full Nodes)</text>
+
+      <!-- Mesh links -->
+      <line x1="520" y1="75" x2="710" y2="75" stroke="#14b8a6" stroke-width="2"/>
+      <line x1="520" y1="175" x2="710" y2="175" stroke="#14b8a6" stroke-width="2"/>
+      <line x1="520" y1="75" x2="520" y2="175" stroke="#14b8a6" stroke-width="2"/>
+      <line x1="710" y1="75" x2="710" y2="175" stroke="#14b8a6" stroke-width="2"/>
+      <line x1="520" y1="75" x2="710" y2="175" stroke="#14b8a6" stroke-width="1.6"/>
+      <line x1="710" y1="75" x2="520" y2="175" stroke="#14b8a6" stroke-width="1.6"/>
+
+      <rect x="460" y="48" width="120" height="48" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.2"/>
+      <text x="520" y="70" fill="#5eead4" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">Full Node 1</text>
+      <text x="520" y="85" fill="#cbd5e1" font-family="monospace" font-size="9" text-anchor="middle">100% Ledger Copy</text>
+
+      <rect x="650" y="48" width="120" height="48" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.2"/>
+      <text x="710" y="70" fill="#5eead4" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">Full Node 2</text>
+      <text x="710" y="85" fill="#cbd5e1" font-family="monospace" font-size="9" text-anchor="middle">100% Ledger Copy</text>
+
+      <rect x="460" y="150" width="120" height="48" rx="8" fill="${disc ? '#4c0519' : '#064e3b'}" stroke="${disc ? '#f43f5e' : '#14b8a6'}" stroke-width="2.2"/>
+      <text x="520" y="172" fill="#f8fafc" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">${disc ? 'Rogue Node 3' : 'Full Node 3'}</text>
+      <text x="520" y="187" fill="#cbd5e1" font-family="monospace" font-size="9" text-anchor="middle">${disc ? 'Rejected by 3/4!' : '100% Ledger Copy'}</text>
+
+      <rect x="650" y="150" width="120" height="48" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.2"/>
+      <text x="710" y="172" fill="#5eead4" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">Full Node 4</text>
+      <text x="710" y="187" fill="#cbd5e1" font-family="monospace" font-size="9" text-anchor="middle">100% Ledger Copy</text>
+    `;
+
+    document.getElementById('ledgerTopologyInspector').innerHTML = disc
+      ? `<h4 style="color:var(--accent-rose);margin-bottom:4px;">Discrepancy &amp; Dispute Resolution Comparison</h4>
+         <p style="font-size:0.84rem;"><strong>Centralized (OCBC Bank):</strong> The bank holds the single source of truth; clients must reconcile with the bank because the bank holds ultimate authority.<br>
+         <strong>Distributed Ledger:</strong> Every participant node holds an identical copy of the ledger and has an equal say via consensus protocols—any single altered node is immediately outvoted and rejected!</p>`
+      : `<h4 style="color:var(--accent-teal);margin-bottom:4px;">Normal Ledger Operation</h4>
+         <p style="font-size:0.84rem;">In a distributed ledger, there is no central coordinator. Every full node independently validates and stores the complete chronological chain of blocks.</p>`;
+  }
+
+  document.querySelectorAll('#ledgerSimBtns .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => renderLedgerTopology(btn.dataset.lmode));
+  });
+  renderLedgerTopology('normal');
+
+  // ==================== MODULE 2: MEMPOOL FEE PRIORITIZER ====================
+  function renderMempoolTable() {
+    document.getElementById('mempoolTableWrap').innerHTML = `
+      <table>
+        <thead><tr><th>TXN ID</th><th>Transfer</th><th>User Fee (SGD)</th><th>Adjust Fee</th></tr></thead>
+        <tbody>
+          ${state.mempool.map((tx, idx) => `
+            <tr>
+              <td><code>${tx.id}</code></td>
+              <td>${tx.from} &rarr; ${tx.to} (${tx.amount})</td>
+              <td><strong style="color:var(--accent-teal);">${tx.fee.toFixed(1)} SGD</strong></td>
+              <td>
+                <button class="pill-btn" style="margin:0;padding:2px 8px;" onclick="boostTxFee(${idx}, 3.0)">+3.0 Fee</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  window.boostTxFee = function(idx, delta) {
+    state.mempool[idx].fee = +(state.mempool[idx].fee + delta).toFixed(1);
+    renderMempoolTable();
+  };
+
+  function mineMempoolBlock() {
+    const sorted = [...state.mempool].sort((a, b) => b.fee - a.fee);
+    const packaged = sorted.slice(0, 3);
+    const waiting = sorted.slice(3);
+    const totalFees = packaged.reduce((acc, t) => acc + t.fee, 0);
+    const blockReward = 3.125;
+
+    document.getElementById('mempoolBlockOutput').innerHTML = `
+      <div style="color:#5eead4;font-weight:bold;margin-bottom:6px;">[Miner Block Packaging &amp; Reward Summary]</div>
+      <div>1. Digital Signatures verified on all ${state.mempool.length} broadcast TXNs.</div>
+      <div>2. Packaged Top 3 Highest-Fee TXNs into 1 Block (avoiding an impractically long 1-TXN-per-block chain):</div>
+      <div style="margin:6px 0;padding:6px 10px;background:#162033;border-radius:6px;">
+        ${packaged.map((t, i) => `<div style="color:#fcd34d;">#${i+1}: ${t.id} (${t.from}&rarr;${t.to}, ${t.amount}) | Fee: ${t.fee.toFixed(1)} SGD</div>`).join('')}
+      </div>
+      <div style="color:#94a3b8;">Deferred to Next Block (lower fees): ${waiting.map(t => `${t.id} (${t.fee.toFixed(1)} SGD)`).join(', ')}</div>
+      <div style="margin-top:8px;color:#38bdf8;font-weight:bold;">
+        Miner Earnings = Block Reward (${blockReward} BTC) + Collected Fees (${totalFees.toFixed(1)} SGD)!
+      </div>
+    `;
+  }
+
+  document.getElementById('mineMempoolBtn').addEventListener('click', mineMempoolBlock);
+  renderMempoolTable();
+  mineMempoolBlock();
+
+  // ==================== MODULE 3: SHA-256 SANDBOX & HASH CHAIN TAMPER LAB ====================
+  window.updateShaSandbox = function() {
+    const txt = document.getElementById('shaSandboxInput').value;
+    const hex = sha256Hex(txt);
+    const firstByteBin = parseInt(hex.slice(0, 2), 16).toString(2).padStart(8, '0');
+    document.getElementById('shaSandboxOutput').innerHTML = `
+      <div><span style="color:#94a3b8;">Input x:</span> "${txt}"</div>
+      <div style="margin-top:4px;"><span style="color:#5eead4;">SHA-256 Hex (64 hex chars = 256 bits):</span><br><strong style="color:#fcd34d;">${hex}</strong></div>
+      <div style="margin-top:4px;"><span style="color:#38bdf8;">First 8 Binary Bits:</span> <code>${firstByteBin}...</code> (Fixed 256-bit 0/1 output regardless of input length)</div>
+    `;
+  };
+  document.getElementById('shaSandboxInput').addEventListener('input', window.updateShaSandbox);
+  window.updateShaSandbox();
+
+  // Hash Chain Tamper Lab
+  function computeOriginalHashes() {
+    const origHashes = [];
+    for (let i = 0; i < state.chainBlocks.length; i++) {
+      const prev = i === 0 ? '0000000000000000' : origHashes[i - 1];
+      origHashes.push(sha256Hex(`${i}|${prev}|${state.chainBlocks[i].origPayload}`));
+    }
+    return origHashes;
+  }
+
+  function renderHashChain() {
+    const origHashes = computeOriginalHashes();
+    // Set stored prev pointers from original valid chain so tampering breaks downstream links
+    for (let i = 1; i < state.chainBlocks.length; i++) {
+      state.chainBlocks[i].prev = origHashes[i - 1];
+    }
+
+    const currentHashes = [];
+    for (let i = 0; i < state.chainBlocks.length; i++) {
+      const b = state.chainBlocks[i];
+      currentHashes.push(sha256Hex(`${b.idx}|${b.prev}|${b.payload}`));
+    }
+
+    let firstTamperedIdx = -1;
+    for (let i = 0; i < state.chainBlocks.length; i++) {
+      if (state.chainBlocks[i].payload !== state.chainBlocks[i].origPayload) {
+        firstTamperedIdx = i;
+        break;
+      }
+    }
+
+    document.getElementById('hashChainContainer').innerHTML = state.chainBlocks.map((b, i) => {
+      const isModified = b.payload !== b.origPayload;
+      const prevMismatch = i > 0 && b.prev !== currentHashes[i - 1];
+      const cls = isModified ? 'block-card tampered' : prevMismatch ? 'block-card broken-link' : 'block-card';
+      return `
+        <div class="${cls}">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+            <strong style="font-size:0.9rem;">${b.title}</strong>
+            <span class="tag ${isModified ? 'tag-rose' : prevMismatch ? 'tag-amber' : 'tag-teal'}">
+              ${isModified ? 'TAMPERED!' : prevMismatch ? 'BROKEN PREV LINK' : 'VALID'}
+            </span>
+          </div>
+          <div style="font-family:var(--font-mono);font-size:0.71rem;margin-bottom:4px;">
+            <strong>prev:</strong> <code>${b.prev.slice(0, 14)}...</code>
+          </div>
+          <div style="margin-bottom:6px;">
+            <input type="text" class="form-input" style="width:100%;font-size:0.74rem;padding:4px 7px;" value="${b.payload}" oninput="editChainBlock(${i}, this.value)">
+          </div>
+          <div style="font-family:var(--font-mono);font-size:0.71rem;">
+            <strong>hash<sub>${i}</sub>:</strong> <code style="color:${isModified ? 'var(--accent-rose)' : 'var(--accent-teal)'};">${currentHashes[i].slice(0, 14)}...</code>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const panel = document.getElementById('hashChainStatusPanel');
+    if (firstTamperedIdx !== -1) {
+      panel.innerHTML = `
+        <h4 style="color:var(--accent-rose);margin-bottom:4px;">Tamper Alert Detected Starting at Block ${firstTamperedIdx}!</h4>
+        <p style="font-size:0.84rem;">Modifying Block ${firstTamperedIdx}'s payload changed its SHA-256 hash (<code>hash<sub>${firstTamperedIdx}</sub> &rarr; hash<sub>${firstTamperedIdx}</sub>'</code>). Block ${firstTamperedIdx + 1}'s stored <code>prev</code> pointer (expecting original <code>hash<sub>${firstTamperedIdx}</sub></code>) no longer matches—instantly alerting all full nodes across the network!</p>
+      `;
+    } else {
+      panel.innerHTML = `
+        <h4 style="color:var(--accent-teal);margin-bottom:4px;">All 6 Blocks Cryptographically Verified (Genesis Block 0 &rarr; Block 5)</h4>
+        <p style="font-size:0.84rem;">Every Block <em>N</em>'s <code>prev</code> header matches Block <em>N-1</em>'s SHA-256 hash. Click <strong>"Simulate Lecture Attack: Edit Block 2 (100 &rarr; -100 SGD)"</strong> or edit any block payload directly to see hash mismatch propagation.</p>
+      `;
+    }
+  }
+
+  window.editChainBlock = function(idx, val) {
+    state.chainBlocks[idx].payload = val;
+    renderHashChain();
+  };
+
+  document.getElementById('tamperBlock2Btn').addEventListener('click', () => {
+    state.chainBlocks[2].payload = 'TXN: Wei -> Wayne (-100 SGD)';
+    renderHashChain();
+  });
+
+  document.getElementById('restoreChainBtn').addEventListener('click', () => {
+    state.chainBlocks.forEach(b => { b.payload = b.origPayload; });
+    renderHashChain();
+  });
+  renderHashChain();
+
+  // ==================== MODULE 4: PROOF OF WORK MINER ====================
+  document.querySelectorAll('#powDiffBtns .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.powZeros = Number(btn.dataset.zeros);
+      document.querySelectorAll('#powDiffBtns .pill-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.zeros) === state.powZeros));
+    });
+  });
+
+  document.getElementById('startMineBtn').addEventListener('click', () => {
+    const prefix = '0'.repeat(state.powZeros);
+    const blockData = 'Block#104|Prev:00a89f2c|TXNs:Evan->Fiona(900 SGD)';
+    let nonce = 0;
+    let hash = '';
+    const t0 = performance.now();
+
+    while (nonce < 300000) {
+      hash = sha256Hex(`${blockData}|Nonce:${nonce}`);
+      if (hash.startsWith(prefix)) break;
+      nonce++;
+    }
+    const elapsed = (performance.now() - t0).toFixed(1);
+    state.lastFoundNonce = { blockData, nonce, hash, prefix };
+
+    document.getElementById('powMinerLog').innerHTML = `
+      <div style="color:#5eead4;font-weight:bold;">&#10003; Valid Nonce Discovered!</div>
+      <div><strong>Target Prefix:</strong> <code>${prefix}...</code> (${state.powZeros * 4} leading binary zeros)</div>
+      <div><strong>Winning Nonce:</strong> <span style="color:#fcd34d;font-weight:bold;">${nonce}</span> (found after <strong>${nonce + 1}</strong> trial attempts in ${elapsed} ms)</div>
+      <div><strong>Valid Block SHA-256:</strong> <code style="color:#5eead4;">${hash}</code></div>
+    `;
+  });
+
+  document.getElementById('verifyNonceBtn').addEventListener('click', () => {
+    if (!state.lastFoundNonce) {
+      document.getElementById('powMinerLog').innerHTML = `<span style="color:#fcd34d;">Click "Mine Valid Nonce" first, then test 1-hash verification!</span>`;
+      return;
+    }
+    const { blockData, nonce, hash, prefix } = state.lastFoundNonce;
+    const checkHash = sha256Hex(`${blockData}|Nonce:${nonce}`);
+    const ok = checkHash === hash && checkHash.startsWith(prefix);
+    document.getElementById('powMinerLog').innerHTML += `
+      <div style="margin-top:8px;padding-top:6px;border-top:1px solid #26344e;color:#38bdf8;">
+        <strong>[Peer Node Verification]</strong> Executed <strong>1 single SHA-256 hash</strong> with Nonce = ${nonce} &rarr; <strong>${ok ? 'INSTANTLY VERIFIED VALID!' : 'INVALID'}</strong> (Asymmetric Complexity!)
+      </div>
+    `;
+  });
+
+  // ==================== MODULE 5: STATE FORKS & LONGEST-CHAIN RULE ====================
+  function renderStateFork(step) {
+    state.forkStep = step;
+    document.querySelectorAll('#forkSimBtns .pill-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.fstep) === step));
+
+    const svg = document.getElementById('stateForkSvg');
+    const ins = document.getElementById('stateForkInspector');
+
+    const base = `
+      <rect x="30" y="95" width="110" height="44" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="2.2"/>
+      <text x="85" y="122" fill="#a5b4fc" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">Block 2</text>
+      <line x1="140" y1="117" x2="185" y2="117" stroke="#64748b" stroke-width="2.2"/>
+
+      <rect x="185" y="95" width="110" height="44" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="2.2"/>
+      <text x="240" y="122" fill="#a5b4fc" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">Block 3</text>
+
+      <!-- Fork branches -->
+      <line x1="295" y1="108" x2="365" y2="62" stroke="${step === 2 ? '#f43f5e' : '#14b8a6'}" stroke-width="2.5"/>
+      <line x1="295" y1="126" x2="365" y2="172" stroke="${step === 1 ? '#f43f5e' : '#14b8a6'}" stroke-width="2.5"/>
+
+      <!-- Top Block 4 -->
+      <rect x="365" y="38" width="135" height="46" rx="8" fill="${step === 2 ? '#4c0519' : '#064e3b'}" stroke="${step === 2 ? '#f43f5e' : '#14b8a6'}" stroke-width="2.4"/>
+      <text x="432" y="66" fill="#f8fafc" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">Block 4 ${step === 2 ? '(Orphan)' : ''}</text>
+
+      <!-- Bottom Block 4' -->
+      <rect x="365" y="150" width="135" height="46" rx="8" fill="${step === 1 ? '#4c0519' : '#064e3b'}" stroke="${step === 1 ? '#f43f5e' : '#14b8a6'}" stroke-width="2.4"/>
+      <text x="432" y="178" fill="#f8fafc" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">Block 4' ${step === 1 ? '(Orphan)' : ''}</text>
+    `;
+
+    let ext = '';
+    if (step === 1) {
+      ext = `
+        <line x1="500" y1="61" x2="565" y2="61" stroke="#14b8a6" stroke-width="3"/>
+        <rect x="565" y="38" width="195" height="46" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.8"/>
+        <text x="662" y="66" fill="#5eead4" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">Block 5 (LONGEST CHAIN)</text>
+      `;
+      ins.innerHTML = `<h4 style="color:var(--accent-teal);margin-bottom:4px;">Top Branch Grows Longer First &rarr; Block 4' Abandoned!</h4>
+        <p style="font-size:0.84rem;">Because the top chain (<code>Block 2 &rarr; 3 &rarr; 4 &rarr; 5</code>) is now strictly longer, all network nodes follow the <strong>Longest-Chain Rule</strong> and switch to the top branch, discarding <code>Block 4'</code>.</p>`;
+    } else if (step === 2) {
+      ext = `
+        <line x1="500" y1="173" x2="565" y2="173" stroke="#14b8a6" stroke-width="3"/>
+        <rect x="565" y="150" width="195" height="46" rx="8" fill="#064e3b" stroke="#14b8a6" stroke-width="2.8"/>
+        <text x="662" y="178" fill="#5eead4" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">Block 5' (LONGEST CHAIN)</text>
+      `;
+      ins.innerHTML = `<h4 style="color:var(--accent-teal);margin-bottom:4px;">Bottom Branch Grows Longer First &rarr; Block 4 Abandoned!</h4>
+        <p style="font-size:0.84rem;">When the bottom chain (<code>Block 2 &rarr; 3 &rarr; 4' &rarr; 5'</code>) extends first, all nodes abandon <code>Block 4</code> and converge on the bottom branch. Miners must broadcast new blocks immediately over fast links to avoid losing fork races!</p>`;
+    } else {
+      ins.innerHTML = `<h4 style="color:var(--accent-amber);margin-bottom:4px;">Simultaneous State Fork (Block 4 vs. Block 4')</h4>
+        <p style="font-size:0.84rem;">Two competing miners discovered valid nonces at nearly the same time. Nodes temporarily build on whichever candidate block arrived first until one branch grows longer.</p>`;
+    }
+
+    svg.innerHTML = base + ext;
+  }
+
+  document.querySelectorAll('#forkSimBtns .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => renderStateFork(Number(btn.dataset.fstep)));
+  });
+  renderStateFork(0);
+
+  // ==================== GLOBAL SEARCH ====================
+  const searchIndex = [
+    { title: 'Centralized Ledger (OCBC Bank) vs. Distributed P2P Ledger', mod: 1, sub: 'Topic 1: Fundamentals' },
+    { title: 'Consensus Protocols & Full Node Ledger Replication', mod: 1, sub: 'Topic 1: Governance' },
+    { title: 'Transaction Lifecycle: Digital Signatures, P2P Broadcast & Packaging', mod: 2, sub: 'Topic 2: Block Creation' },
+    { title: 'Mempool Transaction Fee Incentives & Miner Block Rewards', mod: 2, sub: 'Topic 2: Fee Prioritization' },
+    { title: 'SHA-256 Hash Function Properties (Deterministic, Collision Resistant, Fast)', mod: 3, sub: 'Topic 3: Cryptography' },
+    { title: 'Genesis Block 0 to Block 5 & Block 2 Tamper Trace (100 -> -100 SGD)', mod: 3, sub: 'Topic 3: Immutability' },
+    { title: 'Proof of Work (PoW) Nonce Miner & Target < 2^200 (2^56 Expected Trials)', mod: 4, sub: 'Topic 4: PoW Consensus' },
+    { title: 'Bitcoin Halving Schedule (210,000 blocks: 12.5 -> 6.25 -> 3.125 BTC) & Pizza Story', mod: 4, sub: 'Topic 4: Mining Economics' },
+    { title: 'State Forks (Block 4 vs. 4\') & The Longest-Chain Rule', mod: 5, sub: 'Topic 5: Fork Resolution' },
+    { title: 'Bitcoin (~400 TXNs/min) vs. Visa (102,000 TXNs/min) Throughput Comparison', mod: 6, sub: 'Topic 6: Evaluation' },
+    { title: 'Physical World Traceability Bottleneck & Enterprise Use Cases (COVID-19 Certs, Patents)', mod: 6, sub: 'Topic 6: Applications' },
+    { title: 'Chapter 9 Exam Readiness Quiz (10 Active Recall Questions)', mod: 7, sub: 'Module 7: Self-Assessment' }
+  ];
+
+  const searchInput = document.getElementById('globalSearchInput');
+  const searchDropdown = document.getElementById('searchResultsDropdown');
+
+  searchInput.addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) { searchDropdown.classList.remove('open'); return; }
+    const hits = searchIndex.filter(item => item.title.toLowerCase().includes(q) || item.sub.toLowerCase().includes(q)).slice(0, 8);
+    if (!hits.length) {
+      searchDropdown.innerHTML = `<div class="search-hit" style="color:var(--text-muted);">No matching topics found.</div>`;
+    } else {
+      searchDropdown.innerHTML = hits.map((h, i) => `
+        <div class="search-hit" data-hitidx="${i}">
+          <div style="font-weight:700;color:var(--text-primary);">${h.title}</div>
+          <div style="font-size:0.72rem;color:var(--accent-teal);">${h.sub}</div>
+        </div>
+      `).join('');
+      searchDropdown.querySelectorAll('.search-hit').forEach((el, idx) => {
+        el.addEventListener('click', () => {
+          goToModule(hits[idx].mod);
+          searchDropdown.classList.remove('open');
+          searchInput.value = '';
+        });
+      });
+    }
+    searchDropdown.classList.add('open');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.sidebar-search')) searchDropdown.classList.remove('open');
+  });
+
+  // ==================== MODULE 7: EXAM READINESS QUIZ ====================
+  const quizQuestions = [
+    {
+      q: '1. In the Centralized vs. Distributed Ledger comparison (e.g., OCBC Bank vs. Blockchain), what happens when a discrepancy occurs?',
+      options: [
+        'In a centralized bank, the client overrides the bank server.',
+        'In a centralized bank, the bank holds ultimate authority as the single source of truth; in a distributed ledger, every full node holds the ledger and validates state equally via consensus.',
+        'Distributed ledgers delete all prior blocks when a dispute occurs.',
+        'Centralized banks use Proof of Work nonces.'
+      ],
+      correct: 1,
+      exp: 'A centralized entity like OCBC Bank holds ultimate authority, whereas distributed ledgers replace central authorities with consensus protocols across equal full nodes.'
+    },
+    {
+      q: '2. Why do blockchain nodes package multiple broadcast transactions into a single block instead of creating 1 block per transaction?',
+      options: [
+        'Because SHA-256 only hashes multiple transactions.',
+        'Because creating 1 block per transaction would result in an impractically long chain.',
+        'Because digital signatures require 3 transactions.',
+        'Because transaction fees are illegal on single transactions.'
+      ],
+      correct: 1,
+      exp: 'Bundling multiple broadcast transactions into a single block prevents an impractically long blockchain while allowing miners to prioritize higher-fee transactions.'
+    },
+    {
+      q: '3. Why do full nodes store compact cryptographic hash values inside blocks rather than raw bulky files?',
+      options: [
+        'Because raw files cannot be encrypted.',
+        'Because storing full raw data copies across every node would require massive data center hardware and encourage re-centralization.',
+        'Because SHA-256 expands files to 1 GB.',
+        'Because Genesis Block 0 forbids raw text.'
+      ],
+      correct: 1,
+      exp: 'Compact 256-bit hashes keep full-node storage lightweight so ordinary participants—not just massive data centers—can run full nodes.'
+    },
+    {
+      q: '4. In the lecture tamper trace, an attacker modifies Block 2 (changing 100 SGD to -100 SGD) after Block 5 has been added. How is this detected?',
+      options: [
+        'Block 2\'s calculated hash changes (hash2 -> hash2\'), causing a mismatch with Block 3\'s stored "prev" pointer and immediately alerting all network nodes.',
+        'Block 0 (Genesis Block) automatically deletes Block 2.',
+        'Visa credit servers reject Block 2.',
+        'The attacker\'s digital signature expires after 5 blocks.'
+      ],
+      correct: 0,
+      exp: 'Every Block N stores the hash of Block N-1 in its "prev" header. Altering Block 2 changes hash2 -> hash2\', breaking Block 3\'s prev pointer.'
+    },
+    {
+      q: '5. In Proof of Work (PoW), if the SHA-256 difficulty target requires a hash strictly below 2^200, how many leading binary zeros are required and what is the expected number of trial attempts?',
+      options: [
+        '200 leading binary zeros; 2^200 expected trials.',
+        '56 leading binary zeros (256 - 200); expected 2^56 trial attempts (since each bit has a 50% probability of being 0).',
+        '16 leading binary zeros; 16 trial attempts.',
+        '256 leading binary zeros; 1 trial attempt.'
+      ],
+      correct: 1,
+      exp: '256 bits minus 200 bits = 56 leading binary zeros. With a 50% chance per bit, finding a valid nonce requires an expected 2^56 trials.'
+    },
+    {
+      q: '6. What is the primary security purpose of Proof of Work (PoW) requiring significant computing power to find a nonce?',
+      options: [
+        'To make verification slow for other nodes.',
+        'To prevent cheap system attacks (e.g., flooding invalid blocks using low-cost MCUs or Raspberry Pis), while remaining fast (1 hash) for peers to verify.',
+        'To replace digital signatures.',
+        'To increase block size above 100 MB.'
+      ],
+      correct: 1,
+      exp: 'PoW exhibits asymmetric complexity: expensive to compute (deterring cheap Raspberry Pi/MCU Sybil spam) yet trivial to verify in a single hash.'
+    },
+    {
+      q: '7. How often does Bitcoin Halving occur, and what were the block rewards in Feb 2019, May 2020, and 2024?',
+      options: [
+        'Every 10 minutes; 50 -> 25 -> 12.5 BTC.',
+        'Every 210,000 blocks; 12.5 BTC (Feb 2019) -> 6.25 BTC (May 2020) -> 3.125 BTC (2024).',
+        'Every 1,000 blocks; 10,000 -> 5,000 -> 2,500 BTC.',
+        'Every year; 3.125 -> 6.25 -> 12.5 BTC.'
+      ],
+      correct: 1,
+      exp: 'Bitcoin block rewards halve every 210,000 blocks: 12.5 BTC (Feb 2019), 6.25 BTC (May 2020), and 3.125 BTC (2024).'
+    },
+    {
+      q: '8. When two miners discover valid nonces at nearly the same time (creating competing Block 4 and Block 4\'), how does the network resolve this state fork?',
+      options: [
+        'Both branches remain permanently valid.',
+        'Nodes follow the Longest-Chain Rule: whichever branch grows longer first becomes the accepted single truth, and the shorter branch is abandoned.',
+        'The branch with lower transaction fees wins.',
+        'OCBC Bank manually chooses Block 4.'
+      ],
+      correct: 1,
+      exp: 'Under the Longest-Chain Rule, miners build on whichever block they received first and automatically switch to whichever branch becomes longer first.'
+    },
+    {
+      q: '9. How does Bitcoin\'s transaction throughput compare to the Visa credit card network?',
+      options: [
+        'Bitcoin processes 102,000 TXNs/min while Visa processes ~400 TXNs/min.',
+        'Bitcoin processes ~400 transactions/minute (~7 TPS, with 1 MB blocks every 10 min), whereas Visa processes ~1,700 TPS (102,000 transactions/minute).',
+        'Both process exactly 1,700 TPS.',
+        'Bitcoin has unlimited TPS.'
+      ],
+      correct: 1,
+      exp: 'Bitcoin (~400 TXNs/min) is far slower than Visa (102,000 TXNs/min), demonstrating that blockchain is a specialized ledger rather than a general high-throughput CRUD database.'
+    },
+    {
+      q: '10. Which limitation is known as the "Physical World Traceability Bottleneck" in blockchain applications?',
+      options: [
+        'SHA-256 hashes cannot be stored on solid-state drives.',
+        'On-chain digital immutability cannot guarantee physical-world authenticity (e.g., logging organic food on a blockchain cannot prevent physical packaging or product swapping).',
+        'Cross-border COVID-19 medical certificates cannot be hashed.',
+        'Miners refuse to mine international transfers.'
+      ],
+      correct: 1,
+      exp: 'While blockchain excels at tamper-evident digital verification (patents, COVID-19 certificates), it cannot physically prevent tampering or swapping of physical goods off-chain.'
+    }
+  ];
+
+  function renderQuiz() {
+    const container = document.getElementById('quizContainer');
+    container.innerHTML = quizQuestions.map((item, qIdx) => {
+      const answered = state.quizAnswers[qIdx] !== undefined;
+      const chosen = state.quizAnswers[qIdx];
+      return `
+        <div class="quiz-card">
+          <div class="quiz-q">${item.q}</div>
+          <div class="quiz-opts">
+            ${item.options.map((opt, oIdx) => {
+              let cls = 'quiz-opt';
+              if (answered) {
+                if (oIdx === item.correct) cls += ' correct';
+                else if (oIdx === chosen) cls += ' incorrect';
+              }
+              return `
+                <button class="${cls}" ${answered ? 'disabled' : ''} onclick="answerQuiz(${qIdx}, ${oIdx})">
+                  <span style="font-family:var(--font-mono);font-weight:700;color:var(--accent-teal);">${String.fromCharCode(65 + oIdx)}.</span>
+                  <span>${opt}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+          <div class="quiz-exp ${answered ? 'show' : ''}" style="background:${chosen === item.correct ? 'rgba(20,184,166,0.14)' : 'rgba(244,63,94,0.14)'};border:1px solid ${chosen === item.correct ? 'rgba(20,184,166,0.38)' : 'rgba(244,63,94,0.38)'};">
+            <strong>${chosen === item.correct ? '&#10003; Correct:' : '&#10007; Incorrect:'}</strong> ${item.exp}
+          </div>
+        </div>
+      `;
+    }).join('');
+    updateQuizScore();
+  }
+
+  window.answerQuiz = function(qIdx, oIdx) {
+    if (state.quizAnswers[qIdx] !== undefined) return;
+    state.quizAnswers[qIdx] = oIdx;
+    renderQuiz();
+  };
+
+  function updateQuizScore() {
+    const answeredCount = Object.keys(state.quizAnswers).length;
+    let score = 0;
+    Object.entries(state.quizAnswers).forEach(([q, o]) => {
+      if (quizQuestions[Number(q)].correct === o) score++;
+    });
+
+    document.getElementById('quizScoreBadge').textContent = `Score: ${score} / ${quizQuestions.length}`;
+    const summary = document.getElementById('quizSummaryCard');
+    if (answeredCount === quizQuestions.length) {
+      summary.style.display = 'block';
+      document.getElementById('quizFinalTitle').textContent = `Final Score: ${score} / ${quizQuestions.length} (${Math.round((score / quizQuestions.length) * 100)}%)`;
+      document.getElementById('quizFinalMsg').textContent = score >= 8
+        ? 'Outstanding mastery! You are thoroughly prepared for Chapter 9 Blockchain Database Systems exam questions.'
+        : 'Review the explanations highlighted above and retake the quiz to hit 80%+ mastery.';
+    } else {
+      summary.style.display = 'none';
+    }
+  }
+
+  window.resetQuiz = function() {
+    state.quizAnswers = {};
+    renderQuiz();
+  };
+
+  document.getElementById('resetQuizBtn').addEventListener('click', window.resetQuiz);
+  renderQuiz();
+
+  // ==================== DOWNLOAD SELF-CONTAINED HTML ====================
+  document.getElementById('downloadHtmlBtn').addEventListener('click', () => {
+    const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'chapter-9-blockchain-database-revision-guide.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    const toast = document.getElementById('toastNotification');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  });
+})();
+</script>
+</body>
+</html>
