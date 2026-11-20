@@ -1,4 +1,4 @@
-### **Malware** 
+### Malware 
 
 * Written for OS   
 * Needs detailed knowledge of operations, procedures and Setup of System 
@@ -10,13 +10,13 @@
 * **Time** \[Make System unusable until malware is eliminated\]   
 * **Reputation** \[ Reputation can have massive impact on your business\] 
 
-### **Malware Type** 
+### Malware Type 
 
 * Virus   
 * Worm   
 * Trojan 
 
-### **Virus** 
+### Virus 
 - Malicious executable  
 - Does NOT auto-replicate  
 - Attaches to a "host' (program or file)  

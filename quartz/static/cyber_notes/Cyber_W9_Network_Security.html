@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 9 Revision — Network Security Attacks</title>
+<style>
+  :root{
+    --bg:#080d12;
+    --panel:#111a22;
+    --panel2:#16222c;
+    --border:#243441;
+    --text:#d5e2ec;
+    --muted:#8298ab;
+    --accent:#2dd4bf;
+    --accent2:#4da3ff;
+    --green:#7ee787;
+    --red:#ff6b6b;
+    --amber:#ffb454;
+    --purple:#b48cff;
+    --pink:#ff7ab6;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 620px at 85% -10%, #0d2a2a 0%, transparent 60%),
+      radial-gradient(900px 520px at -5% 25%, #101d33 0%, transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:15.5px;line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  code,pre,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    padding:34px 40px 26px;border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(45,212,191,.08), transparent);
+  }
+  .topbar h1{
+    margin:0 0 6px;font-size:clamp(1.4rem,2.6vw,2rem);letter-spacing:-.5px;
+    background:linear-gradient(90deg,#7ee7dc,#4dd0e1 40%,#7ee787 75%,#b48cff);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .topbar p{margin:0;color:var(--muted);font-size:.92rem;}
+
+  /* ---------- layout ---------- */
+  .layout{display:flex;align-items:flex-start;}
+  .sidebar{
+    position:sticky;top:0;height:100vh;width:268px;flex:0 0 268px;
+    overflow-y:auto;padding:22px 14px 60px;
+    border-right:1px solid var(--border);
+    background:rgba(6,10,14,.72);backdrop-filter:blur(6px);
+  }
+  .sidebar h3{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 12px 10px;font-weight:600;}
+  .sidebar a{
+    display:block;padding:7px 12px;border-radius:8px;color:var(--muted);
+    text-decoration:none;font-size:.875rem;border-left:2px solid transparent;transition:.15s;
+  }
+  .sidebar a:hover{background:var(--panel2);color:var(--text);}
+  .sidebar a.active{background:rgba(45,212,191,.12);color:#7ee7dc;border-left-color:var(--accent);}
+
+  main{flex:1 1 auto;min-width:0;padding:36px 44px 160px;max-width:1080px;}
+
+  /* ---------- sections ---------- */
+  section{margin-bottom:64px;scroll-margin-top:24px;}
+  section > h2{
+    font-size:1.42rem;margin:0 0 6px;letter-spacing:-.3px;
+    padding-left:14px;border-left:4px solid var(--accent);
+  }
+  section > .lede{color:var(--muted);margin:0 0 22px 14px;font-size:.93rem;}
+  h3{font-size:1.06rem;margin:30px 0 10px;color:#b9d8d3;}
+  h4{font-size:.95rem;margin:18px 0 6px;color:#9fb6c9;}
+  p{margin:10px 0;}
+  ul,ol{margin:10px 0;padding-left:22px;}
+  li{margin:5px 0;}
+  strong{color:#fff;font-weight:600;}
+  em{color:#a9c8ea;font-style:normal;}
+
+  /* ---------- cards ---------- */
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:18px 20px;margin:16px 0;}
+  .card.accent{border-left:3px solid var(--accent);}
+  .card.warn{border-left:3px solid var(--amber);background:rgba(255,180,84,.06);}
+  .card.danger{border-left:3px solid var(--red);background:rgba(255,107,107,.06);}
+  .card.good{border-left:3px solid var(--green);background:rgba(126,231,135,.05);}
+  .card.info{border-left:3px solid var(--accent2);background:rgba(77,163,255,.05);}
+  .card h4{margin-top:0;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+  /* ---------- tables ---------- */
+  .tblwrap{overflow-x:auto;margin:16px 0;border:1px solid var(--border);border-radius:10px;}
+  table{border-collapse:collapse;width:100%;font-size:.875rem;min-width:520px;}
+  th,td{padding:10px 13px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{background:var(--panel2);color:#9ecfc8;font-weight:600;font-size:.77rem;
+     letter-spacing:.05em;text-transform:uppercase;}
+  tr:last-child td{border-bottom:none;}
+  td code{background:#070c10;padding:1px 5px;border-radius:4px;font-size:.82rem;color:#7ee7dc;}
+
+  /* ---------- code ---------- */
+  pre.code{
+    background:#060b0f;border:1px solid var(--border);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:.83rem;line-height:1.55;
+    margin:14px 0;color:#c3d5e2;
+  }
+  .cm{color:#5a6d80;}
+  code.inl{background:#060b0f;border:1px solid var(--border);padding:1px 6px;
+    border-radius:5px;font-size:.84rem;color:#7ee7dc;}
+
+  /* ---------- buttons ---------- */
+  .chip{background:var(--panel2);border:1px solid var(--border);color:var(--muted);
+    padding:6px 12px;border-radius:999px;font-size:.79rem;cursor:pointer;
+    transition:.15s;font-family:inherit;margin:0;}
+  .chip:hover{color:var(--text);border-color:#3a5062;}
+  .chip.active{background:rgba(45,212,191,.16);border-color:var(--accent);color:#9ff0e6;}
+  .btn{background:linear-gradient(180deg,#1e2f3a,#15212a);
+    border:1px solid #2e4454;color:#c6dceb;padding:8px 16px;border-radius:8px;
+    cursor:pointer;font-size:.84rem;font-family:inherit;transition:.15s;}
+  .btn:hover{border-color:var(--accent);color:#fff;}
+  .btn.primary{background:linear-gradient(180deg,#0f6b62,#0a4d47);border-color:#1a9c8f;color:#d9fffa;}
+  .btn.primary:hover{background:linear-gradient(180deg,#13857a,#0c5f57);}
+  .btn.danger{background:linear-gradient(180deg,#7a2a2a,#4d1a1a);border-color:#a33a3a;color:#ffd6d6;}
+  .btn.danger:hover{background:linear-gradient(180deg,#943232,#5e2020);}
+  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;align-items:center;}
+
+  /* ---------- generic diagram ---------- */
+  .diagram{
+    position:relative;background:#070d12;border:1px solid var(--border);
+    border-radius:12px;padding:18px;margin:16px 0;overflow:hidden;
+  }
+  .node{
+    background:var(--panel2);border:1px solid #2e4454;border-radius:10px;
+    padding:10px 12px;font-size:.78rem;text-align:center;transition:.35s;
+    position:relative;z-index:2;
+  }
+  .node b{display:block;font-size:.83rem;color:#dcecf7;margin-bottom:2px;}
+  .node span{color:var(--muted);font-size:.72rem;}
+  .node.victim{border-color:#2f6ea3;background:#0f2130;}
+  .node.attack{border-color:#a33a3a;background:#2a1212;}
+  .node.reflect{border-color:#7a5c2f;background:#261e10;}
+  .node.legit{border-color:#3d7a3d;background:#122415;}
+  .node.glow{box-shadow:0 0 0 2px currentColor, 0 0 22px rgba(45,212,191,.35);}
+  .pkt{
+    position:absolute;width:10px;height:10px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 10px var(--accent);
+    transform:translate(-50%,-50%);z-index:3;pointer-events:none;
+  }
+  .pkt.red{background:var(--red);box-shadow:0 0 10px var(--red);}
+  .pkt.amber{background:var(--amber);box-shadow:0 0 10px var(--amber);}
+  .pkt.purple{background:var(--purple);box-shadow:0 0 10px var(--purple);}
+  .pkt.green{background:var(--green);box-shadow:0 0 10px var(--green);}
+
+  /* ---------- DoS lab ---------- */
+  .lab{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:18px;margin:18px 0;}
+  .pipe-wrap{margin:16px 0;}
+  .pipe-label{display:flex;justify-content:space-between;font-size:.76rem;
+    color:var(--muted);margin-bottom:6px;font-family:ui-monospace,monospace;}
+  .pipe{
+    height:36px;border-radius:8px;background:#070d12;border:1px solid #2e4454;
+    position:relative;overflow:hidden;
+  }
+  .pipe-fill{
+    position:absolute;left:0;top:0;bottom:0;width:0%;transition:width .6s ease;
+    background:linear-gradient(90deg,#0f6b62,#2dd4bf);
+  }
+  .pipe-fill.over{background:linear-gradient(90deg,#a33a3a,#ff6b6b);}
+  .pipe-mark{
+    position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;opacity:.5;
+  }
+  .queue-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin:14px 0;}
+  .qslot{
+    aspect-ratio:1.4;border-radius:5px;background:#0c151c;border:1px solid #243441;
+    display:flex;align-items:center;justify-content:center;font-size:.62rem;
+    color:#3e5266;transition:.25s;font-family:ui-monospace,monospace;
+  }
+  .qslot.half{background:#5c3a12;border-color:#a3703a;color:#ffd9a0;}
+  .qslot.full{background:#5c1a1a;border-color:#a33a3a;color:#ffb3b3;}
+  .lab-stat{
+    font-family:ui-monospace,monospace;font-size:.8rem;color:#8fa6b8;
+    background:#060b0f;border:1px solid var(--border);border-radius:8px;
+    padding:10px 13px;margin-top:12px;min-height:44px;
+  }
+
+  /* ---------- terminal ---------- */
+  .terminal{
+    background:#050a0e;border:1px solid var(--border);border-radius:9px;
+    padding:14px 16px;font-family:ui-monospace,Menlo,monospace;font-size:.79rem;
+    color:#c3d5e2;line-height:1.65;margin:12px 0;overflow-x:auto;min-height:140px;
+    white-space:pre-wrap;word-break:break-word;
+  }
+  .terminal .prompt{color:#7ee787;}
+  .terminal .ok{color:#7ee787;}
+  .terminal .warn{color:#ffb454;}
+  .terminal .bad{color:#ff8a8a;}
+  .terminal .dim{color:#5a6d80;}
+  .terminal .cy{color:#7ee7dc;}
+
+  /* ---------- ARP tables ---------- */
+  .arp-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0;}
+  @media(max-width:760px){.arp-wrap{grid-template-columns:1fr;}}
+  .arp-tbl{background:#070d12;border:1px solid var(--border);border-radius:10px;padding:12px;}
+  .arp-tbl h5{margin:0 0 10px;font-size:.74rem;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--muted);font-weight:600;}
+  .arp-row{
+    display:grid;grid-template-columns:1fr 1.2fr;gap:8px;padding:7px 9px;border-radius:6px;
+    font-family:ui-monospace,monospace;font-size:.76rem;margin:4px 0;
+    background:#0d161d;border:1px solid transparent;transition:.3s;
+  }
+  .arp-row.poisoned{background:#2a1212;border-color:#a33a3a;color:#ffb3b3;}
+  .arp-row .ip{color:#7ee7dc;}
+  .arp-row.poisoned .ip{color:#ffb3b3;}
+
+  /* ---------- evil twin ---------- */
+  .step-list{counter-reset:st;margin:14px 0;}
+  .step-item{
+    display:flex;gap:12px;padding:11px 14px;border-radius:9px;margin:7px 0;
+    background:#0b1319;border:1px solid var(--border);cursor:pointer;transition:.2s;
+  }
+  .step-item:hover{border-color:#3a5062;}
+  .step-item.active{background:rgba(45,212,191,.1);border-color:var(--accent);}
+  .step-num{
+    flex:0 0 26px;height:26px;border-radius:50%;background:#1b2832;color:var(--muted);
+    display:flex;align-items:center;justify-content:center;font-size:.78rem;
+    font-weight:700;transition:.2s;
+  }
+  .step-item.active .step-num{background:var(--accent);color:#04211e;}
+  .step-body{flex:1;font-size:.87rem;}
+  .step-body b{display:block;color:#dcecf7;margin-bottom:2px;font-size:.88rem;}
+
+  /* ---------- hub/switch ---------- */
+  .hs-host{
+    background:#12212c;border:1px solid #2e4454;border-radius:9px;
+    padding:9px;text-align:center;font-size:.75rem;transition:.3s;
+  }
+  .hs-host.hit{border-color:var(--green);background:#122a1a;color:#a8f0ae;}
+  .hs-host.miss{border-color:#3a2a2a;opacity:.45;}
+  .hs-device{
+    background:#1a2a34;border:2px solid #2dd4bf;border-radius:12px;
+    padding:14px;text-align:center;font-size:.8rem;font-weight:600;color:#9ff0e6;
+  }
+
+  /* ---------- wireshark ---------- */
+  .ws-filter{
+    background:#060b0f;border:1px solid var(--border);border-radius:8px;
+    padding:9px 13px;font-family:ui-monospace,monospace;font-size:.8rem;
+    color:#7ee7dc;margin:12px 0;
+  }
+  .ws-list{background:#070d12;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:12px 0;}
+  .ws-row{
+    display:grid;grid-template-columns:44px 1fr 1.6fr;gap:10px;padding:7px 12px;
+    font-family:ui-monospace,monospace;font-size:.75rem;border-bottom:1px solid #131e27;
+    transition:.2s;
+  }
+  .ws-row:last-child{border-bottom:none;}
+  .ws-row.head{background:var(--panel2);color:#9ecfc8;font-weight:600;
+    font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;}
+  .ws-row.sel{background:rgba(45,212,191,.12);border-left:3px solid var(--accent);}
+  .ws-row.clickable{cursor:pointer;}
+  .ws-row.clickable:hover{background:#101a22;}
+  .stream-out{
+    background:#050a0e;border:1px solid var(--border);border-radius:9px;
+    padding:13px 15px;font-family:ui-monospace,monospace;font-size:.78rem;
+    color:#c3d5e2;line-height:1.75;white-space:pre-wrap;overflow-x:auto;min-height:60px;
+  }
+  .stream-out .hl{background:rgba(255,107,107,.2);color:#ffb3b3;padding:0 3px;border-radius:3px;}
+
+  /* ---------- risk equation ---------- */
+  .risk-eq{
+    display:flex;gap:14px;align-items:center;justify-content:center;
+    flex-wrap:wrap;margin:20px 0;
+  }
+  .risk-box{
+    padding:18px 22px;border-radius:12px;border:2px dashed #2e4454;
+    background:#0b1319;text-align:center;min-width:150px;cursor:pointer;
+    transition:.25s;user-select:none;
+  }
+  .risk-box b{display:block;font-size:.95rem;color:#8fa6b8;transition:.25s;}
+  .risk-box small{color:var(--muted);font-size:.72rem;}
+  .risk-box.on{border-style:solid;border-color:var(--accent);background:rgba(45,212,191,.1);}
+  .risk-box.on b{color:#9ff0e6;}
+  .risk-box.risk-on{border-color:var(--red);background:rgba(255,107,107,.12);}
+  .risk-box.risk-on b{color:#ffb3b3;}
+  .risk-op{font-size:1.4rem;color:var(--muted);font-family:ui-monospace,monospace;}
+  .risk-msg{
+    text-align:center;font-size:.87rem;color:#a9c8ea;margin-top:8px;
+    background:#0b1319;border:1px solid var(--border);border-radius:9px;padding:12px;
+  }
+
+  /* ---------- quiz ---------- */
+  .quiz-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:16px 18px;margin:14px 0;}
+  .quiz-item .q{font-weight:600;margin-bottom:10px;color:#e2ecf8;}
+  .opt{
+    display:block;width:100%;text-align:left;background:#0b1319;border:1px solid #243441;
+    color:#b0c6d6;padding:9px 13px;border-radius:8px;margin:6px 0;cursor:pointer;
+    font-family:inherit;font-size:.86rem;transition:.15s;
+  }
+  .opt:hover{border-color:#3a5062;background:#101a22;}
+  .opt.correct{background:rgba(126,231,135,.14);border-color:var(--green);color:#b7f5bd;}
+  .opt.wrong{background:rgba(255,107,107,.12);border-color:var(--red);color:#ffb3b3;}
+  .explain{display:none;margin-top:10px;padding:10px 13px;border-radius:8px;
+    background:#0b1319;border-left:3px solid var(--accent);font-size:.84rem;color:#a9c8ea;}
+  .explain.show{display:block;}
+  .score{font-size:.9rem;color:var(--muted);margin-top:10px;}
+
+  /* ---------- misc ---------- */
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.71rem;
+    font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-right:6px;}
+  .pill.red{background:rgba(255,107,107,.15);color:#ff9b9b;border:1px solid #7a3d3d;}
+  .pill.blue{background:rgba(77,163,255,.15);color:#9ecbff;border:1px solid #2f6ea3;}
+  .pill.green{background:rgba(126,231,135,.13);color:#a8f0ae;border:1px solid #3d7a3d;}
+  .pill.amber{background:rgba(255,180,84,.13);color:#ffcf94;border:1px solid #7a5c2f;}
+  .pill.purple{background:rgba(180,140,255,.14);color:#d0bcff;border:1px solid #5f4a8a;}
+  .pill.teal{background:rgba(45,212,191,.14);color:#9ff0e6;border:1px solid #1a7a70;}
+
+  @media(max-width:900px){
+    .layout{display:block;}
+    .sidebar{position:static;height:auto;width:auto;flex:none;border-right:none;
+      border-bottom:1px solid var(--border);padding-bottom:18px;}
+    main{padding:26px 20px 100px;}
+    .topbar{padding:24px 20px 18px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Week 9 — Network Security Attacks</h1>
+  <p>Interactive revision guide · 7 topic areas · live attack simulations, diagrams &amp; self-test</p>
+</div>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <h3>Contents</h3>
+    <a href="#s1">1 · Fundamentals &amp; Risk</a>
+    <a href="#s2">2 · DoS &amp; DDoS</a>
+    <a href="#s3">3 · MitM &amp; Evil Twin</a>
+    <a href="#s4">4 · Sniffing &amp; Analysis</a>
+    <a href="#s5">5 · Spoofing, Poisoning &amp; DPI</a>
+    <a href="#s6">6 · Recon &amp; Port Scanning</a>
+    <a href="#s7">7 · Summary &amp; Quiz</a>
+  </nav>
+
+  <main>
+
+  <!-- ============================ 1 ============================ -->
+  <section id="s1">
+    <h2>1 · Network Fundamentals &amp; Threat Modelling</h2>
+    <p class="lede">Before attacking or defending anything, you need a model: what a network is, how data is layered, and what "risk" actually means.</p>
+
+    <div class="card accent">
+      <h4>Computer network — definition</h4>
+      <p>A system of <strong>interconnected autonomous computers, people, or devices</strong> exchanging information, resources or services over copper wire, fibre optics, microwaves, infrared, or communication satellites.</p>
+      <p style="margin-bottom:0"><strong>Categories:</strong> computer networks, social networks, infrastructure networks, broadcasting networks.</p>
+    </div>
+
+    <h3>1.1 Encapsulation hierarchy</h3>
+    <p>Data is crafted and processed hierarchically. At every layer the payload gets a new header prepended — by the time it reaches the wire, the original application data sits inside four nested envelopes.</p>
+
+    <div class="diagram" id="encap-diagram">
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="node" style="border-color:#5f4a8a;background:#1c1430;text-align:left;">
+          <b style="color:#d0bcff;">Link Layer</b>
+          <span>Frame header + MAC addresses + trailer</span>
+        </div>
+        <div style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+          <div class="node" style="border-color:#2f6ea3;background:#0f2130;text-align:left;">
+            <b style="color:#9ecbff;">Internet Layer</b>
+            <span>IP header — source &amp; destination IP</span>
+          </div>
+          <div style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+            <div class="node" style="border-color:#1a7a70;background:#0c2a27;text-align:left;">
+              <b style="color:#9ff0e6;">Transport Layer</b>
+              <span>TCP / UDP header — ports &amp; sequence numbers</span>
+            </div>
+            <div style="padding-left:18px;">
+              <div class="node" style="border-color:#3d7a3d;background:#122415;text-align:left;">
+                <b style="color:#a8f0ae;">Application Layer</b>
+                <span>HTTP request, DNS query, credentials…</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="mono" style="font-size:.8rem;color:#8fa6b8;text-align:center;">
+      Application → Transport → Internet → Link &nbsp;&nbsp;|&nbsp;&nbsp; each step <em>prepends</em> a header
+    </p>
+
+    <h3>1.2 The core security equation</h3>
+    <p>Click each box to toggle it on and off and watch how risk behaves.</p>
+
+    <div class="card">
+      <div class="risk-eq">
+        <div class="risk-box" id="rb-vuln">
+          <b>VULNERABILITY</b>
+          <small>technical weakness</small>
+        </div>
+        <div class="risk-op">+</div>
+        <div class="risk-box" id="rb-threat">
+          <b>THREAT</b>
+          <small>action with damage potential</small>
+        </div>
+        <div class="risk-op">=</div>
+        <div class="risk-box" id="rb-risk">
+          <b>RISK</b>
+          <small>probability of loss</small>
+        </div>
+      </div>
+      <div class="risk-msg" id="risk-msg"></div>
+    </div>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Vulnerability</strong></td><td>A technical weakness in a system or device.</td></tr>
+          <tr><td><strong>Threat</strong></td><td>An action with the potential to damage a system.</td></tr>
+          <tr><td><strong>Risk</strong></td><td>The probability of financial or operational loss resulting from a cyber attack.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card good">
+      <h4>Core principle</h4>
+      <p style="margin-bottom:0">A vulnerability <strong>alone never causes risk</strong> without an active exploit launched by an attacker. Severity and likelihood are quantified using frameworks like <strong>CVSS v3.1</strong> (Common Vulnerability Scoring System).</p>
+    </div>
+  </section>
+
+  <!-- ============================ 2 ============================ -->
+  <section id="s2">
+    <h2>2 · Denial of Service (DoS) &amp; DDoS</h2>
+    <p class="lede">Availability attacks: you don't need to steal anything if you can simply stop the service from working.</p>
+
+    <div class="card accent">
+      <h4>Definitions</h4>
+      <p><strong>DoS</strong> — attacks designed to disrupt or take down the availability of a system or network asset. Tool example: <em>High Orbit Ion Cannon (HOIC)</em>.</p>
+      <p style="margin-bottom:0"><strong>DDoS</strong> — the same, but launched from many distributed sources (botnet) rather than one host.</p>
+    </div>
+
+    <h3>2.1 Three attack classifications</h3>
+    <div class="grid3">
+      <div class="card">
+        <h4><span class="pill red">1</span> Bandwidth flood</h4>
+        <p>Overwhelm the target's physical or logical network capacity — e.g. sending <strong>150 MB/s</strong> at a pipe with only <strong>100 MB/s</strong> capacity.</p>
+      </div>
+      <div class="card">
+        <h4><span class="pill amber">2</span> Service request flood</h4>
+        <p>Exhaust compute/memory with high volumes of anomalous HTTP requests, DNS queries or TCP connection requests. <em>Requests do not need to succeed to consume resources.</em></p>
+      </div>
+      <div class="card">
+        <h4><span class="pill purple">3</span> SYN flood</h4>
+        <p>Exploit the TCP 3-way handshake: flood continuous <code>SYN</code> packets, fill the server's connection queue (<strong>TCP Queue Full</strong>) while ignoring <code>SYN-ACK</code> replies.</p>
+      </div>
+    </div>
+
+    <h3>2.2 DoS lab — try each attack</h3>
+    <div class="lab">
+      <div class="btnrow" id="dos-tabs"></div>
+      <div id="dos-panel"></div>
+    </div>
+
+    <h3>2.3 Distributed Reflective DoS (DRDoS)</h3>
+    <p>An <strong>asymmetrical</strong> attack: the attacker uses small requests to generate overwhelming response volumes, without ever establishing connection state. The victim is flooded by <em>third parties</em>, not the attacker.</p>
+
+    <div class="btnrow">
+      <button class="btn primary" id="drdos-play">▶ Launch DRDoS</button>
+      <button class="btn" id="drdos-stop">■ Stop</button>
+    </div>
+
+    <div class="diagram" id="drdos-diagram">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;
+                  grid-template-rows:repeat(3,auto);gap:14px;align-items:center;">
+        <div class="node attack" id="drdos-c2" style="grid-column:1;grid-row:2;">
+          <b>C&amp;C Server</b><span>attacker command</span>
+        </div>
+        <div class="node" id="drdos-bot1" style="grid-column:2;grid-row:1;"><b>Bot 1</b><span>zombie</span></div>
+        <div class="node" id="drdos-bot2" style="grid-column:2;grid-row:2;"><b>Bot 2</b><span>zombie</span></div>
+        <div class="node" id="drdos-bot3" style="grid-column:2;grid-row:3;"><b>Bot 3</b><span>zombie</span></div>
+        <div class="node reflect" id="drdos-ref1" style="grid-column:3;grid-row:1;"><b>Reflector 1</b><span>3rd-party server</span></div>
+        <div class="node reflect" id="drdos-ref2" style="grid-column:3;grid-row:2;"><b>Reflector 2</b><span>3rd-party server</span></div>
+        <div class="node reflect" id="drdos-ref3" style="grid-column:3;grid-row:3;"><b>Reflector 3</b><span>3rd-party server</span></div>
+        <div class="node victim" id="drdos-victim" style="grid-column:4;grid-row:2;">
+          <b>Victim</b><span>spoofed as source</span>
+        </div>
+      </div>
+      <div style="margin-top:16px;font-size:.8rem;color:#8fa6b8;font-family:ui-monospace,monospace;line-height:1.9;">
+        ① attacker → bots: <span style="color:#ff9b9b">“attack now”</span><br>
+        ② bots → reflectors: small request, <span style="color:#ffcf94">source IP SPOOFED as the victim</span><br>
+        ③ reflectors → victim: <span style="color:#7ee7dc">huge unsolicited response volume</span>
+      </div>
+    </div>
+
+    <h3>2.4 Botnets, zombies &amp; IoT botnets</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Bot</strong></td><td>Malicious software granting an attacker full remote control over an endpoint.</td></tr>
+          <tr><td><strong>Zombie</strong></td><td>An internet-connected host infected with a bot.</td></tr>
+          <tr><td><strong>Botnet</strong></td><td>A network collection of zombies coordinated to execute DDoS attacks or spam campaigns.</td></tr>
+          <tr><td><strong>IoT botnet</strong></td><td>Exploits IoT devices as zombies (e.g. <em>Dark IoT Botnet</em>). IoT devices typically run stripped-down Linux distributions, making it easy for attackers to cross-compile malware for the target architecture.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================ 3 ============================ -->
+  <section id="s3">
+    <h2>3 · Man-in-the-Middle &amp; Wireless Access Point Exploits</h2>
+    <p class="lede">Wireless is an open radio medium — anyone nearby can listen, and anyone can pretend to be the access point.</p>
+
+    <div class="card accent">
+      <h4>Why wireless is different</h4>
+      <p style="margin-bottom:0">Open radio mediums allow any nearby device to attempt access or eavesdrop on unencrypted management traffic. There is no physical cable to control access to.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h4>Wardriving</h4>
+        <p>Physically moving through an area with portable hardware/laptops to <strong>map, locate and assess</strong> Wi-Fi Access Points for potential vulnerabilities.</p>
+      </div>
+      <div class="card">
+        <h4>Evil Twin</h4>
+        <p>Deploying a rogue Wi-Fi Access Point configured with the <strong>identical SSID</strong> (Service Set Identifier) of a legitimate network — e.g. both broadcast <code class="inl">SIT-WIFI</code> — to intercept wireless communications.</p>
+      </div>
+    </div>
+
+    <h3>3.1 Access point hijacking — step by step</h3>
+    <p>Click a step to drive the diagram.</p>
+
+    <div class="diagram" id="et-diagram">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;
+                  grid-template-rows:auto auto auto;gap:16px;align-items:center;">
+        <div class="node victim" id="et-victim" style="grid-column:1;grid-row:2 / span 2;">
+          <b>Victim device</b><span id="et-victim-state">connected to SIT-WIFI</span>
+        </div>
+        <div class="node" id="et-legit" style="grid-column:3;grid-row:1;border-color:#3d7a3d;background:#122415;">
+          <b>Legitimate AP</b><span>SSID: SIT-WIFI</span>
+        </div>
+        <div class="node attack" id="et-evil" style="grid-column:3;grid-row:3;">
+          <b>Evil Twin AP</b><span>SSID: SIT-WIFI (rogue)</span>
+        </div>
+        <div class="node" id="et-net" style="grid-column:2;grid-row:1;border-color:#5f4a8a;background:#1c1430;">
+          <b>Internet</b><span>upstream</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-list" id="et-steps"></div>
+    <div class="risk-msg" id="et-note" style="text-align:left;"></div>
+
+    <div class="card warn">
+      <h4>Step 4 is the whole point</h4>
+      <p style="margin-bottom:0">The attacker's <strong>DHCP server</strong> assigns IP addresses to hijacked clients and (crucially) hands out <em>itself</em> as the default gateway, routing all traffic through the attacker's system for Man-in-the-Middle inspection.</p>
+    </div>
+  </section>
+
+  <!-- ============================ 4 ============================ -->
+  <section id="s4">
+    <h2>4 · Network Sniffing &amp; Traffic Analysis</h2>
+    <p class="lede">Sniffing is just listening — the attack works because the traffic was never encrypted in the first place.</p>
+
+    <div class="card accent">
+      <h4>Packet sniffing</h4>
+      <p style="margin-bottom:0">Intercepting raw network packets traversing a wire or wireless link. Transmitting unencrypted traffic leads to direct privacy loss — harvesting passwords, credit card data and private messages.</p>
+    </div>
+
+    <h3>4.1 Hub vs switched network — the architecture that decides your technique</h3>
+
+    <div class="btnrow">
+      <button class="chip active" data-hs="hub">Hub network (broadcast)</button>
+      <button class="chip" data-hs="switch">Switched network (micro-segmentation)</button>
+      <button class="btn primary" id="hs-play">▶ Send a packet A → B</button>
+    </div>
+
+    <div class="diagram" id="hs-diagram">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;
+                  grid-template-rows:auto auto auto;gap:16px;align-items:center;">
+        <div class="hs-host" id="hs-a" style="grid-column:1;grid-row:1;"><b>Host A</b><br><span style="color:#5a6d80">sender</span></div>
+        <div class="hs-host" id="hs-b" style="grid-column:1;grid-row:3;"><b>Host B</b><br><span style="color:#5a6d80">intended recipient</span></div>
+        <div class="hs-device" id="hs-device" style="grid-column:2;grid-row:2;">HUB</div>
+        <div class="hs-host" id="hs-c" style="grid-column:3;grid-row:1;"><b>Host C</b><br><span style="color:#5a6d80">attacker / sniffer</span></div>
+        <div class="hs-host" id="hs-d" style="grid-column:3;grid-row:3;"><b>Host D</b><br><span style="color:#5a6d80">unrelated</span></div>
+      </div>
+    </div>
+
+    <div class="risk-msg" id="hs-note" style="text-align:left;"></div>
+
+    <div class="grid2">
+      <div class="card warn">
+        <h4>Hub — passive sniffing</h4>
+        <p>All incoming packets are <strong>broadcast to every physical port</strong>. An attacker just puts the NIC into <strong>promiscuous mode</strong> and sees everything.</p>
+        <p style="margin-bottom:0"><em>Highly stealthy and difficult to detect — but useless on a switch.</em></p>
+      </div>
+      <div class="card danger">
+        <h4>Switch — active sniffing</h4>
+        <p>Switches isolate traffic using internal <strong>MAC address tables</strong>, so the attacker sees nothing by default.</p>
+        <p style="margin-bottom:0">Sniffing requires injecting malicious traffic — e.g. <strong>ARP spoofing</strong> via <code class="inl">arpspoof</code> — to force other nodes' traffic through the attacker's NIC.</p>
+      </div>
+    </div>
+
+    <p><strong>Sniffing software:</strong> Wireshark, Cain and Abel.</p>
+
+    <h3>4.2 Wireshark demo — capturing a plaintext web login</h3>
+    <p>This is the slide procedure. Work through it by clicking each stage.</p>
+
+    <div class="card">
+      <div class="btnrow" id="ws-steps"></div>
+      <div id="ws-panel"></div>
+    </div>
+
+    <div class="card danger">
+      <h4>Why this works</h4>
+      <p style="margin-bottom:0">HTTP is plaintext. The moment the browser sends <code class="inl">POST /ssp-login.php</code>, the username and password travel as readable ASCII in the request body. <strong>Follow → TCP Stream</strong> just concatenates the bytes for you.</p>
+    </div>
+  </section>
+
+  <!-- ============================ 5 ============================ -->
+  <section id="s5">
+    <h2>5 · Spoofing, Poisoning &amp; Deep Packet Inspection</h2>
+    <p class="lede">ARP has no authentication. That single design decision underpins most local-network MitM attacks.</p>
+
+    <h3>5.1 ARP and ARP poisoning</h3>
+    <div class="card accent">
+      <h4>What ARP does</h4>
+      <p style="margin-bottom:0">The Address Resolution Protocol translates <strong>32-bit Internet Layer IP addresses</strong> into <strong>48-bit Link Layer physical MAC addresses</strong> — e.g. IP <code class="inl">192.168.174.100</code> → MAC <code class="inl">00:00:5e:00:53:af</code>.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card danger">
+        <h4>Stateless vulnerability</h4>
+        <p style="margin-bottom:0">ARP has <strong>no verification or authentication</strong> mechanism. Requests and replies can be freely forged by anyone on the segment.</p>
+      </div>
+      <div class="card">
+        <h4>ARP cache</h4>
+        <p style="margin-bottom:0">Operating systems maintain local lookup tables mapping IP addresses to MAC addresses. The cache is consulted before every outbound frame.</p>
+      </div>
+    </div>
+
+    <h4>Watch a victim's ARP cache get poisoned</h4>
+    <div class="btnrow">
+      <button class="btn danger" id="arp-poison">▶ Send forged ARP reply</button>
+      <button class="btn" id="arp-reset">↺ Reset cache</button>
+    </div>
+
+    <div class="arp-wrap">
+      <div class="arp-tbl">
+        <h5>Victim ARP cache — before</h5>
+        <div id="arp-before">
+          <div class="arp-row"><span class="ip">192.168.174.1</span><span>00:11:22:33:44:01 &nbsp;<span class="cm">(gateway)</span></span></div>
+          <div class="arp-row"><span class="ip">192.168.174.100</span><span>00:00:5e:00:53:af</span></div>
+        </div>
+      </div>
+      <div class="arp-tbl">
+        <h5>Victim ARP cache — after poisoning</h5>
+        <div id="arp-after">
+          <div class="arp-row"><span class="ip">192.168.174.1</span><span>00:11:22:33:44:01 &nbsp;<span class="cm">(gateway)</span></span></div>
+          <div class="arp-row"><span class="ip">192.168.174.100</span><span>00:00:5e:00:53:af</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="risk-msg" id="arp-note" style="text-align:left;"></div>
+
+    <div class="card warn">
+      <h4>Mechanism in one sentence</h4>
+      <p style="margin-bottom:0">The attacker sends <strong>forged, unsolicited ARP replies</strong> to the victim, updating its ARP cache so that the <em>default gateway's IP</em> maps to the <em>attacker's MAC address</em>. Every outbound packet now goes to the attacker first.</p>
+    </div>
+
+    <h3>5.2 Port spoofing &amp; firewall evasion</h3>
+    <p>Bypass perimeter firewall rules by encapsulating malicious protocol traffic (SSH remote access, malware transport) over <strong>allowed web ports like HTTPS (443)</strong> instead of blocked standard ports (SSH 22).</p>
+
+<pre class="code">ssh -L 8443:serverA:443 -Nf [user@]serverB</pre>
+
+    <div class="diagram" id="portspoof-diagram">
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center;">
+        <div class="node" style="border-color:#2f6ea3;background:#0f2130;">
+          <b>Attacker / client</b><span>wants SSH into serverA</span>
+        </div>
+        <div class="node" id="ps-firewall" style="border-color:#a33a3a;background:#2a1212;">
+          <b>Perimeter firewall</b>
+          <span style="display:block;margin-top:6px;text-align:left;line-height:1.9;">
+            <span style="color:#ff8a8a;">✗ port 22 → BLOCKED</span><br>
+            <span style="color:#a8f0ae;">✓ port 443 → ALLOWED</span>
+          </span>
+        </div>
+        <div class="node" style="border-color:#3d7a3d;background:#122415;">
+          <b>serverA : 443</b><span>receives the tunnel</span>
+        </div>
+      </div>
+      <div style="margin-top:16px;font-size:.82rem;color:#8fa6b8;font-family:ui-monospace,monospace;">
+        Payload on the wire: <span style="color:#ffcf94;">[ TCP dst port 443 ][ SSH protocol inside ]</span>
+      </div>
+    </div>
+
+    <div class="card danger">
+      <h4>The blind spot</h4>
+      <p style="margin-bottom:0">Standard packet-filtering firewalls inspecting <strong>only transport/IP headers</strong> see <code class="inl">dst port 443</code> and allow it. They fail to detect the hidden SSH tunnel inside.</p>
+    </div>
+
+    <h3>5.3 Deep Packet Inspection (DPI)</h3>
+    <div class="card good">
+      <h4>How DPI fixes it</h4>
+      <p style="margin-bottom:0">DPI is an advanced filtering mechanism that examines <strong>both packet headers AND payload contents/code</strong>. Through <strong>application intelligence</strong> it identifies the faux-HTTPS traffic as SSH protocol and routes it to security tools for blocking or decryption — overcoming the header-only limitation.</p>
+    </div>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Filtering type</th><th>Inspects</th><th>Detects SSH-over-443?</th></tr></thead>
+        <tbody>
+          <tr><td>Packet filtering (header only)</td><td>IP / TCP / UDP headers</td><td><span style="color:#ff8a8a;">✗ No — sees only port 443</span></td></tr>
+          <tr><td>Deep Packet Inspection</td><td>Headers <em>and</em> payload contents</td><td><span style="color:#a8f0ae;">✓ Yes — protocol fingerprinting</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================ 6 ============================ -->
+  <section id="s6">
+    <h2>6 · Port Scanning &amp; Reconnaissance Methodology</h2>
+    <p class="lede">Recon maps the attack surface before a single exploit is fired.</p>
+
+    <div class="card accent">
+      <h4>Definition</h4>
+      <p style="margin-bottom:0">Probing a target host's ports (e.g. 21 FTP, 25 SMTP, 80 HTTP, 443 HTTPS) to identify which services are <strong>open</strong>, <strong>closed</strong>, or <strong>filtered</strong>.</p>
+    </div>
+
+    <h3>6.1 Port states</h3>
+    <div class="grid3">
+      <div class="card"><h4 style="color:#a8f0ae;">open</h4><p style="margin-bottom:0">A service is actively accepting connections on that port.</p></div>
+      <div class="card"><h4 style="color:#ffcf94;">closed</h4><p style="margin-bottom:0">The port is reachable but no service is listening — the host replies with RST.</p></div>
+      <div class="card"><h4 style="color:#ff9b9b;">filtered</h4><p style="margin-bottom:0">A firewall drops the probe — no response at all, so Nmap cannot tell open from closed.</p></div>
+    </div>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Scan type</th><th>Behaviour</th><th>Stealth</th></tr></thead>
+        <tbody>
+          <tr><td><strong>TCP Connect scan</strong> (<code>-sT</code>)</td><td>Completes the full 3-way handshake, then tears it down.</td><td>Loud — logged by the application</td></tr>
+          <tr><td><strong>SYN stealth scan</strong> (<code>-sS</code>)</td><td>Sends SYN, reads SYN-ACK, then immediately sends RST. Never completes the handshake.</td><td>Quieter — often not logged · <em>Nmap default</em></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>6.2 Nmap &amp; recon terminal</h3>
+    <p>Click a command to run it against the lab target.</p>
+
+    <div class="btnrow" id="nmap-btns"></div>
+    <div class="terminal" id="nmap-out"></div>
+
+    <h3>6.3 Host discovery &amp; route tracing</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Technique</th><th>Purpose</th><th>Tooling</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Ping</strong></td><td>ICMP Echo request — is one host alive?</td><td><code>ping</code></td></tr>
+          <tr><td><strong>Ping sweep</strong></td><td>Probe many hosts at once</td><td><code>fping</code> (Kali), Angry IP Scanner, Zenmap</td></tr>
+          <tr><td><strong>Trace route</strong></td><td>Map intermediate routers and hop counts</td><td><code>traceroute</code> (Linux/Unix), <code>tracert</code> (Windows)</td></tr>
+          <tr><td><strong>TCP traceroute</strong></td><td>Fallback when ICMP is blocked by firewalls</td><td><code>traceroute -T</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Traceroute hop visualisation</h4>
+    <div class="btnrow"><button class="btn primary" id="tr-play">▶ traceroute 8.8.8.8</button></div>
+    <div class="diagram" id="tr-diagram">
+      <div id="tr-hops" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <h3>6.4 Public domain vulnerability databases</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Database</th><th>URL</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><strong>CVE</strong></td><td><code>https://cve.mitre.org/</code></td><td>Standardised catalogue for identifying vulnerabilities and exploits.</td></tr>
+          <tr><td><strong>NVD</strong></td><td><code>https://nvd.nist.gov/</code></td><td>National Vulnerability Database — vulnerability management and CVSS scoring.</td></tr>
+          <tr><td><strong>VulDB</strong></td><td><code>https://vuldb.com/</code></td><td>Threat intelligence vulnerability database.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================ 7 ============================ -->
+  <section id="s7">
+    <h2>7 · Summary Matrix &amp; Self-Test</h2>
+
+    <h3>7.1 Revision topic summary matrix</h3>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Topic area</th><th>Core concept</th><th>Key technical detail / syntax</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Fundamentals</strong></td><td>Risk equation</td><td><code>Vulnerability + Threat = Risk</code>; CVSS v3.1 scoring.</td></tr>
+          <tr><td><strong>DoS / DDoS</strong></td><td>Availability attacks</td><td>Bandwidth flood (150 MB/s vs 100 MB/s), service request flood, SYN flood → TCP Queue Full.</td></tr>
+          <tr><td><strong>DRDoS</strong></td><td>Reflection &amp; spoofing</td><td>Bots send spoofed-source requests; reflectors flood the victim with responses.</td></tr>
+          <tr><td><strong>Botnets</strong></td><td>Zombie coordination</td><td>Bot → Zombie → Botnet; IoT botnets cross-compile for stripped Linux.</td></tr>
+          <tr><td><strong>Wireless / MitM</strong></td><td>Evil twin</td><td>Same SSID as <code>SIT-WIFI</code>; de-auth → associate → rogue DHCP → MitM.</td></tr>
+          <tr><td><strong>Sniffing</strong></td><td>Hub vs switch</td><td>Promiscuous mode (hub, passive) vs <code>arpspoof</code> (switch, active).</td></tr>
+          <tr><td><strong>Wireshark</strong></td><td>Plaintext credential capture</td><td>Filter <code>http.request.method == POST</code> → Follow → TCP Stream.</td></tr>
+          <tr><td><strong>ARP</strong></td><td>Cache poisoning</td><td>Stateless protocol; forged unsolicited replies map gateway IP → attacker MAC.</td></tr>
+          <tr><td><strong>Port spoofing</strong></td><td>Firewall evasion</td><td><code>ssh -L 8443:serverA:443 -Nf user@serverB</code> — SSH hidden on port 443.</td></tr>
+          <tr><td><strong>DPI</strong></td><td>Payload inspection</td><td>Application intelligence identifies faux-HTTPS as SSH and blocks/decrypts.</td></tr>
+          <tr><td><strong>Recon</strong></td><td>Port scanning</td><td><code>nmap -p 1-1000</code>, <code>nmap -sS -sV -p80 -v -n -Pn --script banner</code>.</td></tr>
+          <tr><td><strong>Tracing</strong></td><td>Path discovery</td><td><code>traceroute</code> / <code>tracert</code>; <code>traceroute -T</code> when ICMP is blocked.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>7.2 Self-test</h3>
+    <p>Pick an answer — instant feedback with an explanation.</p>
+    <div id="quiz"></div>
+    <div class="score" id="quiz-score">Score: 0 / 0</div>
+  </section>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* =====================================================================
+     SHARED HELPERS — packet animation between DOM nodes
+     ===================================================================== */
+  function centerOf(el, container) {
+    var a = el.getBoundingClientRect();
+    var b = container.getBoundingClientRect();
+    return {
+      x: a.left - b.left + a.width / 2,
+      y: a.top - b.top + a.height / 2
+    };
+  }
+
+  function flyPacket(container, fromEl, toEl, duration, cls, onEnd) {
+    var from = centerOf(fromEl, container);
+    var to = centerOf(toEl, container);
+    var dot = document.createElement("div");
+    dot.className = "pkt " + (cls || "");
+    dot.style.left = from.x + "px";
+    dot.style.top = from.y + "px";
+    container.appendChild(dot);
+    var start = performance.now();
+    function step(t) {
+      var p = Math.min(1, (t - start) / duration);
+      var e = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p; /* ease-in-out */
+      dot.style.left = (from.x + (to.x - from.x) * e) + "px";
+      dot.style.top = (from.y + (to.y - from.y) * e) + "px";
+      if (p < 1) {
+        requestAnimationFrame(step);
+      } else {
+        dot.remove();
+        if (onEnd) onEnd();
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  function clearPackets(container) {
+    Array.prototype.slice.call(container.querySelectorAll(".pkt"))
+      .forEach(function (p) { p.remove(); });
+  }
+
+  /* =====================================================================
+     1. RISK EQUATION
+     ===================================================================== */
+  var rbVuln = document.getElementById("rb-vuln");
+  var rbThreat = document.getElementById("rb-threat");
+  var rbRisk = document.getElementById("rb-risk");
+  var riskMsg = document.getElementById("risk-msg");
+  var riskState = { vuln: false, threat: false };
+
+  function renderRisk() {
+    rbVuln.classList.toggle("on", riskState.vuln);
+    rbThreat.classList.toggle("on", riskState.threat);
+    var risk = riskState.vuln && riskState.threat;
+    rbRisk.classList.toggle("risk-on", risk);
+
+    if (!riskState.vuln && !riskState.threat) {
+      riskMsg.innerHTML = "No vulnerability, no threat → <strong>no risk</strong>. Nothing to exploit, nobody exploiting it.";
+    } else if (riskState.vuln && !riskState.threat) {
+      riskMsg.innerHTML = "A <strong>vulnerability alone never causes risk</strong> — without an active exploit launched by an attacker, nothing happens. This is the core principle of the slide.";
+    } else if (!riskState.vuln && riskState.threat) {
+      riskMsg.innerHTML = "A threat actor is out there, but with <strong>no technical weakness to target</strong> the attack cannot succeed. Risk stays at zero.";
+    } else {
+      riskMsg.innerHTML = "<strong style='color:#ffb3b3'>RISK MATERIALISES.</strong> A technical weakness is paired with an active exploit. Severity and likelihood are now quantified with a framework like <strong>CVSS v3.1</strong>.";
+    }
+  }
+
+  rbVuln.addEventListener("click", function () {
+    riskState.vuln = !riskState.vuln; renderRisk();
+  });
+  rbThreat.addEventListener("click", function () {
+    riskState.threat = !riskState.threat; renderRisk();
+  });
+  renderRisk();
+
+  /* =====================================================================
+     2. DoS LAB — three attack modes
+     ===================================================================== */
+  var dosTabs = document.getElementById("dos-tabs");
+  var dosPanel = document.getElementById("dos-panel");
+  var dosMode = "bandwidth";
+  var dosTimers = {};
+
+  function stopDosTimers() {
+    Object.keys(dosTimers).forEach(function (k) {
+      clearInterval(dosTimers[k]);
+      clearTimeout(dosTimers[k]);
+      delete dosTimers[k];
+    });
+  }
+
+  var dosPanelHTML = {
+    bandwidth:
+      '<h4 style="margin-top:0">Bandwidth flood</h4>' +
+      '<p>Target link capacity is <strong>100 MB/s</strong>. The attacker sends <strong>150 MB/s</strong> of junk traffic.</p>' +
+      '<div class="pipe-wrap">' +
+        '<div class="pipe-label"><span>inbound traffic</span><span id="bw-in">0 MB/s</span></div>' +
+        '<div class="pipe"><div class="pipe-fill" id="bw-fill" style="width:0%"></div>' +
+        '<div class="pipe-mark" style="left:66.6%"></div></div>' +
+        '<div class="pipe-label" style="margin-top:6px"><span>link capacity: 100 MB/s</span>' +
+        '<span style="color:#ff8a8a">white line = capacity limit</span></div>' +
+      '</div>' +
+      '<div class="btnrow">' +
+        '<button class="btn danger" id="bw-go">▶ Flood at 150 MB/s</button>' +
+        '<button class="btn" id="bw-stop">■ Stop</button>' +
+      '</div>' +
+      '<div class="lab-stat" id="bw-stat">idle — legitimate traffic flows normally.</div>',
+
+    request:
+      '<h4 style="margin-top:0">Service request flood</h4>' +
+      '<p>The server has <strong>8 worker threads</strong>. Anomalous HTTP requests occupy them; the requests never need to succeed to consume resources.</p>' +
+      '<div class="queue-grid" id="req-grid" style="grid-template-columns:repeat(8,1fr)"></div>' +
+      '<div class="btnrow">' +
+        '<button class="btn danger" id="req-go">▶ Flood with anomalous requests</button>' +
+        '<button class="btn" id="req-legit">Try a legitimate request</button>' +
+        '<button class="btn" id="req-stop">■ Stop</button>' +
+      '</div>' +
+      '<div class="lab-stat" id="req-stat">8 / 8 workers free.</div>',
+
+    syn:
+      '<h4 style="margin-top:0">SYN flood</h4>' +
+      '<p>Each inbound <code class="inl">SYN</code> occupies a slot in the server\'s connection queue and waits for the handshake to finish. The attacker never sends the final <code class="inl">ACK</code> — the replies <code class="inl">SYN-ACK</code> are simply ignored.</p>' +
+      '<div class="queue-grid" id="syn-grid"></div>' +
+      '<div class="btnrow">' +
+        '<button class="btn danger" id="syn-go">▶ Start SYN flood</button>' +
+        '<button class="btn" id="syn-legit">Legitimate client connects</button>' +
+        '<button class="btn" id="syn-stop">■ Stop</button>' +
+      '</div>' +
+      '<div class="lab-stat" id="syn-stat">TCP queue empty (0 / 10).</div>'
+  };
+
+  function renderDosTabs() {
+    dosTabs.innerHTML = "";
+    [["bandwidth", "Bandwidth flood"],
+     ["request", "Service request flood"],
+     ["syn", "SYN flood"]].forEach(function (pair) {
+      var b = document.createElement("button");
+      b.className = "chip" + (dosMode === pair[0] ? " active" : "");
+      b.textContent = pair[1];
+      b.addEventListener("click", function () {
+        stopDosTimers();
+        dosMode = pair[0];
+        renderDosTabs();
+        dosPanel.innerHTML = dosPanelHTML[dosMode];
+        wireDos();
+      });
+      dosTabs.appendChild(b);
+    });
+  }
+
+  function wireDos() {
+    if (dosMode === "bandwidth") wireBandwidth();
+    if (dosMode === "request") wireRequest();
+    if (dosMode === "syn") wireSyn();
+  }
+
+  /* ---- bandwidth ---- */
+  function wireBandwidth() {
+    var fill = document.getElementById("bw-fill");
+    var stat = document.getElementById("bw-stat");
+    var inLbl = document.getElementById("bw-in");
+    var val = 0;
+
+    document.getElementById("bw-go").addEventListener("click", function () {
+      stopDosTimers();
+      val = 0;
+      fill.classList.remove("over");
+      dosTimers.bw = setInterval(function () {
+        val = Math.min(150, val + 12);
+        inLbl.textContent = val + " MB/s";
+        fill.style.width = Math.min(100, (val / 150) * 100) + "%";
+        if (val > 100) {
+          fill.classList.add("over");
+          stat.innerHTML = '<span style="color:#ff8a8a">⚠ OVERFLOW — inbound ' + val +
+            ' MB/s exceeds the 100 MB/s capacity. Legitimate packets are dropped. ' +
+            'The service is now unavailable (denial of service).</span>';
+        } else {
+          stat.innerHTML = '<span style="color:#7ee7dc">flooding… inbound ' + val +
+            ' MB/s — still within capacity.</span>';
+        }
+        if (val >= 150) { clearInterval(dosTimers.bw); delete dosTimers.bw; }
+      }, 260);
+    });
+
+    document.getElementById("bw-stop").addEventListener("click", function () {
+      stopDosTimers();
+      fill.classList.remove("over");
+      fill.style.width = "0%";
+      inLbl.textContent = "0 MB/s";
+      stat.textContent = "idle — legitimate traffic flows normally.";
+    });
+  }
+
+  /* ---- service request flood ---- */
+  function wireRequest() {
+    var grid = document.getElementById("req-grid");
+    var stat = document.getElementById("req-stat");
+    var workers = [];
+    for (var i = 0; i < 8; i++) {
+      var d = document.createElement("div");
+      d.className = "qslot";
+      d.textContent = "free";
+      grid.appendChild(d);
+      workers.push({ el: d, busy: false });
+    }
+
+    function countBusy() {
+      return workers.filter(function (w) { return w.busy; }).length;
+    }
+    function updateStat(extra) {
+      var busy = countBusy();
+      var base = busy + " / 8 workers busy.";
+      if (busy === 8) {
+        stat.innerHTML = '<span style="color:#ff8a8a">⚠ ' + base +
+          ' 503 Service Unavailable — every worker is occupied by an anomalous request.</span>';
+      } else {
+        stat.innerHTML = '<span style="color:#7ee7dc">' + base + "</span>" +
+          (extra ? " " + extra : "");
+      }
+    }
+
+    function occupy() {
+      for (var i = 0; i < workers.length; i++) {
+        if (!workers[i].busy) {
+          workers[i].busy = true;
+          workers[i].el.className = "qslot half";
+          workers[i].el.textContent = "REQ";
+          updateStat();
+          return true;
+        }
+      }
+      updateStat();
+      return false;
+    }
+
+    document.getElementById("req-go").addEventListener("click", function () {
+      stopDosTimers();
+      dosTimers.req = setInterval(function () {
+        if (!occupy()) { /* already saturated, keep trying quietly */ }
+      }, 320);
+    });
+
+    document.getElementById("req-legit").addEventListener("click", function () {
+      var served = false;
+      for (var i = 0; i < workers.length; i++) {
+        if (!workers[i].busy) {
+          workers[i].busy = true;
+          workers[i].el.className = "qslot";
+          workers[i].el.textContent = "USER";
+          setTimeout(function () {
+            workers[i].busy = false;
+            workers[i].el.textContent = "free";
+            updateStat();
+          }, 900);
+          served = true;
+          break;
+        }
+      }
+      updateStat(served
+        ? '<span style="color:#a8f0ae">✔ legitimate request served.</span>'
+        : '<span style="color:#ff8a8a">✗ legitimate user REJECTED.</span>');
+    });
+
+    document.getElementById("req-stop").addEventListener("click", function () {
+      stopDosTimers();
+      workers.forEach(function (w) { w.busy = false; w.el.className = "qslot"; w.el.textContent = "free"; });
+      updateStat();
+    });
+  }
+
+  /* ---- SYN flood ---- */
+  function wireSyn() {
+    var grid = document.getElementById("syn-grid");
+    var stat = document.getElementById("syn-stat");
+    var slots = [];
+    for (var i = 0; i < 10; i++) {
+      var d = document.createElement("div");
+      d.className = "qslot";
+      d.textContent = "—";
+      grid.appendChild(d);
+      slots.push({ el: d, used: false });
+    }
+
+    function used() { return slots.filter(function (s) { return s.used; }).length; }
+    function updateStat(extra) {
+      var u = used();
+      var base = "TCP queue: " + u + " / 10 half-open connections.";
+      if (u === 10) {
+        stat.innerHTML = '<span style="color:#ff8a8a">⚠ ' + base +
+          "  TCP Queue Full — the server cannot accept any new connection. Legitimate clients are refused.</span>";
+      } else {
+        stat.innerHTML = '<span style="color:#ffcf94">' + base + "</span>" +
+          (extra ? " " + extra : "");
+      }
+    }
+
+    document.getElementById("syn-go").addEventListener("click", function () {
+      stopDosTimers();
+      dosTimers.syn = setInterval(function () {
+        for (var i = 0; i < slots.length; i++) {
+          if (!slots[i].used) {
+            slots[i].used = true;
+            slots[i].el.className = "qslot half";
+            slots[i].el.textContent = "SYN";
+            break;
+          }
+        }
+        updateStat();
+      }, 300);
+    });
+
+    document.getElementById("syn-legit").addEventListener("click", function () {
+      if (used() >= 10) {
+        updateStat('<span style="color:#ff8a8a">✗ legitimate client REFUSED — queue full (connection reset / timeout).</span>');
+        return;
+      }
+      for (var i = 0; i < slots.length; i++) {
+        if (!slots[i].used) {
+          slots[i].used = true;
+          slots[i].el.className = "qslot full";
+          slots[i].el.textContent = "OK";
+          updateStat('<span style="color:#a8f0ae">✔ legitimate client completed the 3-way handshake.</span>');
+          return;
+        }
+      }
+    });
+
+    document.getElementById("syn-stop").addEventListener("click", function () {
+      stopDosTimers();
+      slots.forEach(function (s) { s.used = false; s.el.className = "qslot"; s.el.textContent = "—"; });
+      updateStat();
+    });
+  }
+
+  renderDosTabs();
+  dosPanel.innerHTML = dosPanelHTML[dosMode];
+  wireDos();
+
+  /* =====================================================================
+     3. DRDoS ANIMATION
+     ===================================================================== */
+  var drdosDiagram = document.getElementById("drdos-diagram");
+  var drdosRunning = false;
+  var drdosTimers = [];
+
+  function drdosStop() {
+    drdosRunning = false;
+    drdosTimers.forEach(function (id) { clearInterval(id); clearTimeout(id); });
+    drdosTimers = [];
+    clearPackets(drdosDiagram);
+  }
+
+  function drdosLaunch() {
+    drdosStop();
+    drdosRunning = true;
+
+    var c2 = document.getElementById("drdos-c2");
+    var bots = [
+      document.getElementById("drdos-bot1"),
+      document.getElementById("drdos-bot2"),
+      document.getElementById("drdos-bot3")
+    ];
+    var refs = [
+      document.getElementById("drdos-ref1"),
+      document.getElementById("drdos-ref2"),
+      document.getElementById("drdos-ref3")
+    ];
+    var victim = document.getElementById("drdos-victim");
+
+    function phase1() {
+      if (!drdosRunning) return;
+      bots.forEach(function (b, i) {
+        setTimeout(function () {
+          if (!drdosRunning) return;
+          flyPacket(drdosDiagram, c2, b, 700, "purple");
+        }, i * 130);
+      });
+    }
+
+    function phase2() {
+      if (!drdosRunning) return;
+      bots.forEach(function (b, i) {
+        setTimeout(function () {
+          if (!drdosRunning) return;
+          flyPacket(drdosDiagram, b, refs[i], 650, "amber");
+        }, i * 150);
+      });
+    }
+
+    function phase3() {
+      if (!drdosRunning) return;
+      refs.forEach(function (r, i) {
+        setTimeout(function () {
+          if (!drdosRunning) return;
+          /* bigger packets = response volume */
+          for (var k = 0; k < 3; k++) {
+            setTimeout(function () {
+              if (!drdosRunning) return;
+              flyPacket(drdosDiagram, r, victim, 800, "green");
+            }, k * 90);
+          }
+        }, i * 120);
+      });
+    }
+
+    /* cycle: command → spoofed requests → reflected flood */
+    phase1();
+    dosTimers.d1 = setTimeout(phase2, 900);
+    dosTimers.d2 = setTimeout(phase3, 1800);
+    dosTimers.d3 = setInterval(function () {
+      if (!drdosRunning) return;
+      phase1();
+      dosTimers.d4 = setTimeout(phase2, 900);
+      dosTimers.d5 = setTimeout(phase3, 1800);
+      drdosTimers.push(dosTimers.d4, dosTimers.d5);
+    }, 3000);
+    drdosTimers.push(dosTimers.d1, dosTimers.d2, dosTimers.d3);
+  }
+
+  document.getElementById("drdos-play").addEventListener("click", drdosLaunch);
+  document.getElementById("drdos-stop").addEventListener("click", drdosStop);
+
+  /* =====================================================================
+     4. EVIL TWIN STEPPER
+     ===================================================================== */
+  var etSteps = [
+    {
+      title: "Rogue AP setup",
+      body: "The attacker initialises an Evil Twin AP on a laptop — e.g. using <em>Virtual Wi-Fi Router</em> software — broadcasting the exact same SSID as the legitimate network.",
+      note: "At this point nothing has happened to the victim yet. The rogue AP is simply sitting there advertising SIT-WIFI.",
+      apply: function () {
+        document.getElementById("et-evil").classList.add("glow");
+        document.getElementById("et-evil").style.color = "#ff9b9b";
+        document.getElementById("et-victim-state").textContent = "connected to SIT-WIFI (legitimate)";
+      }
+    },
+    {
+      title: "De-authentication",
+      body: "The attacker transmits continuous de-auth signals to target victims and/or the legitimate Access Point, forcibly knocking clients off the real network.",
+      note: "De-authentication frames are unauthenticated management frames — a client cannot tell a forged one from a real one.",
+      apply: function () {
+        var evil = document.getElementById("et-evil");
+        var victim = document.getElementById("et-victim");
+        var legit = document.getElementById("et-legit");
+        evil.classList.add("glow");
+        evil.style.color = "#ff9b9b";
+        document.getElementById("et-victim-state").textContent = "being de-authenticated…";
+        flyPacket(drdosDiagram, evil, victim, 620, "red");
+        flyPacket(drdosDiagram, evil, legit, 620, "red");
+      }
+    },
+    {
+      title: "Roaming & association",
+      body: "Forced off the legitimate AP, the victim device automatically searches for the SSID and associates with the Evil Twin — often on a different channel with a stronger signal.",
+      note: "The victim sees the same SSID and reconnects automatically. From the user's point of view, nothing changed.",
+      apply: function () {
+        var evil = document.getElementById("et-evil");
+        var victim = document.getElementById("et-victim");
+        evil.classList.add("glow");
+        evil.style.color = "#ff9b9b";
+        document.getElementById("et-victim-state").textContent = "associated with the EVIL TWIN";
+        flyPacket(drdosDiagram, victim, evil, 700, "amber");
+      }
+    },
+    {
+      title: "MitM interception",
+      body: "The attacker's DHCP server assigns IP addresses to hijacked clients and routes all traffic through the attacker's system for Man-in-the-Middle inspection.",
+      note: "Every packet now passes through the attacker. They can read, modify or drop it — full Man-in-the-Middle.",
+      apply: function () {
+        var evil = document.getElementById("et-evil");
+        var victim = document.getElementById("et-victim");
+        var net = document.getElementById("et-net");
+        evil.classList.add("glow");
+        evil.style.color = "#ff9b9b";
+        document.getElementById("et-victim-state").textContent = "→ all traffic routed via attacker";
+        flyPacket(drdosDiagram, victim, evil, 600, "green");
+        setTimeout(function () { flyPacket(drdosDiagram, evil, net, 650, "green"); }, 500);
+      }
+    }
+  ];
+
+  var etList = document.getElementById("et-steps");
+  var etNote = document.getElementById("et-note");
+  var etDiagram = document.getElementById("et-diagram");
+
+  function clearEtHighlights() {
+    ["et-evil", "et-victim", "et-legit", "et-net"].forEach(function (id) {
+      var el = document.getElementById(id);
+      el.classList.remove("glow");
+      el.style.color = "";
+    });
+    clearPackets(etDiagram);
+  }
+
+  function selectEtStep(i) {
+    clearEtHighlights();
+    etSteps[i].apply();
+    etNote.innerHTML = "<strong>" + etSteps[i].title + ".</strong> " + etSteps[i].note;
+    Array.prototype.forEach.call(etList.children, function (c, j) {
+      c.classList.toggle("active", j === i);
+    });
+  }
+
+  etSteps.forEach(function (s, i) {
+    var d = document.createElement("div");
+    d.className = "step-item";
+    d.innerHTML = '<div class="step-num">' + (i + 1) + "</div>" +
+      '<div class="step-body"><b>' + s.title + "</b>" + s.body + "</div>";
+    d.addEventListener("click", function () { selectEtStep(i); });
+    etList.appendChild(d);
+  });
+  selectEtStep(0);
+
+  /* =====================================================================
+     5. HUB vs SWITCH
+     ===================================================================== */
+  var hsMode = "hub";
+  var hsDiagram = document.getElementById("hs-diagram");
+  var hsNote = document.getElementById("hs-note");
+  var hsChips = document.querySelectorAll('[data-hs]');
+
+  function setHsMode(m) {
+    hsMode = m;
+    Array.prototype.forEach.call(hsChips, function (c) {
+      c.classList.toggle("active", c.dataset.hs === m);
+    });
+    document.getElementById("hs-device").textContent = m === "hub" ? "HUB" : "SWITCH";
+    document.getElementById("hs-device").style.borderColor =
+      m === "hub" ? "#ffb454" : "#2dd4bf";
+    document.getElementById("hs-device").style.color =
+      m === "hub" ? "#ffcf94" : "#9ff0e6";
+    resetHs();
+  }
+
+  function resetHs() {
+    ["hs-a", "hs-b", "hs-c", "hs-d"].forEach(function (id) {
+      document.getElementById(id).className = "hs-host";
+    });
+    clearPackets(hsDiagram);
+    hsNote.innerHTML = hsMode === "hub"
+      ? "Hub selected. <strong>All incoming packets are broadcast to every physical port</strong> — send one and watch the attacker receive it too."
+      : "Switch selected. <strong>The switch consults its MAC address table</strong> and forwards only to the port that owns the destination MAC — send one and watch the attacker get nothing.";
+  }
+
+  Array.prototype.forEach.call(hsChips, function (c) {
+    c.addEventListener("click", function () { setHsMode(c.dataset.hs); });
+  });
+
+  document.getElementById("hs-play").addEventListener("click", function () {
+    resetHs();
+    var a = document.getElementById("hs-a");
+    var b = document.getElementById("hs-b");
+    var c = document.getElementById("hs-c");
+    var d = document.getElementById("hs-d");
+    var dev = document.getElementById("hs-device");
+
+    a.classList.add("hit");
+
+    if (hsMode === "hub") {
+      flyPacket(hsDiagram, a, dev, 420, "green", function () {
+        setTimeout(function () {
+          flyPacket(hsDiagram, dev, b, 460, "green");
+          flyPacket(hsDiagram, dev, c, 460, "green");
+          flyPacket(hsDiagram, dev, d, 460, "green");
+          b.classList.add("hit");
+          c.classList.add("hit");
+          d.classList.add("hit");
+          hsNote.innerHTML = "<strong style='color:#ffb3b3'>Attacker (Host C) received the packet.</strong> The hub broadcast it to every port, so passive sniffing in promiscuous mode captured traffic that was never addressed to it. <em>Highly stealthy — but this only works on a hub.</em>";
+        }, 60);
+      });
+    } else {
+      flyPacket(hsDiagram, a, dev, 420, "green", function () {
+        setTimeout(function () {
+          flyPacket(hsDiagram, dev, b, 460, "green");
+          b.classList.add("hit");
+          c.classList.add("miss");
+          d.classList.add("miss");
+          hsNote.innerHTML = "<strong style='color:#a8f0ae'>Attacker (Host C) received nothing.</strong> The switch consulted its MAC table and forwarded only to Host B's port. To sniff here the attacker must use <em>active</em> techniques — ARP spoofing via <code>arpspoof</code> — to force traffic through their NIC.";
+        }, 60);
+      });
+    }
+  });
+
+  setHsMode("hub");
+
+  /* =====================================================================
+     6. WIRESHARK DEMO
+     ===================================================================== */
+  var wsSteps = [
+    {
+      label: "1 · Select interfaces",
+      html: function () {
+        return '<div class="stream-out">' +
+          '<span class="dim">// Wireshark → Capture → Interfaces</span>\n' +
+          'eth0      ↑ 2.1 kbps   ▁▂▁▃▂▁   <span class="ok">[ selected ]</span>\n' +
+          'wlan0     ↑ 0.4 kbps   ▁▁▂▁▁▁\n' +
+          'lo        ↑ 0 bps      ▁▁▁▁▁▁\n' +
+          '<span class="dim">// capture started on eth0</span></div>';
+      }
+    },
+    {
+      label: "2 · Capture login POST",
+      html: function () {
+        return '<div class="stream-out">' +
+          '<span class="dim">// browsing to the unencrypted portal</span>\n' +
+          '<span class="cy">http://retail9.com/ssp-login.php</span>\n\n' +
+          '<span class="dim">// credentials entered in the form:</span>\n' +
+          'Username: YOURNAME@ccsf.edu\n' +
+          'Password: topsecretpassword\n\n' +
+          '<span class="dim">// … captured 412 packets on eth0</span></div>';
+      }
+    },
+    {
+      label: "3 · Apply display filter",
+      html: function () {
+        return '<div class="ws-filter">http.request.method == POST</div>' +
+          '<div class="ws-list">' +
+            '<div class="ws-row head"><span>No.</span><span>Time</span><span>Info</span></div>' +
+            '<div class="ws-row"><span>112</span><span>1.204</span><span>GET /ssp-login.php HTTP/1.1</span></div>' +
+            '<div class="ws-row sel clickable" id="ws-post-row"><span>187</span><span>9.881</span>' +
+              '<span>POST /ssp-login.php HTTP/1.1 &nbsp;← <span style="color:#7ee7dc">click me</span></span></div>' +
+            '<div class="ws-row"><span>301</span><span>11.02</span><span>GET /dashboard.php HTTP/1.1</span></div>' +
+          '</div>' +
+          '<div class="stream-out" id="ws-stream"><span class="dim">// select the POST packet, then right-click → Follow → TCP Stream</span></div>';
+      }
+    },
+    {
+      label: "4 · Follow → TCP Stream",
+      html: function () {
+        return '<div class="ws-filter">http.request.method == POST</div>' +
+          '<div class="ws-list">' +
+            '<div class="ws-row head"><span>No.</span><span>Time</span><span>Info</span></div>' +
+            '<div class="ws-row"><span>112</span><span>1.204</span><span>GET /ssp-login.php HTTP/1.1</span></div>' +
+            '<div class="ws-row sel"><span>187</span><span>9.881</span><span>POST /ssp-login.php HTTP/1.1</span></div>' +
+            '<div class="ws-row"><span>301</span><span>11.02</span><span>GET /dashboard.php HTTP/1.1</span></div>' +
+          '</div>' +
+          '<div class="stream-out"><span class="dim">POST /ssp-login.php HTTP/1.1</span>\n' +
+          'Host: retail9.com\n' +
+          'Content-Type: application/x-www-form-urlencoded\n' +
+          'Content-Length: 62\n\n' +
+          '<span class="hl">username=YOURNAME%40ccsf.edu&amp;password=topsecretpassword</span>\n\n' +
+          '<span class="dim">// plaintext. no encryption. credentials fully recovered.</span></div>';
+      }
+    }
+  ];
+
+  var wsBtns = document.getElementById("ws-steps");
+  var wsPanel = document.getElementById("ws-panel");
+
+  function renderWs(i) {
+    wsPanel.innerHTML = wsSteps[i].html();
+    Array.prototype.forEach.call(wsBtns.children, function (b, j) {
+      b.classList.toggle("active", j === i);
+    });
+    if (i === 2) {
+      var row = document.getElementById("ws-post-row");
+      if (row) {
+        row.addEventListener("click", function () { renderWs(3); });
+      }
+    }
+  }
+
+  wsSteps.forEach(function (s, i) {
+    var b = document.createElement("button");
+    b.className = "chip";
+    b.textContent = s.label;
+    b.addEventListener("click", function () { renderWs(i); });
+    wsBtns.appendChild(b);
+  });
+  renderWs(0);
+
+  /* =====================================================================
+     7. ARP POISONING
+     ===================================================================== */
+  var arpPoisoned = false;
+  var arpBefore = document.getElementById("arp-before");
+  var arpAfter = document.getElementById("arp-after");
+  var arpNote = document.getElementById("arp-note");
+
+  function renderArp() {
+    arpBefore.innerHTML =
+      '<div class="arp-row"><span class="ip">192.168.174.1</span>' +
+        '<span>00:11:22:33:44:01 &nbsp;<span class="cm">(gateway)</span></span></div>' +
+      '<div class="arp-row"><span class="ip">192.168.174.100</span>' +
+        '<span>00:00:5e:00:53:af</span></div>';
+
+    if (!arpPoisoned) {
+      arpAfter.innerHTML =
+        '<div class="arp-row"><span class="ip">192.168.174.1</span>' +
+          '<span>00:11:22:33:44:01 &nbsp;<span class="cm">(gateway)</span></span></div>' +
+        '<div class="arp-row"><span class="ip">192.168.174.100</span>' +
+          '<span>00:00:5e:00:53:af</span></div>';
+      arpNote.innerHTML = "Cache is clean. The victim sends gateway traffic to MAC <code>00:11:22:33:44:01</code> — the real router.";
+    } else {
+      arpAfter.innerHTML =
+        '<div class="arp-row poisoned"><span class="ip">192.168.174.1</span>' +
+          '<span>AA:BB:CC:DD:EE:FF &nbsp;<span class="cm">(ATTACKER)</span></span></div>' +
+        '<div class="arp-row"><span class="ip">192.168.174.100</span>' +
+          '<span>00:00:5e:00:53:af</span></div>';
+      arpNote.innerHTML = "<strong style='color:#ffb3b3'>Poisoned.</strong> A forged, unsolicited ARP reply told the victim that <code>192.168.174.1</code> (the gateway) now lives at the attacker's MAC <code>AA:BB:CC:DD:EE:FF</code>. Every outbound packet now goes to the attacker first — classic Man-in-the-Middle.";
+    }
+  }
+
+  document.getElementById("arp-poison").addEventListener("click", function () {
+    arpPoisoned = true; renderArp();
+  });
+  document.getElementById("arp-reset").addEventListener("click", function () {
+    arpPoisoned = false; renderArp();
+  });
+  renderArp();
+
+  /* =====================================================================
+     8. NMAP TERMINAL
+     ===================================================================== */
+  var nmapData = [
+    {
+      label: "nmap -p 1-1000",
+      cmd: "nmap -p 1-1000 192.168.1.10",
+      out:
+        '<span class="dim">Starting Nmap 7.94 ( https://nmap.org ) at 2024-03-11 14:02 UTC</span>\n' +
+        'Nmap scan report for 192.168.1.10\n' +
+        'Host is up (0.0042s latency).\n' +
+        'Not shown: 995 closed tcp ports (reset)\n' +
+        '<span class="dim">PORT     STATE SERVICE</span>\n' +
+        '<span class="ok">21/tcp   open  ftp</span>\n' +
+        '<span class="ok">22/tcp   open  ssh</span>\n' +
+        '<span class="ok">25/tcp   open  smtp</span>\n' +
+        '<span class="ok">80/tcp   open  http</span>\n' +
+        '<span class="ok">443/tcp  open  https</span>\n\n' +
+        '<span class="dim">Nmap done: 1 IP address (1 host up) scanned in 2.31 seconds</span>'
+    },
+    {
+      label: "nmap -sS -sV --script banner",
+      cmd: "nmap -sS -sV -p80 -v -n -Pn --script banner 192.168.1.10",
+      out:
+        '<span class="dim">Starting Nmap 7.94 ( https://nmap.org ) at 2024-03-11 14:05 UTC</span>\n' +
+        '<span class="dim">Initiating SYN Stealth Scan against 192.168.1.10</span>\n' +
+        'Nmap scan report for 192.168.1.10\n' +
+        'Host is up (0.0038s latency).\n\n' +
+        '<span class="dim">PORT   STATE SERVICE VERSION</span>\n' +
+        '<span class="ok">80/tcp open  http    Apache httpd 2.4.49 ((Unix))</span>\n\n' +
+        '<span class="cy">Host script results:</span>\n' +
+        '|_banner: HTTP/1.1 200 OK\n' +
+        '|_Server: Apache/2.4.49 (Unix)\n' +
+        '|_Last-Modified: Mon, 11 Mar 2024 09:12:44 GMT\n\n' +
+        '<span class="warn">⚠ Apache 2.4.49 is vulnerable to CVE-2021-41773 (path traversal).</span>\n' +
+        '<span class="dim">Nmap done: 1 IP address (1 host up) scanned in 3.87 seconds</span>'
+    },
+    {
+      label: "nmap -sT (TCP connect)",
+      cmd: "nmap -sT -p 20-25 192.168.1.10",
+      out:
+        '<span class="dim">Starting Nmap 7.94 ( https://nmap.org ) at 2024-03-11 14:08 UTC</span>\n' +
+        'Nmap scan report for 192.168.1.10\n' +
+        'Host is up (0.0041s latency).\n\n' +
+        '<span class="dim">PORT   STATE    SERVICE</span>\n' +
+        '20/tcp closed   ftp-data\n' +
+        '<span class="ok">21/tcp open     ftp</span>\n' +
+        '22/tcp closed   ssh\n' +
+        '23/tcp closed   telnet\n' +
+        '24/tcp closed   priv-mail\n' +
+        '<span class="ok">25/tcp open     smtp</span>\n\n' +
+        '<span class="warn">⚠ TCP Connect scan completes the full 3-way handshake — the service\n' +
+        '   WILL log the connection. Use -sS for a stealthier scan.</span>\n' +
+        '<span class="dim">Nmap done: 1 IP address (1 host up) scanned in 1.02 seconds</span>'
+    },
+    {
+      label: "ping -c 4",
+      cmd: "ping -c 4 192.168.1.10",
+      out:
+        'PING 192.168.1.10 (192.168.1.10) 56(84) bytes of data.\n' +
+        '64 bytes from 192.168.1.10: icmp_seq=1 ttl=64 time=0.842 ms\n' +
+        '64 bytes from 192.168.1.10: icmp_seq=2 ttl=64 time=0.771 ms\n' +
+        '64 bytes from 192.168.1.10: icmp_seq=3 ttl=64 time=0.803 ms\n' +
+        '64 bytes from 192.168.1.10: icmp_seq=4 ttl=64 time=0.795 ms\n\n' +
+        '<span class="dim">--- 192.168.1.10 ping statistics ---</span>\n' +
+        '4 packets transmitted, 4 received, <span class="ok">0% packet loss</span>, time 3003ms\n' +
+        '<span class="dim">rtt min/avg/max/mdev = 0.771/0.803/0.842/0.026 ms</span>'
+    },
+    {
+      label: "fping -a -g (sweep)",
+      cmd: "fping -a -g 192.168.1.0/24",
+      out:
+        '<span class="dim"># -a = show only live hosts, -g = generate target list from range</span>\n' +
+        '<span class="ok">192.168.1.1</span>\n' +
+        '<span class="ok">192.168.1.10</span>\n' +
+        '<span class="ok">192.168.1.23</span>\n' +
+        '<span class="ok">192.168.1.45</span>\n' +
+        '<span class="ok">192.168.1.102</span>\n\n' +
+        '<span class="dim">5 hosts alive out of 254 addresses swept</span>'
+    },
+    {
+      label: "traceroute -T (TCP fallback)",
+      cmd: "traceroute -T 8.8.8.8",
+      out:
+        '<span class="dim"># ICMP blocked by perimeter firewall → falling back to TCP probes</span>\n' +
+        'traceroute to 8.8.8.8 (8.8.8.8), 30 hops max, 60 byte packets\n' +
+        ' 1  <span class="cy">192.168.1.1</span>      0.612 ms  0.584 ms  0.560 ms\n' +
+        ' 2  <span class="cy">10.20.0.1</span>       4.221 ms  4.190 ms  4.140 ms\n' +
+        ' 3  <span class="cy">172.16.4.9</span>      9.883 ms  9.840 ms  9.792 ms\n' +
+        ' 4  <span class="cy">203.0.113.17</span>   14.552 ms 14.510 ms 14.480 ms\n' +
+        ' 5  <span class="cy">* * *</span>\n' +
+        ' 6  <span class="cy">8.8.8.8</span>        22.104 ms 22.061 ms 22.019 ms\n\n' +
+        '<span class="dim">// hop 5 shows * * * because that router filters probes</span>'
+    }
+  ];
+
+  var nmapBtns = document.getElementById("nmap-btns");
+  var nmapOut = document.getElementById("nmap-out");
+
+  function runNmap(i) {
+    var d = nmapData[i];
+    nmapOut.innerHTML = '<span class="prompt">student@kali:~$</span> <span class="cy">' +
+      d.cmd + "</span>\n" +
+      '<span class="dim">scanning…</span>';
+    Array.prototype.forEach.call(nmapBtns.children, function (b, j) {
+      b.classList.toggle("active", j === i);
+    });
+    setTimeout(function () {
+      nmapOut.innerHTML = '<span class="prompt">student@kali:~$</span> <span class="cy">' +
+        d.cmd + "</span>\n" + d.out;
+    }, 520);
+  }
+
+  nmapData.forEach(function (d, i) {
+    var b = document.createElement("button");
+    b.className = "chip";
+    b.textContent = d.label;
+    b.addEventListener("click", function () { runNmap(i); });
+    nmapBtns.appendChild(b);
+  });
+  runNmap(0);
+
+  /* =====================================================================
+     9. TRACEROUTE VISUALISATION
+     ===================================================================== */
+  var trHops = [
+    { ip: "192.168.1.1", label: "home router", ms: "0.61 ms" },
+    { ip: "10.20.0.1", label: "ISP aggregation", ms: "4.22 ms" },
+    { ip: "172.16.4.9", label: "regional peering", ms: "9.88 ms" },
+    { ip: "203.0.113.17", label: "backbone", ms: "14.55 ms" },
+    { ip: "* * *", label: "filtered hop — no reply", ms: "—" },
+    { ip: "8.8.8.8", label: "destination", ms: "22.10 ms" }
+  ];
+
+  var trHopsEl = document.getElementById("tr-hops");
+
+  function renderTrace() {
+    trHopsEl.innerHTML = "";
+    trHops.forEach(function (h, i) {
+      var row = document.createElement("div");
+      row.className = "node";
+      row.style.cssText = "display:flex;justify-content:space-between;align-items:center;" +
+        "text-align:left;opacity:0;transition:opacity .35s;padding:8px 13px;";
+      if (h.ip === "* * *") {
+        row.style.borderColor = "#7a5c2f";
+        row.style.background = "#1f1808";
+      } else if (i === trHops.length - 1) {
+        row.style.borderColor = "#3d7a3d";
+        row.style.background = "#122415";
+      }
+      row.innerHTML = '<span><b style="display:inline;margin-right:10px;color:#7ee7dc;">' +
+        (i + 1) + "</b><code style='color:#c3d5e2;background:none;border:none;'>" +
+        h.ip + "</code> <span style='color:#5a6d80;font-size:.72rem;'>" + h.label + "</span></span>" +
+        '<span class="mono" style="font-size:.75rem;color:#8fa6b8;">' + h.ms + "</span>";
+      trHopsEl.appendChild(row);
+      setTimeout(function () { row.style.opacity = "1"; }, i * 220);
+    });
+  }
+
+  document.getElementById("tr-play").addEventListener("click", renderTrace);
+
+  /* =====================================================================
+     10. QUIZ
+     ===================================================================== */
+  var quizData = [
+    {
+      q: "According to the core security equation, what causes risk?",
+      opts: [
+        "A vulnerability on its own",
+        "A threat actor on its own",
+        "A vulnerability combined with an active threat/exploit",
+        "Any open port on a firewall"
+      ],
+      answer: 2,
+      ex: "Vulnerability + Threat = Risk. A vulnerability alone never causes risk without an active exploit launched by an attacker. A threat with no weakness to target also yields no risk."
+    },
+    {
+      q: "A SYN flood specifically targets which mechanism?",
+      opts: [
+        "The DNS resolver cache",
+        "The TCP 3-way handshake and connection queue",
+        "The ARP cache table",
+        "The DHCP lease pool"
+      ],
+      answer: 1,
+      ex: "Continuous SYN packets fill the server's connection queue while the attacker ignores SYN-ACK replies, producing 'TCP Queue Full' so legitimate clients cannot connect."
+    },
+    {
+      q: "In a DRDoS attack, why does the victim get flooded by third parties?",
+      opts: [
+        "The bots encrypt their traffic so the victim cannot filter it",
+        "Bots spoof the victim's source IP, so reflectors send responses to the victim",
+        "The victim's DNS server is misconfigured",
+        "The attacker physically moves next to the victim"
+      ],
+      answer: 1,
+      ex: "Bots send small requests to reflector servers with the source IP spoofed as the victim's address. The reflectors then send large unsolicited responses to the victim — asymmetric amplification without ever establishing connection state."
+    },
+    {
+      q: "Why does passive sniffing in promiscuous mode fail on a switched network?",
+      opts: [
+        "Switches encrypt all frames",
+        "Switches forward frames only out the port matching the destination MAC in their MAC table",
+        "Switches block promiscuous mode at the driver level",
+        "Switches only run at layer 3"
+      ],
+      answer: 1,
+      ex: "A switch micro-segments traffic using its MAC address table, so unicast frames never reach the attacker's port. Active techniques such as ARP spoofing are required to redirect traffic."
+    },
+    {
+      q: "What is the function of ARP?",
+      opts: [
+        "Translate domain names to IP addresses",
+        "Translate 32-bit IP addresses to 48-bit MAC addresses",
+        "Assign IP addresses to clients dynamically",
+        "Encrypt traffic between hosts"
+      ],
+      answer: 1,
+      ex: "ARP maps Internet Layer IP addresses to Link Layer MAC addresses. It is stateless and unauthenticated, which is exactly why it can be poisoned with forged replies."
+    },
+    {
+      q: "During ARP poisoning, what does the forged reply tell the victim?",
+      opts: [
+        "That the DNS server has moved",
+        "That the default gateway's IP now maps to the attacker's MAC address",
+        "That the victim's own IP has changed",
+        "That the switch needs a firmware update"
+      ],
+      answer: 1,
+      ex: "The attacker sends unsolicited ARP replies binding the gateway's IP to the attacker's MAC. All outbound traffic then flows through the attacker — a Man-in-the-Middle position."
+    },
+    {
+      q: "An Evil Twin AP is best described as…",
+      opts: [
+        "A legitimate AP with a misconfigured firewall rule",
+        "A rogue AP broadcasting the identical SSID of a legitimate network",
+        "A mobile hotspot used while wardriving",
+        "A switch with duplicate MAC entries"
+      ],
+      answer: 1,
+      ex: "The Evil Twin uses the same SSID (e.g. SIT-WIFI) so victim devices automatically associate with it after being de-authenticated from the real AP."
+    },
+    {
+      q: "What happens at the final step of access point hijacking?",
+      opts: [
+        "The victim's device is bricked",
+        "The attacker's DHCP server assigns IPs and routes all traffic through the attacker for MitM inspection",
+        "The legitimate AP reboots",
+        "The SSID is permanently changed"
+      ],
+      answer: 1,
+      ex: "The rogue DHCP server hands out IPs and itself as the default gateway, so every packet from the hijacked client traverses the attacker's system."
+    },
+    {
+      q: "Why does `ssh -L 8443:serverA:443 -Nf user@serverB` evade a simple packet-filtering firewall?",
+      opts: [
+        "It encrypts the TCP header",
+        "It tunnels SSH inside traffic addressed to port 443, which the firewall allows",
+        "It uses UDP instead of TCP",
+        "It changes the source IP address"
+      ],
+      answer: 1,
+      ex: "Header-only filtering sees dst port 443 and permits it. The SSH protocol hidden inside is only revealed by Deep Packet Inspection, which examines payload contents and performs application-level protocol fingerprinting."
+    },
+    {
+      q: "Which Nmap scan type never completes the TCP handshake?",
+      opts: [
+        "TCP Connect scan (-sT)",
+        "SYN stealth scan (-sS)",
+        "UDP scan (-sU)",
+        "Ping sweep (-sn)"
+      ],
+      answer: 1,
+      ex: "The SYN stealth scan (Nmap's default) sends SYN, reads SYN-ACK, then immediately sends RST. Because the handshake never completes, the application typically never logs the connection."
+    },
+    {
+      q: "If ICMP is blocked by a firewall, which command still traces the route?",
+      opts: ["traceroute 8.8.8.8", "tracert 8.8.8.8", "traceroute -T 8.8.8.8", "ping -R 8.8.8.8"],
+      answer: 2,
+      ex: "traceroute -T probes using TCP packets instead of ICMP, so it can traverse networks that drop ICMP echo or time-exceeded messages."
+    },
+    {
+      q: "In the Wireshark demo, which display filter isolates the login submission?",
+      opts: [
+        "tcp.port == 80",
+        "http.request.method == POST",
+        "ip.addr == retail9.com",
+        "dns.qry.name contains login"
+      ],
+      answer: 1,
+      ex: "The filter http.request.method == POST isolates the form submission. Right-clicking it and choosing Follow → TCP Stream reveals the plaintext credentials."
+    }
+  ];
+
+  var quizEl = document.getElementById("quiz");
+  var scoreEl = document.getElementById("quiz-score");
+  var answered = 0, correct = 0;
+
+  quizData.forEach(function (item, qi) {
+    var wrap = document.createElement("div");
+    wrap.className = "quiz-item";
+
+    var q = document.createElement("div");
+    q.className = "q";
+    q.textContent = (qi + 1) + ". " + item.q;
+    wrap.appendChild(q);
+
+    var explain = document.createElement("div");
+    explain.className = "explain";
+    explain.textContent = item.ex;
+
+    var done = false;
+
+    item.opts.forEach(function (opt, oi) {
+      var b = document.createElement("button");
+      b.className = "opt";
+      b.textContent = String.fromCharCode(65 + oi) + ") " + opt;
+      b.addEventListener("click", function () {
+        if (done) return;
+        done = true;
+        answered++;
+        if (oi === item.answer) {
+          b.classList.add("correct");
+          correct++;
+        } else {
+          b.classList.add("wrong");
+          wrap.querySelectorAll(".opt")[item.answer].classList.add("correct");
+        }
+        explain.classList.add("show");
+        scoreEl.textContent = "Score: " + correct + " / " + answered;
+      });
+      wrap.appendChild(b);
+    });
+
+    wrap.appendChild(explain);
+    quizEl.appendChild(wrap);
+  });
+
+  scoreEl.textContent = "Score: 0 / 0";
+
+  /* =====================================================================
+     11. SIDEBAR ACTIVE LINK
+     ===================================================================== */
+  var sections = document.querySelectorAll("section[id]");
+  var navLinks = document.querySelectorAll(".sidebar a");
+
+  if ("IntersectionObserver" in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          navLinks.forEach(function (a) {
+            a.classList.toggle("active", a.getAttribute("href") === "#" + entry.target.id);
+          });
+        }
+      });
+    }, { rootMargin: "-15% 0px -70% 0px", threshold: 0 });
+    sections.forEach(function (s) { observer.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
