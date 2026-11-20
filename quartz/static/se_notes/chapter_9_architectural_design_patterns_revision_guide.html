@@ -1,0 +1,2580 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 9 Revision Studio: Architectural Patterns &amp; Design Patterns</title>
+<style>
+  :root {
+    --bg-primary: #090d16;
+    --bg-secondary: #111827;
+    --bg-card: #162033;
+    --bg-card-alt: #1d2942;
+    --bg-stage: #070b12;
+    --border-color: #26344e;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-indigo: #6366f1;
+    --accent-indigo-glow: rgba(99, 102, 241, 0.25);
+    --accent-teal: #14b8a6;
+    --accent-teal-glow: rgba(20, 184, 166, 0.22);
+    --accent-sky: #38bdf8;
+    --accent-amber: #f59e0b;
+    --accent-amber-glow: rgba(245, 158, 11, 0.2);
+    --accent-rose: #f43f5e;
+    --accent-rose-glow: rgba(244, 63, 94, 0.2);
+    --accent-purple: #a855f7;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.28);
+  }
+
+  [data-theme="light"] {
+    --bg-primary: #f1f5f9;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-alt: #f8fafc;
+    --bg-stage: #f8fafc;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --accent-indigo: #4f46e5;
+    --accent-indigo-glow: rgba(79, 70, 229, 0.14);
+    --accent-teal: #0d9488;
+    --accent-teal-glow: rgba(13, 148, 136, 0.14);
+    --accent-sky: #0284c7;
+    --accent-amber: #d97706;
+    --accent-amber-glow: rgba(217, 119, 6, 0.14);
+    --accent-rose: #e11d48;
+    --accent-rose-glow: rgba(225, 29, 72, 0.14);
+    --shadow-card: 0 4px 16px rgba(15, 23, 42, 0.06);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 300px;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    transition: transform 0.3s ease, background-color 0.25s ease;
+  }
+
+  .sidebar-header {
+    padding: 1.25rem 1.4rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.55rem;
+  }
+
+  .course-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.71rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--accent-teal);
+    background: var(--accent-teal-glow);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(20, 184, 166, 0.35);
+  }
+
+  .theme-toggle-btn {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 4px 9px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .theme-toggle-btn:hover {
+    border-color: var(--accent-indigo);
+  }
+
+  .sidebar-title {
+    font-size: 1.08rem;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+
+  .sidebar-sub {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    margin-top: 0.2rem;
+  }
+
+  /* Global Search Box in Sidebar */
+  .sidebar-search {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.81rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .search-input:focus {
+    border-color: var(--accent-indigo);
+  }
+
+  .search-results-dropdown {
+    position: absolute;
+    left: 1.25rem;
+    right: 1.25rem;
+    top: calc(100% - 4px);
+    background: var(--bg-card);
+    border: 1px solid var(--accent-indigo);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 60;
+    display: none;
+  }
+
+  .search-results-dropdown.open {
+    display: block;
+  }
+
+  .search-hit {
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background 0.15s ease;
+  }
+
+  .search-hit:last-child { border-bottom: none; }
+  .search-hit:hover { background: var(--accent-indigo-glow); }
+
+  /* Progress */
+  .progress-box {
+    padding: 0.85rem 1.4rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+  }
+
+  .progress-track {
+    height: 7px;
+    background: var(--bg-primary);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 17%;
+    background: linear-gradient(90deg, var(--accent-indigo), var(--accent-teal));
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+
+  .nav-list {
+    list-style: none;
+    padding: 0.75rem;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .nav-btn {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.74rem 0.85rem;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+
+  .nav-btn:hover {
+    background: var(--bg-card-alt);
+    color: var(--text-primary);
+  }
+
+  .nav-btn.active {
+    background: linear-gradient(135deg, var(--accent-indigo-glow), var(--accent-teal-glow));
+    border-color: rgba(99, 102, 241, 0.45);
+    color: var(--text-primary);
+  }
+
+  .nav-num {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-top: 1px;
+  }
+
+  .nav-btn.active .nav-num {
+    background: var(--accent-indigo);
+    border-color: var(--accent-indigo);
+    color: #fff;
+  }
+
+  .nav-btn.visited .nav-num {
+    background: var(--accent-teal);
+    border-color: var(--accent-teal);
+    color: #042f2e;
+  }
+
+  .nav-title {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .nav-desc {
+    display: block;
+    font-size: 0.71rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .sidebar-footer {
+    padding: 0.9rem 1.25rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .download-btn {
+    width: 100%;
+    padding: 0.68rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(20, 184, 166, 0.45);
+    background: var(--accent-teal-glow);
+    color: var(--accent-teal);
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .download-btn:hover {
+    background: var(--accent-teal);
+    color: #ffffff;
+    box-shadow: 0 0 18px var(--accent-teal-glow);
+  }
+
+  /* Mobile Topbar */
+  .mobile-topbar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 58px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 1rem;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 45;
+  }
+
+  .hamburger-btn {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 11px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 48;
+  }
+
+  /* Main Area */
+  .main-content {
+    margin-left: 300px;
+    flex: 1;
+    padding: 2.2rem 2.75rem 4rem;
+    max-width: 1260px;
+  }
+
+  .module-section {
+    display: none;
+    animation: fadeSlide 0.28s ease-out;
+  }
+
+  .module-section.active {
+    display: block;
+  }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .module-header {
+    margin-bottom: 1.8rem;
+    padding-bottom: 1.15rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+
+  .module-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-teal);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.3rem;
+  }
+
+  .module-title {
+    font-size: 1.78rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .module-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.93rem;
+    max-width: 780px;
+    margin-top: 0.4rem;
+  }
+
+  /* Cards & Grids */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 1.75rem;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .card-title {
+    font-size: 1.12rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.71rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 6px;
+    text-transform: uppercase;
+  }
+
+  .tag-indigo { background: var(--accent-indigo-glow); color: var(--accent-indigo); border: 1px solid rgba(99, 102, 241, 0.38); }
+  .tag-teal { background: var(--accent-teal-glow); color: var(--accent-teal); border: 1px solid rgba(20, 184, 166, 0.38); }
+  .tag-amber { background: var(--accent-amber-glow); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.38); }
+  .tag-rose { background: var(--accent-rose-glow); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.38); }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.15rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.9rem; }
+
+  .concept-box {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent-indigo);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.15rem;
+  }
+  .concept-box.teal { border-left-color: var(--accent-teal); }
+  .concept-box.amber { border-left-color: var(--accent-amber); }
+  .concept-box.rose { border-left-color: var(--accent-rose); }
+
+  .concept-box h4 {
+    font-size: 0.93rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+    color: var(--text-primary);
+  }
+  .concept-box p, .concept-box li {
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+  }
+
+  /* Pill Tabs */
+  .pill-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .pill-btn {
+    padding: 0.52rem 0.95rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 0.81rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .pill-btn:hover {
+    border-color: var(--accent-indigo);
+    color: var(--text-primary);
+  }
+
+  .pill-btn.active {
+    background: var(--accent-indigo);
+    border-color: var(--accent-indigo);
+    color: #fff;
+  }
+
+  /* Diagram Stage */
+  .diagram-stage {
+    background: #070b12;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    position: relative;
+    overflow-x: auto;
+  }
+
+  .diagram-stage svg {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .inspector-panel {
+    margin-top: 1rem;
+    background: var(--bg-card-alt);
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    border-radius: var(--radius-md);
+    padding: 1.1rem 1.25rem;
+  }
+
+  /* Tables */
+  .data-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+    text-align: left;
+  }
+
+  th {
+    background: var(--bg-card-alt);
+    color: var(--accent-teal);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(99, 102, 241, 0.04); }
+
+  /* Tradeoff Bars */
+  .metric-bar-row {
+    margin-bottom: 0.75rem;
+  }
+  .metric-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  .metric-bar-track {
+    height: 8px;
+    background: var(--bg-primary);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+  .metric-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+
+  /* GoF Pattern Cards */
+  .gof-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .gof-card {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.95rem 1.05rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .gof-card:hover, .gof-card.active {
+    border-color: var(--accent-indigo);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px var(--accent-indigo-glow);
+  }
+
+  .gof-card.active {
+    background: linear-gradient(135deg, var(--accent-indigo-glow), var(--bg-card-alt));
+  }
+
+  /* Interactive Sandbox Output */
+  .sandbox-console {
+    background: #070b12;
+    color: #e2e8f0;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid #26344e;
+    margin-top: 0.85rem;
+    line-height: 1.55;
+  }
+
+  /* Quiz */
+  .quiz-card {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .quiz-q {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .quiz-opts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .quiz-opt {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.86rem;
+    cursor: pointer;
+    display: flex;
+    gap: 0.65rem;
+    transition: all 0.18s ease;
+  }
+
+  .quiz-opt:hover:not(:disabled) {
+    border-color: var(--accent-indigo);
+    background: var(--accent-indigo-glow);
+  }
+
+  .quiz-opt.correct {
+    border-color: var(--accent-teal);
+    background: rgba(20, 184, 166, 0.2);
+  }
+
+  .quiz-opt.incorrect {
+    border-color: var(--accent-rose);
+    background: rgba(244, 63, 94, 0.2);
+  }
+
+  .quiz-exp {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.83rem;
+    display: none;
+  }
+  .quiz-exp.show { display: block; }
+
+  /* Footer Nav */
+  .module-footer-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-color);
+    gap: 1rem;
+  }
+
+  .btn-primary, .btn-secondary {
+    padding: 0.72rem 1.3rem;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: 0.86rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--accent-indigo);
+    color: #fff;
+    border: 1px solid var(--accent-indigo);
+  }
+  .btn-primary:hover {
+    opacity: 0.92;
+    box-shadow: 0 0 18px var(--accent-indigo-glow);
+  }
+
+  .btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+  .btn-secondary:hover { border-color: var(--accent-teal); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--accent-teal);
+    color: var(--text-primary);
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    font-size: 0.84rem;
+    font-weight: 600;
+    z-index: 100;
+    transform: translateY(130%);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 980px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-backdrop.open { display: block; }
+    .mobile-topbar { display: flex; }
+    .main-content { margin-left: 0; padding: 5rem 1.2rem 3rem; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Mobile Topbar -->
+  <header class="mobile-topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="hamburger-btn" id="menuToggle" aria-label="Toggle Menu">&#9776;</button>
+      <span style="font-weight:700;font-size:0.92rem;">Ch. 9: Architecture &amp; Design Patterns</span>
+    </div>
+    <span class="tag tag-teal" id="mobileProgressTag">17%</span>
+  </header>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="header-top-row">
+        <span class="course-badge">&#9679; INF2001 // CHAPTER 9</span>
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode">&#9788; Theme</button>
+      </div>
+      <h1 class="sidebar-title">Architectural &amp; Design Patterns</h1>
+      <p class="sidebar-sub">Week 9 Interactive Revision Studio</p>
+    </div>
+
+    <div class="sidebar-search">
+      <input type="text" class="search-input" id="globalSearchInput" placeholder="Search concepts, C4, MVC, GoF patterns...">
+      <div class="search-results-dropdown" id="searchResultsDropdown"></div>
+    </div>
+
+    <div class="progress-box">
+      <div class="progress-meta">
+        <span>Revision Coverage</span>
+        <span id="progressPercent">17%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <ul class="nav-list" id="navList">
+      <li>
+        <button class="nav-btn active" data-module="1">
+          <span class="nav-num">01</span>
+          <div>
+            <span class="nav-title">Software Architecture Overview</span>
+            <span class="nav-desc">IEEE 1471, 5-Step Process &amp; Trade-offs</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="2">
+          <span class="nav-num">02</span>
+          <div>
+            <span class="nav-title">Documentation Frameworks</span>
+            <span class="nav-desc">C4 Model Zoom &amp; 4+1 View Model</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="3">
+          <span class="nav-num">03</span>
+          <div>
+            <span class="nav-title">Architectural Patterns</span>
+            <span class="nav-desc">5 System Types, Layered, C-S, MVC</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="4">
+          <span class="nav-num">04</span>
+          <div>
+            <span class="nav-title">GoF 23 Design Patterns Lab</span>
+            <span class="nav-desc">Creational, Structural &amp; Behavioral</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="5">
+          <span class="nav-num">05</span>
+          <div>
+            <span class="nav-title">Arch vs Design &amp; Labtorial</span>
+            <span class="nav-desc">6-Dim Matrix, W9 Lab &amp; AI-ORATE</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="6">
+          <span class="nav-num">06</span>
+          <div>
+            <span class="nav-title">Exam Readiness Quiz</span>
+            <span class="nav-desc">10 Active Recall Questions</span>
+          </div>
+        </button>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <button class="download-btn" id="downloadHtmlBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Self-Contained HTML
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- ==================== MODULE 1 ==================== -->
+    <section class="module-section active" id="module-1">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Section 1 // Macro-System Foundations</div>
+          <h2 class="module-title">Overview of Software Architecture &amp; Trade-Offs</h2>
+          <p class="module-subtitle">Master formal definitions (IEEE 1471), the 6 purposes of architecture diagrams, the 5-step architecture process, and non-functional quality attribute trade-offs.</p>
+        </div>
+        <span class="tag tag-indigo">W9 Architectural Design</span>
+      </div>
+
+      <!-- 1.1 Formal Definitions & 1.2 Purposes -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.1 Three Perspectives on Software Architecture</h3>
+          <span class="tag tag-teal">Core Definitions</span>
+        </div>
+
+        <div class="grid-3" style="margin-bottom:1.25rem;">
+          <div class="concept-box">
+            <h4>IEEE 1471 Standard Definition</h4>
+            <p>The fundamental organization of a system, embodied in its <strong>components</strong>, their <strong>relationships</strong> to one another and the environment, and the <strong>principles</strong> governing its design and evolution.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>Decision-Making Perspective</h4>
+            <p>An abstract description of system entities and relationships, involving a series of <strong>strategic decision-making processes</strong> that are difficult and costly to change later in the lifecycle.</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>System Concept Perspective</h4>
+            <p>Defines fundamental concepts and properties of a system within its environment, encompassing <strong>structural elements</strong>, <strong>behavioral elements</strong>, and their composition into subsystems.</p>
+          </div>
+        </div>
+
+        <h4 style="font-size:0.92rem;margin-bottom:0.75rem;">1.2 Six Engineering Purposes of Software Architecture Diagrams:</h4>
+        <div class="grid-3">
+          <div class="concept-box">
+            <h4>1. Long-Term System Artifact</h4>
+            <p>Outlasts original creators; languages and developers change, but high-level architecture stays stable.</p>
+          </div>
+          <div class="concept-box">
+            <h4>2. High-Level Decision Making</h4>
+            <p>Provides a bird's-eye view for strategic technical decisions across all project aspects.</p>
+          </div>
+          <div class="concept-box">
+            <h4>3. Team Onboarding</h4>
+            <p>Accelerates ramp-up time for new software developers joining the project.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>4. Knowledge Refresh</h4>
+            <p>Helps existing team members reacquaint themselves with modules after working elsewhere.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>5. Structural Requirement Changes</h4>
+            <p>Facilitates evaluation when new business or technical requirements mandate structural shifts.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>6. Team Alignment</h4>
+            <p>Ensures core components and macro-designs are transparent and shared across the entire team.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.3 Interactive 5-Step Software Architecture Process -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.3 Interactive 5-Step Software Architecture Process</h3>
+          <span class="tag tag-amber">Click Any Step</span>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 820 215" width="820" height="215">
+            <defs>
+              <marker id="archArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#6366f1"/>
+              </marker>
+              <marker id="fbArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#14b8a6"/>
+              </marker>
+            </defs>
+
+            <!-- Forward Links -->
+            <line x1="155" y1="75" x2="180" y2="75" stroke="#6366f1" stroke-width="2.2" marker-end="url(#archArrow)"/>
+            <line x1="315" y1="75" x2="340" y2="75" stroke="#6366f1" stroke-width="2.2" marker-end="url(#archArrow)"/>
+            <line x1="475" y1="75" x2="500" y2="75" stroke="#6366f1" stroke-width="2.2" marker-end="url(#archArrow)"/>
+            <line x1="635" y1="75" x2="660" y2="75" stroke="#6366f1" stroke-width="2.2" marker-end="url(#archArrow)"/>
+
+            <!-- Feedback loops -->
+            <path d="M 408 112 L 408 152 L 248 152 L 248 115" fill="none" stroke="#14b8a6" stroke-width="1.8" stroke-dasharray="5,4" marker-end="url(#fbArrow)"/>
+            <path d="M 730 112 L 730 182 L 85 182 L 85 115" fill="none" stroke="#14b8a6" stroke-width="1.8" stroke-dasharray="5,4" marker-end="url(#fbArrow)"/>
+            <text x="410" y="175" fill="#14b8a6" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">Continuous Evaluation &amp; Design Synchronicity Feedback Loops</text>
+
+            <!-- Step 1 -->
+            <g class="arch-step-node" data-step="0" style="cursor:pointer;">
+              <rect x="15" y="38" width="140" height="74" rx="10" fill="#1e293b" stroke="#6366f1" stroke-width="2.5" id="archStepRect0"/>
+              <text x="85" y="61" fill="#a5b4fc" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">STEP 01</text>
+              <text x="85" y="79" fill="#f8fafc" font-family="sans-serif" font-size="11.5" font-weight="bold" text-anchor="middle">Understand &amp;</text>
+              <text x="85" y="95" fill="#f8fafc" font-family="sans-serif" font-size="11.5" font-weight="bold" text-anchor="middle">Eval Requirements</text>
+            </g>
+
+            <!-- Step 2 -->
+            <g class="arch-step-node" data-step="1" style="cursor:pointer;">
+              <rect x="180" y="38" width="135" height="74" rx="10" fill="#111827" stroke="#334155" stroke-width="2" id="archStepRect1"/>
+              <text x="247" y="61" fill="#94a3b8" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">STEP 02</text>
+              <text x="247" y="79" fill="#f8fafc" font-family="sans-serif" font-size="11.5" font-weight="bold" text-anchor="middle">Identify Subsystems</text>
+              <text x="247" y="95" fill="#f8fafc" font-family="sans-serif" font-size="11.5" font-weight="bold" text-anchor="middle">&amp; Design Arch</text>
+            </g>
+
+            <!-- Step 3 -->
+            <g class="arch-step-node" data-step="2" style="cursor:pointer;">
+              <rect x="340" y="38" width="135" height="74" rx="10" fill="#111827" stroke="#334155" stroke-width="2" id="archStepRect2"/>
+              <text x="407" y="61" fill="#94a3b8" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">STEP 03</text>
+              <text x="407" y="79" fill="#f8fafc" font-family="sans-serif" font-size="11.5" font-weight="bold" text-anchor="middle">Evaluate the</text>
+              <text x="407" y="95" fill="#f8fafc" font-family="sans-serif" font-size="11.5" font-weight="bold" text-anchor="middle">Architecture</text>
+            </g>
+
+            <!-- Step 4 -->
+            <g class="arch-step-node" data-step="3" style="cursor:pointer;">
+              <rect x="500" y="38" width="135" height="74" rx="10" fill="#111827" stroke="#334155" stroke-width="2" id="archStepRect3"/>
+              <text x="567" y="61" fill="#94a3b8" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">STEP 04</text>
+              <text x="567" y="79" fill="#f8fafc" font-family="sans-serif" font-size="11.5" font-weight="bold" text-anchor="middle">Document the</text>
+              <text x="567" y="95" fill="#f8fafc" font-family="sans-serif" font-size="11.5" font-weight="bold" text-anchor="middle">Architecture</text>
+            </g>
+
+            <!-- Step 5 -->
+            <g class="arch-step-node" data-step="4" style="cursor:pointer;">
+              <rect x="660" y="38" width="142" height="74" rx="10" fill="#111827" stroke="#334155" stroke-width="2" id="archStepRect4"/>
+              <text x="731" y="61" fill="#94a3b8" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">STEP 05</text>
+              <text x="731" y="79" fill="#f8fafc" font-family="sans-serif" font-size="11.5" font-weight="bold" text-anchor="middle">Monitor, Control</text>
+              <text x="731" y="95" fill="#f8fafc" font-family="sans-serif" font-size="11.5" font-weight="bold" text-anchor="middle">&amp; Update Design</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="inspector-panel" id="archStepInspector"></div>
+      </div>
+
+      <!-- 1.4 Quality Attributes & Blog Application Trade-Off Simulator -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.4 Quality Attributes &amp; Slide Trade-Off Simulator (Blog App)</h3>
+          <span class="tag tag-rose">Trade-Off Analysis</span>
+        </div>
+
+        <div class="grid-4" style="margin-bottom:1.35rem;">
+          <div class="concept-box">
+            <h4>Usability</h4>
+            <p>Complexity experienced by users learning or operating the system.</p>
+          </div>
+          <div class="concept-box">
+            <h4>Maintainability</h4>
+            <p>Ease of fixing bugs or modifying features without destabilizing modules.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>Interoperability</h4>
+            <p>Ability to collaborate and exchange data with external systems.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>Availability</h4>
+            <p>Degree to which the system remains operational during service windows.</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>Portability</h4>
+            <p>Ease of transferring software across platforms or OS environments.</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>Performance &amp; Scale</h4>
+            <p>Responsiveness, throughput, and capacity under varying workloads.</p>
+          </div>
+          <div class="concept-box rose" style="grid-column: span 2;">
+            <h4>Security &amp; Architectural Compromises</h4>
+            <p>Protection against unauthorized access and data breaches. Just like automotive engineering (where adding armor weight reduces acceleration), improving one quality attribute often requires compromising another.</p>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-card-alt);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1.25rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem;">
+            <div>
+              <h4 style="font-size:1rem;">Slide Case: Mobile Blog Application Deployment Trade-Off</h4>
+              <p style="font-size:0.82rem;color:var(--text-secondary);">Compare the two candidate architectures from the lecture slides:</p>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="pill-btn active" id="blogWebBtn">Option A: Mobile Web App</button>
+              <button class="pill-btn" id="blogNativeBtn">Option B: Native Mobile App (+ Local DB)</button>
+            </div>
+          </div>
+
+          <div class="grid-2" id="blogTradeoffContainer"></div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <span style="font-size:0.8rem;color:var(--text-muted);">Module 1 of 6</span>
+        <button class="btn-primary" onclick="goToModule(2)">Next: Documentation Frameworks (C4 &amp; 4+1) &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 2 ==================== -->
+    <section class="module-section" id="module-2">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Section 2 // Multi-View Modeling</div>
+          <h2 class="module-title">Architectural Documentation Frameworks (C4 &amp; 4+1)</h2>
+          <p class="module-subtitle">Zoom progressively from high-level system boundaries down to source code using the C4 Model, and organize stakeholder perspectives using the 4+1 Architectural View Model.</p>
+        </div>
+        <span class="tag tag-teal">C4 &amp; 4+1 Views</span>
+      </div>
+
+      <!-- 2.1 Interactive C4 Model Zoom Explorer -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">2.1 Interactive C4 Model Progressive Zoom Explorer</h3>
+          <span class="tag tag-indigo">Context &rarr; Containers &rarr; Components &rarr; Code</span>
+        </div>
+
+        <div class="pill-bar" id="c4LevelTabs">
+          <button class="pill-btn active" data-c4="1">Level 1: System Context</button>
+          <button class="pill-btn" data-c4="2">Level 2: Containers</button>
+          <button class="pill-btn" data-c4="3">Level 3: Components</button>
+          <button class="pill-btn" data-c4="4">Level 4: Code (UML Classes)</button>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 800 280" width="800" height="280" id="c4DiagramSvg"></svg>
+        </div>
+
+        <div class="inspector-panel" id="c4DetailPanel"></div>
+      </div>
+
+      <!-- 2.2 Interactive 4+1 Architectural View Model -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">2.2 Interactive 4+1 Architectural View Model Explorer</h3>
+          <span class="tag tag-amber">Click Any View</span>
+        </div>
+
+        <div class="grid-2" style="align-items:center;">
+          <div class="diagram-stage">
+            <svg viewBox="0 0 420 320" width="420" height="320">
+              <!-- Connecting lines to center +1 Scenarios -->
+              <line x1="120" y1="75" x2="210" y2="160" stroke="#6366f1" stroke-width="2" stroke-dasharray="4,4"/>
+              <line x1="300" y1="75" x2="210" y2="160" stroke="#14b8a6" stroke-width="2" stroke-dasharray="4,4"/>
+              <line x1="120" y1="245" x2="210" y2="160" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,4"/>
+              <line x1="300" y1="245" x2="210" y2="160" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4,4"/>
+
+              <!-- Logical View (Top Left) -->
+              <g class="view41-node" data-view="logical" style="cursor:pointer;">
+                <rect x="25" y="25" width="165" height="80" rx="10" fill="#1e293b" stroke="#6366f1" stroke-width="2.5" id="v41Rect-logical"/>
+                <text x="107" y="57" fill="#a5b4fc" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">END-USER FUNCTIONALITY</text>
+                <text x="107" y="79" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Logical View</text>
+              </g>
+
+              <!-- Development View (Top Right) -->
+              <g class="view41-node" data-view="development" style="cursor:pointer;">
+                <rect x="230" y="25" width="165" height="80" rx="10" fill="#111827" stroke="#334155" stroke-width="2" id="v41Rect-development"/>
+                <text x="312" y="57" fill="#5eead4" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">PROGRAMMER / MODULES</text>
+                <text x="312" y="79" fill="#f8fafc" font-family="sans-serif" font-size="13.5" font-weight="bold" text-anchor="middle">Development View</text>
+              </g>
+
+              <!-- Process View (Bottom Left) -->
+              <g class="view41-node" data-view="process" style="cursor:pointer;">
+                <rect x="25" y="215" width="165" height="80" rx="10" fill="#111827" stroke="#334155" stroke-width="2" id="v41Rect-process"/>
+                <text x="107" y="247" fill="#fcd34d" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">RUNTIME &amp; CONCURRENCY</text>
+                <text x="107" y="269" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Process View</text>
+              </g>
+
+              <!-- Physical View (Bottom Right) -->
+              <g class="view41-node" data-view="physical" style="cursor:pointer;">
+                <rect x="230" y="215" width="165" height="80" rx="10" fill="#111827" stroke="#334155" stroke-width="2" id="v41Rect-physical"/>
+                <text x="312" y="247" fill="#7dd3fc" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">TOPOLOGY &amp; NODES</text>
+                <text x="312" y="269" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Physical View</text>
+              </g>
+
+              <!-- Center +1 Scenarios View -->
+              <g class="view41-node" data-view="scenarios" style="cursor:pointer;">
+                <circle cx="210" cy="160" r="52" fill="#111827" stroke="#f43f5e" stroke-width="2.5" id="v41Rect-scenarios"/>
+                <text x="210" y="152" fill="#fda4af" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">+1 VIEW</text>
+                <text x="210" y="170" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Scenarios</text>
+                <text x="210" y="185" fill="#94a3b8" font-family="monospace" font-size="9.5" text-anchor="middle">(Use Cases)</text>
+              </g>
+            </svg>
+          </div>
+
+          <div id="view41InspectorBox"></div>
+        </div>
+      </div>
+
+      <!-- 2.3 8 Key Tasks in Architectural Design -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">2.3 Eight Core Tasks of a Software Architect</h3>
+          <span class="tag tag-indigo">Responsibilities</span>
+        </div>
+        <div class="grid-4">
+          <div class="concept-box"><h4>1. Stakeholder Concerns</h4><p>Identify key business, user, and operational concerns.</p></div>
+          <div class="concept-box"><h4>2. Architectural Views</h4><p>Select appropriate structural and behavioral documentation views.</p></div>
+          <div class="concept-box teal"><h4>3. Styles &amp; Patterns</h4><p>Identify suitable architectural styles and recurring patterns.</p></div>
+          <div class="concept-box teal"><h4>4. Org Influences</h4><p>Identify organizational influences of architectural decisions.</p></div>
+          <div class="concept-box amber"><h4>5. Components &amp; Interfaces</h4><p>Define major system subsystems and interface contracts.</p></div>
+          <div class="concept-box amber"><h4>6. Evaluate &amp; Validate</h4><p>Assess quality trade-offs and validate against scenarios.</p></div>
+          <div class="concept-box rose"><h4>7. Synchronicity Policies</h4><p>Establish policies ensuring design-to-code synchronicity.</p></div>
+          <div class="concept-box rose"><h4>8. Detailed Alignment</h4><p>Maintain continuous alignment across detailed design artifacts.</p></div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(1)">&larr; Previous: Architecture Overview</button>
+        <button class="btn-primary" onclick="goToModule(3)">Next: Architectural Patterns &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 3 ==================== -->
+    <section class="module-section" id="module-3">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Section 3 // Macro-Architectural Patterns</div>
+          <h2 class="module-title">Architectural Pattern Classifications &amp; Interactive Visualizers</h2>
+          <p class="module-subtitle">Classify systems across the 5 Architectural Categories and simulate live data/request flows for Layered, Client-Server (Email), and Model-View-Controller (MVC) architectures.</p>
+        </div>
+        <span class="tag tag-indigo">Layered / C-S / MVC</span>
+      </div>
+
+      <!-- 3.1 Classification Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">3.1 The 5 System Categories &amp; Suitable Architectural Patterns</h3>
+          <span class="tag tag-teal">Lecture Taxonomy</span>
+        </div>
+
+        <div class="data-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>System Type Category</th>
+                <th>Category Description</th>
+                <th>Slide System Examples</th>
+                <th>Suitable Architectural Patterns</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Data-centered</strong></td>
+                <td>Centralized data repository accessed and modified by multiple independent clients</td>
+                <td>Integrated Development Environments (IDEs), Student Information Systems</td>
+                <td><span class="tag tag-indigo">Blackboard Pattern</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Data flow</strong></td>
+                <td>Focused on transport, transformation, and sequential processing of data streams</td>
+                <td>Sensor Data Processing Systems</td>
+                <td><span class="tag tag-teal">Pipe and Filter Pattern</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Distributed</strong></td>
+                <td>Involves network-connected interaction between multiple independent processing units</td>
+                <td>Enterprise Email Systems (e.g., Outlook)</td>
+                <td><span class="tag tag-amber">Client-Server</span>, Peer-to-Peer, Broker</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Interactive</strong></td>
+                <td>Designed for human-computer interaction and user-centric systems</td>
+                <td>E-shopping Websites</td>
+                <td><span class="tag tag-rose">Model-View-Controller (MVC)</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Hierarchical</strong></td>
+                <td>Structured in vertical/horizontal layers reflecting distinct abstraction levels</td>
+                <td>Android Operating System</td>
+                <td>Main Program &amp; Subroutine, <span class="tag tag-indigo">Layered Pattern</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:0.81rem;color:var(--text-muted);margin-top:0.75rem;">
+          <strong>Note:</strong> Complex enterprise applications frequently combine multiple patterns simultaneously (e.g., Layered + Client-Server + MVC).
+        </p>
+      </div>
+
+      <!-- 3.2 Interactive Deep-Dive Visualizers -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">3.2 Interactive Featured Architectural Pattern Simulators</h3>
+          <div class="pill-bar" style="margin-bottom:0;" id="archPatternTabs">
+            <button class="pill-btn active" data-pat="layered">A. Hierarchical: Layered Pattern</button>
+            <button class="pill-btn" data-pat="clientserver">B. Distributed: Client-Server (Email)</button>
+            <button class="pill-btn" data-pat="mvc">C. Interactive: MVC 5-Step Simulator</button>
+          </div>
+        </div>
+
+        <div id="archPatternVisualizerContainer"></div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(2)">&larr; Previous: C4 &amp; 4+1 Views</button>
+        <button class="btn-primary" onclick="goToModule(4)">Next: GoF 23 Design Patterns Lab &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 4 ==================== -->
+    <section class="module-section" id="module-4">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Sections 4, 5, 6 &amp; 7 // Micro-Level OOP Solutions</div>
+          <h2 class="module-title">Complete Gang of Four (GoF) 23 Design Patterns Lab</h2>
+          <p class="module-subtitle">Filter and inspect all 23 GoF Design Patterns organized by Creational (5), Structural (7), and Behavioral (11) categories using Millett's 5-part template, plus interactive UML diagrams &amp; live code simulators for Factory Method, Singleton, Composite, and Observer.</p>
+        </div>
+        <span class="tag tag-teal">23 GoF Patterns</span>
+      </div>
+
+      <!-- Interactive Featured Pattern UML & Live Simulator -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Featured Lecture UML Diagrams &amp; Interactive Execution Simulators</h3>
+          <div class="pill-bar" style="margin-bottom:0;" id="featuredGofTabs">
+            <button class="pill-btn active" data-fgof="factory">Factory Method (Creational)</button>
+            <button class="pill-btn" data-fgof="singleton">Singleton (Creational)</button>
+            <button class="pill-btn" data-fgof="composite">Composite (Structural)</button>
+            <button class="pill-btn" data-fgof="observer">Observer (Behavioral)</button>
+          </div>
+        </div>
+
+        <div class="grid-2" style="align-items:start;">
+          <div class="diagram-stage">
+            <svg viewBox="0 0 460 280" width="460" height="280" id="featuredGofSvg"></svg>
+          </div>
+          <div id="featuredGofSimBox"></div>
+        </div>
+      </div>
+
+      <!-- Full 23 GoF Patterns Searchable Catalog -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Complete GoF 23 Design Patterns Catalog (Millett's 5-Part Template)</h3>
+          <span class="tag tag-indigo" id="gofCountBadge">Showing 23 Patterns</span>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.15rem;">
+          <div class="pill-bar" style="margin-bottom:0;" id="gofCategoryFilters">
+            <button class="pill-btn active" data-cat="all">All (23)</button>
+            <button class="pill-btn" data-cat="Creational">Creational (5)</button>
+            <button class="pill-btn" data-cat="Structural">Structural (7)</button>
+            <button class="pill-btn" data-cat="Behavioral">Behavioral (11)</button>
+          </div>
+          <input type="text" class="search-input" id="gofCatalogSearch" placeholder="Filter patterns (e.g., Adapter, Proxy, Strategy...)" style="max-width:290px;">
+        </div>
+
+        <div class="gof-grid" id="gofCatalogGrid"></div>
+
+        <div class="inspector-panel" id="gofSelectedDetailPanel"></div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(3)">&larr; Previous: Architectural Patterns</button>
+        <button class="btn-primary" onclick="goToModule(5)">Next: Arch vs Design &amp; W9 Lab &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 5 ==================== -->
+    <section class="module-section" id="module-5">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Sections 8 &amp; 9 // Synthesis &amp; Practical Application</div>
+          <h2 class="module-title">Architectural vs. Design Patterns &amp; W9 Labtorial Workflow</h2>
+          <p class="module-subtitle">Contrast macro-architectural patterns against micro-design patterns across 5 key dimensions, and review the SIT Entrepreneurship Education Programme Labtorial &amp; AI-ORATE workflow.</p>
+        </div>
+        <span class="tag tag-amber">Lab &amp; AI-ORATE</span>
+      </div>
+
+      <!-- 8. Comparison Matrix -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">8. Architectural Patterns vs. Design Patterns Comparison</h3>
+          <span class="tag tag-indigo">Exam Comparison Table</span>
+        </div>
+
+        <div class="data-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Comparison Dimension</th>
+                <th>Architectural Patterns</th>
+                <th>Design Patterns</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Definition</strong></td>
+                <td>Fundamental structural organization for a software system</td>
+                <td>Specification assisting in the implementation/refinement of software classes</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Scope &amp; Conversion</strong></td>
+                <td>Converts high-level software characteristics into macro system structures</td>
+                <td>Describes specific software units/classes to support detailed coding and construction</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Tooling Level</strong></td>
+                <td><strong>Large-level tools:</strong> Concerned with large-scale components, global properties, and system-wide mechanisms</td>
+                <td><strong>Small-level tools:</strong> Concerned with schemes for refining and building smaller subsystems and classes</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Problems Addressed</strong></td>
+                <td>System partitioning, high-level interfaces, scalability, reliability, security</td>
+                <td>Specific micro-level problems in software construction and object interaction</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Catalog Examples</strong></td>
+                <td>Layered Architecture, Client-Server, Model-View-Controller (MVC), Pipe &amp; Filter, Blackboard</td>
+                <td>Creational (Factory Method, Singleton), Structural (Adapter, Composite, Facade), Behavioral (Observer, Strategy)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 9. W9 Labtorial & AI-ORATE -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">9.1 W9 Labtorial: Entrepreneurship Portal</h3>
+            <span class="tag tag-teal">SIT Scenario</span>
+          </div>
+          <p style="font-size:0.86rem;color:var(--text-secondary);margin-bottom:0.85rem;">
+            <strong>Scenario:</strong> SIT launches an Entrepreneurship Education Programme managed by a faculty committee. Students subscribe to news updates on activities (<strong>Hackathons</strong>, <strong>Boot Camps</strong>, <strong>Innovation Challenges</strong>) and receive notifications.
+          </p>
+          <div class="concept-box" style="margin-bottom:0.75rem;">
+            <h4>Task 1: Derive Component Diagram</h4>
+            <p>Derive from Use Cases &amp; Class Diagrams. Ensure all provided lollipops and required sockets align with class diagram interfaces without dangling interfaces.</p>
+          </div>
+          <div class="concept-box teal" style="margin-bottom:0.75rem;">
+            <h4>Task 2: Propose Macro-Architecture</h4>
+            <p>Justify a combined <strong>Layered + Client-Server + MVC</strong> architecture (plus Observer pattern for student activity subscriptions!).</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>9.2 Diagram Alignment Rule</h4>
+            <p>Maintain strict structural consistency across Use Case, Class, Component, and Architecture Diagrams. If adding a component introduces a new interface, update the Class Diagram immediately.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">9.3 AI-ORATE Formative Assessment Workflow</h3>
+            <span class="tag tag-rose">3-Step Viva</span>
+          </div>
+          <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem;">
+            AI-ORATE is an AI-powered formative feedback tool used to evaluate architectural reasoning and diagram alignment:
+          </p>
+          <div style="display:flex;flex-direction:column;gap:0.85rem;">
+            <div class="concept-box">
+              <h4>Step 1: Submit W9 Lab Work</h4>
+              <p>Upload a single PDF containing your <strong>Class Diagram</strong>, <strong>Component Diagram</strong>, and <strong>Architecture Diagram</strong> to Dropbox.</p>
+            </div>
+            <div class="concept-box teal">
+              <h4>Step 2: Explain Solution (Viva-Style Q&amp;A)</h4>
+              <p>Complete an interactive AI-ORATE Q&amp;A session answering targeted questions justifying your design choices, pattern selection, and cross-diagram alignment.</p>
+            </div>
+            <div class="concept-box amber">
+              <h4>Step 3: Learn from Formative Feedback</h4>
+              <p>Receive personalized diagnostic feedback highlighting architectural strengths and structural inconsistencies before final grading.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(4)">&larr; Previous: GoF 23 Design Patterns</button>
+        <button class="btn-primary" onclick="goToModule(6)">Next: Exam Readiness Quiz &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 6 ==================== -->
+    <section class="module-section" id="module-6">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Active Recall // Self-Assessment</div>
+          <h2 class="module-title">Chapter 9 Exam Readiness Quiz</h2>
+          <p class="module-subtitle">Test your mastery of Software Architecture definitions, C4 &amp; 4+1 Views, Architectural Patterns, and GoF Design Patterns with 10 exam-style questions.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="tag tag-teal" id="quizScoreBadge">Score: 0 / 10</span>
+          <button class="btn-secondary" style="padding:6px 12px;font-size:0.8rem;" id="resetQuizBtn">Reset Quiz</button>
+        </div>
+      </div>
+
+      <div id="quizContainer"></div>
+
+      <div class="card" id="quizSummaryCard" style="display:none;border-color:var(--accent-teal);text-align:center;">
+        <h3 style="font-size:1.3rem;margin-bottom:0.4rem;" id="quizFinalTitle">Assessment Complete!</h3>
+        <p style="color:var(--text-secondary);margin-bottom:1rem;" id="quizFinalMsg"></p>
+        <button class="btn-primary" onclick="resetQuiz()">Retake Quiz</button>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(5)">&larr; Previous: Arch vs Design &amp; Lab</button>
+        <button class="btn-primary" onclick="goToModule(1)">Return to Module 01 &#8634;</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toastNotification">Chapter 9 HTML Study Guide downloaded!</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ==================== STATE ====================
+  const state = {
+    currentModule: 1,
+    visitedModules: new Set([1]),
+    theme: 'dark',
+    archStep: 0,
+    blogOption: 'web',
+    c4Level: 1,
+    view41: 'logical',
+    archPatternTab: 'layered',
+    mvcStep: 0,
+    featuredGof: 'factory',
+    gofCatFilter: 'all',
+    gofSearch: '',
+    selectedGofName: 'Factory Method',
+    quizAnswers: {}
+  };
+
+  // ==================== THEME TOGGLE ====================
+  document.getElementById('themeToggleBtn').addEventListener('click', () => {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', state.theme);
+  });
+
+  // ==================== NAVIGATION ====================
+  window.goToModule = function(modNum) {
+    state.currentModule = modNum;
+    state.visitedModules.add(modNum);
+
+    document.querySelectorAll('.module-section').forEach(s => s.classList.remove('active'));
+    document.getElementById(`module-${modNum}`).classList.add('active');
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      const m = Number(btn.dataset.module);
+      btn.classList.toggle('active', m === modNum);
+      btn.classList.toggle('visited', state.visitedModules.has(m) && m !== modNum);
+    });
+
+    const pct = Math.round((state.visitedModules.size / 6) * 100);
+    document.getElementById('progressPercent').textContent = `${pct}%`;
+    document.getElementById('mobileProgressTag').textContent = `${pct}%`;
+    document.getElementById('progressFill').style.width = `${pct}%`;
+
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => goToModule(Number(btn.dataset.module)));
+  });
+
+  document.getElementById('menuToggle').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarBackdrop').classList.toggle('open');
+  });
+
+  document.getElementById('sidebarBackdrop').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+  });
+
+  // ==================== MODULE 1: 5-STEP PROCESS & BLOG TRADE-OFFS ====================
+  const archProcessSteps = [
+    { title: 'Step 01: Understand and Evaluate Requirements', desc: 'Analyze functional requirements, stakeholder concerns, and non-functional quality constraints (usability, availability, performance, security) before structuring the system.' },
+    { title: 'Step 02: Identify Subsystems and Components / Design Architecture', desc: 'Decompose the software system into macro-level subsystems and components, selecting appropriate architectural styles and defining structural layouts.' },
+    { title: 'Step 03: Evaluate the Architecture', desc: 'Assess architectural trade-offs against stakeholder concerns and quality attributes. If risks or bottlenecks appear, loop back to refine Step 02.' },
+    { title: 'Step 04: Document the Architecture', desc: 'Formulate clear architectural views and structural models (e.g., C4 Model, 4+1 Views) so the design communicates clearly across engineering teams.' },
+    { title: 'Step 05: Monitor, Control Implementation, and Update Design', desc: 'Maintain continuous design synchronicity during active coding and construction, updating architectural documentation whenever structural changes occur.' }
+  ];
+
+  function renderArchStep(idx) {
+    state.archStep = idx;
+    for (let i = 0; i < 5; i++) {
+      const r = document.getElementById(`archStepRect${i}`);
+      r.setAttribute('fill', i === idx ? '#1e293b' : '#111827');
+      r.setAttribute('stroke', i === idx ? '#6366f1' : '#334155');
+      r.setAttribute('stroke-width', i === idx ? '2.8' : '2');
+    }
+    const s = archProcessSteps[idx];
+    document.getElementById('archStepInspector').innerHTML = `
+      <h4 style="color:var(--accent-teal);font-size:0.96rem;margin-bottom:0.35rem;">${s.title}</h4>
+      <p style="font-size:0.86rem;color:var(--text-primary);">${s.desc}</p>
+    `;
+  }
+
+  document.querySelectorAll('.arch-step-node').forEach(node => {
+    node.addEventListener('click', () => renderArchStep(Number(node.dataset.step)));
+  });
+  renderArchStep(0);
+
+  // Blog Tradeoff Simulator
+  const blogOptionsData = {
+    web: {
+      title: 'Option A: Mobile Web App',
+      pros: [
+        'Operates on any mobile browser without platform-specific code (High Portability)',
+        'Smaller client footprint; requires minimal client hardware resources',
+        'Easier and cheaper to update centrally on the web server (High Maintainability)'
+      ],
+      cons: [
+        'Requires continuous online network connectivity (Lower Offline Availability)',
+        'Potential interface lag compared to native rendering',
+        'Limited access to device hardware sensors'
+      ],
+      scores: [
+        { label: 'Cross-Platform Portability', val: 95, color: '#14b8a6' },
+        { label: 'Centralized Maintainability & Cost', val: 90, color: '#6366f1' },
+        { label: 'Offline Availability', val: 20, color: '#f43f5e' },
+        { label: 'UI Responsiveness & Hardware Access', val: 45, color: '#f59e0b' }
+      ]
+    },
+    native: {
+      title: 'Option B: Native Mobile App (with Local Database)',
+      pros: [
+        'Supports full offline operation using a local database on the device',
+        'Faster and smoother native user interface response',
+        'Direct access to device hardware capabilities (e.g., camera, GPS sensors)'
+      ],
+      cons: [
+        'Requires building and maintaining separate apps per mobile platform (iOS/Android)',
+        'Requires pushing updates to all end-user devices; higher development/maintenance cost',
+        'Consumes local storage space on user devices'
+      ],
+      scores: [
+        { label: 'Cross-Platform Portability', val: 35, color: '#f43f5e' },
+        { label: 'Centralized Maintainability & Cost', val: 40, color: '#f59e0b' },
+        { label: 'Offline Availability (Local DB)', val: 95, color: '#14b8a6' },
+        { label: 'UI Responsiveness & Hardware Access', val: 95, color: '#6366f1' }
+      ]
+    }
+  };
+
+  function renderBlogTradeoff(opt) {
+    const d = blogOptionsData[opt];
+    document.getElementById('blogTradeoffContainer').innerHTML = `
+      <div>
+        <div class="concept-box teal" style="margin-bottom:0.85rem;">
+          <h4>Advantages (${d.title})</h4>
+          <ul style="padding-left:1.15rem;margin-top:0.3rem;">${d.pros.map(p => `<li>${p}</li>`).join('')}</ul>
+        </div>
+        <div class="concept-box rose">
+          <h4>Architectural Trade-Offs</h4>
+          <ul style="padding-left:1.15rem;margin-top:0.3rem;">${d.cons.map(c => `<li>${c}</li>`).join('')}</ul>
+        </div>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1rem;">
+        <h4 style="font-size:0.88rem;margin-bottom:0.85rem;color:var(--accent-indigo);">Quality Attribute Profile</h4>
+        ${d.scores.map(s => `
+          <div class="metric-bar-row">
+            <div class="metric-bar-label"><span>${s.label}</span><span style="font-family:var(--font-mono);">${s.val}%</span></div>
+            <div class="metric-bar-track"><div class="metric-bar-fill" style="width:${s.val}%;background:${s.color};"></div></div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  document.getElementById('blogWebBtn').addEventListener('click', () => {
+    document.getElementById('blogWebBtn').classList.add('active');
+    document.getElementById('blogNativeBtn').classList.remove('active');
+    renderBlogTradeoff('web');
+  });
+
+  document.getElementById('blogNativeBtn').addEventListener('click', () => {
+    document.getElementById('blogNativeBtn').classList.add('active');
+    document.getElementById('blogWebBtn').classList.remove('active');
+    renderBlogTradeoff('native');
+  });
+  renderBlogTradeoff('web');
+
+  // ==================== MODULE 2: C4 MODEL & 4+1 VIEW MODEL ====================
+  const c4LevelsData = {
+    1: {
+      title: 'Level 1: System Context Diagram (Macro Boundary)',
+      desc: 'High-level view showing the target software system as a single central box surrounded by human users (actors) and external interacting systems.',
+      svg: `
+        <rect x="65" y="95" width="140" height="85" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+        <text x="135" y="132" fill="#7dd3fc" font-family="monospace" font-size="11" text-anchor="middle">[Person]</text>
+        <text x="135" y="152" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Student / User</text>
+
+        <line x1="205" y1="138" x2="295" y2="138" stroke="#94a3b8" stroke-width="2.2"/>
+        <text x="250" y="128" fill="#94a3b8" font-family="monospace" font-size="10.5" text-anchor="middle">Uses</text>
+
+        <rect x="295" y="75" width="210" height="125" rx="12" fill="#162033" stroke="#6366f1" stroke-width="3"/>
+        <text x="400" y="125" fill="#a5b4fc" font-family="monospace" font-size="11" text-anchor="middle">[Software System]</text>
+        <text x="400" y="148" fill="#f8fafc" font-family="sans-serif" font-size="16" font-weight="bold" text-anchor="middle">Blog / Portal System</text>
+
+        <line x1="505" y1="138" x2="595" y2="138" stroke="#94a3b8" stroke-width="2.2"/>
+        <text x="550" y="128" fill="#94a3b8" font-family="monospace" font-size="10.5" text-anchor="middle">Auth / Email</text>
+
+        <rect x="595" y="95" width="145" height="85" rx="10" fill="#111827" stroke="#64748b" stroke-width="2"/>
+        <text x="667" y="132" fill="#94a3b8" font-family="monospace" font-size="10.5" text-anchor="middle">[External System]</text>
+        <text x="667" y="152" fill="#f8fafc" font-family="sans-serif" font-size="13.5" font-weight="bold" text-anchor="middle">OAuth / Email Svc</text>
+      `
+    },
+    2: {
+      title: 'Level 2: Containers Diagram (Deployable Units)',
+      desc: 'Zooms inside the Software System box to reveal separately deployable/executable containers: client-side web/mobile apps, server-side API applications, and database schemas.',
+      svg: `
+        <rect x="135" y="20" width="530" height="240" rx="12" fill="none" stroke="#6366f1" stroke-width="2" stroke-dasharray="6,4"/>
+        <text x="400" y="42" fill="#a5b4fc" font-family="monospace" font-size="11.5" font-weight="bold" text-anchor="middle">System Boundary: Blog / Portal System</text>
+
+        <rect x="165" y="75" width="145" height="80" rx="8" fill="#162033" stroke="#14b8a6" stroke-width="2.2"/>
+        <text x="237" y="108" fill="#5eead4" font-family="monospace" font-size="10" text-anchor="middle">[Container: SPA]</text>
+        <text x="237" y="128" fill="#f8fafc" font-family="sans-serif" font-size="13.5" font-weight="bold" text-anchor="middle">Web / Mobile App</text>
+
+        <line x1="310" y1="115" x2="365" y2="115" stroke="#14b8a6" stroke-width="2"/>
+        <text x="337" y="106" fill="#94a3b8" font-family="monospace" font-size="9.5" text-anchor="middle">JSON/HTTPS</text>
+
+        <rect x="365" y="75" width="145" height="80" rx="8" fill="#162033" stroke="#6366f1" stroke-width="2.5"/>
+        <text x="437" y="108" fill="#a5b4fc" font-family="monospace" font-size="10" text-anchor="middle">[Container: API]</text>
+        <text x="437" y="128" fill="#f8fafc" font-family="sans-serif" font-size="13.5" font-weight="bold" text-anchor="middle">API Application</text>
+
+        <line x1="510" y1="115" x2="555" y2="115" stroke="#f59e0b" stroke-width="2"/>
+
+        <rect x="555" y="75" width="90" height="80" rx="8" fill="#162033" stroke="#f59e0b" stroke-width="2.2"/>
+        <text x="600" y="108" fill="#fcd34d" font-family="monospace" font-size="10" text-anchor="middle">[Container]</text>
+        <text x="600" y="128" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Database</text>
+      `
+    },
+    3: {
+      title: 'Level 3: Components Diagram (Inside API Container)',
+      desc: 'Zooms inside an individual Container (e.g., API Application) to show modular components (controllers, security modules, payment/post handlers) and their interfaces.',
+      svg: `
+        <rect x="115" y="20" width="570" height="240" rx="12" fill="none" stroke="#14b8a6" stroke-width="2" stroke-dasharray="6,4"/>
+        <text x="400" y="42" fill="#5eead4" font-family="monospace" font-size="11.5" font-weight="bold" text-anchor="middle">Container Boundary: API Application</text>
+
+        <rect x="145" y="70" width="150" height="75" rx="8" fill="#162033" stroke="#6366f1" stroke-width="2.2"/>
+        <text x="220" y="102" fill="#a5b4fc" font-family="monospace" font-size="10" text-anchor="middle">[Component]</text>
+        <text x="220" y="122" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">AuthController</text>
+
+        <rect x="325" y="70" width="150" height="75" rx="8" fill="#162033" stroke="#6366f1" stroke-width="2.2"/>
+        <text x="400" y="102" fill="#a5b4fc" font-family="monospace" font-size="10" text-anchor="middle">[Component]</text>
+        <text x="400" y="122" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">PostController</text>
+
+        <rect x="505" y="70" width="150" height="75" rx="8" fill="#162033" stroke="#6366f1" stroke-width="2.2"/>
+        <text x="580" y="102" fill="#a5b4fc" font-family="monospace" font-size="10" text-anchor="middle">[Component]</text>
+        <text x="580" y="122" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">PaymentHandler</text>
+
+        <rect x="275" y="175" width="250" height="65" rx="8" fill="#162033" stroke="#14b8a6" stroke-width="2.2"/>
+        <text x="400" y="203" fill="#5eead4" font-family="monospace" font-size="10" text-anchor="middle">[Component]</text>
+        <text x="400" y="222" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Security &amp; Data Repository</text>
+      `
+    },
+    4: {
+      title: 'Level 4: Code Diagram (UML Classes & Interfaces)',
+      desc: 'Deepest level zooming into concrete code structures: UML class diagrams, implementation classes, attributes, and method signatures inside a component.',
+      svg: `
+        <rect x="135" y="45" width="220" height="175" rx="6" fill="#111827" stroke="#14b8a6" stroke-width="2.2"/>
+        <text x="245" y="68" fill="#5eead4" font-family="monospace" font-size="11" text-anchor="middle">&laquo;interface&raquo;</text>
+        <text x="245" y="88" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">IPostService</text>
+        <line x1="135" y1="98" x2="355" y2="98" stroke="#14b8a6" stroke-width="1.5"/>
+        <text x="150" y="122" fill="#e2e8f0" font-family="monospace" font-size="11.5">+ createPost(dto): Post</text>
+        <text x="150" y="144" fill="#e2e8f0" font-family="monospace" font-size="11.5">+ publishPost(id): void</text>
+
+        <line x1="355" y1="130" x2="445" y2="130" stroke="#14b8a6" stroke-width="2" stroke-dasharray="5,4"/>
+
+        <rect x="445" y="45" width="230" height="175" rx="6" fill="#162033" stroke="#6366f1" stroke-width="2.2"/>
+        <text x="560" y="75" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">PostControllerImpl</text>
+        <line x1="445" y1="88" x2="675" y2="88" stroke="#6366f1" stroke-width="1.5"/>
+        <text x="460" y="112" fill="#94a3b8" font-family="monospace" font-size="11">- repo: PostRepository</text>
+        <line x1="445" y1="125" x2="675" y2="125" stroke="#6366f1" stroke-width="1.5"/>
+        <text x="460" y="148" fill="#e2e8f0" font-family="monospace" font-size="11.5">+ createPost(dto): Post</text>
+        <text x="460" y="170" fill="#e2e8f0" font-family="monospace" font-size="11.5">+ publishPost(id): void</text>
+      `
+    }
+  };
+
+  function renderC4(lvl) {
+    state.c4Level = lvl;
+    const d = c4LevelsData[lvl];
+    document.getElementById('c4DiagramSvg').innerHTML = d.svg;
+    document.getElementById('c4DetailPanel').innerHTML = `
+      <h4 style="color:var(--accent-indigo);font-size:0.98rem;margin-bottom:0.35rem;">${d.title}</h4>
+      <p style="font-size:0.87rem;color:var(--text-primary);">${d.desc}</p>
+    `;
+  }
+
+  document.querySelectorAll('#c4LevelTabs .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#c4LevelTabs .pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderC4(Number(btn.dataset.c4));
+    });
+  });
+  renderC4(1);
+
+  // 4+1 View Model Data
+  const view41Data = {
+    logical: {
+      title: '1. Logical View (End-User Functionality)',
+      stakeholder: 'End-Users, Analysts & Designers',
+      diagrams: 'UML Class Diagrams, State Diagrams, Component Diagrams',
+      desc: 'Describes the functionality the system provides to end-users, modeling static object structures, domain classes, and functional abstractions.'
+    },
+    process: {
+      title: '2. Process View (Dynamic Runtime & Concurrency)',
+      stakeholder: 'System Integrators & Performance Engineers',
+      diagrams: 'UML Sequence Diagrams, Communication Diagrams, Activity Diagrams',
+      desc: 'Captures dynamic runtime behavior, threads/processes, synchronization, concurrency, and inter-process communication pathways.'
+    },
+    development: {
+      title: '3. Development / Implementation View (Code Organization)',
+      stakeholder: 'Software Programmers & Configuration Managers',
+      diagrams: 'UML Package Diagrams, Component Artifacts, Source Code Structures',
+      desc: 'Captures the software from a programmer’s perspective, focusing on static module organization, library dependencies, versioning, and build management.'
+    },
+    physical: {
+      title: '4. Physical / Deployment View (Hardware & Topology)',
+      stakeholder: 'Systems Engineers & DevOps / Infrastructure Teams',
+      diagrams: 'UML Deployment Diagrams',
+      desc: 'Captures physical system topology, detailing execution nodes, server hardware, network links, and how software components map onto physical machines.'
+    },
+    scenarios: {
+      title: '+1 View: User View / Scenarios (Central Validation Glue)',
+      stakeholder: 'All Stakeholders & QA Testers',
+      diagrams: 'Use Cases & Scenarios (e.g., UC-00 Search Product Main Scenario)',
+      desc: 'Consists of selected critical Use Cases/Scenarios that connect, illustrate, and validate all four architectural views while providing the baseline for testing architectural prototypes.'
+    }
+  };
+
+  function renderView41(key) {
+    state.view41 = key;
+    ['logical', 'development', 'process', 'physical', 'scenarios'].forEach(k => {
+      const el = document.getElementById(`v41Rect-${k}`);
+      if (k === key) {
+        el.setAttribute('fill', '#1e293b');
+        el.setAttribute('stroke-width', '3.5');
+      } else {
+        el.setAttribute('fill', '#111827');
+        el.setAttribute('stroke-width', '2');
+      }
+    });
+
+    const v = view41Data[key];
+    document.getElementById('view41InspectorBox').innerHTML = `
+      <div class="concept-box teal">
+        <h4 style="font-size:1.02rem;margin-bottom:0.45rem;">${v.title}</h4>
+        <p style="margin-bottom:0.5rem;"><strong>Target Audience:</strong> ${v.stakeholder}</p>
+        <p style="margin-bottom:0.5rem;"><strong>UML Artifacts:</strong> <span style="color:var(--accent-indigo);font-family:var(--font-mono);font-size:0.8rem;">${v.diagrams}</span></p>
+        <p>${v.desc}</p>
+      </div>
+    `;
+  }
+
+  document.querySelectorAll('.view41-node').forEach(node => {
+    node.addEventListener('click', () => renderView41(node.dataset.view));
+  });
+  renderView41('logical');
+
+  // ==================== MODULE 3: LAYERED, CLIENT-SERVER & MVC SIMULATORS ====================
+  function renderArchPatternVisualizer(pat) {
+    const container = document.getElementById('archPatternVisualizerContainer');
+    if (pat === 'layered') {
+      container.innerHTML = `
+        <div class="grid-2" style="align-items:center;">
+          <div class="diagram-stage">
+            <svg viewBox="0 0 440 270" width="440" height="270">
+              <rect x="45" y="20" width="350" height="62" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="2.2"/>
+              <text x="220" y="46" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">1. Presentation Layer</text>
+              <text x="220" y="66" fill="#a5b4fc" font-family="monospace" font-size="11" text-anchor="middle">User Interface Elements &amp; Input Display</text>
+
+              <text x="220" y="99" fill="#14b8a6" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">&darr; Stable Interface &darr;</text>
+
+              <rect x="45" y="106" width="350" height="62" rx="8" fill="#1e293b" stroke="#14b8a6" stroke-width="2.2"/>
+              <text x="220" y="132" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">2. Application / Business Layer</text>
+              <text x="220" y="152" fill="#5eead4" font-family="monospace" font-size="11" text-anchor="middle">Business Rules, Domain Logic &amp; Workflow</text>
+
+              <text x="220" y="185" fill="#f59e0b" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">&darr; Stable Interface &darr;</text>
+
+              <rect x="45" y="192" width="350" height="62" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="2.2"/>
+              <text x="220" y="218" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">3. Data / Persistence Layer</text>
+              <text x="220" y="238" fill="#fcd34d" font-family="monospace" font-size="11" text-anchor="middle">Database Queries, File Storage &amp; DAOs</text>
+            </svg>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.85rem;">
+            <div class="concept-box">
+              <h4>Hierarchical — Layered Architecture</h4>
+              <p>The most widely adopted architectural pattern. Components and classes are partitioned into horizontal abstraction layers where each layer performs a specialized role.</p>
+            </div>
+            <div class="concept-box teal">
+              <h4>Key Engineering Benefit</h4>
+              <p>Promotes strict <strong>separation of concerns</strong> and <strong>maintainability</strong>. Modifications inside one layer (e.g., migrating SQL databases in the Data Layer) do not affect adjacent layers as long as layer interfaces remain stable.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (pat === 'clientserver') {
+      container.innerHTML = `
+        <div class="grid-2" style="align-items:center;">
+          <div class="diagram-stage">
+            <svg viewBox="0 0 480 265" width="480" height="265">
+              <!-- EmailClient -->
+              <rect x="20" y="75" width="145" height="110" rx="10" fill="#162033" stroke="#38bdf8" stroke-width="2.5"/>
+              <text x="92" y="118" fill="#7dd3fc" font-family="monospace" font-size="10.5" text-anchor="middle">&laquo;component&raquo;</text>
+              <text x="92" y="140" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">EmailClient</text>
+              <text x="92" y="160" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="middle">(e.g., Outlook)</text>
+
+              <!-- IMAP Link -->
+              <line x1="165" y1="100" x2="232" y2="85" stroke="#f59e0b" stroke-width="2.3"/>
+              <path d="M 244 72 A 13 13 0 0 0 244 96" fill="none" stroke="#f59e0b" stroke-width="2.3"/>
+              <circle cx="244" cy="84" r="7" fill="#14b8a6"/>
+              <line x1="251" y1="84" x2="290" y2="84" stroke="#14b8a6" stroke-width="2.3"/>
+              <text x="225" y="62" fill="#14b8a6" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">IMAP</text>
+
+              <!-- SMTP Link -->
+              <line x1="165" y1="158" x2="232" y2="175" stroke="#f59e0b" stroke-width="2.3"/>
+              <path d="M 244 163 A 13 13 0 0 0 244 187" fill="none" stroke="#f59e0b" stroke-width="2.3"/>
+              <circle cx="244" cy="175" r="7" fill="#14b8a6"/>
+              <line x1="251" y1="175" x2="290" y2="175" stroke="#14b8a6" stroke-width="2.3"/>
+              <text x="225" y="205" fill="#14b8a6" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">SMTP</text>
+
+              <!-- EmailServer Outer Box -->
+              <rect x="275" y="22" width="190" height="220" rx="10" fill="#111827" stroke="#6366f1" stroke-width="2.5"/>
+              <text x="370" y="45" fill="#a5b4fc" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">&laquo;component&raquo; EmailServer</text>
+
+              <rect x="290" y="58" width="160" height="65" rx="8" fill="#162033" stroke="#14b8a6" stroke-width="2"/>
+              <text x="370" y="86" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Retrieval Sub-comp</text>
+              <text x="370" y="105" fill="#5eead4" font-family="monospace" font-size="10" text-anchor="middle">Implements IMAP</text>
+
+              <rect x="290" y="145" width="160" height="65" rx="8" fill="#162033" stroke="#14b8a6" stroke-width="2"/>
+              <text x="370" y="173" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Transport Sub-comp</text>
+              <text x="370" y="192" fill="#5eead4" font-family="monospace" font-size="10" text-anchor="middle">Implements SMTP</text>
+            </svg>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.85rem;">
+            <div class="concept-box">
+              <h4>Distributed — 2-Tier Client-Server Pattern</h4>
+              <p><strong>Client:</strong> Requests services, data, or resources.<br><strong>Server:</strong> Processes incoming requests, executes computations, and returns responses.</p>
+            </div>
+            <div class="concept-box teal">
+              <h4>Slide Example: Email System (Outlook)</h4>
+              <ul style="padding-left:1.1rem;margin-top:0.25rem;">
+                <li><strong>Retrieval Sub-component:</strong> Implements the <code>IMAP</code> interface so <code>EmailClient</code> can access and download stored emails.</li>
+                <li><strong>Transport Sub-component:</strong> Implements the <code>SMTP</code> interface so <code>EmailClient</code> can submit outbound emails for delivery.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      const mvcSteps = [
+        'Ready: Click "Advance MVC Step" to simulate the 5-step Model-View-Controller interaction workflow.',
+        'Step 1: User triggers an interactive action on the View (e.g., clicks "Add to Cart").',
+        'Step 2: View forwards the user input/action event to the Controller.',
+        'Step 3: Controller processes input, executes business rules, and updates the Model state.',
+        'Step 4: Model sends state change notifications to subscribed Views.',
+        'Step 5: View queries updated state and refreshes the UI display for the User.'
+      ];
+      const s = state.mvcStep;
+      container.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.85rem;">
+          <span class="tag tag-rose">Current State: ${s === 0 ? 'Idle' : 'Step ' + s + ' of 5'}</span>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-primary" style="padding:6px 14px;font-size:0.82rem;" id="nextMvcStepBtn">Advance MVC Step (${(s % 5) + 1}/5) &rarr;</button>
+            <button class="btn-secondary" style="padding:6px 12px;font-size:0.82rem;" id="resetMvcBtn">Reset</button>
+          </div>
+        </div>
+        <div class="diagram-stage">
+          <svg viewBox="0 0 760 225" width="760" height="225">
+            <!-- User -->
+            <rect x="25" y="75" width="115" height="75" rx="10" fill="${s===1||s===5?'#1e293b':'#111827'}" stroke="${s===1||s===5?'#38bdf8':'#475569'}" stroke-width="2.5"/>
+            <text x="82" y="117" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">User</text>
+
+            <!-- View -->
+            <rect x="215" y="75" width="140" height="75" rx="10" fill="${s===1||s===2||s===4||s===5?'#1e293b':'#111827'}" stroke="${s===1||s===2||s===4||s===5?'#14b8a6':'#475569'}" stroke-width="2.5"/>
+            <text x="285" y="108" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">View</text>
+            <text x="285" y="128" fill="#5eead4" font-family="monospace" font-size="10" text-anchor="middle">UI Display</text>
+
+            <!-- Controller -->
+            <rect x="430" y="25" width="150" height="70" rx="10" fill="${s===2||s===3?'#1e293b':'#111827'}" stroke="${s===2||s===3?'#6366f1':'#475569'}" stroke-width="2.5"/>
+            <text x="505" y="56" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Controller</text>
+            <text x="505" y="75" fill="#a5b4fc" font-family="monospace" font-size="10" text-anchor="middle">Input Handler</text>
+
+            <!-- Model -->
+            <rect x="430" y="135" width="150" height="70" rx="10" fill="${s===3||s===4?'#1e293b':'#111827'}" stroke="${s===3||s===4?'#f59e0b':'#475569'}" stroke-width="2.5"/>
+            <text x="505" y="166" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Model</text>
+            <text x="505" y="185" fill="#fcd34d" font-family="monospace" font-size="10" text-anchor="middle">State &amp; Domain</text>
+
+            <!-- Step Arrows -->
+            <line x1="140" y1="98" x2="215" y2="98" stroke="${s===1?'#38bdf8':'#334155'}" stroke-width="${s===1?3:1.5}"/>
+            <text x="177" y="90" fill="${s===1?'#38bdf8':'#64748b'}" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">1. Action</text>
+
+            <line x1="355" y1="92" x2="430" y2="62" stroke="${s===2?'#6366f1':'#334155'}" stroke-width="${s===2?3:1.5}"/>
+            <text x="382" y="66" fill="${s===2?'#a5b4fc':'#64748b'}" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">2. Forward</text>
+
+            <line x1="505" y1="95" x2="505" y2="135" stroke="${s===3?'#f59e0b':'#334155'}" stroke-width="${s===3?3:1.5}"/>
+            <text x="552" y="119" fill="${s===3?'#fbbf24':'#64748b'}" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">3. Update</text>
+
+            <line x1="430" y1="170" x2="355" y2="132" stroke="${s===4?'#14b8a6':'#334155'}" stroke-width="${s===4?3:1.5}"/>
+            <text x="382" y="168" fill="${s===4?'#14b8a6':'#64748b'}" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">4. Notify</text>
+
+            <line x1="215" y1="130" x2="140" y2="130" stroke="${s===5?'#14b8a6':'#334155'}" stroke-width="${s===5?3:1.5}"/>
+            <text x="177" y="148" fill="${s===5?'#14b8a6':'#64748b'}" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">5. Render</text>
+          </svg>
+        </div>
+        <div class="inspector-panel">
+          <p style="font-size:0.88rem;font-weight:600;color:var(--text-primary);">${mvcSteps[s]}</p>
+        </div>
+      `;
+
+      document.getElementById('nextMvcStepBtn').addEventListener('click', () => {
+        state.mvcStep = (state.mvcStep % 5) + 1;
+        renderArchPatternVisualizer('mvc');
+      });
+      document.getElementById('resetMvcBtn').addEventListener('click', () => {
+        state.mvcStep = 0;
+        renderArchPatternVisualizer('mvc');
+      });
+    }
+  }
+
+  document.querySelectorAll('#archPatternTabs .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#archPatternTabs .pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.archPatternTab = btn.dataset.pat;
+      renderArchPatternVisualizer(state.archPatternTab);
+    });
+  });
+  renderArchPatternVisualizer('layered');
+
+  // ==================== MODULE 4: GOF 23 DESIGN PATTERNS & FEATURED SIMULATORS ====================
+  const featuredGofData = {
+    factory: {
+      svg: `
+        <rect x="20" y="95" width="95" height="55" rx="6" fill="#162033" stroke="#38bdf8" stroke-width="2"/>
+        <text x="67" y="127" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Client</text>
+
+        <line x1="115" y1="122" x2="165" y2="122" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,3"/>
+
+        <rect x="165" y="80" width="145" height="85" rx="6" fill="#162033" stroke="#6366f1" stroke-width="2.2"/>
+        <text x="237" y="106" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">UserFactory</text>
+        <line x1="165" y1="115" x2="310" y2="115" stroke="#6366f1"/>
+        <text x="174" y="136" fill="#a5b4fc" font-family="monospace" font-size="10">+ create(type):</text>
+        <text x="174" y="150" fill="#a5b4fc" font-family="monospace" font-size="10">  IUser</text>
+
+        <rect x="335" y="20" width="110" height="55" rx="6" fill="#111827" stroke="#14b8a6" stroke-width="2"/>
+        <text x="390" y="42" fill="#5eead4" font-family="monospace" font-size="9.5" text-anchor="middle">&laquo;interface&raquo;</text>
+        <text x="390" y="60" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">IUser</text>
+
+        <rect x="335" y="115" width="110" height="42" rx="6" fill="#162033" stroke="#14b8a6" stroke-width="1.8"/>
+        <text x="390" y="140" fill="#f8fafc" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Student</text>
+
+        <rect x="335" y="172" width="110" height="42" rx="6" fill="#162033" stroke="#14b8a6" stroke-width="1.8"/>
+        <text x="390" y="197" fill="#f8fafc" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Faculty</text>
+
+        <rect x="335" y="228" width="110" height="42" rx="6" fill="#162033" stroke="#14b8a6" stroke-width="1.8"/>
+        <text x="390" y="253" fill="#f8fafc" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Admin</text>
+      `,
+      simHtml: `
+        <div class="concept-box">
+          <h4>Factory Method Interactive Simulator (Slide Scenario)</h4>
+          <p style="margin-bottom:0.75rem;">Select a runtime user type string to invoke <code>UserFactory.createUser(type)</code> without scattering <code>new</code> statements across client code:</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="pill-btn active" onclick="runFactorySim('Student')">Create "Student"</button>
+            <button class="pill-btn" onclick="runFactorySim('Faculty')">Create "Faculty"</button>
+            <button class="pill-btn" onclick="runFactorySim('Administrator')">Create "Administrator"</button>
+          </div>
+          <div class="sandbox-console" id="factoryConsole">
+            &gt; UserFactory.createUser("Student")<br>
+            &gt; Returned concrete instance: <strong>Student</strong> implementing <strong>IUser</strong> (Role: Enrolled Learner)
+          </div>
+        </div>
+      `
+    },
+    singleton: {
+      svg: `
+        <rect x="105" y="45" width="250" height="175" rx="8" fill="#162033" stroke="#14b8a6" stroke-width="2.5"/>
+        <text x="230" y="75" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">ConfigurationManager</text>
+        <line x1="105" y1="88" x2="355" y2="88" stroke="#14b8a6" stroke-width="1.8"/>
+        <text x="120" y="112" fill="#fcd34d" font-family="monospace" font-size="11.5">- instance : ConfigurationManager</text>
+        <line x1="105" y1="126" x2="355" y2="126" stroke="#14b8a6" stroke-width="1.8"/>
+        <text x="120" y="152" fill="#fda4af" font-family="monospace" font-size="11.5">- ConfigurationManager()</text>
+        <text x="120" y="176" fill="#5eead4" font-family="monospace" font-size="11.5">+ getInstance() : ConfigMgr</text>
+        <path d="M 355 168 C 395 168, 395 108, 355 108" fill="none" stroke="#14b8a6" stroke-width="2"/>
+      `,
+      simHtml: `
+        <div class="concept-box teal">
+          <h4>Singleton Pattern Simulator (School ConfigurationManager)</h4>
+          <p style="margin-bottom:0.75rem;">Private constructor blocks <code>new ConfigurationManager()</code>. All screens call <code>getInstance()</code> and receive the exact same memory reference:</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn-primary" style="padding:6px 12px;font-size:0.8rem;" onclick="runSingletonSim('get')">Call getInstance() from UI Screen</button>
+            <button class="btn-secondary" style="padding:6px 12px;font-size:0.8rem;" onclick="runSingletonSim('new')">Attempt new ConfigurationManager()</button>
+          </div>
+          <div class="sandbox-console" id="singletonConsole">
+            &gt; Screen_A called ConfigurationManager.getInstance() &rarr; Reference: <strong>0x7F9A2C (Singleton #1)</strong>
+          </div>
+        </div>
+      `
+    },
+    composite: {
+      svg: `
+        <rect x="150" y="20" width="160" height="75" rx="6" fill="#111827" stroke="#6366f1" stroke-width="2.2"/>
+        <text x="230" y="45" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Component</text>
+        <line x1="150" y1="54" x2="310" y2="54" stroke="#6366f1"/>
+        <text x="162" y="75" fill="#a5b4fc" font-family="monospace" font-size="11">+ operation() / delete()</text>
+
+        <line x1="140" y1="145" x2="205" y2="95" stroke="#14b8a6" stroke-width="2"/>
+        <line x1="320" y1="145" x2="255" y2="95" stroke="#14b8a6" stroke-width="2"/>
+
+        <rect x="65" y="145" width="130" height="65" rx="6" fill="#162033" stroke="#14b8a6" stroke-width="2"/>
+        <text x="130" y="175" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Leaf (File)</text>
+        <text x="130" y="194" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="middle">Single Object</text>
+
+        <rect x="265" y="145" width="145" height="65" rx="6" fill="#162033" stroke="#f59e0b" stroke-width="2"/>
+        <text x="337" y="175" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Composite (Folder)</text>
+        <text x="337" y="194" fill="#fcd34d" font-family="monospace" font-size="10" text-anchor="middle">Holds Children[]</text>
+      `,
+      simHtml: `
+        <div class="concept-box amber">
+          <h4>Composite Tree Simulator (Slide File Explorer)</h4>
+          <p style="margin-bottom:0.75rem;">Clients treat individual <code>File (Leaf)</code> objects and nested <code>Folder (Composite)</code> trees uniformly via the same <code>copy()</code> command:</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn-secondary" style="padding:6px 12px;font-size:0.8rem;" onclick="runCompositeSim('leaf')">Execute copy() on Leaf: "Notes.pdf"</button>
+            <button class="btn-primary" style="padding:6px 12px;font-size:0.8rem;" onclick="runCompositeSim('folder')">Execute copy() on Composite: "Week9_Folder/"</button>
+          </div>
+          <div class="sandbox-console" id="compositeConsole">
+            &gt; folder.copy() invoked uniformly:<br>
+            &nbsp;&nbsp;&#9500;&#9472; Copying Leaf: LectureSlides.pdf<br>
+            &nbsp;&nbsp;&#9492;&#9472; Copying Sub-Composite: LabFiles/ &rarr; Copying Leaf: Diagram.png
+          </div>
+        </div>
+      `
+    },
+    observer: {
+      svg: `
+        <rect x="25" y="30" width="185" height="90" rx="6" fill="#162033" stroke="#6366f1" stroke-width="2.2"/>
+        <text x="117" y="55" fill="#f8fafc" font-family="sans-serif" font-size="13.5" font-weight="bold" text-anchor="middle">AbstractSubject</text>
+        <line x1="25" y1="64" x2="210" y2="64" stroke="#6366f1"/>
+        <text x="34" y="84" fill="#a5b4fc" font-family="monospace" font-size="10">+ attachObserver(o)</text>
+        <text x="34" y="102" fill="#a5b4fc" font-family="monospace" font-size="10"># notify()</text>
+
+        <line x1="210" y1="75" x2="265" y2="75" stroke="#14b8a6" stroke-width="2" stroke-dasharray="4,3"/>
+
+        <rect x="265" y="30" width="165" height="75" rx="6" fill="#111827" stroke="#14b8a6" stroke-width="2"/>
+        <text x="347" y="52" fill="#5eead4" font-family="monospace" font-size="9.5" text-anchor="middle">&laquo;interface&raquo;</text>
+        <text x="347" y="70" fill="#f8fafc" font-family="sans-serif" font-size="13.5" font-weight="bold" text-anchor="middle">IObserver</text>
+        <text x="347" y="92" fill="#e2e8f0" font-family="monospace" font-size="10.5" text-anchor="middle">+ update()</text>
+
+        <rect x="265" y="155" width="165" height="65" rx="6" fill="#162033" stroke="#f59e0b" stroke-width="2"/>
+        <text x="347" y="185" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">ConcreteObserver</text>
+        <text x="347" y="203" fill="#fcd34d" font-family="monospace" font-size="10" text-anchor="middle">UI Component</text>
+        <line x1="347" y1="155" x2="347" y2="105" stroke="#14b8a6" stroke-width="2" stroke-dasharray="4,3"/>
+      `,
+      simHtml: `
+        <div class="concept-box rose">
+          <h4>Observer Pub-Sub Simulator (Event-Handling UI)</h4>
+          <p style="margin-bottom:0.75rem;">When the <code>Subject</code> changes state, <code>notify()</code> automatically triggers <code>update()</code> on all attached UI Observers:</p>
+          <button class="btn-primary" style="padding:6px 14px;font-size:0.8rem;" onclick="runObserverSim()">Mutate Subject State &amp; Call notify()</button>
+          <div class="sandbox-console" id="observerConsole">
+            &gt; Subject state updated to: <strong>v1.0 (Initial)</strong><br>
+            &gt; Notified 3 Observers: [ChartWidget.update(), BadgeCounter.update(), StatusBanner.update()]
+          </div>
+        </div>
+      `
+    }
+  };
+
+  let singletonCalls = 1;
+  let observerVersion = 1;
+
+  window.runFactorySim = function(type) {
+    const roles = { Student: 'Enrolled Learner', Faculty: 'Course Instructor', Administrator: 'System Admin' };
+    document.getElementById('factoryConsole').innerHTML = `
+      &gt; UserFactory.createUser("${type}")<br>
+      &gt; Returned concrete instance: <strong>${type}</strong> implementing <strong>IUser</strong> (Role: ${roles[type]})
+    `;
+  };
+
+  window.runSingletonSim = function(action) {
+    if (action === 'get') {
+      singletonCalls++;
+      document.getElementById('singletonConsole').innerHTML = `
+        &gt; Screen_${String.fromCharCode(64 + singletonCalls)} called ConfigurationManager.getInstance() &rarr; Reference: <strong>0x7F9A2C (Identical Instance!)</strong>
+      `;
+    } else {
+      document.getElementById('singletonConsole').innerHTML = `
+        &gt; <span style="color:#f43f5e;">Compile Error: ConfigurationManager() has private access!</span> Use getInstance() instead.
+      `;
+    }
+  };
+
+  window.runCompositeSim = function(kind) {
+    if (kind === 'leaf') {
+      document.getElementById('compositeConsole').innerHTML = `
+        &gt; file.copy() invoked on Leaf:<br>
+        &nbsp;&nbsp;&#9492;&#9472; Copying single file: Notes.pdf (240 KB)
+      `;
+    } else {
+      document.getElementById('compositeConsole').innerHTML = `
+        &gt; folder.copy() invoked uniformly on Composite:<br>
+        &nbsp;&nbsp;&#9500;&#9472; Copying Leaf: LectureSlides.pdf<br>
+        &nbsp;&nbsp;&#9492;&#9472; Copying Sub-Composite: LabFiles/ &rarr; Copying Leaf: Diagram.png
+      `;
+    }
+  };
+
+  window.runObserverSim = function() {
+    observerVersion++;
+    document.getElementById('observerConsole').innerHTML = `
+      &gt; Subject state mutated to: <strong>v${observerVersion}.0 (Timestamp: ${new Date().toLocaleTimeString()})</strong><br>
+      &gt; Subject.notify() triggered &rarr; ChartWidget.update(), BadgeCounter.update(), StatusBanner.update()
+    `;
+  };
+
+  function renderFeaturedGof(key) {
+    state.featuredGof = key;
+    const item = featuredGofData[key];
+    document.getElementById('featuredGofSvg').innerHTML = item.svg;
+    document.getElementById('featuredGofSimBox').innerHTML = item.simHtml;
+  }
+
+  document.querySelectorAll('#featuredGofTabs .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#featuredGofTabs .pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderFeaturedGof(btn.dataset.fgof);
+    });
+  });
+  renderFeaturedGof('factory');
+
+  // Complete 23 GoF Catalog
+  const all23GofPatterns = [
+    // Creational (5)
+    { name: 'Factory Method', cat: 'Creational', intent: 'Provides an interface/method for creating objects, letting subclasses or factory methods decide which concrete class to instantiate at runtime.', app: 'When concrete object types must be decided dynamically at runtime or new types will be added over time.', example: 'Instantiating Student, Faculty, or Administrator based on user type string; or Bike vs. Van delivery drivers.' },
+    { name: 'Singleton', cat: 'Creational', intent: 'Ensures a class has exactly one instance throughout the application lifecycle and provides a global access point to it.', app: 'Managing unique shared system resources (DB connection pool, console) or global configuration variables.', example: 'A school application sharing a single ConfigurationManager instance via private constructor + GetInstance().' },
+    { name: 'Abstract Factory', cat: 'Creational', intent: 'Provides an interface for creating families of related or dependent objects without specifying their concrete classes.', app: 'When a system must be configured with one of multiple families of UI or domain products.', example: 'An application offering Light and Dark themes that produce matching families of buttons, menus, and dialogs.' },
+    { name: 'Builder', cat: 'Creational', intent: 'Separates the construction of a complex object from its representation so the same construction process can create different representations step-by-step.', app: 'When constructing complex objects with many optional components or multi-step workflows.', example: 'A travel booking system letting users choose flights, seats, baggage, and meals step-by-step.' },
+    { name: 'Prototype', cat: 'Creational', intent: 'Creates new objects by cloning/copying an existing prototype instance rather than instantiating from scratch.', app: 'When object creation is expensive or objects share pre-configured formatting/templates.', example: 'A slide editor duplicating a formatted slide layout so users only edit text content.' },
+    // Structural (7)
+    { name: 'Adapter', cat: 'Structural', intent: 'Converts the interface of a class into another interface clients expect, enabling incompatible interfaces to collaborate.', app: 'Integrating legacy components or third-party APIs whose method signatures do not match internal interfaces.', example: 'A payment processing system integrating a new third-party payment provider with incompatible method names.' },
+    { name: 'Bridge', cat: 'Structural', intent: 'Decouples an abstraction from its implementation so the two can vary independently.', app: 'Avoiding a Cartesian explosion of subclasses when both abstractions and platform implementations vary.', example: 'A universal remote control abstraction working across TV or Projector device implementations.' },
+    { name: 'Composite', cat: 'Structural', intent: 'Composes objects into tree structures to represent part-whole hierarchies, letting clients treat individual objects (Leaf) and compositions (Composite) uniformly.', app: 'Hierarchical tree structures like file systems, UI containers, or organizational charts.', example: 'A file explorer running Copy or Delete uniformly on single files (Leaf) and folders (Composite).' },
+    { name: 'Decorator', cat: 'Structural', intent: 'Attaches additional responsibilities to an object dynamically at runtime without altering its underlying class structure.', app: 'Adding flexible, stackable features to individual objects without static subclass explosion.', example: 'A coffee ordering system dynamically adding milk, caramel, or whipped cream toppings and summing prices.' },
+    { name: 'Facade', cat: 'Structural', intent: 'Provides a unified, simplified higher-level interface to a set of interfaces in a complex subsystem.', app: 'Decoupling clients from complex multi-step subsystem interactions.', example: 'A single "Place Order" button executing payment processing, inventory verification, and shipping booking.' },
+    { name: 'Flyweight', cat: 'Structural', intent: 'Minimizes memory usage by sharing fine-grained reusable intrinsic data across large numbers of similar objects.', app: 'Applications rendering thousands or millions of fine-grained objects with shared state.', example: 'A video game rendering thousands of forest trees while sharing common texture and 3D mesh data.' },
+    { name: 'Proxy', cat: 'Structural', intent: 'Provides a surrogate or placeholder object to control access, lazy-load, cache, or log requests to another target object.', app: 'Deferring expensive object initialization (virtual proxy) or enforcing access control (protection proxy).', example: 'An image gallery showing lightweight thumbnail proxies first, loading full-resolution photos only when clicked.' },
+    // Behavioral (11)
+    { name: 'Observer', cat: 'Behavioral', intent: 'Defines a one-to-many dependency between objects so when one Subject changes state, all attached Observers are notified and updated automatically.', app: 'Event-driven systems, reactive UI views, and publish-subscribe notifications.', example: 'An event-handling system notifying multiple UI components when underlying data state changes.' },
+    { name: 'Chain of Responsibility', cat: 'Behavioral', intent: 'Avoids coupling the sender of a request to its receiver by giving multiple chained objects a chance to handle the request.', app: 'Multi-tier escalation workflows or middleware request pipelines.', example: 'An IT helpdesk ticket passing from Chatbot -> Support Staff -> Specialist until resolved.' },
+    { name: 'Command', cat: 'Behavioral', intent: 'Encapsulates a request as an object, enabling parameterization of clients, request queuing/logging, and undoable operations.', app: 'Implementing Undo/Redo stacks, macro recording, or task queues.', example: 'Text editor actions encapsulated as executable Command objects supporting Undo.' },
+    { name: 'Interpreter', cat: 'Behavioral', intent: 'Given a language, defines a representation for its grammar along with an interpreter that evaluates sentences in that language.', app: 'Domain-specific languages (DSLs), rule engines, and mathematical expression evaluators.', example: 'Evaluating boolean search filter expressions in an enterprise query bar.' },
+    { name: 'Iterator', cat: 'Behavioral', intent: 'Provides a way to access elements of an aggregate collection sequentially without exposing its underlying internal data structure.', app: 'Traversing lists, trees, or graphs uniformly without leaking representation details.', example: 'Iterating through a playlist or collection via hasNext() and next() methods.' },
+    { name: 'Mediator', cat: 'Behavioral', intent: 'Defines an object that encapsulates how a set of objects interact, promoting loose coupling by preventing objects from referring to each other explicitly.', app: 'Complex UI dialog forms or air-traffic control hubs where many peers coordinate.', example: 'A chat room or dialog controller coordinating state between buttons, checkboxes, and text fields.' },
+    { name: 'Memento', cat: 'Behavioral', intent: 'Captures and externalizes an object’s internal state without violating encapsulation so the object can be restored to this state later.', app: 'Checkpoints, save-game snapshots, and state rollback mechanisms.', example: 'Saving document snapshots so a user can revert to a previous checkpoint.' },
+    { name: 'State', cat: 'Behavioral', intent: 'Allows an object to alter its behavior when its internal state changes, appearing to change its class.', app: 'Finite state machines (e.g., Order status: New -> Paid -> Shipped -> Delivered).', example: 'A vending machine or order object changing valid operations based on its current state.' },
+    { name: 'Strategy', cat: 'Behavioral', intent: 'Defines a family of algorithms, encapsulating each one and making them interchangeable at runtime based on context.', app: 'Swapping sorting, pricing, routing, or payment algorithms dynamically without conditional clutter.', example: 'A navigation app switching between Fastest Route, Scenic Route, and Walking strategies.' },
+    { name: 'Template Method', cat: 'Behavioral', intent: 'Defines the skeleton of an algorithm in a base method, deferring specific steps to subclasses without changing the algorithm’s overall structure.', app: 'Standardizing invariant multi-step workflows while allowing customizable hooks.', example: 'A report generator fixing Load Data -> Analyze -> Export steps while subclasses customize Analyze.' },
+    { name: 'Visitor', cat: 'Behavioral', intent: 'Represents an operation to be performed on elements of an object structure, letting you define new operations without changing the classes of elements operated upon.', app: 'Adding new reporting/tax/export operations across a stable hierarchy of element classes.', example: 'A shopping cart tax calculator applying tax rules across Books, Groceries, and Electronics via a Visitor.' }
+  ];
+
+  function renderGofCatalog() {
+    const filtered = all23GofPatterns.filter(p => {
+      const catMatch = state.gofCatFilter === 'all' || p.cat === state.gofCatFilter;
+      const q = state.gofSearch.toLowerCase();
+      const textMatch = !q || p.name.toLowerCase().includes(q) || p.intent.toLowerCase().includes(q) || p.example.toLowerCase().includes(q);
+      return catMatch && textMatch;
+    });
+
+    document.getElementById('gofCountBadge').textContent = `Showing ${filtered.length} Pattern${filtered.length === 1 ? '' : 's'}`;
+
+    const catTagClass = { Creational: 'tag-indigo', Structural: 'tag-teal', Behavioral: 'tag-amber' };
+    document.getElementById('gofCatalogGrid').innerHTML = filtered.map(p => `
+      <div class="gof-card ${p.name === state.selectedGofName ? 'active' : ''}" data-gofname="${p.name}">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:0.4rem;">
+            <strong style="font-size:0.93rem;">${p.name}</strong>
+            <span class="tag ${catTagClass[p.cat]}" style="font-size:0.65rem;">${p.cat}</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-secondary);">${p.intent.slice(0, 88)}...</p>
+        </div>
+        <div style="margin-top:0.6rem;font-family:var(--font-mono);font-size:0.71rem;color:var(--accent-teal);">[Inspect Millett Template &rarr;]</div>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.gof-card').forEach(card => {
+      card.addEventListener('click', () => {
+        state.selectedGofName = card.dataset.gofname;
+        renderGofCatalog();
+      });
+    });
+
+    const selected = all23GofPatterns.find(p => p.name === state.selectedGofName) || filtered[0];
+    if (selected) {
+      document.getElementById('gofSelectedDetailPanel').innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:0.65rem;">
+          <h4 style="font-size:1.05rem;color:var(--accent-indigo);">Pattern Name: ${selected.name}</h4>
+          <span class="tag ${catTagClass[selected.cat]}">${selected.cat} Pattern</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.45rem;font-size:0.86rem;">
+          <div><strong>Intent:</strong> ${selected.intent}</div>
+          <div><strong>Applicability:</strong> ${selected.app}</div>
+          <div style="background:var(--bg-card);padding:0.65rem 0.9rem;border-radius:8px;border:1px solid var(--border-color);margin-top:0.25rem;">
+            <strong style="color:var(--accent-teal);">Slide Example / How It Works:</strong> ${selected.example}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  document.querySelectorAll('#gofCategoryFilters .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#gofCategoryFilters .pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.gofCatFilter = btn.dataset.cat;
+      renderGofCatalog();
+    });
+  });
+
+  document.getElementById('gofCatalogSearch').addEventListener('input', (e) => {
+    state.gofSearch = e.target.value;
+    renderGofCatalog();
+  });
+  renderGofCatalog();
+
+  // ==================== GLOBAL SEARCH BAR ====================
+  const searchIndex = [
+    { title: 'IEEE 1471 Software Architecture Definition', mod: 1, sub: 'Module 1: Architecture Overview' },
+    { title: '5-Step Software Architecture Process', mod: 1, sub: 'Module 1: Process & Feedback Loops' },
+    { title: 'Blog App Trade-Off: Mobile Web vs Native App', mod: 1, sub: 'Module 1: Quality Attributes' },
+    { title: 'C4 Model (Context, Containers, Components, Code)', mod: 2, sub: 'Module 2: Documentation Frameworks' },
+    { title: '4+1 Architectural View Model & Scenarios (+1)', mod: 2, sub: 'Module 2: Documentation Frameworks' },
+    { title: '5 System Categories (Blackboard, Pipe & Filter, MVC)', mod: 3, sub: 'Module 3: Architectural Patterns' },
+    { title: 'Layered Software Architecture Pattern', mod: 3, sub: 'Module 3: Hierarchical Pattern' },
+    { title: 'Client-Server Pattern (Email IMAP & SMTP)', mod: 3, sub: 'Module 3: Distributed Pattern' },
+    { title: 'Model-View-Controller (MVC) 5-Step Workflow', mod: 3, sub: 'Module 3: Interactive Pattern' },
+    ...all23GofPatterns.map(p => ({ title: `${p.name} (${p.cat} Pattern)`, mod: 4, sub: `Module 4: ${p.intent.slice(0, 52)}...`, gof: p.name })),
+    { title: 'Architectural vs Design Patterns Comparison', mod: 5, sub: 'Module 5: 5-Dimension Matrix' },
+    { title: 'W9 Labtorial & AI-ORATE Formative Assessment', mod: 5, sub: 'Module 5: Entrepreneurship Portal' },
+    { title: 'Chapter 9 Exam Readiness Quiz (10 Questions)', mod: 6, sub: 'Module 6: Active Recall' }
+  ];
+
+  const searchInput = document.getElementById('globalSearchInput');
+  const searchDropdown = document.getElementById('searchResultsDropdown');
+
+  searchInput.addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) {
+      searchDropdown.classList.remove('open');
+      return;
+    }
+    const hits = searchIndex.filter(item => item.title.toLowerCase().includes(q) || item.sub.toLowerCase().includes(q)).slice(0, 8);
+    if (!hits.length) {
+      searchDropdown.innerHTML = `<div class="search-hit" style="color:var(--text-muted);">No matching topics found.</div>`;
+    } else {
+      searchDropdown.innerHTML = hits.map((h, i) => `
+        <div class="search-hit" data-hitidx="${i}">
+          <div style="font-weight:700;color:var(--text-primary);">${h.title}</div>
+          <div style="font-size:0.72rem;color:var(--accent-teal);">${h.sub}</div>
+        </div>
+      `).join('');
+      searchDropdown.querySelectorAll('.search-hit').forEach((el, idx) => {
+        el.addEventListener('click', () => {
+          const hit = hits[idx];
+          if (hit.gof) {
+            state.selectedGofName = hit.gof;
+            state.gofCatFilter = 'all';
+            state.gofSearch = '';
+            renderGofCatalog();
+          }
+          goToModule(hit.mod);
+          searchDropdown.classList.remove('open');
+          searchInput.value = '';
+        });
+      });
+    }
+    searchDropdown.classList.add('open');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.sidebar-search')) searchDropdown.classList.remove('open');
+  });
+
+  // ==================== MODULE 6: EXAM READINESS QUIZ ====================
+  const quizQuestions = [
+    {
+      q: '1. According to the IEEE 1471 standard definition, how is Software Architecture defined?',
+      options: [
+        'The step-by-step method algorithms inside individual classes.',
+        'The fundamental organization of a system, embodied in its components, their relationships to one another and the environment, and the principles governing its design and evolution.',
+        'A list of user interface wireframes and database SQL schemas.',
+        'The programming language syntax used during software construction.'
+      ],
+      correct: 1,
+      exp: 'IEEE 1471 defines software architecture as the fundamental organization of a system, embodied in its components, relationships to one another and the environment, and governing principles.'
+    },
+    {
+      q: '2. In the Blog Application architecture trade-off example from the slides, what is a key advantage of a Native Mobile App (with Local DB) over a Mobile Web App?',
+      options: [
+        'It operates on any mobile browser without platform-specific code.',
+        'It requires zero storage space on user devices.',
+        'It supports offline operation using a local database, offers faster UI response, and accesses device hardware sensors.',
+        'It only needs to be updated once centrally on the web server.'
+      ],
+      correct: 2,
+      exp: 'Native Mobile Apps with a Local DB enable offline operation, smoother native UI performance, and direct hardware access, at the trade-off of higher multi-platform maintenance cost.'
+    },
+    {
+      q: '3. What are the four progressive zoom levels of the C4 Architectural Documentation Model?',
+      options: [
+        'Classes, Components, Cloud, Customers',
+        'System Context, Containers, Components, Code',
+        'Conceptual, Concrete, Coded, Compiled',
+        'Client, Controller, Cache, Cluster'
+      ],
+      correct: 1,
+      exp: 'The C4 model zooms progressively from Level 1 (System Context) -> Level 2 (Containers) -> Level 3 (Components) -> Level 4 (Code).'
+    },
+    {
+      q: '4. In the 4+1 Architectural View Model, which view connects, illustrates, and validates all four core views using selected Use Cases (e.g., UC-00 Search Product)?',
+      options: [
+        'Physical / Deployment View',
+        'Development / Implementation View',
+        'User View / Scenarios (+1 View)',
+        'Process View'
+      ],
+      correct: 2,
+      exp: 'The +1 Scenarios (User) View uses concrete Use Cases to unify and validate the Logical, Process, Development, and Physical views.'
+    },
+    {
+      q: '5. Which architectural pattern is best suited for "Data flow" systems such as Sensor Data Processing Systems?',
+      options: [
+        'Blackboard Pattern',
+        'Pipe and Filter Pattern',
+        'Model-View-Controller (MVC) Pattern',
+        'Singleton Pattern'
+      ],
+      correct: 1,
+      exp: 'Data flow systems focused on transport, transformation, and sequential stream processing use the Pipe and Filter architectural pattern.'
+    },
+    {
+      q: '6. In the Client-Server Email System slide example, which two interfaces are exposed by the Retrieval and Transport sub-components of EmailServer?',
+      options: [
+        'HTTP and FTP',
+        'IMAP (Retrieval) and SMTP (Transport)',
+        'OAuth and SQL',
+        'TCP and UDP'
+      ],
+      correct: 1,
+      exp: 'EmailServer contains a Retrieval sub-component implementing IMAP (for downloading emails) and a Transport sub-component implementing SMTP (for outbound delivery).'
+    },
+    {
+      q: '7. In the Model-View-Controller (MVC) interaction workflow, what happens immediately after the Controller updates the Model?',
+      options: [
+        'The User directly edits the database.',
+        'The Model sends state change notifications to the View, which then updates the UI display.',
+        'The Controller deletes the View.',
+        'The View restarts the server.'
+      ],
+      correct: 1,
+      exp: 'In MVC: (1) User triggers View -> (2) View forwards to Controller -> (3) Controller updates Model -> (4) Model notifies View -> (5) View updates UI.'
+    },
+    {
+      q: '8. Which Gang of Four (GoF) Design Pattern ensures a class has only one instance via a private constructor and provides a global getInstance() access point?',
+      options: [
+        'Factory Method',
+        'Prototype',
+        'Singleton',
+        'Flyweight'
+      ],
+      correct: 2,
+      exp: 'The Singleton pattern uses a private static instance field, private constructor, and public static getInstance() method (e.g., ConfigurationManager).'
+    },
+    {
+      q: '9. Which Structural Design Pattern allows clients to treat individual objects (Leaf) and tree compositions of objects (Composite) uniformly—such as Copy/Delete on files and folders?',
+      options: [
+        'Adapter',
+        'Composite',
+        'Proxy',
+        'Bridge'
+      ],
+      correct: 1,
+      exp: 'The Composite pattern organizes Leaf and Composite objects into part-whole tree hierarchies behind a uniform Component interface.'
+    },
+    {
+      q: '10. How do Architectural Patterns differ from Design Patterns in terms of scope and tooling level?',
+      options: [
+        'Architectural Patterns are small-level tools for single classes; Design Patterns are large-level tools for entire distributed servers.',
+        'Architectural Patterns are large-level tools for macro system partitioning and global quality attributes; Design Patterns are small-level tools for refining classes and object interactions.',
+        'Design Patterns are only used in hardware engineering.',
+        'There is no distinction between them.'
+      ],
+      correct: 1,
+      exp: 'Architectural Patterns operate at the macro-system level (partitioning, scalability, security), whereas Design Patterns operate at the micro-class/subsystem implementation level.'
+    }
+  ];
+
+  function renderQuiz() {
+    const container = document.getElementById('quizContainer');
+    container.innerHTML = quizQuestions.map((item, qIdx) => {
+      const answered = state.quizAnswers[qIdx] !== undefined;
+      const chosen = state.quizAnswers[qIdx];
+      return `
+        <div class="quiz-card">
+          <div class="quiz-q">${item.q}</div>
+          <div class="quiz-opts">
+            ${item.options.map((opt, oIdx) => {
+              let cls = 'quiz-opt';
+              if (answered) {
+                if (oIdx === item.correct) cls += ' correct';
+                else if (oIdx === chosen) cls += ' incorrect';
+              }
+              return `
+                <button class="${cls}" ${answered ? 'disabled' : ''} onclick="answerQuiz(${qIdx}, ${oIdx})">
+                  <span style="font-family:var(--font-mono);font-weight:700;color:var(--accent-teal);">${String.fromCharCode(65 + oIdx)}.</span>
+                  <span>${opt}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+          <div class="quiz-exp ${answered ? 'show' : ''}" style="background:${chosen === item.correct ? 'rgba(20,184,166,0.14)' : 'rgba(244,63,94,0.14)'};border:1px solid ${chosen === item.correct ? 'rgba(20,184,166,0.38)' : 'rgba(244,63,94,0.38)'};">
+            <strong>${chosen === item.correct ? '&#10003; Correct:' : '&#10007; Incorrect:'}</strong> ${item.exp}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    updateQuizScore();
+  }
+
+  window.answerQuiz = function(qIdx, oIdx) {
+    if (state.quizAnswers[qIdx] !== undefined) return;
+    state.quizAnswers[qIdx] = oIdx;
+    renderQuiz();
+  };
+
+  function updateQuizScore() {
+    const answeredCount = Object.keys(state.quizAnswers).length;
+    let score = 0;
+    Object.entries(state.quizAnswers).forEach(([q, o]) => {
+      if (quizQuestions[Number(q)].correct === o) score++;
+    });
+
+    document.getElementById('quizScoreBadge').textContent = `Score: ${score} / ${quizQuestions.length}`;
+    const summary = document.getElementById('quizSummaryCard');
+    if (answeredCount === quizQuestions.length) {
+      summary.style.display = 'block';
+      document.getElementById('quizFinalTitle').textContent = `Final Score: ${score} / ${quizQuestions.length} (${Math.round((score / quizQuestions.length) * 100)}%)`;
+      document.getElementById('quizFinalMsg').textContent = score >= 8
+        ? 'Excellent mastery! You are well-prepared for Chapter 9 Software Architecture & Design Patterns exam questions.'
+        : 'Review the explanations highlighted above and retake the quiz to hit 80%+ mastery.';
+    } else {
+      summary.style.display = 'none';
+    }
+  }
+
+  window.resetQuiz = function() {
+    state.quizAnswers = {};
+    renderQuiz();
+  };
+
+  document.getElementById('resetQuizBtn').addEventListener('click', window.resetQuiz);
+  renderQuiz();
+
+  // ==================== DOWNLOAD SELF-CONTAINED HTML ====================
+  document.getElementById('downloadHtmlBtn').addEventListener('click', () => {
+    const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Chapter-9-Architectural-and-Design-Patterns.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    const toast = document.getElementById('toastNotification');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  });
+})();
+</script>
+</body>
+</html>

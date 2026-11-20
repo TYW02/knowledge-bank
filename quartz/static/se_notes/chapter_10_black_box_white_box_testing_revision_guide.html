@@ -1,0 +1,2406 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 10 Revision Studio: Black-Box &amp; White-Box Testing</title>
+<style>
+  :root {
+    --bg-primary: #090d16;
+    --bg-secondary: #111827;
+    --bg-card: #162033;
+    --bg-card-alt: #1d2942;
+    --bg-stage: #070b12;
+    --border-color: #26344e;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-indigo: #6366f1;
+    --accent-indigo-glow: rgba(99, 102, 241, 0.25);
+    --accent-teal: #14b8a6;
+    --accent-teal-glow: rgba(20, 184, 166, 0.22);
+    --accent-sky: #38bdf8;
+    --accent-amber: #f59e0b;
+    --accent-amber-glow: rgba(245, 158, 11, 0.2);
+    --accent-rose: #f43f5e;
+    --accent-rose-glow: rgba(244, 63, 94, 0.2);
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.28);
+  }
+
+  [data-theme="light"] {
+    --bg-primary: #f1f5f9;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-alt: #f8fafc;
+    --bg-stage: #f8fafc;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --accent-indigo: #4f46e5;
+    --accent-indigo-glow: rgba(79, 70, 229, 0.14);
+    --accent-teal: #0d9488;
+    --accent-teal-glow: rgba(13, 148, 136, 0.14);
+    --accent-sky: #0284c7;
+    --accent-amber: #d97706;
+    --accent-amber-glow: rgba(217, 119, 6, 0.14);
+    --accent-rose: #e11d48;
+    --accent-rose-glow: rgba(225, 29, 72, 0.14);
+    --shadow-card: 0 4px 16px rgba(15, 23, 42, 0.06);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 305px;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    transition: transform 0.3s ease, background-color 0.25s ease;
+  }
+
+  .sidebar-header {
+    padding: 1.25rem 1.4rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.55rem;
+  }
+
+  .course-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.71rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--accent-teal);
+    background: var(--accent-teal-glow);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(20, 184, 166, 0.35);
+  }
+
+  .theme-toggle-btn {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 4px 9px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+  }
+  .theme-toggle-btn:hover { border-color: var(--accent-indigo); }
+
+  .sidebar-title {
+    font-size: 1.06rem;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+
+  .sidebar-sub {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    margin-top: 0.2rem;
+  }
+
+  /* Global Search */
+  .sidebar-search {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.81rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+  .search-input:focus { border-color: var(--accent-indigo); }
+
+  .search-results-dropdown {
+    position: absolute;
+    left: 1.25rem;
+    right: 1.25rem;
+    top: calc(100% - 4px);
+    background: var(--bg-card);
+    border: 1px solid var(--accent-indigo);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 60;
+    display: none;
+  }
+  .search-results-dropdown.open { display: block; }
+
+  .search-hit {
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  .search-hit:last-child { border-bottom: none; }
+  .search-hit:hover { background: var(--accent-indigo-glow); }
+
+  /* Progress */
+  .progress-box {
+    padding: 0.85rem 1.4rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+  }
+
+  .progress-track {
+    height: 7px;
+    background: var(--bg-primary);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 17%;
+    background: linear-gradient(90deg, var(--accent-indigo), var(--accent-teal));
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+
+  .nav-list {
+    list-style: none;
+    padding: 0.75rem;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .nav-btn {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.74rem 0.85rem;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+
+  .nav-btn:hover {
+    background: var(--bg-card-alt);
+    color: var(--text-primary);
+  }
+
+  .nav-btn.active {
+    background: linear-gradient(135deg, var(--accent-indigo-glow), var(--accent-teal-glow));
+    border-color: rgba(99, 102, 241, 0.45);
+    color: var(--text-primary);
+  }
+
+  .nav-num {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-top: 1px;
+  }
+
+  .nav-btn.active .nav-num {
+    background: var(--accent-indigo);
+    border-color: var(--accent-indigo);
+    color: #fff;
+  }
+
+  .nav-btn.visited .nav-num {
+    background: var(--accent-teal);
+    border-color: var(--accent-teal);
+    color: #042f2e;
+  }
+
+  .nav-title {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .nav-desc {
+    display: block;
+    font-size: 0.71rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .sidebar-footer {
+    padding: 0.9rem 1.25rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .download-btn {
+    width: 100%;
+    padding: 0.68rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(20, 184, 166, 0.45);
+    background: var(--accent-teal-glow);
+    color: var(--accent-teal);
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .download-btn:hover {
+    background: var(--accent-teal);
+    color: #ffffff;
+    box-shadow: 0 0 18px var(--accent-teal-glow);
+  }
+
+  /* Mobile Topbar */
+  .mobile-topbar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 58px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 1rem;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 45;
+  }
+
+  .hamburger-btn {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 11px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 48;
+  }
+
+  /* Main Area */
+  .main-content {
+    margin-left: 305px;
+    flex: 1;
+    padding: 2.2rem 2.75rem 4rem;
+    max-width: 1280px;
+  }
+
+  .module-section {
+    display: none;
+    animation: fadeSlide 0.28s ease-out;
+  }
+
+  .module-section.active { display: block; }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .module-header {
+    margin-bottom: 1.8rem;
+    padding-bottom: 1.15rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+
+  .module-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-teal);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.3rem;
+  }
+
+  .module-title {
+    font-size: 1.78rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .module-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.93rem;
+    max-width: 800px;
+    margin-top: 0.4rem;
+  }
+
+  /* Cards & Grids */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 1.75rem;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .card-title {
+    font-size: 1.12rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.71rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 6px;
+    text-transform: uppercase;
+  }
+
+  .tag-indigo { background: var(--accent-indigo-glow); color: var(--accent-indigo); border: 1px solid rgba(99, 102, 241, 0.38); }
+  .tag-teal { background: var(--accent-teal-glow); color: var(--accent-teal); border: 1px solid rgba(20, 184, 166, 0.38); }
+  .tag-amber { background: var(--accent-amber-glow); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.38); }
+  .tag-rose { background: var(--accent-rose-glow); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.38); }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.15rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.9rem; }
+
+  .concept-box {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent-indigo);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.15rem;
+  }
+  .concept-box.teal { border-left-color: var(--accent-teal); }
+  .concept-box.amber { border-left-color: var(--accent-amber); }
+  .concept-box.rose { border-left-color: var(--accent-rose); }
+
+  .concept-box h4 {
+    font-size: 0.93rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+    color: var(--text-primary);
+  }
+  .concept-box p, .concept-box li {
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+  }
+
+  /* Mathematical Formula Banner */
+  .formula-box {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(20, 184, 166, 0.12));
+    border: 1px solid rgba(99, 102, 241, 0.45);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.35rem;
+    margin: 0.85rem 0 1.2rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .formula-math {
+    font-family: 'Cambria Math', 'Times New Roman', Georgia, serif;
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.02em;
+  }
+
+  .formula-caption {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--accent-teal);
+    font-weight: 600;
+  }
+
+  /* Pill Tabs */
+  .pill-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .pill-btn {
+    padding: 0.5rem 0.92rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .pill-btn:hover { border-color: var(--accent-indigo); color: var(--text-primary); }
+  .pill-btn.active { background: var(--accent-indigo); border-color: var(--accent-indigo); color: #fff; }
+
+  /* Diagram Stage */
+  .diagram-stage {
+    background: #070b12;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    position: relative;
+    overflow-x: auto;
+  }
+
+  .diagram-stage svg, .diagram-stage canvas {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .inspector-panel {
+    margin-top: 1rem;
+    background: var(--bg-card-alt);
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    border-radius: var(--radius-md);
+    padding: 1.1rem 1.25rem;
+  }
+
+  /* Syntax-Highlighted Code Block */
+  .code-block {
+    background: #070b12;
+    border: 1px solid #26344e;
+    border-radius: var(--radius-md);
+    padding: 1rem 1.15rem;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.65;
+    color: #e2e8f0;
+    overflow-x: auto;
+  }
+
+  .code-line {
+    display: flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: background-color 0.25s ease;
+  }
+
+  .code-line.covered {
+    background: rgba(20, 184, 166, 0.2);
+    border-left: 3px solid #14b8a6;
+  }
+
+  .code-line.uncovered {
+    background: rgba(244, 63, 94, 0.14);
+    border-left: 3px solid #f43f5e;
+  }
+
+  .ln {
+    width: 28px;
+    color: #64748b;
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  .kw { color: #c084fc; font-weight: 600; }
+  .fn { color: #38bdf8; }
+  .str { color: #4ade80; }
+  .num { color: #fbbf24; }
+  .cmt { color: #64748b; font-style: italic; }
+
+  /* Tables */
+  .data-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.83rem;
+    text-align: left;
+  }
+
+  th {
+    background: var(--bg-card-alt);
+    color: var(--accent-teal);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    padding: 0.8rem 0.9rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  td {
+    padding: 0.78rem 0.9rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr.highlight-col td, td.highlight-cell, th.highlight-cell {
+    background: rgba(99, 102, 241, 0.22) !important;
+    color: var(--text-primary) !important;
+    font-weight: 700;
+  }
+
+  /* Form Controls */
+  .input-ctrl {
+    padding: 0.52rem 0.8rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    width: 110px;
+  }
+
+  /* Quiz */
+  .quiz-card {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .quiz-q {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .quiz-opts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .quiz-opt {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.86rem;
+    cursor: pointer;
+    display: flex;
+    gap: 0.65rem;
+    transition: all 0.18s ease;
+  }
+
+  .quiz-opt:hover:not(:disabled) {
+    border-color: var(--accent-indigo);
+    background: var(--accent-indigo-glow);
+  }
+
+  .quiz-opt.correct {
+    border-color: var(--accent-teal);
+    background: rgba(20, 184, 166, 0.2);
+  }
+
+  .quiz-opt.incorrect {
+    border-color: var(--accent-rose);
+    background: rgba(244, 63, 94, 0.2);
+  }
+
+  .quiz-exp {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.83rem;
+    display: none;
+  }
+  .quiz-exp.show { display: block; }
+
+  /* Footer Nav */
+  .module-footer-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-color);
+    gap: 1rem;
+  }
+
+  .btn-primary, .btn-secondary {
+    padding: 0.7rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--accent-indigo);
+    color: #fff;
+    border: 1px solid var(--accent-indigo);
+  }
+  .btn-primary:hover {
+    opacity: 0.92;
+    box-shadow: 0 0 18px var(--accent-indigo-glow);
+  }
+
+  .btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+  .btn-secondary:hover { border-color: var(--accent-teal); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--accent-teal);
+    color: var(--text-primary);
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    font-size: 0.84rem;
+    font-weight: 600;
+    z-index: 100;
+    transform: translateY(130%);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 980px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-backdrop.open { display: block; }
+    .mobile-topbar { display: flex; }
+    .main-content { margin-left: 0; padding: 5rem 1.2rem 3rem; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Mobile Topbar -->
+  <header class="mobile-topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="hamburger-btn" id="menuToggle" aria-label="Toggle Menu">&#9776;</button>
+      <span style="font-weight:700;font-size:0.92rem;">Ch. 10: Black-Box &amp; White-Box Testing</span>
+    </div>
+    <span class="tag tag-teal" id="mobileProgressTag">17%</span>
+  </header>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="header-top-row">
+        <span class="course-badge">&#9679; SE // CHAPTER 10</span>
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode">&#9788; Theme</button>
+      </div>
+      <h1 class="sidebar-title">Black-Box &amp; White-Box Testing</h1>
+      <p class="sidebar-sub">Interactive Revision &amp; Coverage Studio</p>
+    </div>
+
+    <div class="sidebar-search">
+      <input type="text" class="search-input" id="globalSearchInput" placeholder="Search EP, BVA, CFG, M=E-N+2P, UAT...">
+      <div class="search-results-dropdown" id="searchResultsDropdown"></div>
+    </div>
+
+    <div class="progress-box">
+      <div class="progress-meta">
+        <span>Revision Coverage</span>
+        <span id="progressPercent">17%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <ul class="nav-list" id="navList">
+      <li>
+        <button class="nav-btn active" data-module="1">
+          <span class="nav-num">01</span>
+          <div>
+            <span class="nav-title">Testing Paradigms &amp; Levels</span>
+            <span class="nav-desc">Black vs White-Box &amp; 5 Testing Levels</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="2">
+          <span class="nav-num">02</span>
+          <div>
+            <span class="nav-title">Black-Box Testing Lab</span>
+            <span class="nav-desc">EP, BVA Number Line &amp; ATM Tables</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="3">
+          <span class="nav-num">03</span>
+          <div>
+            <span class="nav-title">White-Box &amp; Control-Flow Graphs</span>
+            <span class="nav-desc">Statement Coverage &amp; CheckSavings CFG</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="4">
+          <span class="nav-num">04</span>
+          <div>
+            <span class="nav-title">Cyclomatic Complexity &amp; Paths</span>
+            <span class="nav-desc">M = E - N + 2P &amp; 12-Node Basis Paths</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="5">
+          <span class="nav-num">05</span>
+          <div>
+            <span class="nav-title">Trade-Offs &amp; UAT vs System</span>
+            <span class="nav-desc">White-Box Pros/Cons &amp; Release Gate</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="6">
+          <span class="nav-num">06</span>
+          <div>
+            <span class="nav-title">Exam Readiness Quiz</span>
+            <span class="nav-desc">10 Active Recall Questions</span>
+          </div>
+        </button>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <button class="download-btn" id="downloadHtmlBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Self-Contained HTML
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- ==================== MODULE 1 ==================== -->
+    <section class="module-section active" id="module-1">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Section 1 // Testing Foundations</div>
+          <h2 class="module-title">Fundamental Testing Paradigms &amp; Testing Levels</h2>
+          <p class="module-subtitle">Compare specification-based Black-Box Testing against structural White-Box Testing, and explore the 5 abstraction levels of software verification and validation.</p>
+        </div>
+        <span class="tag tag-indigo">Execution-Based Evaluation</span>
+      </div>
+
+      <!-- 1.1 Black-Box vs White-Box Comparison -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.1 Black-Box vs. White-Box Testing Comparison</h3>
+          <span class="tag tag-teal">Complementary Paradigms</span>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:1.25rem;">
+          <div class="concept-box">
+            <h4>Black-Box Testing (Functional / Specification-Based)</h4>
+            <p style="margin-bottom:0.45rem;">Treats the software under test as an opaque "black box" with <strong>no access to internal source code</strong>. Evaluates external inputs and outputs strictly against documented requirements.</p>
+            <p><strong style="color:var(--accent-rose);">Blind Spot:</strong> Cannot detect internal implementation errors or extra uncalled code paths (e.g., hidden backdoors or dead logic).</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>White-Box Testing (Clear / Glass / Open-Box / Structural)</h4>
+            <p style="margin-bottom:0.45rem;">Requires <strong>full access to source code</strong>. Also called Clear, Glass, Open-Box, Structural, or Logic-Driven Testing. Designs tests from internal control flow and statement logic.</p>
+            <p><strong style="color:var(--accent-rose);">Blind Spot:</strong> Cannot detect missing requirements or unimplemented execution paths that were never coded in the first place.</p>
+          </div>
+        </div>
+
+        <div class="data-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Dimension</th>
+                <th>Black-Box Testing</th>
+                <th>White-Box Testing</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Primary Focus</strong></td>
+                <td>System specifications, functional requirements, inputs, and outputs</td>
+                <td>Internal source code, control flow structures, and statement logic</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Code Visibility</strong></td>
+                <td>No access to source code (treats system as an opaque "black box")</td>
+                <td>Full access to source code (Clear, Glass, or Open-Box Testing)</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Alternative Names</strong></td>
+                <td>Functional Testing, Specification-Based Testing</td>
+                <td>Structural Testing, Logic-Driven Testing</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Blind Spots</strong></td>
+                <td>Cannot detect implementation errors or extra uncalled code paths</td>
+                <td>Cannot detect missing requirements or unimplemented execution paths</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Execution Nature</strong></td>
+                <td>Execution-based</td>
+                <td>Execution-based</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 1.2 Interactive 5-Tier Testing Levels Staircase -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.2 Interactive 5-Level Software Testing Staircase</h3>
+          <span class="tag tag-amber">Click Any Level</span>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 820 265" width="820" height="265">
+            <!-- Step 1: Unit -->
+            <g class="test-lvl-node" data-lvl="0" style="cursor:pointer;">
+              <rect x="20" y="195" width="145" height="52" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="2.5" id="lvlRect0"/>
+              <text x="92" y="218" fill="#a5b4fc" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">LEVEL 01</text>
+              <text x="92" y="236" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Unit Testing</text>
+            </g>
+
+            <!-- Step 2: Integration -->
+            <g class="test-lvl-node" data-lvl="1" style="cursor:pointer;">
+              <rect x="178" y="150" width="150" height="52" rx="8" fill="#111827" stroke="#334155" stroke-width="2" id="lvlRect1"/>
+              <text x="253" y="173" fill="#94a3b8" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">LEVEL 02</text>
+              <text x="253" y="191" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Integration Testing</text>
+            </g>
+
+            <!-- Step 3: System -->
+            <g class="test-lvl-node" data-lvl="2" style="cursor:pointer;">
+              <rect x="342" y="105" width="145" height="52" rx="8" fill="#111827" stroke="#334155" stroke-width="2" id="lvlRect2"/>
+              <text x="414" y="128" fill="#94a3b8" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">LEVEL 03</text>
+              <text x="414" y="146" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">System Testing</text>
+            </g>
+
+            <!-- Step 4: Regression -->
+            <g class="test-lvl-node" data-lvl="3" style="cursor:pointer;">
+              <rect x="500" y="60" width="150" height="52" rx="8" fill="#111827" stroke="#334155" stroke-width="2" id="lvlRect3"/>
+              <text x="575" y="83" fill="#94a3b8" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">LEVEL 04</text>
+              <text x="575" y="101" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Regression Testing</text>
+            </g>
+
+            <!-- Step 5: UAT -->
+            <g class="test-lvl-node" data-lvl="4" style="cursor:pointer;">
+              <rect x="662" y="15" width="140" height="52" rx="8" fill="#111827" stroke="#334155" stroke-width="2" id="lvlRect4"/>
+              <text x="732" y="38" fill="#94a3b8" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">LEVEL 05</text>
+              <text x="732" y="56" fill="#f8fafc" font-family="sans-serif" font-size="12.5" font-weight="bold" text-anchor="middle">User Acceptance (UAT)</text>
+            </g>
+
+            <!-- Connecting Staircase Lines -->
+            <path d="M 165 221 L 178 176 M 328 176 L 342 131 M 487 131 L 500 86 M 650 86 L 662 41" stroke="#14b8a6" stroke-width="2" stroke-dasharray="4,3"/>
+            <text x="440" y="232" fill="#94a3b8" font-family="monospace" font-size="11">Abstraction Scope: Micro Code Units &rarr; Integrated Modules &rarr; End-User Deployment</text>
+          </svg>
+        </div>
+
+        <div class="inspector-panel" id="testLevelInspector"></div>
+      </div>
+
+      <div class="module-footer-nav">
+        <span style="font-size:0.8rem;color:var(--text-muted);">Module 1 of 6</span>
+        <button class="btn-primary" onclick="goToModule(2)">Next: Black-Box Testing Lab (EP, BVA &amp; Decision Tables) &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 2 ==================== -->
+    <section class="module-section" id="module-2">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Section 2 // Specification-Based Testing</div>
+          <h2 class="module-title">Black-Box Methodologies: EP, BVA &amp; Decision Tables</h2>
+          <p class="module-subtitle">Master the 7 Black-Box techniques, test the Percentage Input Form (`50% <= Score <= 90%`) on an interactive EP/BVA number line, and construct/reduce the ATM Decision Table.</p>
+        </div>
+        <span class="tag tag-teal">EP + BVA + Decision Tables</span>
+      </div>
+
+      <!-- 2.1 Taxonomy of 7 Black-Box Techniques -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">2.1 Taxonomy of Black-Box Testing Techniques</h3>
+          <span class="tag tag-indigo">7 Techniques</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.55rem;">
+          <span class="tag tag-teal" style="padding:6px 12px;font-size:0.78rem;">1. Equivalence Partitioning (EP)</span>
+          <span class="tag tag-teal" style="padding:6px 12px;font-size:0.78rem;">2. Boundary Value Analysis (BVA)</span>
+          <span class="tag tag-teal" style="padding:6px 12px;font-size:0.78rem;">3. Decision Table Testing</span>
+          <span class="tag tag-indigo" style="padding:6px 12px;font-size:0.78rem;">4. All-Pairs (and N-Wise) Testing</span>
+          <span class="tag tag-indigo" style="padding:6px 12px;font-size:0.78rem;">5. State Transition Analysis</span>
+          <span class="tag tag-indigo" style="padding:6px 12px;font-size:0.78rem;">6. Cause–Effect Graphing</span>
+          <span class="tag tag-indigo" style="padding:6px 12px;font-size:0.78rem;">7. Error Guessing</span>
+        </div>
+      </div>
+
+      <!-- 2.2 & 2.3 Interactive EP & BVA Number-Line Lab -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">2.2 &amp; 2.3 Interactive EP &amp; BVA Number-Line Lab (Percentage Input Form)</h3>
+          <span class="tag tag-amber">Valid Range: 50% &le; Score &le; 90%</span>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:1.1rem;">
+          <div class="concept-box">
+            <h4>Equivalence Partitioning (EP) Rules</h4>
+            <p>Divides input domain into <strong>Valid</strong> and <strong>Invalid</strong> partitions. Only <strong>1 random representative value</strong> per partition is needed (minimal set covering the domain): <code>30</code> (Invalid &lt; 50), <code>60</code> (Valid 50–90), <code>100</code> (Invalid &gt; 90).</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>Boundary Value Analysis (BVA) Rules</h4>
+            <p>Errors occur disproportionately at edges due to operator bugs (e.g., <code>&lt;</code> instead of <code>&lt;=</code>). Tests values <strong>at and immediately adjacent to</strong> boundaries: Lower (<code>49, 50, 51</code>) and Upper (<code>89, 90, 91</code>).</p>
+          </div>
+        </div>
+
+        <!-- Interactive Input Tester -->
+        <div style="background:var(--bg-card-alt);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1rem 1.2rem;margin-bottom:1rem;">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.75rem;margin-bottom:0.75rem;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <label for="epBvaScoreInput" style="font-size:0.85rem;font-weight:700;">Test Score (%):</label>
+              <input type="number" id="epBvaScoreInput" class="input-ctrl" value="60" min="-20" max="150">
+              <button class="btn-primary" style="padding:6px 14px;font-size:0.82rem;" id="runEpBvaBtn">Evaluate Input</button>
+              <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;color:var(--accent-rose);font-weight:600;cursor:pointer;">
+                <input type="checkbox" id="injectOffByOneBug"> Simulate Off-By-One Bug (<code>50 &lt; score &lt; 90</code>)
+              </label>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+            <span style="font-size:0.76rem;color:var(--text-muted);font-weight:600;">Slide Presets:</span>
+            <button class="pill-btn" style="padding:3px 10px;font-size:0.75rem;" onclick="setEpBvaScore(30)">30 (EP Invalid 1)</button>
+            <button class="pill-btn" style="padding:3px 10px;font-size:0.75rem;" onclick="setEpBvaScore(49)">49 (BVA Lower-1)</button>
+            <button class="pill-btn" style="padding:3px 10px;font-size:0.75rem;" onclick="setEpBvaScore(50)">50 (BVA Lower)</button>
+            <button class="pill-btn" style="padding:3px 10px;font-size:0.75rem;" onclick="setEpBvaScore(51)">51 (BVA Lower+1)</button>
+            <button class="pill-btn active" style="padding:3px 10px;font-size:0.75rem;" onclick="setEpBvaScore(60)">60 (EP Valid)</button>
+            <button class="pill-btn" style="padding:3px 10px;font-size:0.75rem;" onclick="setEpBvaScore(89)">89 (BVA Upper-1)</button>
+            <button class="pill-btn" style="padding:3px 10px;font-size:0.75rem;" onclick="setEpBvaScore(90)">90 (BVA Upper)</button>
+            <button class="pill-btn" style="padding:3px 10px;font-size:0.75rem;" onclick="setEpBvaScore(91)">91 (BVA Upper+1)</button>
+            <button class="pill-btn" style="padding:3px 10px;font-size:0.75rem;" onclick="setEpBvaScore(100)">100 (EP Invalid 2)</button>
+          </div>
+        </div>
+
+        <div class="diagram-stage">
+          <canvas id="epBvaCanvas" width="820" height="190"></canvas>
+        </div>
+
+        <div class="inspector-panel" id="epBvaResultBox"></div>
+      </div>
+
+      <!-- 2.4 Interactive Decision Table Construction & Reduction Simulator -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">2.4 Decision Table Testing &amp; ATM Reduction Simulator</h3>
+          <span class="tag tag-indigo">6-Step Construction Algorithm</span>
+        </div>
+
+        <div class="formula-box">
+          <div>
+            <div class="formula-math">Total Combinations = &prod;<sub>i=1..n</sub> NumOfValues(Cause<sub>i</sub>) = 2<sup>n</sup> <span style="font-size:0.88rem;font-weight:400;">(for n Boolean causes)</span></div>
+            <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">
+              <strong>6-Step Algorithm:</strong> (1) List causes &rarr; (2) Calculate total combinations (2<sup>n</sup>) &rarr; (3) Fill truth columns &rarr; (4) Add effects &rarr; (5) Reduce redundant combinations using don't-care (<code>-</code>) &rarr; (6) Verify 100% coverage of initial combinations.
+            </div>
+          </div>
+          <span class="formula-caption">ATM: 2 &times; 2 &times; 2 = 8 Rules &rarr; 4 Reduced</span>
+        </div>
+
+        <!-- Example 1 Summary + Example 2 Interactive ATM Simulator -->
+        <div class="concept-box" style="margin-bottom:1rem;">
+          <h4>Slide Example 1: Basic Authentication (2 Causes &rarr; 2<sup>2</sup> = 4 Rules)</h4>
+          <p>Causes: <code>Email (Y/N)</code>, <code>Password (Y/N)</code>. Output is <strong>Accept</strong> only when <code>Email=Y</code> AND <code>Password=Y</code> (Rule 4); the other 3 rules produce <strong>Reject</strong>.</p>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.95rem;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="pill-btn active" id="dtUnreducedBtn">Unreduced ATM Table (8 Rules)</button>
+            <button class="pill-btn" id="dtReducedBtn">Reduced ATM Table (4 Rules with '-')</button>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--bg-card-alt);padding:6px 12px;border-radius:8px;border:1px solid var(--border-color);">
+            <span style="font-size:0.78rem;font-weight:700;color:var(--accent-teal);">Live ATM Tester:</span>
+            <label style="font-size:0.8rem;cursor:pointer;"><input type="checkbox" id="atmC1" checked> C1: Account Exists</label>
+            <label style="font-size:0.8rem;cursor:pointer;"><input type="checkbox" id="atmC2" checked> C2: PIN Correct</label>
+            <label style="font-size:0.8rem;cursor:pointer;"><input type="checkbox" id="atmC3" checked> C3: Balance Avail</label>
+          </div>
+        </div>
+
+        <div class="data-table-wrap" id="atmDecisionTableWrap"></div>
+
+        <div class="inspector-panel" id="atmRuleInspector"></div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(1)">&larr; Previous: Paradigms &amp; Levels</button>
+        <button class="btn-primary" onclick="goToModule(3)">Next: White-Box &amp; Control-Flow Graphs &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 3 ==================== -->
+    <section class="module-section" id="module-3">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Section 3.1 – 3.3 // Structural Code Analysis</div>
+          <h2 class="module-title">White-Box Testing, Statement Coverage &amp; Control-Flow Graphs</h2>
+          <p class="module-subtitle">Understand the Necessary Condition Principle, expose the blind spots of 100% Statement Coverage on <code>example_function(x, y)</code>, and trace execution paths through the <code>CheckSavings</code> Control-Flow Graph.</p>
+        </div>
+        <span class="tag tag-rose">Code-Based Structural Testing</span>
+      </div>
+
+      <!-- 3.1 Core Principles & Test Artifacts -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">3.1 White-Box Principles &amp; Test Specification Hierarchy</h3>
+          <span class="tag tag-indigo">Foundational Concepts</span>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:1rem;">
+          <div class="concept-box rose">
+            <h4>Necessary Condition Principle</h4>
+            <p><em>"Executing a faulty statement is a necessary condition for revealing a fault."</em> A defect in code can only be uncovered if test execution forces the processor through the faulty line.</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>Exhaustive Testing Limitation</h4>
+            <p>Exhaustive testing of all possible input combinations and paths is practically impossible. White-box testing provides the <strong>strongest structural guarantees at minimal effort/cost</strong>.</p>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="concept-box">
+            <h4>1. Test Requirement</h4>
+            <p>What structural element we want to cover (e.g., "all executable statements" or "all decision branches").</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>2. Test Specification</h4>
+            <p>Logical constraints on inputs required to execute a specific code path (e.g., <code>result &gt;= 500</code>).</p>
+          </div>
+          <div class="concept-box">
+            <h4>3. Test Case</h4>
+            <p>Concrete input values applied based on test specifications, paired with expected output values (e.g., <code>income=1000, expenses=200</code>).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3.2 Interactive Statement Coverage Simulator -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">3.2 Interactive Statement Coverage Simulator (<code>example_function(x, y)</code>)</h3>
+          <span class="tag tag-teal" id="stmtCovBadge">Statement Coverage: 100% (7/7 lines)</span>
+        </div>
+
+        <div class="formula-box">
+          <div class="formula-math">Statement Coverage (%) = (Lines of Code Covered by Tests / Total Lines of Executable Code) &times; 100</div>
+          <span class="formula-caption">1 Test Case = 100% Stmt Cov, but 3/4 Paths Untested!</span>
+        </div>
+
+        <div class="grid-2" style="align-items:start;">
+          <div>
+            <div class="code-block" id="pythonStmtCodeBlock"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.85rem;">
+            <div class="concept-box">
+              <h4>Toggle Active Test Cases in Suite:</h4>
+              <p style="margin-bottom:0.65rem;">Notice how running just <strong>Path 1: <code>(x=1, y=1)</code></strong> hits 100% of executable lines while leaving 3 out of 4 control paths completely untested!</p>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <label style="font-size:0.82rem;cursor:pointer;"><input type="checkbox" class="stmt-tc-chk" data-tc="0" checked> <strong>Test 1 (Path 1):</strong> <code>x = 1, y = 1</code> (x &gt; 0 and y &gt; 0)</label>
+                <label style="font-size:0.82rem;cursor:pointer;"><input type="checkbox" class="stmt-tc-chk" data-tc="1"> <strong>Test 2 (Path 2):</strong> <code>x = 1, y = -1</code> (x &gt; 0 and y &le; 0)</label>
+                <label style="font-size:0.82rem;cursor:pointer;"><input type="checkbox" class="stmt-tc-chk" data-tc="2"> <strong>Test 3 (Path 3):</strong> <code>x = -1, y = 1</code> (x &le; 0 and y &gt; 0)</label>
+                <label style="font-size:0.82rem;cursor:pointer;"><input type="checkbox" class="stmt-tc-chk" data-tc="3"> <strong>Test 4 (Path 4):</strong> <code>x = -1, y = -1</code> (x &le; 0 and y &le; 0)</label>
+              </div>
+            </div>
+            <div class="inspector-panel" id="stmtPathSummaryBox"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3.3 Interactive Control-Flow Graph (CFG) Visualizer: CheckSavings -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">3.3 Interactive Control-Flow Graph (CFG): <code>CheckSavings</code></h3>
+          <span class="tag tag-amber">Nodes (N), Edges (E) &amp; Branches</span>
+        </div>
+
+        <div class="grid-2" style="align-items:start;">
+          <div>
+            <div class="code-block" style="margin-bottom:0.85rem;">
+              <div class="code-line"><span class="ln">1</span><span><span class="kw">void</span> <span class="fn">CheckSavings</span>(<span class="kw">int</span> income, <span class="kw">int</span> expenses) {</span></div>
+              <div class="code-line"><span class="ln">2</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">int</span> result = income - expenses;</span></div>
+              <div class="code-line"><span class="ln">3</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (result &gt;= <span class="num">500</span>)</span></div>
+              <div class="code-line"><span class="ln">4</span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Console.WriteLine(<span class="str">"Not bad, you save this much:"</span>, result);</span></div>
+              <div class="code-line"><span class="ln">5</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">else if</span> (result &lt; <span class="num">500</span>)</span></div>
+              <div class="code-line"><span class="ln">6</span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Console.WriteLine(<span class="str">"Reduce those expenses, your savings is this much:"</span>, result);</span></div>
+              <div class="code-line"><span class="ln">7</span><span>} <span class="cmt">// code exit</span></span></div>
+            </div>
+
+            <div class="concept-box teal">
+              <h4>Interactive Input Runner (Slide Test Specifications)</h4>
+              <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0.6rem 0;">
+                <label style="font-size:0.8rem;font-weight:600;">income: <input type="number" id="cfgIncomeInput" class="input-ctrl" value="1000"></label>
+                <label style="font-size:0.8rem;font-weight:600;">expenses: <input type="number" id="cfgExpensesInput" class="input-ctrl" value="200"></label>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="pill-btn active" onclick="setCfgPreset(1000, 200)">Req #1: (1000, 200) &rarr; result=800</button>
+                <button class="pill-btn" onclick="setCfgPreset(400, 400)">Req #2: (400, 400) &rarr; result=0</button>
+              </div>
+              <div class="inspector-panel" id="cfgOutputBox" style="margin-top:0.75rem;"></div>
+            </div>
+          </div>
+
+          <div class="diagram-stage">
+            <svg viewBox="0 0 380 395" width="380" height="395" id="checkSavingsCfgSvg"></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(2)">&larr; Previous: Black-Box Testing Lab</button>
+        <button class="btn-primary" onclick="goToModule(4)">Next: Cyclomatic Complexity &amp; Basis Paths &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 4 ==================== -->
+    <section class="module-section" id="module-4">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Section 3.4 – 3.7 // Complexity &amp; Path Coverage</div>
+          <h2 class="module-title">Cyclomatic Complexity &amp; Basis Path Testing Lab</h2>
+          <p class="module-subtitle">Compute Cyclomatic Complexity <code>M = E - N + 2P</code>, calculate Branch Coverage %, and derive all 4 linearly independent basis paths on the 12-node lecture graph.</p>
+        </div>
+        <span class="tag tag-indigo">M = E - N + 2P</span>
+      </div>
+
+      <!-- 4.1 Cyclomatic Complexity & Branch Coverage Calculator -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">4.1 Cyclomatic Complexity (M or V(G)) &amp; Branch Coverage Calculator</h3>
+          <span class="tag tag-teal">Quantitative Structural Metrics</span>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:1.1rem;">
+          <div class="formula-box" style="margin:0;">
+            <div>
+              <div class="formula-math">M = E &minus; N + 2P</div>
+              <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:4px;">
+                <strong>E</strong> = Edges, <strong>N</strong> = Nodes, <strong>P</strong> = Connected components (<code>P = 1</code> for a single module). Establishes the <strong>strict upper bound</strong> on linearly independent basis paths.
+              </p>
+            </div>
+          </div>
+          <div class="formula-box" style="margin:0;">
+            <div>
+              <div class="formula-math">Branch Cov (%) = (Branches Tested / Total Branches) &times; 100</div>
+              <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:4px;">
+                Achieving <strong>100% Branch Coverage</strong> requires executing both <code>True</code> and <code>False</code> outcomes of every decision node.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-card-alt);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1rem 1.25rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;">
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+            <label style="font-size:0.82rem;font-weight:700;">Edges (E): <input type="number" id="ccEdges" class="input-ctrl" value="14" min="1" style="width:75px;"></label>
+            <label style="font-size:0.82rem;font-weight:700;">Nodes (N): <input type="number" id="ccNodes" class="input-ctrl" value="12" min="1" style="width:75px;"></label>
+            <label style="font-size:0.82rem;font-weight:700;">Components (P): <input type="number" id="ccComp" class="input-ctrl" value="1" min="1" style="width:70px;"></label>
+            <button class="pill-btn" style="padding:5px 10px;font-size:0.76rem;" onclick="setCcPreset(8,7,1)">Slide Ex 1 (E=8, N=7 &rarr; M=3)</button>
+            <button class="pill-btn active" style="padding:5px 10px;font-size:0.76rem;" onclick="setCcPreset(14,12,1)">Slide Ex 2 (E=14, N=12 &rarr; M=4)</button>
+          </div>
+          <div style="font-family:var(--font-mono);font-size:1rem;font-weight:800;color:var(--accent-teal);" id="ccLiveOutput">
+            M = 14 - 12 + 2(1) = 4 Basis Paths
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.2 Interactive 12-Node Basis Path Derivation Visualizer -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">4.2 Interactive 12-Node Basis Path Derivation Lab (N=12, E=14, P=1 &rArr; M=4)</h3>
+          <span class="tag tag-amber">3-Step Derivation Algorithm</span>
+        </div>
+
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.9rem;">
+          <strong>3-Step Algorithm:</strong> (1) Establish a baseline path traversing as many decisions as possible &rarr; (2) Backtrack to a decision node and flip its outcome &rarr; (3) Repeat until all <code>M = 4</code> linearly independent basis paths are derived (guaranteeing 100% Statement &amp; 100% Branch Coverage).
+        </p>
+
+        <div class="pill-bar" id="basisPathTabs">
+          <button class="pill-btn active" data-bp="0">Path 1 (Baseline): A&rarr;B&rarr;C&rarr;E&rarr;F&rarr;G&rarr;J&rarr;K&rarr;L</button>
+          <button class="pill-btn" data-bp="1">Path 2 (Flip F&rarr;H): A&rarr;B&rarr;C&rarr;E&rarr;F&rarr;H&rarr;J&rarr;K&rarr;L</button>
+          <button class="pill-btn" data-bp="2">Path 3 (Flip F&rarr;I): A&rarr;B&rarr;C&rarr;E&rarr;F&rarr;I&rarr;J&rarr;K&rarr;L</button>
+          <button class="pill-btn" data-bp="3">Path 4 (Flip C&rarr;D): A&rarr;B&rarr;C&rarr;D&rarr;K&rarr;L</button>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 820 275" width="820" height="275" id="basisPath12Svg"></svg>
+        </div>
+
+        <div class="inspector-panel" id="basisPathInspector"></div>
+      </div>
+
+      <!-- 4.3 Structural Coverage Comparison Matrix -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">4.3 Structural Coverage Comparison Matrix</h3>
+          <span class="tag tag-indigo">Statement vs Branch vs Path</span>
+        </div>
+
+        <div class="data-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Coverage Metric</th>
+                <th>Structural Requirement</th>
+                <th>Guarantee / Scope</th>
+                <th>Difficulty Level</th>
+                <th>Core Question Answered</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Statement Coverage</strong></td>
+                <td>Execute every statement at least once</td>
+                <td>Ensures executable code lines run</td>
+                <td><span class="tag tag-teal">Easy</span></td>
+                <td><em>Did we run every line of code?</em></td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Branch Coverage</strong></td>
+                <td>Execute True &amp; False outcomes of every decision</td>
+                <td>Tests decision logic outcomes</td>
+                <td><span class="tag tag-amber">Medium</span></td>
+                <td><em>Did we test True and False for every condition?</em></td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Path Coverage</strong></td>
+                <td>Execute all possible paths from entry to exit</td>
+                <td>Tests all logic combinations</td>
+                <td><span class="tag tag-rose">Hard (often impractical)</span></td>
+                <td><em>Did we test all possible execution routes?</em></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(3)">&larr; Previous: White-Box &amp; CFG</button>
+        <button class="btn-primary" onclick="goToModule(5)">Next: Trade-Offs &amp; UAT vs System &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 5 ==================== -->
+    <section class="module-section" id="module-5">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Section 4 // Engineering Evaluation &amp; Release Gate</div>
+          <h2 class="module-title">White-Box Trade-Offs &amp; UAT vs. System Testing</h2>
+          <p class="module-subtitle">Evaluate the engineering pros and cons of White-Box Testing and distinguish technical System Testing from business-focused User Acceptance Testing (UAT).</p>
+        </div>
+        <span class="tag tag-teal">Quality &amp; Release Validation</span>
+      </div>
+
+      <!-- 4.1 White-Box Pros & Cons -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">4.1 Advantages &amp; Disadvantages of White-Box Testing</h3>
+          <span class="tag tag-indigo">Engineering Trade-Offs</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="concept-box teal">
+            <h4>Advantages of White-Box Testing</h4>
+            <ul style="padding-left:1.15rem;margin-top:0.35rem;display:flex;flex-direction:column;gap:0.4rem;">
+              <li><strong>Deep Error Detection:</strong> Identifies hidden logic bugs and side effects in internal code.</li>
+              <li><strong>Code Optimization:</strong> Helps remove dead code or redundant execution blocks, improving performance.</li>
+              <li><strong>Loop &amp; Path Thoroughness:</strong> Systematically evaluates internal loops, conditions, and paths.</li>
+              <li><strong>High Rigor:</strong> Provides higher structural thoroughness compared to black-box testing alone.</li>
+            </ul>
+          </div>
+
+          <div class="concept-box rose">
+            <h4>Disadvantages of White-Box Testing</h4>
+            <ul style="padding-left:1.15rem;margin-top:0.35rem;display:flex;flex-direction:column;gap:0.4rem;">
+              <li><strong>High Technical Cost:</strong> Requires testers with deep programming expertise.</li>
+              <li><strong>Impracticality of 100% Path Coverage:</strong> Complete path coverage is unfeasible for large applications; defects may still be missed.</li>
+              <li><strong>Maintenance Overhead:</strong> Changes in internal implementation details require re-developing test cases even if external functionality is unchanged.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.2 UAT vs System Testing Matrix -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">4.2 User Acceptance Testing (UAT) vs. System Testing</h3>
+          <span class="tag tag-amber">Pre-Deployment Comparison</span>
+        </div>
+
+        <div class="data-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>System Testing</th>
+                <th>User Acceptance Testing (UAT)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Primary Goal</strong></td>
+                <td>Verify that system operates without crashing and fulfills SRS specs</td>
+                <td>Confirm that system satisfies business needs and end-user workflows</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Focus</strong></td>
+                <td>Technical compliance, black-box functional checks, and code coverage</td>
+                <td>Operational usability, user goals, and release confidence</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Defect Expectation</strong></td>
+                <td>Expects and detects functional bugs</td>
+                <td>Ideal expectation is <strong style="color:var(--accent-teal);">zero major defects</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(4)">&larr; Previous: Cyclomatic Complexity</button>
+        <button class="btn-primary" onclick="goToModule(6)">Next: Exam Readiness Quiz &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 6 ==================== -->
+    <section class="module-section" id="module-6">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Active Recall // Self-Assessment</div>
+          <h2 class="module-title">Chapter 10 Exam Readiness Quiz</h2>
+          <p class="module-subtitle">Test your knowledge of Black-Box EP/BVA, Decision Table Reduction, Statement vs. Branch Coverage, Cyclomatic Complexity <code>M = E - N + 2P</code>, Basis Paths, and UAT vs. System Testing.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="tag tag-teal" id="quizScoreBadge">Score: 0 / 10</span>
+          <button class="btn-secondary" style="padding:6px 12px;font-size:0.8rem;" id="resetQuizBtn">Reset Quiz</button>
+        </div>
+      </div>
+
+      <div id="quizContainer"></div>
+
+      <div class="card" id="quizSummaryCard" style="display:none;border-color:var(--accent-teal);text-align:center;">
+        <h3 style="font-size:1.3rem;margin-bottom:0.4rem;" id="quizFinalTitle">Assessment Complete!</h3>
+        <p style="color:var(--text-secondary);margin-bottom:1rem;" id="quizFinalMsg"></p>
+        <button class="btn-primary" onclick="resetQuiz()">Retake Quiz</button>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(5)">&larr; Previous: Trade-Offs &amp; UAT</button>
+        <button class="btn-primary" onclick="goToModule(1)">Return to Module 01 &#8634;</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toastNotification">Chapter 10 HTML Study Guide downloaded!</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ==================== APPLICATION STATE ====================
+  const state = {
+    currentModule: 1,
+    visitedModules: new Set([1]),
+    theme: 'dark',
+    testLevel: 0,
+    epBvaScore: 60,
+    injectBug: false,
+    dtReduced: false,
+    atmCauses: [true, true, true],
+    stmtCases: [true, false, false, false],
+    cfgIncome: 1000,
+    cfgExpenses: 200,
+    basisPathIdx: 0,
+    quizAnswers: {}
+  };
+
+  // ==================== THEME TOGGLE ====================
+  document.getElementById('themeToggleBtn').addEventListener('click', () => {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', state.theme);
+    drawEpBvaCanvas();
+  });
+
+  // ==================== NAVIGATION ====================
+  window.goToModule = function(modNum) {
+    state.currentModule = modNum;
+    state.visitedModules.add(modNum);
+
+    document.querySelectorAll('.module-section').forEach(s => s.classList.remove('active'));
+    document.getElementById(`module-${modNum}`).classList.add('active');
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      const m = Number(btn.dataset.module);
+      btn.classList.toggle('active', m === modNum);
+      btn.classList.toggle('visited', state.visitedModules.has(m) && m !== modNum);
+    });
+
+    const pct = Math.round((state.visitedModules.size / 6) * 100);
+    document.getElementById('progressPercent').textContent = `${pct}%`;
+    document.getElementById('mobileProgressTag').textContent = `${pct}%`;
+    document.getElementById('progressFill').style.width = `${pct}%`;
+
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => goToModule(Number(btn.dataset.module)));
+  });
+
+  document.getElementById('menuToggle').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarBackdrop').classList.toggle('open');
+  });
+
+  document.getElementById('sidebarBackdrop').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+  });
+
+  // ==================== MODULE 1: 5 TESTING LEVELS ====================
+  const testLevelsData = [
+    {
+      title: 'Level 1: Unit Testing',
+      paradigm: 'Primarily White-Box Testing',
+      desc: 'Testing individual components, functions, methods, or classes in isolation to verify internal logic, loops, and branches.'
+    },
+    {
+      title: 'Level 2: Integration Testing',
+      paradigm: 'Grey-Box / Interface & Structural Testing',
+      desc: 'Verifying interactions, API interfaces, and data flow between integrated units or subsystems.'
+    },
+    {
+      title: 'Level 3: System Testing',
+      paradigm: 'Primarily Black-Box Testing',
+      desc: 'Testing the complete, integrated software package to verify compliance with documented SRS functional and non-functional requirements without crashing.'
+    },
+    {
+      title: 'Level 4: Regression Testing',
+      paradigm: 'Automated Black-Box & White-Box Suites',
+      desc: 'Re-running existing test suites after code modifications or bug fixes to ensure changes have not introduced new defects into existing functionality.'
+    },
+    {
+      title: 'Level 5: User Acceptance Testing (UAT)',
+      paradigm: 'Black-Box Operational Validation',
+      desc: 'Final validation conducted by clients or end-users to confirm business workflows, usability, and operational readiness (expecting zero major defects).'
+    }
+  ];
+
+  function renderTestLevel(idx) {
+    state.testLevel = idx;
+    for (let i = 0; i < 5; i++) {
+      const r = document.getElementById(`lvlRect${i}`);
+      r.setAttribute('fill', i === idx ? '#1e293b' : '#111827');
+      r.setAttribute('stroke', i === idx ? '#6366f1' : '#334155');
+      r.setAttribute('stroke-width', i === idx ? '2.8' : '2');
+    }
+    const d = testLevelsData[idx];
+    document.getElementById('testLevelInspector').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:0.35rem;">
+        <h4 style="color:var(--accent-teal);font-size:0.98rem;">${d.title}</h4>
+        <span class="tag tag-indigo">${d.paradigm}</span>
+      </div>
+      <p style="font-size:0.86rem;color:var(--text-primary);">${d.desc}</p>
+    `;
+  }
+
+  document.querySelectorAll('.test-lvl-node').forEach(node => {
+    node.addEventListener('click', () => renderTestLevel(Number(node.dataset.lvl)));
+  });
+  renderTestLevel(0);
+
+  // ==================== MODULE 2: EP & BVA NUMBER LINE CANVAS ====================
+  function drawEpBvaCanvas() {
+    const canvas = document.getElementById('epBvaCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width;
+    const H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    // Map score [20..110] to x [50..770]
+    const minVal = 20, maxVal = 110;
+    const x0 = 50, x1 = 770;
+    const toX = (v) => x0 + ((Math.max(minVal, Math.min(maxVal, v)) - minVal) / (maxVal - minVal)) * (x1 - x0);
+
+    const x50 = toX(50);
+    const x90 = toX(90);
+    const axisY = 105;
+
+    // Partition regions
+    ctx.fillStyle = 'rgba(244, 63, 94, 0.16)';
+    ctx.fillRect(x0, axisY - 26, x50 - x0, 52);
+
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.2)';
+    ctx.fillRect(x50, axisY - 26, x90 - x50, 52);
+
+    ctx.fillStyle = 'rgba(244, 63, 94, 0.16)';
+    ctx.fillRect(x90, axisY - 26, x1 - x90, 52);
+
+    // Partition labels
+    ctx.font = 'bold 11px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fda4af';
+    ctx.fillText('INVALID P1 (Score < 50)', (x0 + x50) / 2, 65);
+    ctx.fillStyle = '#5eead4';
+    ctx.fillText('VALID P2 (50 <= Score <= 90)', (x50 + x90) / 2, 65);
+    ctx.fillStyle = '#fda4af';
+    ctx.fillText('INVALID P3 (Score > 90)', (x90 + x1) / 2, 65);
+
+    // Main horizontal axis
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x0, axisY);
+    ctx.lineTo(x1, axisY);
+    ctx.stroke();
+
+    // Boundary vertical markers at 50 and 90
+    [50, 90].forEach(b => {
+      const bx = toX(b);
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(bx, axisY - 35);
+      ctx.lineTo(bx, axisY + 35);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    });
+
+    // Plot the 6 BVA points + 3 EP points
+    const markers = [
+      { v: 30, label: '30 (EP)', col: '#f43f5e' },
+      { v: 49, label: '49', col: '#f43f5e' },
+      { v: 50, label: '50', col: '#14b8a6' },
+      { v: 51, label: '51', col: '#14b8a6' },
+      { v: 60, label: '60 (EP)', col: '#14b8a6' },
+      { v: 89, label: '89', col: '#14b8a6' },
+      { v: 90, label: '90', col: '#14b8a6' },
+      { v: 91, label: '91', col: '#f43f5e' },
+      { v: 100, label: '100 (EP)', col: '#f43f5e' }
+    ];
+
+    markers.forEach((m, idx) => {
+      const mx = toX(m.v);
+      ctx.fillStyle = m.col;
+      ctx.beginPath();
+      ctx.arc(mx, axisY, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.font = 'bold 10.5px monospace';
+      ctx.fillStyle = '#e2e8f0';
+      const yOffset = (m.v === 49 || m.v === 89) ? 24 : (m.v === 51 || m.v === 91) ? 38 : 24;
+      ctx.fillText(m.label, mx, axisY + yOffset);
+    });
+
+    // Active User Test Pointer
+    const curX = toX(state.epBvaScore);
+    ctx.fillStyle = '#6366f1';
+    ctx.beginPath();
+    ctx.moveTo(curX, 34);
+    ctx.lineTo(curX - 8, 18);
+    ctx.lineTo(curX + 8, 18);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.font = 'bold 11px monospace';
+    ctx.fillStyle = '#a5b4fc';
+    ctx.fillText(`TEST = ${state.epBvaScore}%`, curX, 13);
+  }
+
+  function evaluateEpBva() {
+    const val = Number(document.getElementById('epBvaScoreInput').value);
+    state.epBvaScore = val;
+    state.injectBug = document.getElementById('injectOffByOneBug').checked;
+    drawEpBvaCanvas();
+
+    const specAccept = val >= 50 && val <= 90;
+    const actualAccept = state.injectBug ? (val > 50 && val < 90) : specAccept;
+
+    let partitionName = '';
+    if (val < 50) partitionName = 'Invalid Partition 1 (Score < 50)';
+    else if (val <= 90) partitionName = 'Valid Partition (50 <= Score <= 90)';
+    else partitionName = 'Invalid Partition 2 (Score > 90)';
+
+    const bvaNotes = {
+      49: 'Lower Boundary - 1 (50 - 1): Immediately below lower limit.',
+      50: 'Lower Boundary Exact (50): Critical BVA edge value!',
+      51: 'Lower Boundary + 1 (50 + 1): Immediately above lower limit.',
+      89: 'Upper Boundary - 1 (90 - 1): Immediately below upper limit.',
+      90: 'Upper Boundary Exact (90): Critical BVA edge value!',
+      91: 'Upper Boundary + 1 (90 + 1): Immediately above upper limit.'
+    };
+
+    const bugCaught = specAccept !== actualAccept;
+    document.getElementById('epBvaResultBox').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:0.4rem;">
+        <strong>Input Tested: <code>${val}%</code> &mdash; ${partitionName}</strong>
+        <span class="tag ${specAccept ? 'tag-teal' : 'tag-rose'}">Expected Spec: ${specAccept ? 'System Accept' : 'System Reject'}</span>
+      </div>
+      ${bvaNotes[val] ? `<p style="font-size:0.84rem;color:var(--accent-amber);margin-bottom:0.35rem;"><strong>BVA Role:</strong> ${bvaNotes[val]}</p>` : ''}
+      ${bugCaught
+        ? `<p style="font-size:0.85rem;color:var(--accent-rose);font-weight:700;">&#9888; DEFECT DETECTED! The buggy implementation (50 &lt; score &lt; 90) returned <u>${actualAccept ? 'Accept' : 'Reject'}</u> instead of <u>${specAccept ? 'Accept' : 'Reject'}</u>! BVA caught the off-by-one boundary bug.</p>`
+        : `<p style="font-size:0.84rem;color:var(--text-secondary);">System Output: <strong>${actualAccept ? 'System Accept (Processing proceeds)' : 'System Reject (Error message displayed)'}</strong></p>`
+      }
+    `;
+  }
+
+  window.setEpBvaScore = function(s) {
+    document.getElementById('epBvaScoreInput').value = s;
+    evaluateEpBva();
+  };
+
+  document.getElementById('runEpBvaBtn').addEventListener('click', evaluateEpBva);
+  document.getElementById('injectOffByOneBug').addEventListener('change', evaluateEpBva);
+  evaluateEpBva();
+
+  // ==================== MODULE 2.4: ATM DECISION TABLE ====================
+  function renderAtmDecisionTable() {
+    const c1 = document.getElementById('atmC1').checked;
+    const c2 = document.getElementById('atmC2').checked;
+    const c3 = document.getElementById('atmC3').checked;
+
+    const unreducedCols = [
+      { id: 'Rule 1', c1: 'N', c2: 'N', c3: 'N', app: false, match: !c1 && !c2 && !c3 },
+      { id: 'Rule 2', c1: 'N', c2: 'N', c3: 'Y', app: false, match: !c1 && !c2 && c3 },
+      { id: 'Rule 3', c1: 'N', c2: 'Y', c3: 'N', app: false, match: !c1 && c2 && !c3 },
+      { id: 'Rule 4', c1: 'N', c2: 'Y', c3: 'Y', app: false, match: !c1 && c2 && c3 },
+      { id: 'Rule 5', c1: 'Y', c2: 'N', c3: 'N', app: false, match: c1 && !c2 && !c3 },
+      { id: 'Rule 6', c1: 'Y', c2: 'N', c3: 'Y', app: false, match: c1 && !c2 && c3 },
+      { id: 'Rule 7', c1: 'Y', c2: 'Y', c3: 'N', app: false, match: c1 && c2 && !c3 },
+      { id: 'Rule 8', c1: 'Y', c2: 'Y', c3: 'Y', app: true,  match: c1 && c2 && c3 }
+    ];
+
+    const reducedCols = [
+      { id: 'Rule 1–4', c1: 'N', c2: '-', c3: '-', app: false, match: !c1 },
+      { id: 'Rule 5–6', c1: 'Y', c2: 'N', c3: '-', app: false, match: c1 && !c2 },
+      { id: 'Rule 7',   c1: 'Y', c2: 'Y', c3: 'N', app: false, match: c1 && c2 && !c3 },
+      { id: 'Rule 8',   c1: 'Y', c2: 'Y', c3: 'Y', app: true,  match: c1 && c2 && c3 }
+    ];
+
+    const cols = state.dtReduced ? reducedCols : unreducedCols;
+    const activeRule = cols.find(col => col.match);
+
+    document.getElementById('atmDecisionTableWrap').innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Stub Category</th>
+            <th>Condition / Action</th>
+            ${cols.map(col => `<th class="${col.match ? 'highlight-cell' : ''}" style="text-align:center;">${col.id}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="3"><strong>Causes</strong></td>
+            <td><strong>C1: Account Exists</strong></td>
+            ${cols.map(col => `<td class="${col.match ? 'highlight-cell' : ''}" style="text-align:center;">${col.c1}</td>`).join('')}
+          </tr>
+          <tr>
+            <td><strong>C2: PIN Correct</strong></td>
+            ${cols.map(col => `<td class="${col.match ? 'highlight-cell' : ''}" style="text-align:center;">${col.c2}</td>`).join('')}
+          </tr>
+          <tr>
+            <td><strong>C3: Balance Available</strong></td>
+            ${cols.map(col => `<td class="${col.match ? 'highlight-cell' : ''}" style="text-align:center;">${col.c3}</td>`).join('')}
+          </tr>
+          <tr>
+            <td rowspan="2"><strong>Effects</strong></td>
+            <td><strong>E1: Withdrawal Approved</strong></td>
+            ${cols.map(col => `<td class="${col.match ? 'highlight-cell' : ''}" style="text-align:center;color:var(--accent-teal);font-weight:800;">${col.app ? 'X' : ''}</td>`).join('')}
+          </tr>
+          <tr>
+            <td><strong>E2: Withdrawal Denied</strong></td>
+            ${cols.map(col => `<td class="${col.match ? 'highlight-cell' : ''}" style="text-align:center;color:var(--accent-rose);font-weight:800;">${!col.app ? 'X' : ''}</td>`).join('')}
+          </tr>
+        </tbody>
+      </table>
+    `;
+
+    let specNote = '';
+    if (!c1) {
+      specNote = '<strong>Derived Test Case #1 (Rule 1–4):</strong> Pre-Condition: Account <code>999999</code> does not exist. Data: Account <code>999999</code>, PIN <code>1234</code>, Amount <code>$100</code>. Expected: <strong>Withdrawal Denied (Account Not Found)</strong>. PIN &amp; Balance are don\'t-care (<code>-</code>).';
+    } else if (!c2) {
+      specNote = '<strong>Derived Test Case #2 (Rule 5–6):</strong> Pre-Condition: Account exists, PIN is incorrect. Expected: <strong>Withdrawal Denied (Invalid PIN)</strong>. Balance is don\'t-care (<code>-</code>).';
+    } else if (!c3) {
+      specNote = '<strong>Derived Test Case #3 (Rule 7):</strong> Pre-Condition: Account exists, PIN correct, insufficient funds. Expected: <strong>Withdrawal Denied (Insufficient Balance)</strong>.';
+    } else {
+      specNote = '<strong>Derived Test Case #4 (Rule 8):</strong> Pre-Condition: Account exists, PIN correct, sufficient balance. Expected: <strong>Withdrawal Approved (Cash Dispensed)</strong>.';
+    }
+
+    document.getElementById('atmRuleInspector').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:0.4rem;">
+        <strong>Matched Column: <span style="color:var(--accent-indigo);">${activeRule.id}</span></strong>
+        <span class="tag ${activeRule.app ? 'tag-teal' : 'tag-rose'}">${activeRule.app ? 'E1: Withdrawal Approved' : 'E2: Withdrawal Denied'}</span>
+      </div>
+      <p style="font-size:0.84rem;color:var(--text-secondary);">${specNote}</p>
+    `;
+  }
+
+  document.getElementById('dtUnreducedBtn').addEventListener('click', () => {
+    state.dtReduced = false;
+    document.getElementById('dtUnreducedBtn').classList.add('active');
+    document.getElementById('dtReducedBtn').classList.remove('active');
+    renderAtmDecisionTable();
+  });
+
+  document.getElementById('dtReducedBtn').addEventListener('click', () => {
+    state.dtReduced = true;
+    document.getElementById('dtReducedBtn').classList.add('active');
+    document.getElementById('dtUnreducedBtn').classList.remove('active');
+    renderAtmDecisionTable();
+  });
+
+  ['atmC1', 'atmC2', 'atmC3'].forEach(id => {
+    document.getElementById(id).addEventListener('change', renderAtmDecisionTable);
+  });
+  renderAtmDecisionTable();
+
+  // ==================== MODULE 3.2: STATEMENT COVERAGE SIMULATOR ====================
+  const pythonLines = [
+    { ln: 1, html: '<span class="kw">def</span> <span class="fn">example_function</span>(x, y):', exec: true },
+    { ln: 2, html: '&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> x &gt; <span class="num">0</span>:', exec: true },
+    { ln: 3, html: '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="str">"X is positive"</span>)', exec: true },
+    { ln: 4, html: '&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> y &gt; <span class="num">0</span>:', exec: true },
+    { ln: 5, html: '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="str">"Y is positive"</span>)', exec: true },
+    { ln: 6, html: '&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> x &gt; <span class="num">0</span> <span class="kw">and</span> y &gt; <span class="num">0</span>:', exec: true },
+    { ln: 7, html: '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="str">"Both X and Y are positive"</span>)', exec: true }
+  ];
+
+  const stmtTestDefinitions = [
+    { name: 'Path 1 (x > 0, y > 0)', lines: [1, 2, 3, 4, 5, 6, 7] },
+    { name: 'Path 2 (x > 0, y <= 0)', lines: [1, 2, 3, 4, 6] },
+    { name: 'Path 3 (x <= 0, y > 0)', lines: [1, 2, 4, 5, 6] },
+    { name: 'Path 4 (x <= 0, y <= 0)', lines: [1, 2, 4, 6] }
+  ];
+
+  function renderStmtCoverage() {
+    const coveredSet = new Set();
+    let activePaths = 0;
+    document.querySelectorAll('.stmt-tc-chk').forEach(chk => {
+      const idx = Number(chk.dataset.tc);
+      if (chk.checked) {
+        activePaths++;
+        stmtTestDefinitions[idx].lines.forEach(l => coveredSet.add(l));
+      }
+    });
+
+    const pct = Math.round((coveredSet.size / 7) * 100);
+    document.getElementById('stmtCovBadge').textContent = `Statement Coverage: ${pct}% (${coveredSet.size}/7 lines)`;
+
+    document.getElementById('pythonStmtCodeBlock').innerHTML = pythonLines.map(item => {
+      const isCov = coveredSet.has(item.ln);
+      return `<div class="code-line ${isCov ? 'covered' : 'uncovered'}"><span class="ln">${item.ln}</span><span>${item.html}</span></div>`;
+    }).join('');
+
+    document.getElementById('stmtPathSummaryBox').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">
+        <strong>Statement Coverage: ${pct}%</strong>
+        <span class="tag ${activePaths === 4 ? 'tag-teal' : 'tag-amber'}">Control Paths Tested: ${activePaths} / 4</span>
+      </div>
+      <p style="font-size:0.83rem;color:var(--text-secondary);">
+        ${pct === 100 && activePaths < 4
+          ? `<strong>Key Insight:</strong> You achieved <strong>100% Statement Coverage</strong>, yet <strong>${4 - activePaths} out of 4 control paths</strong> remain untested! Statement coverage alone misses false-branch combinations.`
+          : activePaths === 4
+          ? 'All 4 control paths and 100% of statements are now covered!'
+          : 'Enable Test 1 (x=1, y=1) to observe how a single input hits 100% of executable statements.'}
+      </p>
+    `;
+  }
+
+  document.querySelectorAll('.stmt-tc-chk').forEach(chk => {
+    chk.addEventListener('change', renderStmtCoverage);
+  });
+  renderStmtCoverage();
+
+  // ==================== MODULE 3.3: CHECKSAVINGS CFG VISUALIZER ====================
+  function renderCheckSavingsCfg() {
+    const inc = Number(document.getElementById('cfgIncomeInput').value);
+    const exp = Number(document.getElementById('cfgExpensesInput').value);
+    const res = inc - exp;
+
+    const takeTrue1 = res >= 500;
+    const takeTrue2 = !takeTrue1 && res < 500;
+
+    // Nodes active: 1, 2, 3, (4 if takeTrue1 else 5 -> 6), 7
+    const activeNodes = new Set([1, 2, 3, 7]);
+    if (takeTrue1) activeNodes.add(4);
+    else {
+      activeNodes.add(5);
+      if (takeTrue2) activeNodes.add(6);
+    }
+
+    const nCol = (n) => activeNodes.has(n) ? '#14b8a6' : '#334155';
+    const nFill = (n) => activeNodes.has(n) ? '#1e293b' : '#111827';
+
+    document.getElementById('checkSavingsCfgSvg').innerHTML = `
+      <!-- Edges -->
+      <line x1="190" y1="52" x2="190" y2="75" stroke="#14b8a6" stroke-width="2.5"/>
+      <line x1="190" y1="115" x2="190" y2="140" stroke="#14b8a6" stroke-width="2.5"/>
+
+      <!-- Node 3 True -> Node 4 -->
+      <path d="M 130 165 L 75 165 L 75 215" fill="none" stroke="${takeTrue1 ? '#14b8a6' : '#334155'}" stroke-width="${takeTrue1 ? 2.8 : 1.6}"/>
+      <text x="86" y="157" fill="${takeTrue1 ? '#14b8a6' : '#64748b'}" font-family="monospace" font-size="10.5" font-weight="bold">True</text>
+
+      <!-- Node 3 False -> Node 5 -->
+      <path d="M 250 165 L 295 165 L 295 205" fill="none" stroke="${!takeTrue1 ? '#14b8a6' : '#334155'}" stroke-width="${!takeTrue1 ? 2.8 : 1.6}"/>
+      <text x="275" y="157" fill="${!takeTrue1 ? '#14b8a6' : '#64748b'}" font-family="monospace" font-size="10.5" font-weight="bold">False</text>
+
+      <!-- Node 5 True -> Node 6 -->
+      <line x1="295" y1="248" x2="295" y2="275" stroke="${takeTrue2 ? '#14b8a6' : '#334155'}" stroke-width="${takeTrue2 ? 2.8 : 1.6}"/>
+      <text x="315" y="265" fill="${takeTrue2 ? '#14b8a6' : '#64748b'}" font-family="monospace" font-size="10" font-weight="bold">True</text>
+
+      <!-- Node 4 -> Node 7 -->
+      <path d="M 75 260 L 75 355 L 145 355" fill="none" stroke="${takeTrue1 ? '#14b8a6' : '#334155'}" stroke-width="${takeTrue1 ? 2.5 : 1.5}"/>
+
+      <!-- Node 6 -> Node 7 -->
+      <path d="M 295 318 L 295 355 L 235 355" fill="none" stroke="${takeTrue2 ? '#14b8a6' : '#334155'}" stroke-width="${takeTrue2 ? 2.5 : 1.5}"/>
+
+      <!-- Node 1 -->
+      <rect x="115" y="14" width="150" height="38" rx="19" fill="${nFill(1)}" stroke="${nCol(1)}" stroke-width="2.2"/>
+      <text x="190" y="37" fill="#f8fafc" font-family="monospace" font-size="11.5" font-weight="bold" text-anchor="middle">Node 1: Entry</text>
+
+      <!-- Node 2 -->
+      <rect x="95" y="75" width="190" height="40" rx="6" fill="${nFill(2)}" stroke="${nCol(2)}" stroke-width="2.2"/>
+      <text x="190" y="99" fill="#f8fafc" font-family="monospace" font-size="11" text-anchor="middle">Node 2: result = ${res}</text>
+
+      <!-- Node 3 Decision -->
+      <rect x="115" y="140" width="150" height="46" rx="8" fill="${nFill(3)}" stroke="${takeTrue1 || !takeTrue1 ? '#6366f1' : '#334155'}" stroke-width="2.4"/>
+      <text x="190" y="161" fill="#a5b4fc" font-family="monospace" font-size="10" text-anchor="middle">Node 3 (Decision 1)</text>
+      <text x="190" y="177" fill="#f8fafc" font-family="monospace" font-size="11.5" font-weight="bold" text-anchor="middle">result &gt;= 500?</text>
+
+      <!-- Node 4 -->
+      <rect x="15" y="215" width="125" height="45" rx="6" fill="${nFill(4)}" stroke="${nCol(4)}" stroke-width="2.2"/>
+      <text x="77" y="235" fill="#f8fafc" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">Node 4: Print</text>
+      <text x="77" y="250" fill="#5eead4" font-family="monospace" font-size="9.5" text-anchor="middle">"Not bad..."</text>
+
+      <!-- Node 5 Decision -->
+      <rect x="225" y="205" width="140" height="44" rx="8" fill="${nFill(5)}" stroke="${nCol(5)}" stroke-width="2.2"/>
+      <text x="295" y="224" fill="#fcd34d" font-family="monospace" font-size="9.5" text-anchor="middle">Node 5 (Decision 2)</text>
+      <text x="295" y="239" fill="#f8fafc" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">result &lt; 500?</text>
+
+      <!-- Node 6 -->
+      <rect x="225" y="275" width="140" height="44" rx="6" fill="${nFill(6)}" stroke="${nCol(6)}" stroke-width="2.2"/>
+      <text x="295" y="294" fill="#f8fafc" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">Node 6: Print</text>
+      <text x="295" y="309" fill="#5eead4" font-family="monospace" font-size="9.5" text-anchor="middle">"Reduce exp..."</text>
+
+      <!-- Node 7 Exit -->
+      <rect x="145" y="336" width="90" height="38" rx="19" fill="${nFill(7)}" stroke="${nCol(7)}" stroke-width="2.2"/>
+      <text x="190" y="359" fill="#f8fafc" font-family="monospace" font-size="11.5" font-weight="bold" text-anchor="middle">Node 7 Exit</text>
+    `;
+
+    const pathStr = takeTrue1 ? 'Node 1 &rarr; 2 &rarr; 3 &rarr; 4 &rarr; 7' : 'Node 1 &rarr; 2 &rarr; 3 &rarr; 5 &rarr; 6 &rarr; 7';
+    const msg = takeTrue1 ? `"Not bad, you save this much: ${res}"` : `"Reduce those expenses, your savings is this much: ${res}"`;
+
+    document.getElementById('cfgOutputBox').innerHTML = `
+      <div style="font-size:0.83rem;">
+        <div><strong>Executed Path:</strong> <span style="color:var(--accent-teal);font-family:var(--font-mono);">${pathStr}</span></div>
+        <div style="margin-top:4px;"><strong>Console Output:</strong> <code>${msg}</code></div>
+      </div>
+    `;
+  }
+
+  window.setCfgPreset = function(inc, exp) {
+    document.getElementById('cfgIncomeInput').value = inc;
+    document.getElementById('cfgExpensesInput').value = exp;
+    renderCheckSavingsCfg();
+  };
+
+  document.getElementById('cfgIncomeInput').addEventListener('input', renderCheckSavingsCfg);
+  document.getElementById('cfgExpensesInput').addEventListener('input', renderCheckSavingsCfg);
+  renderCheckSavingsCfg();
+
+  // ==================== MODULE 4: CYCLOMATIC COMPLEXITY & 12-NODE BASIS PATHS ====================
+  function updateCcCalculator() {
+    const E = Number(document.getElementById('ccEdges').value);
+    const N = Number(document.getElementById('ccNodes').value);
+    const P = Number(document.getElementById('ccComp').value);
+    const M = E - N + 2 * P;
+    document.getElementById('ccLiveOutput').textContent = `M = ${E} - ${N} + 2(${P}) = ${M} Basis Path${M === 1 ? '' : 's'}`;
+  }
+
+  window.setCcPreset = function(e, n, p) {
+    document.getElementById('ccEdges').value = e;
+    document.getElementById('ccNodes').value = n;
+    document.getElementById('ccComp').value = p;
+    updateCcCalculator();
+  };
+
+  ['ccEdges', 'ccNodes', 'ccComp'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateCcCalculator);
+  });
+
+  // 12-Node Graph Basis Path Visualizer
+  const basisPaths12 = [
+    {
+      title: 'Path 1 (Baseline Path): A -> B -> C -> E -> F -> G -> J -> K -> L',
+      desc: 'Step 1: Select a baseline path through normal execution traversing maximum decision nodes (C -> E and F -> G).',
+      nodes: ['A', 'B', 'C', 'E', 'F', 'G', 'J', 'K', 'L'],
+      edges: ['AB', 'BC', 'CE', 'EF', 'FG', 'GJ', 'JK', 'KL']
+    },
+    {
+      title: 'Path 2 (Backtrack & Flip F -> H): A -> B -> C -> E -> F -> H -> J -> K -> L',
+      desc: 'Step 2: Backtrack along the baseline to Decision Node F, flip outcome from G to H, and rejoin baseline at J -> K -> L.',
+      nodes: ['A', 'B', 'C', 'E', 'F', 'H', 'J', 'K', 'L'],
+      edges: ['AB', 'BC', 'CE', 'EF', 'FH', 'HJ', 'JK', 'KL']
+    },
+    {
+      title: 'Path 3 (Backtrack & Flip F -> I): A -> B -> C -> E -> F -> I -> J -> K -> L',
+      desc: 'Step 3a: Backtrack again to Decision Node F, flip outcome to I, and rejoin baseline at J -> K -> L.',
+      nodes: ['A', 'B', 'C', 'E', 'F', 'I', 'J', 'K', 'L'],
+      edges: ['AB', 'BC', 'CE', 'EF', 'FI', 'IJ', 'JK', 'KL']
+    },
+    {
+      title: 'Path 4 (Backtrack & Flip C -> D): A -> B -> C -> D -> K -> L',
+      desc: 'Step 3b: Backtrack earlier to Decision Node C, flip outcome from E to D, and merge at K -> L. All M = 4 basis paths derived!',
+      nodes: ['A', 'B', 'C', 'D', 'K', 'L'],
+      edges: ['AB', 'BC', 'CD', 'DK', 'JK', 'KL'].filter(e => e !== 'JK')
+    }
+  ];
+
+  const nodeCoords12 = {
+    A: [45, 135],
+    B: [120, 135],
+    C: [200, 135],
+    D: [410, 42],
+    E: [285, 165],
+    F: [370, 165],
+    G: [475, 105],
+    H: [475, 165],
+    I: [475, 225],
+    J: [580, 165],
+    K: [675, 135],
+    L: [765, 135]
+  };
+
+  const allEdges12 = [
+    ['AB', 'A', 'B'], ['BC', 'B', 'C'], ['CD', 'C', 'D'], ['CE', 'C', 'E'],
+    ['DK', 'D', 'K'], ['EF', 'E', 'F'], ['FG', 'F', 'G'], ['FH', 'F', 'H'],
+    ['FI', 'F', 'I'], ['GJ', 'G', 'J'], ['HJ', 'H', 'J'], ['IJ', 'I', 'J'],
+    ['JK', 'J', 'K'], ['KL', 'K', 'L']
+  ];
+
+  function renderBasisPath12(idx) {
+    state.basisPathIdx = idx;
+    const bp = basisPaths12[idx];
+    const activeN = new Set(bp.nodes);
+    const activeE = new Set(bp.edges);
+
+    const edgesSvg = allEdges12.map(([eid, u, v]) => {
+      const [x1, y1] = nodeCoords12[u];
+      const [x2, y2] = nodeCoords12[v];
+      const isAct = activeE.has(eid);
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${isAct ? '#14b8a6' : '#334155'}" stroke-width="${isAct ? 3.4 : 1.7}"/>`;
+    }).join('');
+
+    const nodesSvg = Object.entries(nodeCoords12).map(([nid, [cx, cy]]) => {
+      const isAct = activeN.has(nid);
+      const isDecision = nid === 'C' || nid === 'F';
+      return `
+        <circle cx="${cx}" cy="${cy}" r="19" fill="${isAct ? (isDecision ? '#4f46e5' : '#0f766e') : '#111827'}" stroke="${isAct ? '#f8fafc' : '#475569'}" stroke-width="2.2"/>
+        <text x="${cx}" y="${cy + 5}" fill="#f8fafc" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">${nid}</text>
+      `;
+    }).join('');
+
+    document.getElementById('basisPath12Svg').innerHTML = `
+      ${edgesSvg}
+      ${nodesSvg}
+      <text x="200" y="106" fill="#a5b4fc" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">Decision C</text>
+      <text x="370" y="136" fill="#a5b4fc" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">Decision F</text>
+      <text x="410" y="262" fill="#94a3b8" font-family="monospace" font-size="11" text-anchor="middle">N = 12 Nodes | E = 14 Edges | P = 1 &rArr; Cyclomatic Complexity M = 14 - 12 + 2(1) = 4 Basis Paths</text>
+    `;
+
+    document.getElementById('basisPathInspector').innerHTML = `
+      <h4 style="color:var(--accent-teal);font-size:0.96rem;margin-bottom:0.35rem;">${bp.title}</h4>
+      <p style="font-size:0.86rem;color:var(--text-primary);">${bp.desc}</p>
+    `;
+  }
+
+  document.querySelectorAll('#basisPathTabs .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#basisPathTabs .pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderBasisPath12(Number(btn.dataset.bp));
+    });
+  });
+  renderBasisPath12(0);
+
+  // ==================== GLOBAL SEARCH ====================
+  const searchIndex = [
+    { title: 'Black-Box vs White-Box Testing Comparison', mod: 1, sub: 'Module 1: Paradigms & Blind Spots' },
+    { title: '5 Testing Levels (Unit, Integration, System, Regression, UAT)', mod: 1, sub: 'Module 1: Testing Staircase' },
+    { title: 'Equivalence Partitioning (EP) — Percentage Input Form', mod: 2, sub: 'Module 2: Valid & Invalid Partitions' },
+    { title: 'Boundary Value Analysis (BVA) — 49, 50, 51 & 89, 90, 91', mod: 2, sub: 'Module 2: Edge Testing Lab' },
+    { title: 'Decision Table Testing & 6-Step Reduction Algorithm', mod: 2, sub: 'Module 2: ATM 8-Rule to 4-Rule Reduction' },
+    { title: 'Statement Coverage Formula & example_function(x, y)', mod: 3, sub: 'Module 3: 100% Stmt Cov Blind Spot' },
+    { title: 'Control-Flow Graph (CFG) — CheckSavings Example', mod: 3, sub: 'Module 3: Nodes, Edges & Branches' },
+    { title: 'Cyclomatic Complexity Formula M = E - N + 2P', mod: 4, sub: 'Module 4: Complexity Calculator' },
+    { title: 'Basis Path Testing — 12-Node Graph (M = 4 Paths)', mod: 4, sub: 'Module 4: 3-Step Derivation Algorithm' },
+    { title: 'Structural Coverage Matrix (Statement vs Branch vs Path)', mod: 4, sub: 'Module 4: Comparison Table' },
+    { title: 'White-Box Testing Advantages & Disadvantages', mod: 5, sub: 'Module 5: Engineering Trade-Offs' },
+    { title: 'User Acceptance Testing (UAT) vs System Testing', mod: 5, sub: 'Module 5: Pre-Deployment Matrix' },
+    { title: 'Chapter 10 Exam Readiness Quiz (10 Questions)', mod: 6, sub: 'Module 6: Active Recall' }
+  ];
+
+  const searchInput = document.getElementById('globalSearchInput');
+  const searchDropdown = document.getElementById('searchResultsDropdown');
+
+  searchInput.addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) {
+      searchDropdown.classList.remove('open');
+      return;
+    }
+    const hits = searchIndex.filter(item => item.title.toLowerCase().includes(q) || item.sub.toLowerCase().includes(q)).slice(0, 8);
+    if (!hits.length) {
+      searchDropdown.innerHTML = `<div class="search-hit" style="color:var(--text-muted);">No matching topics found.</div>`;
+    } else {
+      searchDropdown.innerHTML = hits.map((h, i) => `
+        <div class="search-hit" data-hitidx="${i}">
+          <div style="font-weight:700;color:var(--text-primary);">${h.title}</div>
+          <div style="font-size:0.72rem;color:var(--accent-teal);">${h.sub}</div>
+        </div>
+      `).join('');
+      searchDropdown.querySelectorAll('.search-hit').forEach((el, idx) => {
+        el.addEventListener('click', () => {
+          goToModule(hits[idx].mod);
+          searchDropdown.classList.remove('open');
+          searchInput.value = '';
+        });
+      });
+    }
+    searchDropdown.classList.add('open');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.sidebar-search')) searchDropdown.classList.remove('open');
+  });
+
+  // ==================== MODULE 6: EXAM READINESS QUIZ ====================
+  const quizQuestions = [
+    {
+      q: '1. What is the fundamental blind spot of Black-Box Testing compared to White-Box Testing?',
+      options: [
+        'It cannot be executed on compiled software.',
+        'It cannot detect internal implementation errors or extra uncalled code paths.',
+        'It requires full access to source code and control-flow graphs.',
+        'It can only be performed during Unit Testing.'
+      ],
+      correct: 1,
+      exp: 'Black-Box Testing treats the system as an opaque box based on specifications, so it cannot detect extra uncalled code paths or hidden internal logic errors. Conversely, White-Box Testing cannot detect missing requirements.'
+    },
+    {
+      q: '2. For an input field accepting integers in the valid range 50% <= Score <= 90%, how many minimal Equivalence Partitions (EP) are constructed?',
+      options: [
+        '2 partitions (Valid and Invalid)',
+        '3 partitions: Invalid 1 (Score < 50), Valid (50 <= Score <= 90), and Invalid 2 (Score > 90)',
+        '6 partitions corresponding to boundary edges',
+        '41 partitions (one for every integer from 50 to 90)'
+      ],
+      correct: 1,
+      exp: 'The minimal partition set covering the domain consists of 3 partitions: Invalid Partition 1 (< 50), Valid Partition (50 to 90), and Invalid Partition 2 (> 90).'
+    },
+    {
+      q: '3. Which set of 6 test values represents Boundary Value Analysis (BVA) for the valid range 50% <= Score <= 90%?',
+      options: [
+        '30, 60, 100',
+        '49, 50, 51, 89, 90, 91',
+        '0, 50, 70, 90, 100, 120',
+        '48, 50, 52, 88, 90, 92'
+      ],
+      correct: 1,
+      exp: 'BVA tests values at and immediately adjacent to the lower boundary (49, 50, 51) and upper boundary (89, 90, 91) to catch operator errors such as < vs <=.'
+    },
+    {
+      q: '4. In the ATM Decision Table example with 3 Boolean causes (Account Exists, PIN Correct, Balance Available), how many unreduced rules exist initially and how many remain after reduction?',
+      options: [
+        '6 unreduced rules -> 3 reduced rules',
+        '8 unreduced rules (2^3) -> 4 reduced rules using don\'t-care ("-") entries',
+        '9 unreduced rules -> 4 reduced rules',
+        '8 unreduced rules -> 2 reduced rules'
+      ],
+      correct: 1,
+      exp: 'With 3 Boolean causes, 2^3 = 8 raw combinations exist. Using don\'t-care ("-") reduction collapses Rules 1–4 (C1=N) and Rules 5–6 (C1=Y, C2=N), leaving 4 consolidated rules.'
+    },
+    {
+      q: '5. What does the Necessary Condition Principle in White-Box Testing state?',
+      options: [
+        'Achieving 100% statement coverage guarantees zero bugs remain.',
+        'Executing a faulty statement is a necessary condition for revealing a fault.',
+        'All decision tables must have at least 8 rules.',
+        'System testing must occur after User Acceptance Testing.'
+      ],
+      correct: 1,
+      exp: 'Executing a faulty statement is a necessary (though not always sufficient) condition for revealing a fault in code.'
+    },
+    {
+      q: '6. In the slide example example_function(x, y) containing three sequential if-statements (x > 0, y > 0, and x > 0 and y > 0), what happens when tested with x = 1, y = 1?',
+      options: [
+        'It achieves 100% Path Coverage and 50% Statement Coverage.',
+        'It achieves 100% Statement Coverage, while leaving 3 out of 4 control paths untested.',
+        'It achieves 100% Branch Coverage.',
+        'It fails to execute the third if-statement.'
+      ],
+      correct: 1,
+      exp: 'x = 1, y = 1 enters all three if-blocks, executing 100% of statements while leaving the 3 false-branch path combinations untested.'
+    },
+    {
+      q: '7. Given a Control-Flow Graph (CFG) with E = 14 edges, N = 12 nodes, and P = 1 connected component, what is the Cyclomatic Complexity M?',
+      options: [
+        'M = 2',
+        'M = 3',
+        'M = 4',
+        'M = 6'
+      ],
+      correct: 2,
+      exp: 'Using M = E - N + 2P: M = 14 - 12 + 2(1) = 4 linearly independent basis paths.'
+    },
+    {
+      q: '8. What structural coverage guarantees are provided by executing all M paths in a Basis Path Set?',
+      options: [
+        'Only 50% Statement Coverage',
+        '100% Statement Coverage and 100% Branch Coverage',
+        '100% Exhaustive Input Coverage',
+        'Only Loop Boundary Coverage'
+      ],
+      correct: 1,
+      exp: 'Executing all linearly independent paths in a basis path set guarantees 100% Statement Coverage and 100% Branch Coverage.'
+    },
+    {
+      q: '9. Which structural coverage criterion is easiest to satisfy and answers "Did we run every line of code?"',
+      options: [
+        'Path Coverage',
+        'Branch Coverage',
+        'Statement Coverage',
+        'All-Pairs Coverage'
+      ],
+      correct: 2,
+      exp: 'Statement Coverage (Difficulty: Easy) checks whether every executable line of code ran at least once.'
+    },
+    {
+      q: '10. How does User Acceptance Testing (UAT) differ from System Testing regarding defect expectations?',
+      options: [
+        'UAT expects numerous functional bugs, whereas System Testing expects zero defects.',
+        'System Testing expects and detects functional bugs against SRS specs, whereas UAT\'s ideal expectation is zero major defects while validating business workflows.',
+        'UAT is performed exclusively by white-box unit developers.',
+        'There is no difference between System Testing and UAT.'
+      ],
+      correct: 1,
+      exp: 'System Testing verifies technical SRS compliance and expects to uncover functional bugs; UAT validates end-user workflows and release confidence with an ideal expectation of zero major defects.'
+    }
+  ];
+
+  function renderQuiz() {
+    const container = document.getElementById('quizContainer');
+    container.innerHTML = quizQuestions.map((item, qIdx) => {
+      const answered = state.quizAnswers[qIdx] !== undefined;
+      const chosen = state.quizAnswers[qIdx];
+      return `
+        <div class="quiz-card">
+          <div class="quiz-q">${item.q}</div>
+          <div class="quiz-opts">
+            ${item.options.map((opt, oIdx) => {
+              let cls = 'quiz-opt';
+              if (answered) {
+                if (oIdx === item.correct) cls += ' correct';
+                else if (oIdx === chosen) cls += ' incorrect';
+              }
+              return `
+                <button class="${cls}" ${answered ? 'disabled' : ''} onclick="answerQuiz(${qIdx}, ${oIdx})">
+                  <span style="font-family:var(--font-mono);font-weight:700;color:var(--accent-teal);">${String.fromCharCode(65 + oIdx)}.</span>
+                  <span>${opt}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+          <div class="quiz-exp ${answered ? 'show' : ''}" style="background:${chosen === item.correct ? 'rgba(20,184,166,0.14)' : 'rgba(244,63,94,0.14)'};border:1px solid ${chosen === item.correct ? 'rgba(20,184,166,0.38)' : 'rgba(244,63,94,0.38)'};">
+            <strong>${chosen === item.correct ? '&#10003; Correct:' : '&#10007; Incorrect:'}</strong> ${item.exp}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    updateQuizScore();
+  }
+
+  window.answerQuiz = function(qIdx, oIdx) {
+    if (state.quizAnswers[qIdx] !== undefined) return;
+    state.quizAnswers[qIdx] = oIdx;
+    renderQuiz();
+  };
+
+  function updateQuizScore() {
+    const answeredCount = Object.keys(state.quizAnswers).length;
+    let score = 0;
+    Object.entries(state.quizAnswers).forEach(([q, o]) => {
+      if (quizQuestions[Number(q)].correct === o) score++;
+    });
+
+    document.getElementById('quizScoreBadge').textContent = `Score: ${score} / ${quizQuestions.length}`;
+    const summary = document.getElementById('quizSummaryCard');
+    if (answeredCount === quizQuestions.length) {
+      summary.style.display = 'block';
+      document.getElementById('quizFinalTitle').textContent = `Final Score: ${score} / ${quizQuestions.length} (${Math.round((score / quizQuestions.length) * 100)}%)`;
+      document.getElementById('quizFinalMsg').textContent = score >= 8
+        ? 'Outstanding work! You have mastered Chapter 10 Black-Box and White-Box Testing.'
+        : 'Review the explanations above and retake the quiz to hit 80%+ mastery.';
+    } else {
+      summary.style.display = 'none';
+    }
+  }
+
+  window.resetQuiz = function() {
+    state.quizAnswers = {};
+    renderQuiz();
+  };
+
+  document.getElementById('resetQuizBtn').addEventListener('click', window.resetQuiz);
+  renderQuiz();
+
+  // ==================== DOWNLOAD SELF-CONTAINED HTML ====================
+  document.getElementById('downloadHtmlBtn').addEventListener('click', () => {
+    const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'chapter-10-testing-revision-guide.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    const toast = document.getElementById('toastNotification');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  });
+})();
+</script>
+</body>
+</html>

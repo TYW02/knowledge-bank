@@ -1,0 +1,2484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 8 Revision Studio: Component Diagrams &amp; Software Engineering Design</title>
+<style>
+  :root {
+    --bg-primary: #0b0f19;
+    --bg-secondary: #111827;
+    --bg-card: #161f33;
+    --bg-card-alt: #1c2740;
+    --border-color: #28354f;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-indigo: #6366f1;
+    --accent-indigo-glow: rgba(99, 102, 241, 0.22);
+    --accent-teal: #14b8a6;
+    --accent-teal-glow: rgba(20, 184, 166, 0.22);
+    --accent-sky: #38bdf8;
+    --accent-amber: #f59e0b;
+    --accent-amber-glow: rgba(245, 158, 11, 0.2);
+    --accent-rose: #f43f5e;
+    --accent-rose-glow: rgba(244, 63, 94, 0.2);
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* Sidebar */
+  .sidebar {
+    width: 295px;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-header {
+    padding: 1.4rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .course-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--accent-teal);
+    background: var(--accent-teal-glow);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(20, 184, 166, 0.35);
+    margin-bottom: 0.6rem;
+  }
+
+  .sidebar-title {
+    font-size: 1.12rem;
+    font-weight: 800;
+    line-height: 1.3;
+    color: var(--text-primary);
+  }
+
+  .sidebar-sub {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+  }
+
+  .progress-box {
+    padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(11, 15, 25, 0.45);
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.4rem;
+  }
+
+  .progress-track {
+    height: 7px;
+    background: var(--bg-primary);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 17%;
+    background: linear-gradient(90deg, var(--accent-indigo), var(--accent-teal));
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+
+  .nav-list {
+    list-style: none;
+    padding: 0.85rem 0.75rem;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .nav-btn {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.78rem 0.9rem;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+
+  .nav-btn:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+
+  .nav-btn.active {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.16), rgba(20, 184, 166, 0.1));
+    border-color: rgba(99, 102, 241, 0.45);
+    color: var(--text-primary);
+  }
+
+  .nav-num {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-top: 1px;
+  }
+
+  .nav-btn.active .nav-num {
+    background: var(--accent-indigo);
+    border-color: var(--accent-indigo);
+    color: #fff;
+  }
+
+  .nav-btn.visited .nav-num {
+    background: var(--accent-teal);
+    border-color: var(--accent-teal);
+    color: #042f2e;
+  }
+
+  .nav-title {
+    display: block;
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.28;
+  }
+
+  .nav-desc {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .sidebar-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .download-btn {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(20, 184, 166, 0.45);
+    background: rgba(20, 184, 166, 0.14);
+    color: var(--accent-teal);
+    font-family: var(--font-sans);
+    font-size: 0.83rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .download-btn:hover {
+    background: var(--accent-teal);
+    color: #042f2e;
+    box-shadow: 0 0 18px var(--accent-teal-glow);
+  }
+
+  /* Mobile Header */
+  .mobile-topbar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 58px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 1rem;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 45;
+  }
+
+  .hamburger-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 11px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 48;
+  }
+
+  /* Main Layout */
+  .main-content {
+    margin-left: 295px;
+    flex: 1;
+    padding: 2.25rem 2.75rem 4rem;
+    max-width: 1240px;
+  }
+
+  .module-section {
+    display: none;
+    animation: fadeUp 0.28s ease-out;
+  }
+
+  .module-section.active {
+    display: block;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .module-header {
+    margin-bottom: 1.85rem;
+    padding-bottom: 1.2rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+
+  .module-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--accent-teal);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.3rem;
+  }
+
+  .module-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .module-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.94rem;
+    max-width: 760px;
+    margin-top: 0.4rem;
+  }
+
+  /* Cards & Grids */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    margin-bottom: 1.75rem;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .card-title {
+    font-size: 1.12rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.71rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 6px;
+    text-transform: uppercase;
+  }
+
+  .tag-indigo { background: var(--accent-indigo-glow); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4); }
+  .tag-teal { background: var(--accent-teal-glow); color: var(--accent-teal); border: 1px solid rgba(20, 184, 166, 0.4); }
+  .tag-amber { background: var(--accent-amber-glow); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.4); }
+  .tag-rose { background: var(--accent-rose-glow); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.4); }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.15rem; }
+
+  .concept-box {
+    background: rgba(11, 15, 25, 0.65);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent-indigo);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.15rem;
+  }
+  .concept-box.teal { border-left-color: var(--accent-teal); }
+  .concept-box.amber { border-left-color: var(--accent-amber); }
+  .concept-box.rose { border-left-color: var(--accent-rose); }
+
+  .concept-box h4 {
+    font-size: 0.94rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+    color: var(--text-primary);
+  }
+  .concept-box p, .concept-box li {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  /* Interactive Buttons / Tabs */
+  .pill-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .pill-btn {
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .pill-btn:hover {
+    border-color: var(--accent-indigo);
+    color: var(--text-primary);
+  }
+
+  .pill-btn.active {
+    background: var(--accent-indigo);
+    border-color: var(--accent-indigo);
+    color: #fff;
+  }
+
+  .pill-btn.teal-active.active {
+    background: var(--accent-teal);
+    border-color: var(--accent-teal);
+    color: #042f2e;
+  }
+
+  /* SVG / Canvas Stage */
+  .diagram-stage {
+    background: #090d16;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    position: relative;
+    overflow-x: auto;
+  }
+
+  .diagram-stage svg {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .inspector-panel {
+    margin-top: 1rem;
+    background: #090d16;
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    border-radius: var(--radius-md);
+    padding: 1.1rem 1.25rem;
+  }
+
+  /* Data Table */
+  .data-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    text-align: left;
+  }
+
+  th {
+    background: #0d1322;
+    color: var(--accent-teal);
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+  /* UML Tree & McConnell Levels */
+  .tree-box {
+    background: #090d16;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.1rem 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.75;
+  }
+
+  /* Interactive UML Notation Grid */
+  .notation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .notation-card {
+    background: #090d16;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .notation-card:hover, .notation-card.active {
+    border-color: var(--accent-teal);
+    background: rgba(20, 184, 166, 0.08);
+    transform: translateY(-2px);
+  }
+
+  /* Mapping Side-by-Side Cards */
+  .map-row {
+    display: grid;
+    grid-template-columns: 1fr 42px 1fr;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+    padding: 0.85rem;
+    background: #090d16;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .map-row:hover, .map-row.active {
+    border-color: var(--accent-indigo);
+    background: rgba(99, 102, 241, 0.1);
+  }
+
+  /* Checklist */
+  .rule-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: #090d16;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.6rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+  }
+
+  .rule-item:hover { border-color: var(--accent-teal); }
+  .rule-item.checked {
+    border-color: rgba(20, 184, 166, 0.45);
+    background: rgba(20, 184, 166, 0.06);
+  }
+
+  .rule-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    border: 1.5px solid var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 0.78rem;
+    color: transparent;
+  }
+
+  .rule-item.checked .rule-check {
+    background: var(--accent-teal);
+    border-color: var(--accent-teal);
+    color: #042f2e;
+    font-weight: 800;
+  }
+
+  /* Quiz */
+  .quiz-card {
+    background: #090d16;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .quiz-q {
+    font-weight: 700;
+    font-size: 0.96rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .quiz-opts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .quiz-opt {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.86rem;
+    cursor: pointer;
+    display: flex;
+    gap: 0.65rem;
+    transition: all 0.18s ease;
+  }
+
+  .quiz-opt:hover:not(:disabled) {
+    border-color: var(--accent-indigo);
+    background: var(--bg-card-alt);
+  }
+
+  .quiz-opt.correct {
+    border-color: var(--accent-teal);
+    background: rgba(20, 184, 166, 0.18);
+  }
+
+  .quiz-opt.incorrect {
+    border-color: var(--accent-rose);
+    background: rgba(244, 63, 94, 0.18);
+  }
+
+  .quiz-exp {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.83rem;
+    display: none;
+  }
+  .quiz-exp.show { display: block; }
+
+  /* Footer Nav */
+  .module-footer-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-color);
+    gap: 1rem;
+  }
+
+  .btn-primary, .btn-secondary {
+    padding: 0.72rem 1.3rem;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: 0.86rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--accent-indigo);
+    color: #fff;
+    border: 1px solid var(--accent-indigo);
+  }
+  .btn-primary:hover {
+    background: #4f46e5;
+    box-shadow: 0 0 18px var(--accent-indigo-glow);
+  }
+
+  .btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+  .btn-secondary:hover { border-color: var(--accent-teal); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--accent-teal);
+    color: var(--text-primary);
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    font-size: 0.84rem;
+    font-weight: 600;
+    z-index: 100;
+    transform: translateY(130%);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 960px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-backdrop.open { display: block; }
+    .mobile-topbar { display: flex; }
+    .main-content { margin-left: 0; padding: 5rem 1.2rem 3rem; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .map-row { grid-template-columns: 1fr; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Mobile Topbar -->
+  <header class="mobile-topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="hamburger-btn" id="menuToggle" aria-label="Toggle Menu">&#9776;</button>
+      <span style="font-weight:700;font-size:0.92rem;">Ch. 8: Component &amp; SE Design</span>
+    </div>
+    <span class="tag tag-teal" id="mobileProgressTag">17%</span>
+  </header>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">&#9679; INF2001 // CHAPTER 8</div>
+      <h1 class="sidebar-title">Software Design &amp; Component Diagrams</h1>
+      <p class="sidebar-sub">Week 8 Interactive Revision Studio</p>
+    </div>
+
+    <div class="progress-box">
+      <div class="progress-meta">
+        <span>Revision Coverage</span>
+        <span id="progressPercent">17%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <ul class="nav-list" id="navList">
+      <li>
+        <button class="nav-btn active" data-module="1">
+          <span class="nav-num">01</span>
+          <div>
+            <span class="nav-title">SE Design Fundamentals</span>
+            <span class="nav-desc">Process/Product, Cycle &amp; Levels</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="2">
+          <span class="nav-num">02</span>
+          <div>
+            <span class="nav-title">Design Principles &amp; Lab</span>
+            <span class="nav-desc">Coupling/Cohesion Simulator</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="3">
+          <span class="nav-num">03</span>
+          <div>
+            <span class="nav-title">UML Component Notations</span>
+            <span class="nav-desc">Lollipop, Socket, Port, Delegate</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="4">
+          <span class="nav-num">04</span>
+          <div>
+            <span class="nav-title">3 Lecture Case Walkthroughs</span>
+            <span class="nav-desc">ClientCollection, Order, BlogApp</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="5">
+          <span class="nav-num">05</span>
+          <div>
+            <span class="nav-title">Class Mapping &amp; Rules</span>
+            <span class="nav-desc">Translation &amp; 9 Modeling Rules</span>
+          </div>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-module="6">
+          <span class="nav-num">06</span>
+          <div>
+            <span class="nav-title">Exam Readiness Quiz</span>
+            <span class="nav-desc">10 Active Recall Questions</span>
+          </div>
+        </button>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <button class="download-btn" id="downloadHtmlBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download HTML File
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+
+    <!-- ==================== MODULE 1 ==================== -->
+    <section class="module-section active" id="module-1">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Part 1 // Foundations &amp; Granularity</div>
+          <h2 class="module-title">Software Engineering Design Fundamentals &amp; Levels</h2>
+          <p class="module-subtitle">Software design bridges stakeholder requirements ("what") and physical implementation ("how") through iterative architectural, detailed, and construction models.</p>
+        </div>
+        <span class="tag tag-indigo">W8-1-2 Fundamentals</span>
+      </div>
+
+      <!-- Formal Definition: Process vs Product -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.1 Formal Definition &amp; Product Development Importance</h3>
+          <span class="tag tag-teal">Dual Definition</span>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:1.25rem;">
+          <div class="concept-box">
+            <h4>Software Design as a PROCESS</h4>
+            <p>The activity of <strong>identifying, evaluating, validating, and specifying</strong> the architectural, detailed, and construction models required to build software that meets functional and non-functional requirements.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>Software Design as a PRODUCT / RESULT</h4>
+            <p>The concrete set of <strong>design models, architectural blueprints, and specifications</strong> produced by the design process to guide construction, testing, and maintenance.</p>
+          </div>
+        </div>
+
+        <h4 style="font-size:0.9rem;color:var(--text-primary);margin-bottom:0.75rem;">6 Reasons Why Software Design is Critical (Product Development Perspective):</h4>
+        <div class="grid-3">
+          <div class="concept-box">
+            <h4>1. Foundation for Lifecycle</h4>
+            <p>Forms the mandatory foundation for <strong>Construction</strong>, <strong>Testing</strong>, and <strong>Maintenance</strong> phases.</p>
+          </div>
+          <div class="concept-box">
+            <h4>2. Requirements Mapping</h4>
+            <p>Translates abstract requirements into conceptual structural and behavioral models.</p>
+          </div>
+          <div class="concept-box">
+            <h4>3. Early Component ID</h4>
+            <p>Identifies major structural components and their interaction interfaces before coding.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>4. Birthplace of Quality</h4>
+            <p>Provides mechanisms to evaluate quality attributes (usability, maintainability, performance) early.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>5. Reusability</h4>
+            <p>Design patterns and modular solutions can be reused across multiple software projects.</p>
+          </div>
+          <div class="concept-box amber">
+            <h4>6. Minimizing Volatility</h4>
+            <p>Absorbs requirements volatility early, minimizing costly schedule and budget overruns.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Iterative Design Cycle Diagram -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1.2 Interactive Iterative Software Design Process</h3>
+          <span class="tag tag-amber">Click Any Stage</span>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 760 220" width="760" height="220" id="iterativeCycleSvg">
+            <defs>
+              <marker id="arrowIndigo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#6366f1"/>
+              </marker>
+              <marker id="arrowTeal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#14b8a6"/>
+              </marker>
+            </defs>
+
+            <!-- Forward arrows -->
+            <line x1="175" y1="80" x2="215" y2="80" stroke="#6366f1" stroke-width="2.5" marker-end="url(#arrowIndigo)"/>
+            <line x1="375" y1="80" x2="415" y2="80" stroke="#6366f1" stroke-width="2.5" marker-end="url(#arrowIndigo)"/>
+            <line x1="575" y1="80" x2="615" y2="80" stroke="#6366f1" stroke-width="2.5" marker-end="url(#arrowIndigo)"/>
+
+            <!-- Iterative feedback loop -->
+            <path d="M 685 115 L 685 168 L 95 168 L 95 118" fill="none" stroke="#14b8a6" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrowTeal)"/>
+            <rect x="260" y="153" width="245" height="26" rx="13" fill="#0f172a" stroke="#14b8a6" stroke-width="1.2"/>
+            <text x="382" y="170" fill="#14b8a6" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">Iterative Loop + Human Review</text>
+
+            <!-- Stage 1 -->
+            <g class="cycle-node" data-stage="0" style="cursor:pointer;">
+              <rect x="20" y="45" width="150" height="70" rx="12" fill="#1e293b" stroke="#6366f1" stroke-width="2.5" id="cycleRect0"/>
+              <text x="95" y="72" fill="#a5b4fc" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">STAGE 01</text>
+              <text x="95" y="94" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Clarify Needs</text>
+            </g>
+
+            <!-- Stage 2 -->
+            <g class="cycle-node" data-stage="1" style="cursor:pointer;">
+              <rect x="220" y="45" width="150" height="70" rx="12" fill="#111827" stroke="#334155" stroke-width="2" id="cycleRect1"/>
+              <text x="295" y="72" fill="#94a3b8" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">STAGE 02</text>
+              <text x="295" y="94" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Explore Options</text>
+            </g>
+
+            <!-- Stage 3 -->
+            <g class="cycle-node" data-stage="2" style="cursor:pointer;">
+              <rect x="420" y="45" width="150" height="70" rx="12" fill="#111827" stroke="#334155" stroke-width="2" id="cycleRect2"/>
+              <text x="495" y="72" fill="#94a3b8" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">STAGE 03</text>
+              <text x="495" y="94" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Evaluate Designs</text>
+            </g>
+
+            <!-- Stage 4 -->
+            <g class="cycle-node" data-stage="3" style="cursor:pointer;">
+              <rect x="620" y="45" width="125" height="70" rx="12" fill="#111827" stroke="#334155" stroke-width="2" id="cycleRect3"/>
+              <text x="682" y="72" fill="#94a3b8" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">STAGE 04</text>
+              <text x="682" y="94" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Refine Design</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="inspector-panel" id="cycleInspectorPanel"></div>
+      </div>
+
+      <!-- Design Levels & Supporting Activities -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">2. Software Design Activities: 3 Design Levels &amp; Supporting Tasks</h3>
+          <span class="tag tag-indigo">Zoom Granularity</span>
+        </div>
+
+        <div class="pill-bar" id="designLevelTabs">
+          <button class="pill-btn active" data-level="arch">Level 1: Software Architecture (Macrodesign)</button>
+          <button class="pill-btn" data-level="detailed">Level 2: Detailed Design (Microdesign)</button>
+          <button class="pill-btn" data-level="construction">Level 3: Construction Design</button>
+          <button class="pill-btn" data-level="supporting">Supporting Activities (HCI, Docs, Mgmt)</button>
+        </div>
+
+        <div id="designLevelDetailBox" style="margin-bottom:1.35rem;"></div>
+
+        <div class="data-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Design Level</th>
+                <th>Primary Focus</th>
+                <th>Requirement Type</th>
+                <th>Model Perspective</th>
+                <th>Key Deliverables &amp; Tasks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Software Architecture</strong><br><span style="font-size:0.76rem;color:var(--accent-indigo);">(Macrodesign)</span></td>
+                <td>Overall system structure, major subsystems, quality trade-offs</td>
+                <td><strong>Non-functional Requirements</strong> (Quality attributes)</td>
+                <td><span class="tag tag-indigo">Black-box</span></td>
+                <td>Architectural patterns, architectural views, subsystem partitioning</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Detailed Design</strong><br><span style="font-size:0.76rem;color:var(--accent-teal);">(Microdesign / Zoom In)</span></td>
+                <td>Internal component structure, class relationships, interface signatures</td>
+                <td><strong>Functional Requirements</strong> (System actions)</td>
+                <td><span class="tag tag-teal">White-box</span></td>
+                <td>2 Major Tasks: Interface design (internal/external) &amp; Component design (Otero 2012: + UI &amp; Data design)</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--text-primary);">Construction Design</strong><br><span style="font-size:0.76rem;color:var(--accent-amber);">(Implementation-level)</span></td>
+                <td>Routine logic, algorithms, control flow</td>
+                <td><strong>Execution Quality</strong> (Testability, performance, maintainability)</td>
+                <td><span class="tag tag-amber">Code-ready</span></td>
+                <td>Flow-based design (activity flows), table-based design (decision tables)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <span style="font-size:0.8rem;color:var(--text-muted);">Module 1 of 6</span>
+        <button class="btn-primary" onclick="goToModule(2)">Next: Design Principles &amp; Coupling Lab &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 2 ==================== -->
+    <section class="module-section" id="module-2">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Part 1 // Section 3</div>
+          <h2 class="module-title">Software Design Principles &amp; Coupling/Cohesion Lab</h2>
+          <p class="module-subtitle">Decompose complex software systematically using Abstraction, Encapsulation, Separation of Interface/Implementation, Completeness vs. Sufficiency, and High Cohesion + Loose Coupling.</p>
+        </div>
+        <span class="tag tag-teal">Design Rules</span>
+      </div>
+
+      <!-- Core Design Principles Grid -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">3. Core Modular Design Principles</h3>
+          <span class="tag tag-indigo">Must-Know Definitions</span>
+        </div>
+
+        <div class="grid-3" style="margin-bottom:1.15rem;">
+          <div class="concept-box">
+            <h4>3.1 Modularization</h4>
+            <p>Continuous decomposition of a software system until fine-grained components are created. Prevents ad-hoc decomposition (which yields incoherent, unmaintainable systems). Guided by <strong>Abstraction</strong> &amp; <strong>Encapsulation</strong>.</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>3.2 Abstraction</h4>
+            <p>Focusing on <strong>essential characteristics</strong> of entities within their active context while deferring unnecessary details (e.g., modeling a manager component before deciding its exact classes).</p>
+          </div>
+          <div class="concept-box teal">
+            <h4>3.3 Encapsulation</h4>
+            <p>Hiding internal structure, data, and implementation details from external entities—exposing functionality exclusively through well-defined public interfaces.</p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="concept-box amber">
+            <h4>3.5 Separation of Interface and Implementation</h4>
+            <p>Specifying a public interface (visible to clients) completely separate from how the component is realized internally. Allows internal implementations to be upgraded or swapped without breaking external client components.</p>
+          </div>
+          <div class="concept-box rose">
+            <h4>3.6 Completeness vs. Sufficiency</h4>
+            <ul style="padding-left:1.1rem;margin-top:0.25rem;">
+              <li><strong>Completeness ("No Less"):</strong> Measures how well designed units provide <em>all</em> required services to achieve their intended purpose.</li>
+              <li><strong>Sufficiency ("No More"):</strong> Measures how well designed units provide <em>only</em> the services sufficient to achieve their intended purpose (no bloat).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Coupling & Cohesion Lab -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">3.4 Interactive Coupling &amp; Cohesion Simulator</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="pill-btn active" id="modeBadBtn">Anti-Pattern: Tight Coupling &amp; Low Cohesion</button>
+            <button class="pill-btn teal-active" id="modeGoodBtn">Golden Goal: Loose Coupling &amp; High Cohesion</button>
+          </div>
+        </div>
+
+        <p style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:1rem;">
+          Click any module node inside the simulator below to trigger a <strong>Requirement Change / Code Modification</strong> and observe the ripple blast radius across dependent components:
+        </p>
+
+        <div class="diagram-stage">
+          <canvas id="couplingCanvas" height="270"></canvas>
+        </div>
+
+        <div class="grid-3" style="margin-top:1rem;">
+          <div class="concept-box" id="metricCohesionBox">
+            <h4>Cohesion Level</h4>
+            <p id="metricCohesionText"></p>
+          </div>
+          <div class="concept-box" id="metricCouplingBox">
+            <h4>Coupling Level</h4>
+            <p id="metricCouplingText"></p>
+          </div>
+          <div class="concept-box" id="metricRippleBox">
+            <h4>Change Blast Radius</h4>
+            <p id="metricRippleText"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(1)">&larr; Previous: SE Design Fundamentals</button>
+        <button class="btn-primary" onclick="goToModule(3)">Next: UML Component Notations &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 3 ==================== -->
+    <section class="module-section" id="module-3">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Part 2 // Sections 4 &amp; 5</div>
+          <h2 class="module-title">UML Component Diagrams &amp; Interactive Notation Builder</h2>
+          <p class="module-subtitle">Master UML Structural taxonomy, McConnell's 5 Levels of Design, and every visual symbol: Component boxes, Lollipops, Sockets, Assemblies, Nested Components, Ports, and Delegates.</p>
+        </div>
+        <span class="tag tag-indigo">W8-1-1 UML Notation</span>
+      </div>
+
+      <!-- UML Taxonomy & McConnell's 5 Levels -->
+      <div class="grid-2">
+        <div class="card" style="margin-bottom:1.75rem;">
+          <div class="card-header">
+            <h3 class="card-title">4.2 UML Diagram Taxonomy</h3>
+            <span class="tag tag-teal">Structural Diagram</span>
+          </div>
+          <div class="tree-box">
+            <div style="color:#f8fafc;font-weight:bold;">UML Diagram Types</div>
+            <div>├── <span style="color:#14b8a6;font-weight:bold;">Structural Diagrams</span> (Static Architecture)</div>
+            <div>│   ├── <span style="background:rgba(99,102,241,0.28);color:#a5b4fc;padding:1px 6px;border-radius:4px;font-weight:bold;">Component Diagram (Focus of Week 8)</span></div>
+            <div>│   ├── Class Diagram &amp; Object Diagram</div>
+            <div>│   ├── Package Diagram &amp; Deployment Diagram</div>
+            <div>│   └── Composite Structure &amp; Profile Diagram</div>
+            <div>└── <span style="color:#f59e0b;font-weight:bold;">Behavioral Diagrams</span> (Dynamic Flow)</div>
+            <div>    ├── Use Case, Activity &amp; State Machine</div>
+            <div>    └── Interaction (Sequence, Communication)</div>
+          </div>
+          <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.85rem;">
+            <strong>Key Component Attributes:</strong> Modular, portable, replaceable, and reusable. Facilitates high-level architectural discussions with non-technical stakeholders.
+          </p>
+        </div>
+
+        <div class="card" style="margin-bottom:1.75rem;">
+          <div class="card-header">
+            <h3 class="card-title">4.3 McConnell's 5 Levels of Design</h3>
+            <span class="tag tag-amber">Code Complete</span>
+          </div>
+          <div class="tree-box">
+            <div><strong style="color:#f8fafc;">Level 1:</strong> Software System (Top-level boundary)</div>
+            <div><strong style="color:#14b8a6;">Level 2:</strong> Division into Subsystems / Packages <span style="color:#14b8a6;">&larr; Components!</span></div>
+            <div><strong style="color:#a5b4fc;">Level 3:</strong> Division into Classes within Packages</div>
+            <div><strong style="color:#94a3b8;">Level 4:</strong> Division into Data &amp; Routines within Classes</div>
+            <div><strong style="color:#64748b;">Level 5:</strong> Internal Routine Design (Method algorithms)</div>
+          </div>
+          <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.85rem;">
+            <strong>Encapsulation Loop:</strong> Engineers encapsulate classes identified at <strong>Level 3</strong> into higher-level <strong>Components (Level 2)</strong> to manage complex architectures.
+          </p>
+        </div>
+      </div>
+
+      <!-- Interactive UML Notation Reference & Visual Renderer -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">5. Interactive UML Component Notation Inspector</h3>
+          <span class="tag tag-teal">Click Any Symbol Card</span>
+        </div>
+
+        <div class="notation-grid" id="notationCardsGrid" style="margin-bottom:1.25rem;">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 760 235" width="760" height="235" id="notationPreviewSvg">
+            <!-- Dynamically rendered by JS -->
+          </svg>
+        </div>
+
+        <div class="inspector-panel" id="notationDetailPanel"></div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(2)">&larr; Previous: Design Principles</button>
+        <button class="btn-primary" onclick="goToModule(4)">Next: 3 Lecture Case Walkthroughs &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 4 ==================== -->
+    <section class="module-section" id="module-4">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Part 2 // Section 6</div>
+          <h2 class="module-title">Interactive Walkthrough of All 3 Lecture Examples</h2>
+          <p class="module-subtitle">Explore every component, port, delegation link, and lollipop-socket assembly from the INF2001 Week 8 lecture slides. Click any component or interface in the diagrams below.</p>
+        </div>
+        <span class="tag tag-indigo">Slide Examples</span>
+      </div>
+
+      <div class="card">
+        <div class="pill-bar" id="exampleSelectorTabs">
+          <button class="pill-btn active" data-example="ex1">Example 1: ClientCollectionSystem (Ports &amp; Delegates)</button>
+          <button class="pill-btn" data-example="ex2">Example 2: Order Processing System</button>
+          <button class="pill-btn" data-example="ex3">Example 3: BlogApp Site (Full Architecture)</button>
+        </div>
+
+        <div class="diagram-stage">
+          <svg viewBox="0 0 820 380" width="820" height="380" id="exampleDiagramSvg"></svg>
+        </div>
+
+        <div class="inspector-panel" id="exampleInspectorBox"></div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(3)">&larr; Previous: UML Notations</button>
+        <button class="btn-primary" onclick="goToModule(5)">Next: Class Mapping &amp; Rules &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 5 ==================== -->
+    <section class="module-section" id="module-5">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Part 2 // Section 7</div>
+          <h2 class="module-title">Component-to-Class Translation &amp; Modeling Rules</h2>
+          <p class="module-subtitle">Translate abstract Component Diagrams into concrete Class Diagrams and review all 5 Guiding Questions and 9 Modeling Guidelines.</p>
+        </div>
+        <span class="tag tag-teal">Design Synthesis</span>
+      </div>
+
+      <!-- Interactive Component-to-Class Mapper -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">7.1 Interactive Component Diagram &rarr; Class Diagram Translator</h3>
+          <span class="tag tag-indigo">Click Row to Inspect BlogApp Mapping</span>
+        </div>
+
+        <div id="mappingRowsContainer"></div>
+
+        <div class="diagram-stage" style="margin-top:1rem;">
+          <svg viewBox="0 0 780 220" width="780" height="220" id="mappingVisualSvg"></svg>
+        </div>
+      </div>
+
+      <!-- 5 Guiding Questions & 9 Modeling Rules -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">7.2 The 5 Guiding Modeling Questions</h3>
+            <span class="tag tag-amber">Workflow</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div class="concept-box">
+              <h4>Q1. Core System Responsibilities</h4>
+              <p>What are the main responsibilities of my system?</p>
+            </div>
+            <div class="concept-box">
+              <h4>Q2. Cohesive Class Grouping</h4>
+              <p>Which classes belong together because they serve the same responsibility?</p>
+            </div>
+            <div class="concept-box teal">
+              <h4>Q3. Inter-Component Dependencies</h4>
+              <p>What does each component need from another component?</p>
+            </div>
+            <div class="concept-box teal">
+              <h4>Q4. Provider vs. Requirer Identification</h4>
+              <p>Who provides that service (lollipop) and who requires it (socket)?</p>
+            </div>
+            <div class="concept-box amber">
+              <h4>Q5. Cross-Diagram Consistency</h4>
+              <p>Does my component diagram still align with my class diagram and system design?</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">7.3 Common Modeling Rules (9 Checklist Items)</h3>
+            <span class="tag tag-teal" id="rulesProgressTag">0 / 9 Reviewed</span>
+          </div>
+          <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.85rem;">Click each modeling rule to check it off as you revise:</p>
+          <div id="modelingRulesList"></div>
+        </div>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(4)">&larr; Previous: Lecture Walkthroughs</button>
+        <button class="btn-primary" onclick="goToModule(6)">Next: Exam Readiness Quiz &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODULE 6 ==================== -->
+    <section class="module-section" id="module-6">
+      <div class="module-header">
+        <div>
+          <div class="module-eyebrow">Self-Assessment // Active Recall</div>
+          <h2 class="module-title">Chapter 8 Exam Readiness Quiz</h2>
+          <p class="module-subtitle">Test your knowledge across Software Engineering Design fundamentals, Design Principles, UML Component Notations, Slide Case Studies, and Component-to-Class Mapping.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="tag tag-teal" id="quizScoreBadge">Score: 0 / 10</span>
+          <button class="btn-secondary" style="padding:6px 12px;font-size:0.8rem;" id="resetQuizBtn">Reset Quiz</button>
+        </div>
+      </div>
+
+      <div id="quizContainer"></div>
+
+      <div class="card" id="quizSummaryCard" style="display:none;border-color:var(--accent-teal);text-align:center;">
+        <h3 style="font-size:1.3rem;margin-bottom:0.4rem;" id="quizFinalTitle">Assessment Complete!</h3>
+        <p style="color:var(--text-secondary);margin-bottom:1rem;" id="quizFinalMsg"></p>
+        <button class="btn-primary" onclick="resetQuiz()">Retake Quiz</button>
+      </div>
+
+      <div class="module-footer-nav">
+        <button class="btn-secondary" onclick="goToModule(5)">&larr; Previous: Class Mapping &amp; Rules</button>
+        <button class="btn-primary" onclick="goToModule(1)">Return to Module 01 &#8634;</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toastNotification">Chapter 8 HTML Study Guide downloaded!</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ==================== GLOBAL STATE ====================
+  const state = {
+    currentModule: 1,
+    visitedModules: new Set([1]),
+    cycleStage: 0,
+    designLevel: 'arch',
+    couplingMode: 'bad', // 'bad' or 'good'
+    blastNodeIndex: 0,
+    selectedNotation: 'component',
+    selectedExample: 'ex1',
+    selectedMapRow: 0,
+    checkedRules: new Set(),
+    quizAnswers: {}
+  };
+
+  // ==================== NAVIGATION ====================
+  window.goToModule = function(modNum) {
+    state.currentModule = modNum;
+    state.visitedModules.add(modNum);
+
+    document.querySelectorAll('.module-section').forEach(s => s.classList.remove('active'));
+    document.getElementById(`module-${modNum}`).classList.add('active');
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      const m = Number(btn.dataset.module);
+      btn.classList.toggle('active', m === modNum);
+      btn.classList.toggle('visited', state.visitedModules.has(m) && m !== modNum);
+    });
+
+    const pct = Math.round((state.visitedModules.size / 6) * 100);
+    document.getElementById('progressPercent').textContent = `${pct}%`;
+    document.getElementById('mobileProgressTag').textContent = `${pct}%`;
+    document.getElementById('progressFill').style.width = `${pct}%`;
+
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+
+    if (modNum === 2) drawCouplingCanvas();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => goToModule(Number(btn.dataset.module)));
+  });
+
+  document.getElementById('menuToggle').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarBackdrop').classList.toggle('open');
+  });
+
+  document.getElementById('sidebarBackdrop').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+  });
+
+  // ==================== MODULE 1: ITERATIVE CYCLE & DESIGN LEVELS ====================
+  const cycleStagesData = [
+    {
+      title: 'Stage 01: Clarify Needs',
+      desc: 'Identify open questions, missing edge cases, real stakeholder/user needs, and technical or operational constraints before committing to structural choices.'
+    },
+    {
+      title: 'Stage 02: Explore Options',
+      desc: 'Propose candidate components, architectural styles, and interaction interfaces while evaluating architectural fit and engineering trade-offs.'
+    },
+    {
+      title: 'Stage 03: Evaluate Designs',
+      desc: 'Analyze architectural risks, test design ideas against non-functional quality attributes, and gather objective evidence of system quality.'
+    },
+    {
+      title: 'Stage 04: Refine Design (+ Human Engineering Review)',
+      desc: 'Make iterative design revisions and build prototypes to reach final decisions. Note: While AI tools can suggest candidate designs or code, human software engineers must review, validate, and justify all decisions based on trade-offs and evidence.'
+    }
+  ];
+
+  function renderCycleStage(idx) {
+    state.cycleStage = idx;
+    for (let i = 0; i < 4; i++) {
+      const rect = document.getElementById(`cycleRect${i}`);
+      if (i === idx) {
+        rect.setAttribute('fill', '#1e293b');
+        rect.setAttribute('stroke', '#6366f1');
+        rect.setAttribute('stroke-width', '3');
+      } else {
+        rect.setAttribute('fill', '#111827');
+        rect.setAttribute('stroke', '#334155');
+        rect.setAttribute('stroke-width', '2');
+      }
+    }
+    const d = cycleStagesData[idx];
+    document.getElementById('cycleInspectorPanel').innerHTML = `
+      <h4 style="color:var(--accent-teal);font-size:0.96rem;margin-bottom:0.35rem;">${d.title}</h4>
+      <p style="font-size:0.87rem;color:var(--text-primary);">${d.desc}</p>
+    `;
+  }
+
+  document.querySelectorAll('.cycle-node').forEach(node => {
+    node.addEventListener('click', () => renderCycleStage(Number(node.dataset.stage)));
+  });
+  renderCycleStage(0);
+
+  const designLevelsInfo = {
+    arch: {
+      title: 'Software Architecture (Macrodesign)',
+      badge: 'Black-box // Non-functional Requirements',
+      points: [
+        '<strong>Scope:</strong> A macrodesign approach creating high-level models depicting overall system quality and structure.',
+        '<strong>Primary Focus:</strong> Focuses primarily on <strong>non-functional requirements</strong> (performance, security, maintainability, usability).',
+        '<strong>Model Type:</strong> Uses <strong>black-box models</strong> to evaluate projected system capabilities and establish the structural foundation.'
+      ]
+    },
+    detailed: {
+      title: 'Detailed Design (Microdesign / Zoom In)',
+      badge: 'White-box // Functional Requirements',
+      points: [
+        '<strong>Scope:</strong> Builds on software architecture to provide fine-grained structural and behavioral elements until ready for construction.',
+        '<strong>Primary Focus:</strong> Focuses primarily on <strong>functional requirements</strong> using <strong>white-box models</strong> of component internals.',
+        '<strong>2 Major Tasks:</strong> (1) <em>Interface Design</em> (external system boundaries &amp; internal component interfaces) and (2) <em>Component Design</em> (internal structure).',
+        '<strong>Otero (2012) 4 Tasks:</strong> Interface design, User interface design (HCI), Internal component design, and Data design (Databases).'
+      ]
+    },
+    construction: {
+      title: 'Construction Design (Implementation Support)',
+      badge: 'Execution Quality // Flow & Table-based',
+      points: [
+        '<strong>Scope:</strong> Low-level design directly supporting code implementation and routine logic.',
+        '<strong>Techniques:</strong> <strong>Flow-based design</strong> (e.g., activity flows) and <strong>table-based design</strong> (e.g., decision tables).',
+        '<strong>Focus:</strong> Directly optimizes execution quality attributes: performance, maintainability, and testability.'
+      ]
+    },
+    supporting: {
+      title: 'Supporting Software Design Activities',
+      badge: 'Cross-Cutting Design Governance',
+      points: [
+        '<strong>Human-Computer Interface (HCI) Design:</strong> Applies usability principles to optimize interaction between human users and the system.',
+        '<strong>Software Design Documentation:</strong> Captures all architectural, detailed, and construction decisions into formal design specifications.',
+        '<strong>Software Design Management:</strong> Coordinates design tasks, manages architectural trade-offs, and ensures design integrity across teams.'
+      ]
+    }
+  };
+
+  function renderDesignLevel(key) {
+    const info = designLevelsInfo[key];
+    document.getElementById('designLevelDetailBox').innerHTML = `
+      <div class="concept-box teal">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:0.5rem;">
+          <h4 style="font-size:1rem;">${info.title}</h4>
+          <span class="tag tag-indigo">${info.badge}</span>
+        </div>
+        <ul style="padding-left:1.2rem;display:flex;flex-direction:column;gap:5px;">
+          ${info.points.map(p => `<li>${p}</li>`).join('')}
+        </ul>
+      </div>
+    `;
+  }
+
+  document.querySelectorAll('#designLevelTabs .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#designLevelTabs .pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderDesignLevel(btn.dataset.level);
+    });
+  });
+  renderDesignLevel('arch');
+
+  // ==================== MODULE 2: COUPLING & COHESION CANVAS LAB ====================
+  const couplingCanvas = document.getElementById('couplingCanvas');
+  const cCtx = couplingCanvas.getContext('2d');
+  let nodeHitboxes = [];
+
+  const badNodes = [
+    { name: 'GodClass_Main', sub: 'UI + SQL + Auth + PDF', x: 0.22, y: 0.28 },
+    { name: 'Order_Util_Misc', sub: 'Billing + Email + Logs', x: 0.78, y: 0.26 },
+    { name: 'GlobalState_Mgr', sub: 'Shared Mutable Vars', x: 0.50, y: 0.52 },
+    { name: 'DB_Helper_V2', sub: 'Direct UI Hooks', x: 0.24, y: 0.78 },
+    { name: 'Report_Parser', sub: 'Hardcoded SQL + Auth', x: 0.76, y: 0.78 }
+  ];
+  const badEdges = [
+    [0,1],[0,2],[0,3],[0,4],[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]
+  ];
+
+  const goodNodes = [
+    { name: 'AccountMgmt', sub: 'Single Resp: Auth/User', x: 0.20, y: 0.32 },
+    { name: 'BlogPosts', sub: 'Single Resp: Posts/Comm', x: 0.50, y: 0.25 },
+    { name: 'Notification', sub: 'Single Resp: Email/SMS', x: 0.80, y: 0.32 },
+    { name: 'Database', sub: 'Interface: IStoreData', x: 0.35, y: 0.76 },
+    { name: 'OAuthProvider', sub: 'Interface: IOAuth', x: 0.65, y: 0.76 }
+  ];
+  const goodEdges = [
+    [0,3],[1,3],[0,2],[0,4]
+  ];
+
+  function updateCouplingMetrics() {
+    const isBad = state.couplingMode === 'bad';
+    document.getElementById('metricCohesionBox').className = isBad ? 'concept-box rose' : 'concept-box teal';
+    document.getElementById('metricCohesionText').innerHTML = isBad
+      ? '<strong>LOW COHESION (Bad):</strong> Unrelated tasks (SQL, UI, Auth, Email) are mixed inside single modules.'
+      : '<strong>HIGH COHESION (Good):</strong> Every element inside a component works together toward one focused responsibility.';
+
+    document.getElementById('metricCouplingBox').className = isBad ? 'concept-box rose' : 'concept-box teal';
+    document.getElementById('metricCouplingText').innerHTML = isBad
+      ? '<strong>TIGHT COUPLING (Bad):</strong> Every module directly accesses internals of every other module (10 tangled links).'
+      : '<strong>LOOSE COUPLING (Good):</strong> Components communicate strictly via narrow, well-defined interfaces.';
+
+    const impactedCount = isBad ? 5 : 2;
+    document.getElementById('metricRippleBox').className = isBad ? 'concept-box amber' : 'concept-box';
+    document.getElementById('metricRippleText').innerHTML = isBad
+      ? `<strong>HIGH BLAST RADIUS:</strong> Modifying 1 module forces re-testing/recompiling all <strong>${impactedCount}/5</strong> modules!`
+      : `<strong>CONTAINED IMPACT:</strong> Modifying internal logic affects only <strong>1</strong> component (or at most 1 immediate interface consumer).`;
+  }
+
+  function drawCouplingCanvas() {
+    if (!couplingCanvas.parentElement) return;
+    const rect = couplingCanvas.parentElement.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const w = Math.max(320, rect.width - 32);
+    const h = 270;
+
+    couplingCanvas.width = w * dpr;
+    couplingCanvas.height = h * dpr;
+    couplingCanvas.style.width = `${w}px`;
+    couplingCanvas.style.height = `${h}px`;
+    cCtx.save();
+    cCtx.scale(dpr, dpr);
+    cCtx.clearRect(0, 0, w, h);
+
+    const isBad = state.couplingMode === 'bad';
+    const nodes = isBad ? badNodes : goodNodes;
+    const edges = isBad ? badEdges : goodEdges;
+    const activeIdx = state.blastNodeIndex;
+
+    // Determine impacted nodes
+    const impacted = new Set([activeIdx]);
+    if (isBad) {
+      nodes.forEach((_, i) => impacted.add(i));
+    } else {
+      edges.forEach(([a, b]) => {
+        if (a === activeIdx) impacted.add(b);
+      });
+    }
+
+    // Draw Edges
+    edges.forEach(([a, b]) => {
+      const n1 = nodes[a];
+      const n2 = nodes[b];
+      const isHot = isBad || a === activeIdx || b === activeIdx;
+      cCtx.strokeStyle = isBad
+        ? 'rgba(244, 63, 94, 0.55)'
+        : (isHot ? '#14b8a6' : '#334155');
+      cCtx.lineWidth = isHot ? 2.4 : 1.5;
+      cCtx.beginPath();
+      cCtx.moveTo(n1.x * w, n1.y * h);
+      cCtx.lineTo(n2.x * w, n2.y * h);
+      cCtx.stroke();
+
+      // Lollipop circle on good edges
+      if (!isBad) {
+        const mx = (n1.x * w + n2.x * w) / 2;
+        const my = (n1.y * h + n2.y * h) / 2;
+        cCtx.fillStyle = '#090d16';
+        cCtx.strokeStyle = '#14b8a6';
+        cCtx.lineWidth = 2;
+        cCtx.beginPath();
+        cCtx.arc(mx, my, 5, 0, Math.PI * 2);
+        cCtx.fill();
+        cCtx.stroke();
+      }
+    });
+
+    // Draw Nodes
+    nodeHitboxes = [];
+    const boxW = Math.min(155, w * 0.26);
+    const boxH = 48;
+
+    nodes.forEach((n, idx) => {
+      const cx = n.x * w;
+      const cy = n.y * h;
+      const x = cx - boxW / 2;
+      const y = cy - boxH / 2;
+      nodeHitboxes.push({ x, y, w: boxW, h: boxH, idx });
+
+      const isSelected = idx === activeIdx;
+      const isAffected = impacted.has(idx);
+
+      cCtx.fillStyle = isSelected ? '#1e293b' : '#111827';
+      cCtx.strokeStyle = isSelected
+        ? '#f59e0b'
+        : (isAffected ? (isBad ? '#f43f5e' : '#14b8a6') : '#475569');
+      cCtx.lineWidth = isSelected ? 2.6 : 1.8;
+
+      cCtx.beginPath();
+      cCtx.roundRect(x, y, boxW, boxH, 9);
+      cCtx.fill();
+      cCtx.stroke();
+
+      cCtx.fillStyle = '#f8fafc';
+      cCtx.font = 'bold 11.5px sans-serif';
+      cCtx.textAlign = 'center';
+      cCtx.fillText(n.name, cx, cy - 4);
+
+      cCtx.fillStyle = isSelected ? '#fbbf24' : '#94a3b8';
+      cCtx.font = '9.5px monospace';
+      cCtx.fillText(isSelected ? '[MODIFIED NODE]' : n.sub, cx, cy + 12);
+    });
+
+    cCtx.restore();
+    updateCouplingMetrics();
+  }
+
+  couplingCanvas.addEventListener('click', (e) => {
+    const rect = couplingCanvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    nodeHitboxes.forEach(b => {
+      if (mx >= b.x && mx <= b.x + b.w && my >= b.y && my <= b.y + b.h) {
+        state.blastNodeIndex = b.idx;
+        drawCouplingCanvas();
+      }
+    });
+  });
+
+  document.getElementById('modeBadBtn').addEventListener('click', () => {
+    state.couplingMode = 'bad';
+    document.getElementById('modeBadBtn').classList.add('active');
+    document.getElementById('modeGoodBtn').classList.remove('active');
+    drawCouplingCanvas();
+  });
+
+  document.getElementById('modeGoodBtn').addEventListener('click', () => {
+    state.couplingMode = 'good';
+    document.getElementById('modeGoodBtn').classList.add('active');
+    document.getElementById('modeBadBtn').classList.remove('active');
+    drawCouplingCanvas();
+  });
+
+  // ==================== MODULE 3: UML NOTATIONS SANDBOX ====================
+  const umlNotations = [
+    {
+      id: 'component',
+      name: '5.1 Component Box',
+      badge: '<<component>>',
+      summary: 'A rectangle containing the component name, stereotyped with <<component>> and featuring a small "plug/component" widget icon in the top-right corner.',
+      svg: `
+        <rect x="270" y="55" width="220" height="115" rx="8" fill="#161f33" stroke="#6366f1" stroke-width="2.5"/>
+        <rect x="454" y="68" width="22" height="16" rx="2" fill="#0b0f19" stroke="#6366f1" stroke-width="1.5"/>
+        <rect x="448" y="71" width="10" height="4" fill="#6366f1"/>
+        <rect x="448" y="77" width="10" height="4" fill="#6366f1"/>
+        <text x="380" y="102" fill="#a5b4fc" font-family="monospace" font-size="12" text-anchor="middle">&laquo;component&raquo;</text>
+        <text x="380" y="126" fill="#f8fafc" font-family="sans-serif" font-size="16" font-weight="bold" text-anchor="middle">OrderProcessor</text>
+      `
+    },
+    {
+      id: 'provided',
+      name: '5.2 Provided Interface (Lollipop)',
+      badge: 'Ball / Facet',
+      summary: 'A solid line ending in a complete circle (lollipop/ball). Represents an interface that a component implements and exposes (provides) for other components to use.',
+      svg: `
+        <rect x="190" y="65" width="190" height="100" rx="8" fill="#161f33" stroke="#14b8a6" stroke-width="2.5"/>
+        <text x="285" y="108" fill="#5eead4" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+        <text x="285" y="130" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Storefront</text>
+        <line x1="380" y1="115" x2="485" y2="115" stroke="#14b8a6" stroke-width="3"/>
+        <circle cx="497" cy="115" r="12" fill="#090d16" stroke="#14b8a6" stroke-width="3"/>
+        <text x="497" y="92" fill="#14b8a6" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">IOrder (Provided Lollipop)</text>
+      `
+    },
+    {
+      id: 'required',
+      name: '5.3 Required Interface (Socket)',
+      badge: 'Cup / Receptacle',
+      summary: 'A solid line ending in a half-circle/cup shape (socket/receptacle). Represents a dependency—an interface that a component requires and calls from another component.',
+      svg: `
+        <rect x="380" y="65" width="200" height="100" rx="8" fill="#161f33" stroke="#f59e0b" stroke-width="2.5"/>
+        <text x="480" y="108" fill="#fcd34d" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+        <text x="480" y="130" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">OrderProcessor</text>
+        <line x1="285" y1="115" x2="380" y2="115" stroke="#f59e0b" stroke-width="3"/>
+        <path d="M 285 99 A 16 16 0 0 1 285 131" fill="none" stroke="#f59e0b" stroke-width="3"/>
+        <text x="275" y="88" fill="#f59e0b" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">IOrder (Required Socket)</text>
+      `
+    },
+    {
+      id: 'assembly',
+      name: '5.4 Assembly Relationship',
+      badge: 'Ball-in-Socket',
+      summary: 'Shows an explicit collaboration connection where Component B’s required interface socket plugs directly onto Component A’s provided interface lollipop.',
+      svg: `
+        <rect x="85" y="65" width="185" height="100" rx="8" fill="#161f33" stroke="#14b8a6" stroke-width="2.2"/>
+        <text x="177" y="110" fill="#5eead4" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+        <text x="177" y="132" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Storefront</text>
+
+        <line x1="270" y1="115" x2="368" y2="115" stroke="#14b8a6" stroke-width="2.8"/>
+        <circle cx="380" cy="115" r="11" fill="#14b8a6"/>
+        <path d="M 380 98 A 17 17 0 0 0 380 132" fill="none" stroke="#f59e0b" stroke-width="3"/>
+        <line x1="397" y1="115" x2="490" y2="115" stroke="#f59e0b" stroke-width="2.8"/>
+        <text x="380" y="85" fill="#f8fafc" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">order (Assembly)</text>
+
+        <rect x="490" y="65" width="195" height="100" rx="8" fill="#161f33" stroke="#f59e0b" stroke-width="2.2"/>
+        <text x="587" y="110" fill="#fcd34d" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+        <text x="587" y="132" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">OrderProcessor</text>
+      `
+    },
+    {
+      id: 'nested',
+      name: '5.5 Nested Components',
+      badge: 'Structural Decomposition',
+      summary: 'Component boxes drawn inside a larger enclosing component box. Shows structural decomposition where parent Component A delegates functionality to internal sub-components B and C.',
+      svg: `
+        <rect x="140" y="25" width="480" height="185" rx="10" fill="#111827" stroke="#6366f1" stroke-width="2.5"/>
+        <text x="380" y="52" fill="#a5b4fc" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">&laquo;component&raquo; EnclosingParentSystem</text>
+        <rect x="175" y="75" width="180" height="105" rx="8" fill="#161f33" stroke="#14b8a6" stroke-width="2"/>
+        <text x="265" y="122" fill="#5eead4" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+        <text x="265" y="144" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">SubComponent B</text>
+        <rect x="405" y="75" width="180" height="105" rx="8" fill="#161f33" stroke="#14b8a6" stroke-width="2"/>
+        <text x="495" y="122" fill="#5eead4" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+        <text x="495" y="144" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">SubComponent C</text>
+      `
+    },
+    {
+      id: 'ports_delegates',
+      name: '5.6 Ports & <<delegate>>',
+      badge: 'Boundary Access Point',
+      summary: 'Port: A small shaded square on the outer boundary frame for external access. Delegation (<<delegate>>): Dashed arrow linking an internal sub-component interface to/from an outer boundary port.',
+      svg: `
+        <defs>
+          <marker id="delArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+          </marker>
+        </defs>
+        <rect x="180" y="30" width="420" height="175" rx="10" fill="#111827" stroke="#6366f1" stroke-width="2.5"/>
+        <text x="390" y="56" fill="#a5b4fc" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">&laquo;component&raquo; ClientCollectionSystem</text>
+
+        <!-- Boundary Port -->
+        <rect x="169" y="112" width="22" height="22" fill="#38bdf8" stroke="#f8fafc" stroke-width="2"/>
+        <text x="155" y="102" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="bold" text-anchor="end">Port 1</text>
+
+        <!-- External Lollipop -->
+        <line x1="95" y1="123" x2="169" y2="123" stroke="#14b8a6" stroke-width="2.8"/>
+        <circle cx="83" cy="123" r="11" fill="#090d16" stroke="#14b8a6" stroke-width="2.8"/>
+        <text x="83" y="100" fill="#14b8a6" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">IClientData</text>
+
+        <!-- Internal Subcomponent -->
+        <rect x="360" y="82" width="200" height="85" rx="8" fill="#161f33" stroke="#14b8a6" stroke-width="2"/>
+        <text x="460" y="120" fill="#5eead4" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+        <text x="460" y="140" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">ClientManager</text>
+
+        <!-- Delegate dashed arrow -->
+        <line x1="360" y1="123" x2="195" y2="123" stroke="#38bdf8" stroke-width="2.2" stroke-dasharray="6,4" marker-end="url(#delArr)"/>
+        <text x="278" y="112" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">&laquo;delegate&raquo;</text>
+      `
+    }
+  ];
+
+  function renderNotationGrid() {
+    const grid = document.getElementById('notationCardsGrid');
+    grid.innerHTML = umlNotations.map(n => `
+      <div class="notation-card ${n.id === state.selectedNotation ? 'active' : ''}" data-not="${n.id}">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:0.4rem;">
+          <strong style="font-size:0.9rem;">${n.name}</strong>
+          <span class="tag tag-teal" style="font-size:0.65rem;">${n.badge}</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-secondary);">${n.summary.slice(0, 78)}...</p>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.notation-card').forEach(card => {
+      card.addEventListener('click', () => {
+        state.selectedNotation = card.dataset.not;
+        renderNotationGrid();
+        renderNotationStage();
+      });
+    });
+  }
+
+  function renderNotationStage() {
+    const item = umlNotations.find(n => n.id === state.selectedNotation);
+    document.getElementById('notationPreviewSvg').innerHTML = item.svg;
+    document.getElementById('notationDetailPanel').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">
+        <h4 style="color:var(--accent-teal);font-size:0.98rem;">${item.name}</h4>
+        <span class="tag tag-indigo">${item.badge}</span>
+      </div>
+      <p style="font-size:0.88rem;color:var(--text-primary);">${item.summary}</p>
+    `;
+  }
+  renderNotationGrid();
+  renderNotationStage();
+
+  // ==================== MODULE 4: 3 LECTURE EXAMPLES WALKTHROUGH ====================
+  const exampleWalkthroughs = {
+    ex1: {
+      defaultTitle: 'Example 1: ClientCollectionSystem (Click any element in diagram)',
+      defaultText: 'Models a client data collection system decomposed into 3 internal sub-components (ClientManager, SensorManager, VideoManager) with boundary Ports 1 & 2 and <<delegate>> dependencies.',
+      items: {
+        outer: {
+          title: 'Enclosing Component: ClientCollectionSystem',
+          text: 'Outer system boundary exposing Port 1 (Provided IClientData) and Port 2 (Required ISchedule) to the external environment.'
+        },
+        port1: {
+          title: 'Port 1 & Provided Delegation (IClientData)',
+          text: 'ClientCollectionSystem provides external client data via Port 1 using IClientData. A <<delegate>> dashed link delegates realization from internal sub-component ClientManager to Port 1.'
+        },
+        port2: {
+          title: 'Port 2 & Required Delegation (ISchedule)',
+          text: 'ClientCollectionSystem requires an external collection schedule via Port 2 using ISchedule. A <<delegate>> dashed link routes this dependency from Port 2 to ClientManager.'
+        },
+        clientMgr: {
+          title: 'Internal Sub-Component: ClientManager',
+          text: 'Central coordinator inside ClientCollectionSystem. Realizes IClientData, consumes ISchedule, and controls both SensorManager (ISensorControl) and VideoManager (IVideoControl).'
+        },
+        sensorMgr: {
+          title: 'Internal Sub-Component: SensorManager (ISensorControl)',
+          text: 'Provides the ISensorControl lollipop interface required by ClientManager to manage hardware sensor telemetry.'
+        },
+        videoMgr: {
+          title: 'Internal Sub-Component: VideoManager (IVideoControl)',
+          text: 'Provides the IVideoControl lollipop interface required by ClientManager to manage video capture streams.'
+        }
+      },
+      svg: `
+        <defs>
+          <marker id="ex1Arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+          </marker>
+        </defs>
+        <!-- Outer Component -->
+        <rect x="175" y="25" width="540" height="325" rx="12" fill="#111827" stroke="#6366f1" stroke-width="2.5" class="ex-node" data-key="outer" style="cursor:pointer;"/>
+        <text x="445" y="52" fill="#a5b4fc" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle" class="ex-node" data-key="outer" style="cursor:pointer;">&laquo;component&raquo; ClientCollectionSystem</text>
+
+        <!-- Port 1 (Top Left) -->
+        <g class="ex-node" data-key="port1" style="cursor:pointer;">
+          <rect x="163" y="100" width="24" height="24" fill="#14b8a6" stroke="#f8fafc" stroke-width="2"/>
+          <text x="150" y="92" fill="#14b8a6" font-family="monospace" font-size="11" font-weight="bold" text-anchor="end">Port 1</text>
+          <line x1="85" y1="112" x2="163" y2="112" stroke="#14b8a6" stroke-width="2.8"/>
+          <circle cx="73" cy="112" r="11" fill="#090d16" stroke="#14b8a6" stroke-width="2.8"/>
+          <text x="73" y="88" fill="#14b8a6" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">IClientData</text>
+          <line x1="340" y1="112" x2="191" y2="112" stroke="#38bdf8" stroke-width="2.2" stroke-dasharray="6,4" marker-end="url(#ex1Arr)"/>
+          <text x="265" y="102" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">&laquo;delegate&raquo;</text>
+        </g>
+
+        <!-- Port 2 (Bottom Left) -->
+        <g class="ex-node" data-key="port2" style="cursor:pointer;">
+          <rect x="163" y="215" width="24" height="24" fill="#f59e0b" stroke="#f8fafc" stroke-width="2"/>
+          <text x="150" y="207" fill="#f59e0b" font-family="monospace" font-size="11" font-weight="bold" text-anchor="end">Port 2</text>
+          <line x1="90" y1="227" x2="163" y2="227" stroke="#f59e0b" stroke-width="2.8"/>
+          <path d="M 90 212 A 15 15 0 0 1 90 242" fill="none" stroke="#f59e0b" stroke-width="2.8"/>
+          <text x="75" y="198" fill="#f59e0b" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">ISchedule</text>
+          <line x1="187" y1="227" x2="335" y2="227" stroke="#38bdf8" stroke-width="2.2" stroke-dasharray="6,4" marker-end="url(#ex1Arr)"/>
+          <text x="265" y="217" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">&laquo;delegate&raquo;</text>
+        </g>
+
+        <!-- ClientManager -->
+        <g class="ex-node" data-key="clientMgr" style="cursor:pointer;">
+          <rect x="340" y="88" width="165" height="175" rx="8" fill="#161f33" stroke="#38bdf8" stroke-width="2.2"/>
+          <text x="422" y="165" fill="#7dd3fc" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+          <text x="422" y="187" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">ClientManager</text>
+        </g>
+
+        <!-- SensorManager & ISensorControl -->
+        <g class="ex-node" data-key="sensorMgr" style="cursor:pointer;">
+          <line x1="505" y1="125" x2="545" y2="125" stroke="#f59e0b" stroke-width="2.4"/>
+          <path d="M 556 111 A 14 14 0 0 0 556 139" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+          <circle cx="556" cy="125" r="9" fill="#14b8a6"/>
+          <line x1="565" y1="125" x2="590" y2="125" stroke="#14b8a6" stroke-width="2.4"/>
+          <text x="556" y="100" fill="#14b8a6" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">ISensorControl</text>
+
+          <rect x="590" y="85" width="108" height="80" rx="8" fill="#161f33" stroke="#14b8a6" stroke-width="2"/>
+          <text x="644" y="120" fill="#5eead4" font-family="monospace" font-size="10" text-anchor="middle">&laquo;component&raquo;</text>
+          <text x="644" y="139" fill="#f8fafc" font-family="sans-serif" font-size="12.5" font-weight="bold" text-anchor="middle">SensorManager</text>
+        </g>
+
+        <!-- VideoManager & IVideoControl -->
+        <g class="ex-node" data-key="videoMgr" style="cursor:pointer;">
+          <line x1="505" y1="225" x2="545" y2="225" stroke="#f59e0b" stroke-width="2.4"/>
+          <path d="M 556 211 A 14 14 0 0 0 556 239" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+          <circle cx="556" cy="225" r="9" fill="#14b8a6"/>
+          <line x1="565" y1="225" x2="590" y2="225" stroke="#14b8a6" stroke-width="2.4"/>
+          <text x="556" y="200" fill="#14b8a6" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">IVideoControl</text>
+
+          <rect x="590" y="185" width="108" height="80" rx="8" fill="#161f33" stroke="#14b8a6" stroke-width="2"/>
+          <text x="644" y="220" fill="#5eead4" font-family="monospace" font-size="10" text-anchor="middle">&laquo;component&raquo;</text>
+          <text x="644" y="239" fill="#f8fafc" font-family="sans-serif" font-size="12.5" font-weight="bold" text-anchor="middle">VideoManager</text>
+        </g>
+      `
+    },
+    ex2: {
+      defaultTitle: 'Example 2: Order Processing System (Click any component)',
+      defaultText: 'Demonstrates multi-component lollipop-and-socket assembly relationships across Storefront, OrderProcessor, CustomerService, Shipping, and Analytics.',
+      items: {
+        storefront: {
+          title: 'Component: Storefront',
+          text: 'Provides the "order" interface required by OrderProcessor, and provides the "productDetails" interface required by CustomerService.'
+        },
+        processor: {
+          title: 'Component: OrderProcessor (Central Hub)',
+          text: 'Requires "order" (from Storefront) plus "orderOverride" and "order" (from CustomerService). Provides "shippingOrder" (to Shipping) and "custData" (to Analytics).'
+        },
+        custService: {
+          title: 'Component: CustomerService',
+          text: 'Provides "orderOverride" and "order" interfaces required by OrderProcessor, while requiring "productDetails" from Storefront.'
+        },
+        shipping: {
+          title: 'Component: Shipping',
+          text: 'Consumes (requires socket) the "shippingOrder" provided interface exposed by OrderProcessor.'
+        },
+        analytics: {
+          title: 'Component: Analytics',
+          text: 'Consumes (requires socket) the "custData" provided interface exposed by OrderProcessor.'
+        }
+      },
+      svg: `
+        <!-- Storefront -->
+        <g class="ex-node" data-key="storefront" style="cursor:pointer;">
+          <rect x="40" y="45" width="170" height="90" rx="8" fill="#161f33" stroke="#14b8a6" stroke-width="2.2"/>
+          <text x="125" y="84" fill="#5eead4" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+          <text x="125" y="106" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Storefront</text>
+        </g>
+
+        <!-- Assembly: Storefront -> OrderProcessor (order) -->
+        <line x1="210" y1="90" x2="275" y2="90" stroke="#14b8a6" stroke-width="2.5"/>
+        <circle cx="286" cy="90" r="9" fill="#14b8a6"/>
+        <path d="M 286 75 A 15 15 0 0 0 286 105" fill="none" stroke="#f59e0b" stroke-width="2.6"/>
+        <line x1="301" y1="90" x2="360" y2="90" stroke="#f59e0b" stroke-width="2.5"/>
+        <text x="286" y="66" fill="#f8fafc" font-family="monospace" font-size="11.5" font-weight="bold" text-anchor="middle">order</text>
+
+        <!-- OrderProcessor -->
+        <g class="ex-node" data-key="processor" style="cursor:pointer;">
+          <rect x="360" y="45" width="180" height="115" rx="8" fill="#161f33" stroke="#6366f1" stroke-width="2.5"/>
+          <text x="450" y="96" fill="#a5b4fc" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+          <text x="450" y="118" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">OrderProcessor</text>
+        </g>
+
+        <!-- Assembly: OrderProcessor -> Shipping (shippingOrder) -->
+        <line x1="540" y1="75" x2="595" y2="75" stroke="#14b8a6" stroke-width="2.5"/>
+        <circle cx="605" cy="75" r="8" fill="#14b8a6"/>
+        <path d="M 605 61 A 14 14 0 0 0 605 89" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+        <line x1="619" y1="75" x2="660" y2="75" stroke="#f59e0b" stroke-width="2.5"/>
+        <text x="605" y="52" fill="#14b8a6" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">shippingOrder</text>
+
+        <!-- Shipping -->
+        <g class="ex-node" data-key="shipping" style="cursor:pointer;">
+          <rect x="660" y="35" width="130" height="75" rx="8" fill="#161f33" stroke="#f59e0b" stroke-width="2"/>
+          <text x="725" y="68" fill="#fcd34d" font-family="monospace" font-size="10" text-anchor="middle">&laquo;component&raquo;</text>
+          <text x="725" y="88" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Shipping</text>
+        </g>
+
+        <!-- Assembly: OrderProcessor -> Analytics (custData) -->
+        <line x1="540" y1="138" x2="595" y2="175" stroke="#14b8a6" stroke-width="2.5"/>
+        <circle cx="605" cy="182" r="8" fill="#14b8a6"/>
+        <path d="M 612 170 A 14 14 0 0 0 597 193" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+        <line x1="615" y1="189" x2="660" y2="215" stroke="#f59e0b" stroke-width="2.5"/>
+        <text x="580" y="205" fill="#14b8a6" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">custData</text>
+
+        <!-- Analytics -->
+        <g class="ex-node" data-key="analytics" style="cursor:pointer;">
+          <rect x="660" y="185" width="130" height="75" rx="8" fill="#161f33" stroke="#f59e0b" stroke-width="2"/>
+          <text x="725" y="218" fill="#fcd34d" font-family="monospace" font-size="10" text-anchor="middle">&laquo;component&raquo;</text>
+          <text x="725" y="238" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Analytics</text>
+        </g>
+
+        <!-- CustomerService -->
+        <g class="ex-node" data-key="custService" style="cursor:pointer;">
+          <rect x="200" y="255" width="190" height="90" rx="8" fill="#161f33" stroke="#38bdf8" stroke-width="2.2"/>
+          <text x="295" y="294" fill="#7dd3fc" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+          <text x="295" y="316" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">CustomerService</text>
+        </g>
+
+        <!-- Storefront -> CustomerService (productDetails) -->
+        <line x1="125" y1="135" x2="125" y2="210" stroke="#14b8a6" stroke-width="2.3"/>
+        <circle cx="125" cy="220" r="8" fill="#14b8a6"/>
+        <path d="M 111 220 A 14 14 0 0 0 139 220" fill="none" stroke="#f59e0b" stroke-width="2.3"/>
+        <polyline points="125,234 125,300 200,300" fill="none" stroke="#f59e0b" stroke-width="2.3"/>
+        <text x="112" y="252" fill="#38bdf8" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="end">productDetails</text>
+
+        <!-- CustomerService -> OrderProcessor (orderOverride & order) -->
+        <line x1="390" y1="280" x2="430" y2="225" stroke="#14b8a6" stroke-width="2.3"/>
+        <circle cx="436" cy="216" r="8" fill="#14b8a6"/>
+        <path d="M 424 208 A 14 14 0 0 0 448 224" fill="none" stroke="#f59e0b" stroke-width="2.3"/>
+        <line x1="442" y1="205" x2="455" y2="160" stroke="#f59e0b" stroke-width="2.3"/>
+        <text x="462" y="232" fill="#a5b4fc" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="start">orderOverride / order</text>
+      `
+    },
+    ex3: {
+      defaultTitle: 'Example 3: BlogApp Site (From Use Cases & Classes to Components)',
+      defaultText: 'Groups candidate entity and control classes into cohesive components: AccountManagement, BlogPosts, Notification, Database, and Google OAuth.',
+      items: {
+        account: {
+          title: 'Component: AccountManagement (Exposes IAccount)',
+          text: 'Encapsulates UserRegistration, authentication, and user profile control logic. Exposes provided interface IAccount, and requires OAuth (Google OAuth), Notify (Notification), and StoreData (Database).'
+        },
+        blog: {
+          title: 'Component: BlogPosts (Exposes IPost & IComment)',
+          text: 'Encapsulates PostManagement, Paginate, and CommentManagement logic alongside Post & Comment entities. Exposes provided interfaces IPost and IComment, and requires StoreData from Database.'
+        },
+        notif: {
+          title: 'Component: Notification (Provides Notify)',
+          text: 'Encapsulates EmailNotification and SMSNotification control classes. Exposes the Notify provided lollipop consumed by AccountManagement.'
+        },
+        db: {
+          title: 'Component: Database (Provides StoreData — Shared Lollipop!)',
+          text: 'Included as a component in Component Diagrams (unlike standard Class Diagrams). Exposes a single shared StoreData provided lollipop consumed by BOTH AccountManagement and BlogPosts!'
+        },
+        oauth: {
+          title: 'Component: Google OAuth (Provides OAuth)',
+          text: 'External authentication provider component exposing the OAuth provided interface required by AccountManagement.'
+        }
+      },
+      svg: `
+        <!-- AccountManagement -->
+        <g class="ex-node" data-key="account" style="cursor:pointer;">
+          <rect x="280" y="35" width="210" height="105" rx="8" fill="#161f33" stroke="#6366f1" stroke-width="2.5"/>
+          <text x="385" y="75" fill="#a5b4fc" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+          <text x="385" y="97" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">AccountManagement</text>
+          <line x1="385" y1="35" x2="385" y2="14" stroke="#14b8a6" stroke-width="2.5"/>
+          <circle cx="385" cy="9" r="7" fill="#090d16" stroke="#14b8a6" stroke-width="2.5"/>
+          <text x="445" y="16" fill="#14b8a6" font-family="monospace" font-size="11" font-weight="bold">IAccount</text>
+        </g>
+
+        <!-- Google OAuth (Left) -->
+        <g class="ex-node" data-key="oauth" style="cursor:pointer;">
+          <rect x="25" y="45" width="145" height="85" rx="8" fill="#161f33" stroke="#14b8a6" stroke-width="2"/>
+          <text x="97" y="82" fill="#5eead4" font-family="monospace" font-size="10.5" text-anchor="middle">&laquo;component&raquo;</text>
+          <text x="97" y="102" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Google OAuth</text>
+          <line x1="170" y1="88" x2="215" y2="88" stroke="#14b8a6" stroke-width="2.4"/>
+          <circle cx="224" cy="88" r="8" fill="#14b8a6"/>
+          <path d="M 224 74 A 14 14 0 0 0 224 102" fill="none" stroke="#f59e0b" stroke-width="2.4"/>
+          <line x1="238" y1="88" x2="280" y2="88" stroke="#f59e0b" stroke-width="2.4"/>
+          <text x="224" y="65" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">OAuth</text>
+        </g>
+
+        <!-- Notification (Right) -->
+        <g class="ex-node" data-key="notif" style="cursor:pointer;">
+          <rect x="615" y="45" width="165" height="85" rx="8" fill="#161f33" stroke="#14b8a6" stroke-width="2"/>
+          <text x="697" y="82" fill="#5eead4" font-family="monospace" font-size="10.5" text-anchor="middle">&laquo;component&raquo;</text>
+          <text x="697" y="102" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Notification</text>
+          <line x1="615" y1="88" x2="565" y2="88" stroke="#14b8a6" stroke-width="2.4"/>
+          <circle cx="556" cy="88" r="8" fill="#14b8a6"/>
+          <path d="M 556 74 A 14 14 0 0 1 556 102" fill="none" stroke="#f59e0b" stroke-width="2.4"/>
+          <line x1="542" y1="88" x2="490" y2="88" stroke="#f59e0b" stroke-width="2.4"/>
+          <text x="556" y="65" fill="#14b8a6" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">Notify</text>
+        </g>
+
+        <!-- Database (Center-Bottom Shared Lollipop) -->
+        <g class="ex-node" data-key="db" style="cursor:pointer;">
+          <rect x="305" y="255" width="160" height="90" rx="8" fill="#161f33" stroke="#14b8a6" stroke-width="2.4"/>
+          <text x="385" y="294" fill="#5eead4" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+          <text x="385" y="316" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Database</text>
+
+          <!-- Shared StoreData Ball -->
+          <line x1="385" y1="255" x2="385" y2="206" stroke="#14b8a6" stroke-width="2.6"/>
+          <circle cx="385" cy="196" r="9" fill="#14b8a6"/>
+          <text x="385" y="177" fill="#14b8a6" font-family="monospace" font-size="11.5" font-weight="bold" text-anchor="middle">StoreData (Shared)</text>
+
+          <!-- Socket from AccountManagement -->
+          <path d="M 371 196 A 14 14 0 0 1 399 196" fill="none" stroke="#f59e0b" stroke-width="2.4"/>
+          <line x1="385" y1="182" x2="385" y2="140" stroke="#f59e0b" stroke-width="2.4"/>
+
+          <!-- Socket from BlogPosts -->
+          <path d="M 399 185 A 14 14 0 0 1 399 208" fill="none" stroke="#f59e0b" stroke-width="2.4"/>
+          <polyline points="413,196 475,196 475,275 565,275" fill="none" stroke="#f59e0b" stroke-width="2.4"/>
+        </g>
+
+        <!-- BlogPosts (Bottom Right) -->
+        <g class="ex-node" data-key="blog" style="cursor:pointer;">
+          <rect x="565" y="235" width="215" height="110" rx="8" fill="#161f33" stroke="#6366f1" stroke-width="2.5"/>
+          <text x="672" y="280" fill="#a5b4fc" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+          <text x="672" y="302" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">BlogPosts</text>
+
+          <!-- Exposed IPost & IComment lollipops -->
+          <line x1="630" y1="235" x2="630" y2="195" stroke="#14b8a6" stroke-width="2.4"/>
+          <circle cx="630" cy="187" r="7" fill="#090d16" stroke="#14b8a6" stroke-width="2.4"/>
+          <text x="630" y="173" fill="#14b8a6" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">IPost</text>
+
+          <line x1="715" y1="235" x2="715" y2="195" stroke="#14b8a6" stroke-width="2.4"/>
+          <circle cx="715" cy="187" r="7" fill="#090d16" stroke="#14b8a6" stroke-width="2.4"/>
+          <text x="715" y="173" fill="#14b8a6" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">IComment</text>
+        </g>
+      `
+    }
+  };
+
+  function renderExample(exKey) {
+    state.selectedExample = exKey;
+    const data = exampleWalkthroughs[exKey];
+    const svgEl = document.getElementById('exampleDiagramSvg');
+    svgEl.innerHTML = data.svg;
+
+    const inspector = document.getElementById('exampleInspectorBox');
+    inspector.innerHTML = `
+      <h4 style="color:var(--accent-teal);font-size:0.98rem;margin-bottom:0.35rem;">${data.defaultTitle}</h4>
+      <p style="font-size:0.87rem;color:var(--text-primary);">${data.defaultText}</p>
+    `;
+
+    svgEl.querySelectorAll('.ex-node').forEach(node => {
+      node.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const k = node.dataset.key;
+        if (data.items[k]) {
+          inspector.innerHTML = `
+            <h4 style="color:var(--accent-amber);font-size:0.98rem;margin-bottom:0.35rem;">${data.items[k].title}</h4>
+            <p style="font-size:0.87rem;color:var(--text-primary);">${data.items[k].text}</p>
+          `;
+        }
+      });
+    });
+  }
+
+  document.querySelectorAll('#exampleSelectorTabs .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#exampleSelectorTabs .pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderExample(btn.dataset.example);
+    });
+  });
+  renderExample('ex1');
+
+  // ==================== MODULE 5: COMPONENT-TO-CLASS MAPPING & RULES ====================
+  const mappingRules = [
+    {
+      compSide: '1. Exposed Provided Interface (Lollipop)',
+      compEx: 'BlogPosts exposes provided interface IPost',
+      classSide: 'Interface Class (<<interface>>)',
+      classEx: '<<interface>> IPost with signatures (+ addPost(), + editPost())',
+      svg: `
+        <rect x="60" y="55" width="185" height="105" rx="8" fill="#161f33" stroke="#6366f1" stroke-width="2.2"/>
+        <text x="152" y="102" fill="#a5b4fc" font-family="monospace" font-size="11" text-anchor="middle">&laquo;component&raquo;</text>
+        <text x="152" y="124" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">BlogPosts</text>
+        <line x1="245" y1="108" x2="315" y2="108" stroke="#14b8a6" stroke-width="2.5"/>
+        <circle cx="326" cy="108" r="10" fill="#090d16" stroke="#14b8a6" stroke-width="2.5"/>
+        <text x="326" y="86" fill="#14b8a6" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">IPost</text>
+
+        <text x="410" y="114" fill="#94a3b8" font-family="sans-serif" font-size="22" font-weight="bold" text-anchor="middle">&rArr;</text>
+
+        <rect x="475" y="42" width="245" height="130" rx="6" fill="#111827" stroke="#14b8a6" stroke-width="2.2"/>
+        <text x="597" y="66" fill="#5eead4" font-family="monospace" font-size="11" text-anchor="middle">&laquo;interface&raquo;</text>
+        <text x="597" y="86" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">IPost</text>
+        <line x1="475" y1="98" x2="720" y2="98" stroke="#14b8a6" stroke-width="1.5"/>
+        <text x="492" y="122" fill="#e2e8f0" font-family="monospace" font-size="12">+ addPost()</text>
+        <text x="492" y="144" fill="#e2e8f0" font-family="monospace" font-size="12">+ editPost()</text>
+      `
+    },
+    {
+      compSide: '2. Component Internal Realization',
+      compEx: 'BlogPosts internally realizes IPost logic',
+      classSide: 'Control/Service Class + Realization (--|>)',
+      classEx: 'PostManagement implements <<interface>> IPost via dashed line + hollow triangle',
+      svg: `
+        <defs>
+          <marker id="realizeTri" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto">
+            <path d="M 1 1 L 11 6 L 1 11 z" fill="#090d16" stroke="#14b8a6" stroke-width="1.8"/>
+          </marker>
+        </defs>
+        <rect x="275" y="18" width="230" height="65" rx="6" fill="#111827" stroke="#14b8a6" stroke-width="2"/>
+        <text x="390" y="42" fill="#5eead4" font-family="monospace" font-size="11" text-anchor="middle">&laquo;interface&raquo;</text>
+        <text x="390" y="63" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">IPost</text>
+
+        <line x1="390" y1="138" x2="390" y2="85" stroke="#14b8a6" stroke-width="2.2" stroke-dasharray="6,4" marker-end="url(#realizeTri)"/>
+        <text x="475" y="115" fill="#14b8a6" font-family="monospace" font-size="11">Realization (--|&gt;)</text>
+
+        <rect x="275" y="138" width="230" height="62" rx="6" fill="#161f33" stroke="#6366f1" stroke-width="2"/>
+        <text x="390" y="165" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">PostManagement</text>
+        <text x="390" y="185" fill="#94a3b8" font-family="monospace" font-size="11" text-anchor="middle">(Control / Service Class)</text>
+      `
+    },
+    {
+      compSide: '3. Required Interface (Socket)',
+      compEx: 'BlogPosts requires StoreData socket from Database',
+      classSide: 'Dependency Relationship (<<uses>> dashed arrow)',
+      classEx: 'PostManagement --<<uses>>--> <<interface>> StoreData',
+      svg: `
+        <defs>
+          <marker id="depArr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+            <path d="M 1 1 L 9 5 L 1 9" fill="none" stroke="#f59e0b" stroke-width="2"/>
+          </marker>
+        </defs>
+        <rect x="75" y="70" width="210" height="75" rx="6" fill="#161f33" stroke="#6366f1" stroke-width="2"/>
+        <text x="180" y="104" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">PostManagement</text>
+        <text x="180" y="124" fill="#94a3b8" font-family="monospace" font-size="11" text-anchor="middle">(Client Class)</text>
+
+        <line x1="285" y1="108" x2="485" y2="108" stroke="#f59e0b" stroke-width="2.2" stroke-dasharray="6,4" marker-end="url(#depArr)"/>
+        <text x="385" y="96" fill="#f59e0b" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">&laquo;uses&raquo;</text>
+
+        <rect x="490" y="70" width="215" height="75" rx="6" fill="#111827" stroke="#14b8a6" stroke-width="2"/>
+        <text x="597" y="100" fill="#5eead4" font-family="monospace" font-size="11" text-anchor="middle">&laquo;interface&raquo;</text>
+        <text x="597" y="122" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">StoreData</text>
+      `
+    },
+    {
+      compSide: '4. Internal Encapsulated Data',
+      compEx: 'Domain state managed inside BlogPosts & AccountMgmt',
+      classSide: 'Entity Classes (User, Post, Comment)',
+      classEx: 'Control classes associate with Entity classes (User, Post, Comment)',
+      svg: `
+        <rect x="90" y="65" width="170" height="85" rx="6" fill="#161f33" stroke="#38bdf8" stroke-width="2"/>
+        <text x="175" y="98" fill="#7dd3fc" font-family="monospace" font-size="11" text-anchor="middle">&laquo;entity&raquo;</text>
+        <text x="175" y="122" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">User</text>
+
+        <rect x="305" y="65" width="170" height="85" rx="6" fill="#161f33" stroke="#38bdf8" stroke-width="2"/>
+        <text x="390" y="98" fill="#7dd3fc" font-family="monospace" font-size="11" text-anchor="middle">&laquo;entity&raquo;</text>
+        <text x="390" y="122" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Post</text>
+
+        <rect x="520" y="65" width="170" height="85" rx="6" fill="#161f33" stroke="#38bdf8" stroke-width="2"/>
+        <text x="605" y="98" fill="#7dd3fc" font-family="monospace" font-size="11" text-anchor="middle">&laquo;entity&raquo;</text>
+        <text x="605" y="122" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Comment</text>
+      `
+    }
+  ];
+
+  function renderMappingRows() {
+    const container = document.getElementById('mappingRowsContainer');
+    container.innerHTML = mappingRules.map((m, idx) => `
+      <div class="map-row ${idx === state.selectedMapRow ? 'active' : ''}" data-idx="${idx}">
+        <div>
+          <div style="font-size:0.84rem;font-weight:700;color:var(--accent-indigo);">${m.compSide}</div>
+          <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">${m.compEx}</div>
+        </div>
+        <div style="font-family:var(--font-mono);font-size:1.1rem;color:var(--accent-teal);text-align:center;font-weight:bold;">&rarr;</div>
+        <div>
+          <div style="font-size:0.84rem;font-weight:700;color:var(--accent-teal);">${m.classSide}</div>
+          <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">${m.classEx}</div>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('mappingVisualSvg').innerHTML = mappingRules[state.selectedMapRow].svg;
+
+    container.querySelectorAll('.map-row').forEach(row => {
+      row.addEventListener('click', () => {
+        state.selectedMapRow = Number(row.dataset.idx);
+        renderMappingRows();
+      });
+    });
+  }
+  renderMappingRows();
+
+  const nineModelingRules = [
+    'Start from Class Diagrams: Group sensible classes into components first before drawing lollipops and sockets.',
+    'No Dangling Interfaces: Every provided lollipop must pair with a required socket (unless connecting to an external system).',
+    'Do Not Share Lines: Draw clean, separate lines for distinct interface connections.',
+    'Proper Port Usage: Use a Port (shaded boundary square) for specific interaction points on an encapsulated component boundary.',
+    'Double-Check Single-Interface Components: Verify components having only required or only provided interfaces to ensure none are missed.',
+    'User Interface / Dashboard: UIs or dashboards do not need to be drawn as separate components.',
+    'Component Versatility: A single component can expose both required and provided interfaces simultaneously.',
+    'Shared Provided Interfaces: One provided lollipop (ball) can be shared by multiple required sockets (e.g., Database StoreData).',
+    'Database Representation: Standard class diagrams omit database symbols, whereas databases ARE drawn as components in Component Diagrams.'
+  ];
+
+  function renderModelingRules() {
+    const list = document.getElementById('modelingRulesList');
+    list.innerHTML = nineModelingRules.map((rule, i) => {
+      const checked = state.checkedRules.has(i);
+      return `
+        <div class="rule-item ${checked ? 'checked' : ''}" data-ridx="${i}">
+          <div class="rule-check">${checked ? '&#10003;' : ''}</div>
+          <div style="font-size:0.83rem;color:${checked ? 'var(--text-primary)' : 'var(--text-secondary)'};">${rule}</div>
+        </div>
+      `;
+    }).join('');
+
+    document.getElementById('rulesProgressTag').textContent = `${state.checkedRules.size} / 9 Reviewed`;
+
+    list.querySelectorAll('.rule-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const idx = Number(el.dataset.ridx);
+        if (state.checkedRules.has(idx)) state.checkedRules.delete(idx);
+        else state.checkedRules.add(idx);
+        renderModelingRules();
+      });
+    });
+  }
+  renderModelingRules();
+
+  // ==================== MODULE 6: EXAM READINESS QUIZ ====================
+  const quizQuestions = [
+    {
+      q: '1. Which statement accurately distinguishes Software Architecture from Detailed Design?',
+      options: [
+        'Software Architecture focuses on functional requirements using white-box models; Detailed Design focuses on non-functional requirements using black-box models.',
+        'Software Architecture (macrodesign) focuses primarily on non-functional requirements using black-box models; Detailed Design (microdesign) focuses primarily on functional requirements using white-box models.',
+        'Both levels exclusively produce flow-based and table-based routine algorithms.',
+        'Detailed Design occurs before requirements are gathered.'
+      ],
+      correct: 1,
+      exp: 'Software Architecture is macrodesign (black-box, non-functional quality attributes), whereas Detailed Design zooms in as microdesign (white-box, functional requirements).'
+    },
+    {
+      q: '2. What is the difference between Completeness and Sufficiency in software design principles?',
+      options: [
+        'Completeness means providing all required services ("no less"), while Sufficiency means providing only the services needed ("no more").',
+        'Completeness applies to databases, while Sufficiency applies only to user interfaces.',
+        'Completeness means tight coupling, while Sufficiency means loose coupling.',
+        'They are identical synonyms for encapsulation.'
+      ],
+      correct: 0,
+      exp: 'Completeness ensures a unit provides all required services (no less than required), while Sufficiency ensures it provides only what is needed (no more than required).'
+    },
+    {
+      q: '3. What is the "Golden Goal" of modular software design regarding Coupling and Cohesion?',
+      options: [
+        'Low Cohesion and Tight Coupling',
+        'High Cohesion and Tight Coupling',
+        'High Cohesion and Loose Coupling',
+        'Low Cohesion and Loose Coupling'
+      ],
+      correct: 2,
+      exp: 'High cohesion (elements inside a module work together toward one focused purpose) and loose coupling (minimal interdependence between modules) is the golden goal.'
+    },
+    {
+      q: '4. In UML diagram categorization, how is a Component Diagram classified, and which McConnell design level do Components correspond to?',
+      options: [
+        'Behavioral Diagram; Level 5 (Internal Routine Design)',
+        'Structural Diagram; Level 2 (Subsystems/Packages encapsulating Level 3 classes)',
+        'Interaction Diagram; Level 1 (Entire Software System)',
+        'Behavioral Diagram; Level 4 (Data and Routines)'
+      ],
+      correct: 1,
+      exp: 'Component Diagrams are Structural Diagrams. In McConnell’s 5 levels, engineers encapsulate classes from Level 3 into higher-level Components at Level 2.'
+    },
+    {
+      q: '5. In UML Component Diagram notation, what do a Lollipop (ball) and a Socket (half-circle) represent respectively?',
+      options: [
+        'Lollipop = Required interface; Socket = Provided interface',
+        'Lollipop = Provided interface (implemented & exposed); Socket = Required interface (dependency called)',
+        'Lollipop = Database table; Socket = Human user actor',
+        'Lollipop = Private attribute; Socket = Public constructor'
+      ],
+      correct: 1,
+      exp: 'A Lollipop (full circle) denotes a Provided Interface exposed by a component, while a Socket (half-circle cup) denotes a Required Interface consumed by a component.'
+    },
+    {
+      q: '6. In the ClientCollectionSystem lecture example, how does external access reach the internal ClientManager sub-component?',
+      options: [
+        'Through direct inheritance arrows from external actors',
+        'Through boundary Ports (Port 1 for IClientData, Port 2 for ISchedule) connected via <<delegate>> dashed dependencies to ClientManager',
+        'Through a shared global SQL table',
+        'ClientManager is drawn outside ClientCollectionSystem'
+      ],
+      correct: 1,
+      exp: 'Boundary Ports act as distinct access points on the outer frame of ClientCollectionSystem, using <<delegate>> links to connect IClientData and ISchedule to ClientManager.'
+    },
+    {
+      q: '7. In the Order Processing System lecture example, which component provides the "shippingOrder" and "custData" interfaces?',
+      options: [
+        'Storefront',
+        'CustomerService',
+        'OrderProcessor',
+        'Analytics'
+      ],
+      correct: 2,
+      exp: 'OrderProcessor acts as the central hub, providing "shippingOrder" to Shipping and "custData" to Analytics.'
+    },
+    {
+      q: '8. When translating a Component Diagram into a Class Diagram, how is a Required Interface (socket) represented?',
+      options: [
+        'As a Realization relationship (dashed line with hollow triangle)',
+        'As a Dependency relationship (<<uses>> dashed arrow) from a client class to the targeted <<interface>> class',
+        'As a generalization inheritance arrow',
+        'It is deleted during translation'
+      ],
+      correct: 1,
+      exp: 'Provided interfaces become <<interface>> classes realized (--|>) by control classes, whereas Required sockets become <<uses>> dependency dashed arrows.'
+    },
+    {
+      q: '9. Which of the following is a valid modeling guideline for UML Component Diagrams?',
+      options: [
+        'Always start drawing lollipops and sockets before creating any class diagram.',
+        'A single provided lollipop (ball) can be shared by more than one required socket, and Databases are included as components.',
+        'User interfaces and dashboards must always be drawn as separate components.',
+        'Dangling sockets are encouraged to show future expansion.'
+      ],
+      correct: 1,
+      exp: 'A single provided lollipop can serve multiple required sockets (e.g., StoreData in BlogApp), and Databases are modeled as components in Component Diagrams.'
+    },
+    {
+      q: '10. What are the two primary techniques used during Construction Design (Level 3)?',
+      options: [
+        'Black-box architecture views and stakeholder interviews',
+        'Flow-based design (e.g., activity flows) and table-based design (e.g., decision tables)',
+        'Use case diagrams and deployment diagrams',
+        'Port delegation and OAuth authentication'
+      ],
+      correct: 1,
+      exp: 'Construction Design uses flow-based design and table-based design to specify routine logic and optimize testability, maintainability, and performance.'
+    }
+  ];
+
+  function renderQuiz() {
+    const container = document.getElementById('quizContainer');
+    container.innerHTML = quizQuestions.map((item, qIdx) => {
+      const answered = state.quizAnswers[qIdx] !== undefined;
+      const chosen = state.quizAnswers[qIdx];
+      return `
+        <div class="quiz-card">
+          <div class="quiz-q">${item.q}</div>
+          <div class="quiz-opts">
+            ${item.options.map((opt, oIdx) => {
+              let cls = 'quiz-opt';
+              if (answered) {
+                if (oIdx === item.correct) cls += ' correct';
+                else if (oIdx === chosen) cls += ' incorrect';
+              }
+              return `
+                <button class="${cls}" ${answered ? 'disabled' : ''} onclick="selectQuizOption(${qIdx}, ${oIdx})">
+                  <span style="font-family:var(--font-mono);font-weight:700;color:var(--accent-teal);">${String.fromCharCode(65 + oIdx)}.</span>
+                  <span>${opt}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+          <div class="quiz-exp ${answered ? 'show' : ''}" style="background:${chosen === item.correct ? 'rgba(20,184,166,0.12)' : 'rgba(244,63,94,0.12)'};border:1px solid ${chosen === item.correct ? 'rgba(20,184,166,0.35)' : 'rgba(244,63,94,0.35)'};">
+            <strong>${chosen === item.correct ? '&#10003; Correct:' : '&#10007; Incorrect:'}</strong> ${item.exp}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    updateQuizScore();
+  }
+
+  window.selectQuizOption = function(qIdx, oIdx) {
+    if (state.quizAnswers[qIdx] !== undefined) return;
+    state.quizAnswers[qIdx] = oIdx;
+    renderQuiz();
+  };
+
+  function updateQuizScore() {
+    const answeredCount = Object.keys(state.quizAnswers).length;
+    let score = 0;
+    Object.entries(state.quizAnswers).forEach(([q, o]) => {
+      if (quizQuestions[Number(q)].correct === o) score++;
+    });
+
+    document.getElementById('quizScoreBadge').textContent = `Score: ${score} / ${quizQuestions.length}`;
+    const summary = document.getElementById('quizSummaryCard');
+    if (answeredCount === quizQuestions.length) {
+      summary.style.display = 'block';
+      document.getElementById('quizFinalTitle').textContent = `Final Score: ${score} / ${quizQuestions.length} (${Math.round((score / quizQuestions.length) * 100)}%)`;
+      document.getElementById('quizFinalMsg').textContent = score >= 8
+        ? 'Outstanding work! You have mastered Chapter 8 Software Engineering Design & UML Component Diagrams.'
+        : 'Review the explanations highlighted above and retake the quiz to solidify every concept.';
+    } else {
+      summary.style.display = 'none';
+    }
+  }
+
+  window.resetQuiz = function() {
+    state.quizAnswers = {};
+    renderQuiz();
+  };
+
+  document.getElementById('resetQuizBtn').addEventListener('click', window.resetQuiz);
+  renderQuiz();
+
+  // ==================== DOWNLOAD SELF-CONTAINED HTML ====================
+  document.getElementById('downloadHtmlBtn').addEventListener('click', () => {
+    const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Chapter-8-SE-Design-Component-Diagrams.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    const toast = document.getElementById('toastNotification');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  });
+
+  window.addEventListener('resize', () => {
+    if (state.currentModule === 2) drawCouplingCanvas();
+  });
+})();
+</script>
+</body>
+</html>
